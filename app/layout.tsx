@@ -27,12 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@1&display=optional"
-        />
-      </head>
+      <head></head>
       <body
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable}  antialiased`}
       >

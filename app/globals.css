@@ -1,13 +1,59 @@
 @import "tailwindcss";
 
 :root {
+  /* Base Colors */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Brand Colors */
+  --color-primary: #960018; /* Dark red/maroon - Main brand color */
+  --color-secondary: #24AFB5; /* Teal/cyan - Accent color for buttons and links */
+
+  /* Text Colors */
+  --color-text-primary: #171717; /* Main text color */
+  --color-text-secondary: #585757; /* Body text, secondary content */
+  --color-text-tertiary: #959595; /* Muted text */
+  --color-text-muted: #969696; /* Footer text, very muted */
+  --color-text-inverse: #ffffff; /* White text for dark backgrounds */
+  --color-text-light: #ededed; /* Light text for dark mode */
+
+  /* Background Colors */
+  --color-bg-primary: #ffffff; /* Main background */
+  --color-bg-secondary: #F7F7F7; /* Footer background, subtle sections */
+  --color-bg-dark: #0a0a0a; /* Dark mode background */
+
+  /* Border & Neutral Colors */
+  --color-border: #DBDBDB; /* Borders, dividers, placeholders */
+  --color-neutral: #DBDBDB; /* Neutral gray for icons, placeholders */
 }
 
 @theme inline {
+  /* Base */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Brand Colors - accessible as bg-primary, text-primary, etc. */
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+
+  /* Text Colors - accessible as text-text-primary, text-text-secondary, etc. */
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-inverse: var(--color-text-inverse);
+  --color-text-light: var(--color-text-light);
+
+  /* Background Colors - accessible as bg-bg-primary, bg-bg-secondary, etc. */
+  --color-bg-primary: var(--color-bg-primary);
+  --color-bg-secondary: var(--color-bg-secondary);
+  --color-bg-dark: var(--color-bg-dark);
+
+  /* Border & Neutral Colors - accessible as border-border, bg-neutral, etc. */
+  --color-border: var(--color-border);
+  --color-neutral: var(--color-neutral);
+
+  /* Fonts */
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,6 +62,9 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --color-text-primary: #ededed;
+    --color-text-secondary: #959595;
+    --color-bg-primary: #0a0a0a;
   }
 }
 
