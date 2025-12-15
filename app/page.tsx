@@ -1,14 +1,11 @@
 "use client";
 // import Image from "next/image";
-import { WaitList } from "./waitlist";
 
 export default function Home() {
   // const randomizer = () => Math.floor(Math.random() * 1000).toFixed(1);
   // const random = randomizer();
-  return <div className="flex justify-center">
-     <WaitList />
-  </div>;
-    
+  return <div className="flex justify-center">home</div>;
+
   // return (
   //   <div>
   //     <div className="px-[30px] pt-5 flex justify-between items-center">

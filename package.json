@@ -10,9 +10,16 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
+    "classnames": "^2.5.1",
+    "formik": "^2.4.9",
+    "lucide-react": "^0.561.0",
     "next": "^16.0.8",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "react-icons": "^5.5.0",
+    "zod": "^4.2.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

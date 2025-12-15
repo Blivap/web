@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export const WaitList = () => {
+export default function WaitList() {
   return (
     <div className="px-2 pt-2.5 max-w-[1277px]">
       <div className="flex items-center justify-between">
@@ -42,7 +42,7 @@ export const WaitList = () => {
               />
               <button
                 type="submit"
-                className="bg-primary text-text-inverse text-base leading-[27px] rounded-[40px] px-[32px] py-[22px] text-nowrap"
+                className="bg-primary text-text-inverse text-base leading-[27px] rounded-[40px] px-8 py-[22px] text-nowrap"
               >
                 Get Early Access
               </button>
@@ -237,4 +237,4 @@ export const WaitList = () => {
       </div>
     </div>
   );
-};
+}
