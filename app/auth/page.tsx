@@ -21,7 +21,7 @@ export default function AuthPage() {
       <Image src="/images/auth_bg.png" alt="background" fill />
       <div
         onClick={router.back}
-        className=" border-[0.7px] border-[#960018] absolute rounded-full size-[45px] top-[122px] left-[83px] flex justify-center items-center bg-[#FBFBFB59] text-[#960018]"
+        className=" border-[0.7px] border-[#960018] absolute z-10 rounded-full size-6 md:size-[45px] top-6 left-5 md:top-[122px] md:left-[83px] flex justify-center items-center bg-[#FBFBFB59] text-[#960018]"
       >
         <ArrowLeft strokeWidth={1} size={20} />
       </div>
