@@ -17,7 +17,7 @@ export default function AuthPage() {
     router.push(`?tab=${tab}`, { scroll: false });
   };
   return (
-    <div className="relative flex justify-center items-center bg-[#F5B1B1] w-full flex-1 backdrop-blur-[76px] p-3">
+    <div className="relative flex justify-center items-center bg-[#F5B1B1] w-full flex-1 backdrop-blur-[76px] p-3 md:py-[116px]">
       <Image src="/images/auth_bg.png" alt="background" fill />
       <div
         onClick={router.back}

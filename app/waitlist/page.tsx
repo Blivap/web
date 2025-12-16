@@ -4,7 +4,7 @@ export default function WaitList() {
   return (
     <div className="px-2 pt-2.5 max-w-[1277px]">
       <div className="flex items-center justify-between">
-        <p className="text-primary font-bold text-3xl md:text-5xl leading-[22px]">
+        <p className="font-helvetica text-primary font-bold text-3xl md:text-5xl leading-[22px]">
           Blivap
         </p>
         <div className="py-2 px-3.5 bg-primary rounded-[20px]">
@@ -162,7 +162,9 @@ export default function WaitList() {
       <div className="relative flex flex-col md:flex-row justify-between w-full  bg-[#F5F5F5] rounded-t-[40px] p-3 pt-4 md:pt-[58px] md:px-[63px] md:pb-[69px] gap-6">
         <div className="flex flex-col gap-[31px]">
           <div className="flex flex-col gap-3">
-            <p className="font-bold text-[40px] text-primary">Blivap</p>
+            <p className="font-bold text-[40px] text-primary font-helvetica">
+              Blivap
+            </p>
             <p className="max-w-[343px] text-[18px] leading-[22px] text-[#959595]">
               Blivap is a Blood Donation App Service Inc. company 2022
             </p>
