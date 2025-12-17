@@ -27,18 +27,34 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
   const [drawer, setDrawer] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  const closeDrawer = () => setDrawer(false);
+
   return (
     <div className="flex-1 bg-[#f8f8f8]">
+      {/* Overlay for mobile when drawer is open */}
+      {drawer && (
+        <div
+          onClick={closeDrawer}
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-200"
+        />
+      )}
+
+      {/* Sidebar */}
       <div
         className={classNames(
-          "flex flex-col gap-[73px] w-1/2  max-w-[292px] bg-white fixed left-0  h-full pt-[49px] pl-8 transition-all duration-200 ease-out",
-          { "-left-80!": drawer }
+          "flex flex-col gap-[73px] w-full max-w-[230px]  md:max-w-[292px] bg-white fixed left-0 h-full pt-[49px] px-4 md:pl-8 transition-transform duration-200 ease-out z-50",
+          {
+            // On mobile: completely hidden when closed (-translate-x-full), visible when open (translate-x-0)
+            // On desktop: always visible (md:translate-x-0 overrides)
+            "-translate-x-full md:translate-x-0": !drawer,
+            "translate-x-0": drawer,
+          }
         )}
       >
         <p className="font-bold text-primary text-[32px] font-helvetica">
           Blivap
         </p>
-        <NavLinks />
+        <NavLinks onLinkClick={closeDrawer} />
         <div className="flex flex-col gap-[22px]">
           <p className="font-bold text-xs uppercase text-foundation-dark">
             Other
@@ -50,10 +66,31 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           </div>
         </div>
       </div>
-      <div
-        onClick={() => setDrawer((prev) => !prev)}
-        className="md:ml-[292px] p-8"
-      >
+
+      {/* Main content area */}
+      <div className="md:ml-[292px] p-8">
+        {/* Mobile menu button */}
+        <button
+          onClick={() => setDrawer((prev) => !prev)}
+          className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-md"
+          aria-label="Toggle menu"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12H21M3 6H21M3 18H21"
+              stroke="#070416"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
         {props.children}
       </div>
     </div>
@@ -93,7 +130,11 @@ const ToggleSwitch = ({ checked, onChange }: ToggleSwitchProps) => {
   );
 };
 
-const NavLinks = () => {
+interface NavLinksProps {
+  onLinkClick?: () => void;
+}
+
+const NavLinks = ({ onLinkClick }: NavLinksProps) => {
   const pathName = usePathname();
 
   // Define navigation items with their icons and optional custom colors
@@ -157,6 +198,7 @@ const NavLinks = () => {
           <Link
             key={`link-${idx}`}
             href={`/${item.href}`}
+            onClick={onLinkClick}
             className={classNames(
               "flex items-center font-medium text-base gap-4 transition-colors duration-200",
               {
