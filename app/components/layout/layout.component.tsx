@@ -32,12 +32,17 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
   return (
     <div className="flex-1 bg-[#f8f8f8]">
       {/* Overlay for mobile when drawer is open */}
-      {drawer && (
-        <div
-          onClick={closeDrawer}
-          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-200"
-        />
-      )}
+
+      <div
+        onClick={closeDrawer}
+        className={classNames(
+          "fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300 ease-in-out",
+          {
+            "opacity-100 pointer-events-auto": drawer,
+            "opacity-0 pointer-events-none": !drawer,
+          }
+        )}
+      />
 
       {/* Sidebar */}
       <div
@@ -68,7 +73,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       </div>
 
       {/* Main content area */}
-      <div className="md:ml-[292px] p-8">
+      <div className="md:ml-[292px] p-2 sm:p-8 h-full">
         {/* Mobile menu button */}
         <button
           onClick={() => setDrawer((prev) => !prev)}
