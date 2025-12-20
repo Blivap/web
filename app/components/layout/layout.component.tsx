@@ -13,6 +13,9 @@ import classNames from "classnames";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PropsWithChildren, useState, ReactElement } from "react";
+import { Avatar } from "../Avatar/avatar.component";
+import { FaBars } from "react-icons/fa";
+import { FiBell } from "react-icons/fi";
 
 // Define navigation item structure
 interface NavItem {
@@ -30,7 +33,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
   const closeDrawer = () => setDrawer(false);
 
   return (
-    <div className="flex-1 bg-[#f8f8f8]">
+    <div className="flex-1 bg-[#f8f8f8] w-full overflow-scroll">
       {/* Overlay for mobile when drawer is open */}
 
       <div
@@ -47,7 +50,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       {/* Sidebar */}
       <div
         className={classNames(
-          "flex flex-col gap-[73px] w-full max-w-[230px]  md:max-w-[292px] bg-white fixed left-0 h-full pt-[49px] px-4 md:pl-8 transition-transform duration-200 ease-out z-50",
+          "flex flex-col gap-[43px] w-full max-w-[230px] md:max-w-[292px] bg-white fixed left-0 h-full pt-8 px-4 md:pl-8 transition-transform duration-200 ease-out z-50",
           {
             // On mobile: completely hidden when closed (-translate-x-full), visible when open (translate-x-0)
             // On desktop: always visible (md:translate-x-0 overrides)
@@ -71,31 +74,33 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           </div>
         </div>
       </div>
-
-      {/* Main content area */}
-      <div className="md:ml-[292px] p-2 sm:p-8 h-full">
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setDrawer((prev) => !prev)}
-          className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-md"
-          aria-label="Toggle menu"
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+      {/* Topbar */}
+      <div className="fixed top-0 left-0 right-0 md:left-[292px] z-30 bg-[#f8f8f8]/80 ">
+        <div className="w-full py-3.5 px-5 md:px-9 flex items-center justify-between ">
+          <div className="flex items-center md:w-full justify-between gap-4">
+            <div className="flex items-center gap-2 order-2 md:order-1">
+              <Avatar className="sm:size-12! size-9!" />
+              <div className="flex flex-col sm:gap-1">
+                <p className="text-[#000000] font-medium">648382</p>
+                <p className="text-xs text-[#6B7280]">Donor</p>
+              </div>
+            </div>
+            <div className="relative border-[0.5px] border-[#9CA3AF] rounded-full sm:p-4 p-1 flex items-center justify-center order-1 md:order-2">
+              <div className="absolute size-[7.5px] bg-[#FF0000] rounded-full right-2 top-1 sm:top-4 sm:right-4.5" />
+              <FiBell size={24} className="stroke-2 text-2xl" />
+            </div>
+          </div>
+          <button
+            onClick={() => setDrawer((prev) => !prev)}
+            className="p-2.5 sm:p-3 bg-white rounded-md shadow-md h-fit md:hidden"
+            aria-label="Toggle menu"
           >
-            <path
-              d="M3 12H21M3 6H21M3 18H21"
-              stroke="#070416"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+            <FaBars size={16} />
+          </button>
+        </div>
+      </div>
+      {/* Main content area */}
+      <div className="relative flex flex-col gap-6 md:ml-[292px] m-5 pt-20 sm:px-8 h-full">
         {props.children}
       </div>
     </div>
