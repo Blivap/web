@@ -57,6 +57,7 @@
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   --font-helvetica: var(--font-helvetica);
+  --font-inter: var(--font-inter);
 }
 
 @media (prefers-color-scheme: light) {

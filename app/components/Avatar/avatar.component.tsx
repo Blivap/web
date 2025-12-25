@@ -6,7 +6,7 @@ interface AvatarProps {
 }
 export const Avatar = (
   props: AvatarProps &
-    DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>
+    DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>,
 ) => {
   const { className: style } = props;
   return (
@@ -14,7 +14,7 @@ export const Avatar = (
       {...props}
       className={classNames(
         "size-11 border border-[#960018] rounded-full flex justify-center items-center",
-        style
+        style,
       )}
     >
       <User />

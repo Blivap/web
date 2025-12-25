@@ -174,7 +174,9 @@ export default function Dashboard() {
                           <Avatar />
                           <div className="flex flex-col ">
                             <p className="text-sm">Blood Donation</p>{" "}
-                            <p className="text-sm text-[#6B7280]">1 packs</p>{" "}
+                            <p className="text-sm text-[#6B7280]">
+                              1 packs
+                            </p>{" "}
                           </div>
                         </div>
                         <div className="bg-[#FFE2E2] rounded-[20px] p-[7px] text-sm">
@@ -201,7 +203,9 @@ export default function Dashboard() {
                           <Avatar className="size-[42px] sm:size-11" />
                           <div className="flex flex-col ">
                             <p className="text-sm">811532</p>{" "}
-                            <p className="text-sm text-[#6B7280]">1 packs</p>{" "}
+                            <p className="text-sm text-[#6B7280]">
+                              1 packs
+                            </p>{" "}
                           </div>
                         </div>
                         <div className="bg-[#FFE2E2] rounded-[20px] p-[7px] text-sm">

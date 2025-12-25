@@ -43,7 +43,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           {
             "opacity-100 pointer-events-auto": drawer,
             "opacity-0 pointer-events-none": !drawer,
-          }
+          },
         )}
       />
 
@@ -56,7 +56,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
             // On desktop: always visible (md:translate-x-0 overrides)
             "-translate-x-full md:translate-x-0": !drawer,
             "translate-x-0": drawer,
-          }
+          },
         )}
       >
         <p className="font-bold text-primary text-[32px] font-helvetica">
@@ -75,7 +75,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
         </div>
       </div>
       {/* Topbar */}
-      <div className="fixed top-0 left-0 right-0 md:left-[292px] z-30 bg-[#f8f8f8]/80 ">
+      <div className="fixed top-0 left-0 right-0 md:left-[292px] z-30 bg-[#f8f8f8] ">
         <div className="w-full py-3.5 px-5 md:px-9 flex items-center justify-between ">
           <div className="flex items-center md:w-full justify-between gap-4">
             <div className="flex items-center gap-2 order-2 md:order-1">
@@ -129,7 +129,7 @@ const ToggleSwitch = ({ checked, onChange }: ToggleSwitchProps) => {
           {
             "translate-x-[23px]": checked, // Moves from left (3.5px) to right position
             "translate-x-0": !checked,
-          }
+          },
         )}
         style={{ left: "3.5px" }}
       />
@@ -214,7 +214,7 @@ const NavLinks = ({ onLinkClick }: NavLinksProps) => {
               {
                 "text-primary font-bold!": active,
                 "text-foundation-dark": !active,
-              }
+              },
             )}
           >
             <IconComponent color={iconColor} />

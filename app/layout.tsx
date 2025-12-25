@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Inter, Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Suspense } from "react";
+import { SnackbarProvider } from "./components/snackbar/snackbar.context";
+import { Snackbar } from "./components/snackbar/snackbar.component";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,7 +58,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased grow min-h-screen flex`}
       >
-        <Suspense fallback={<div>Blivap</div>}>{children}</Suspense>
+        <SnackbarProvider>
+          <Suspense fallback={<div>Blivap</div>}>{children}</Suspense>
+          <Snackbar />
+        </SnackbarProvider>
       </body>
     </html>
   );
