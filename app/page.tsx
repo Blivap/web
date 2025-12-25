@@ -27,28 +27,28 @@ export default function Home() {
               <p key={id}>{text}</p>
             ))}
           </div>
-          <div className="relative border border-[#D9D9D9]  sm:p-2.5 p-1 flex items-center  w-full max-w-[359px]">
+          <div className="relative border border-[#D9D9D9]  sm:p-2.5 p-1 flex items-center  w-full max-w-89.75">
             <input
-              className="outline-none w-full text-[18px] font-inter placeholder:text-[#6B7280] leading-[22px]"
+              className="outline-none w-full text-[18px] font-inter placeholder:text-[#6B7280] leading-5.5"
               type="text"
               placeholder="What are you looking for"
             />
           </div>
         </div>
         <div className="mt-4.5 grid md:grid-cols-5">
-          <div className="col-span-2 flex flex-col pl-[78px] pt-[62px] gap-[45px] h-[587px] bg-primary">
+          <div className="col-span-2 flex flex-col pl-19.5 pt-15.5 gap-11.25 h-146.75 bg-primary">
             <div className="flex flex-col gap-6">
               <p className="text-[48px] text-white leading-14">
                 Save lives with your blood or spam
               </p>
               <Link
-                className="w-fit bg-black text-white py-3.5 px-[25px]"
+                className="w-fit bg-black text-white py-3.5 px-6.25"
                 href="#"
               >
                 Register as a donor (EN){" "}
               </Link>
             </div>
-            <div className="flex flex-col gap-6 bg-white px-9 pt-12 pb-[108px] shadow-[0_4px_30px_#0000001A] max-w-[562px] relative w-full md:translate-x-18 z-10">
+            <div className="flex flex-col gap-6 bg-white px-9 pt-12 pb-27 shadow-[0_4px_30px_#0000001A] max-w-140.5 relative w-full md:translate-x-18 z-10">
               <p className="font-medium text-2xl text-black">Quick links</p>
               <div className="flex flex-col gap-4">
                 {["About donating", "Research", "About Blivap"].map((e, i) => (
@@ -63,13 +63,13 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="relative col-span-3 bg-green-300 min-h-[587px]">
+          <div className="relative col-span-3 bg-green-300 min-h-146.75">
             <Image src="/images/hero_image.jpg" alt="home illustration" fill />
             <div className="absolute w-[90%] h-6 bg-[#0005F2] -bottom-6"></div>
           </div>
         </div>
         <div className="mt-37.75grid md:grid-cols-5">
-          <div className="col-span-3 flex flex-col pl-[78px] pt-[62px] gap-[29px] pb-[107px] pr-[90px] bg-[#F4F2FF]">
+          <div className="col-span-3 flex flex-col pl-19.5 pt-15.5 gap-7.25 pb-26.75 pr-22.5 bg-[#F4F2FF]">
             <div className="flex flex-col gap-6">
               <p className="text-[32px] text-black leading-10">
                 Together we help bring people who need Blood/Spam to people who
@@ -97,8 +97,8 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="relative col-span-2 bg-white  -translate-x-10 translate-y-[33px] flex flex-col gap-[66px]">
-            <div className="flex flex-col gap-[82px] mt-[60px] max-w-[482px] px-[58px]">
+          <div className="relative col-span-2 bg-white  -translate-x-10 translate-y-8.25 flex flex-col gap-16.5">
+            <div className="flex flex-col gap-20.5 mt-15 max-w-120.5 px-14.5">
               <div className="flex flex-col gap-4">
                 <p className="text-2xl font-medium">Your donation</p>
                 <p className="font-medium">
@@ -120,7 +120,7 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <div className="flex gap-[9px] items-center ml-[25px] mb-[21px]">
+            <div className="flex gap-2.25 items-center ml-6.25 mb-5.25">
               <p className="text-primary font-medium">What we do</p>{" "}
               <ArrowRight className="text-primary" size={16} />
             </div>
