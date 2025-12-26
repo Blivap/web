@@ -150,79 +150,73 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
         </div>
       </div>
       {props.children}
-      <div className="relative mt-8 sm:mt-12 md:mt-16 lg:mt-63.75 bg-black flex flex-col gap-6 sm:gap-8 md:gap-10 lg:gap-14.25 pt-6 sm:pt-8 md:pt-10 lg:pt-13.75 px-4 sm:px-6 md:px-8 lg:px-20.25 pb-6 sm:pb-8 md:pb-10 lg:pb-14.25">
-        <p className="font-bold font-helvetica text-[32px] leading-5.5 text-white tracking-[-0.41px]">
+      <div className="relative mt-8 sm:mt-12 md:mt-63.75 bg-black flex flex-col gap-8 sm:gap-12 md:gap-14.25 pt-8 sm:pt-12 md:pt-13.75 px-4 sm:px-6 md:px-12 lg:px-20.25 pb-8 sm:pb-12 md:pb-14.25">
+        <p className="font-bold font-helvetica text-xl sm:text-2xl md:text-[32px] leading-5.5 text-white tracking-[-0.41px]">
           Blivap
         </p>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-10 justify-between">
-          <div className="flex flex-col gap-5">
-            <p className="font-semibold text-[18px] text-white tracking-[-0.41px]">
-              Knowledge
-            </p>
-            <p className=" text-base text-white tracking-[-0.41px]">
-              Giving blood
-            </p>
-            <p className=" text-base text-white tracking-[-0.41px]">
-              About blood
-            </p>
-            <p className=" text-base text-white tracking-[-0.41px]">
-              About Sperm
-            </p>
-            <p className=" text-base text-white tracking-[-0.41px]">
-              our expertise
-            </p>
-          </div>
-          <div className="flex flex-col gap-5">
-            <p className="font-semibold text-[18px] text-white tracking-[-0.41px]">
-              Our audiences
-            </p>
-            <p className=" text-base text-white tracking-[-0.41px]">
-              Health care
-            </p>
-            <p className=" text-base text-white tracking-[-0.41px]">Donors</p>
-          </div>
-          <div className="flex flex-col gap-5">
-            <p className="font-semibold text-[18px] text-white tracking-[-0.41px]">
-              About Blivap
-            </p>
-            <p className=" text-base text-white tracking-[-0.41px]">News</p>
-            <p className=" text-base text-white tracking-[-0.41px]">
-              Education
-            </p>
-          </div>
-          <div className="flex flex-col gap-5">
-            <p className="font-semibold text-[18px] text-white tracking-[-0.41px]">
-              Service & Contract
-            </p>
-            <p className=" text-base text-white tracking-[-0.41px]">
-              Frequently asked question
-            </p>
-            <p className=" text-base text-white tracking-[-0.41px]">
-              Contact us
-            </p>
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-0 md:flex md:justify-between">
+          {[
+            {
+              title: "Knowledge",
+              items: [
+                "Giving blood",
+                "About blood",
+                "About Sperm",
+                "our expertise",
+              ],
+            },
+            { title: "Our audiences", items: ["Health care", "Donors"] },
+            { title: "About Blivap", items: ["News", "Education"] },
+            {
+              title: "Service & Contract",
+              items: ["Frequently asked question", "Contact us"],
+            },
+          ].map((section, i) => (
+            <div key={i} className="flex flex-col gap-3 sm:gap-4 md:gap-5">
+              <p className="font-semibold text-sm sm:text-base md:text-[18px] text-white tracking-[-0.41px]">
+                {section.title}
+              </p>
+              {section.items.map((item, j) => (
+                <p
+                  key={j}
+                  className="text-xs sm:text-sm md:text-base text-white tracking-[-0.41px] cursor-pointer hover:text-primary transition-colors"
+                >
+                  {item}
+                </p>
+              ))}
+            </div>
+          ))}
         </div>
-        <div className="absolute -top-20 sm:-top-24 lg:-top-28 right-4 sm:right-8 md:right-12 lg:right-20.25 bg-[#F4F2FF] md:flex flex-col gap-4 sm:gap-5 lg:gap-6.25 shadow-[0px_0px_20px_#00000040] max-w-full sm:max-w-96 lg:max-w-132 px-4 sm:px-5 lg:px-6 py-3 sm:py-3.5 hidden">
-          <div className="flex flex-col gap-3.5">
-            <p className="font-medium text-xl leading-5.5">
+        <div className="absolute hidden  -top-20 sm:-top-24 md:-top-28 right-4 sm:right-6 md:right-12 lg:right-20.25 bg-[#F4F2FF] sm:flex flex-col gap-4 sm:gap-5 md:gap-6.25 shadow-[0px_0px_20px_#00000040] max-w-full sm:max-w-md md:max-w-132 px-4 sm:px-5 md:px-6 py-3 sm:py-3.5">
+          <div className="flex flex-col gap-2 sm:gap-3 md:gap-3.5">
+            <p className="font-medium text-base sm:text-lg md:text-xl leading-5.5">
               Save lives and earn money with your blood or spam
             </p>
-            <p className="text-base tracking-[-0.41px] text-[#333333]">
+            <p className="text-sm sm:text-base tracking-[-0.41px] text-[#333333]">
               With your blood and spam we save and improve lives
             </p>
           </div>
           <Link
             href="#"
-            className="w-fit text-white text-base py-3.5 px-[17.7px] bg-primary"
+            className="w-full sm:w-fit text-white text-sm sm:text-base py-2.5 sm:py-3.5 px-4 sm:px-[17.7px] bg-primary hover:bg-primary/90 transition-colors inline-block text-center"
           >
             Register as a donor
           </Link>
         </div>
       </div>
-      <div className="bg-[#171717] gap-2 sm:gap-3 md:gap-6 lg:gap-11 px-4 sm:pl-5 md:pl-8 lg:pl-20.25 flex flex-wrap text-xs sm:text-sm md:text-base py-4 sm:py-6 md:py-8">
-        <p className="text-white">coordinated Vulnerability Disclosure</p>
-        <p className="text-white">Privacy & Cookies</p>
-        <p className="text-white">Terms and conditions</p>
+      <div className="bg-[#171717] flex flex-col sm:flex-row py-6 sm:py-8 gap-4 sm:gap-6 md:gap-11 px-4 sm:px-6 md:px-12 lg:pl-20.25">
+        {[
+          "coordinated Vulnerability Disclosure",
+          "Privacy & Cookies",
+          "Terms and conditions",
+        ].map((text, i) => (
+          <p
+            key={i}
+            className="text-white cursor-pointer hover:text-primary transition-colors text-xs sm:text-sm md:text-base"
+          >
+            {text}
+          </p>
+        ))}
       </div>
     </div>
   );
