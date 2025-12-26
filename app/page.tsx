@@ -81,7 +81,7 @@ export default function Home() {
             ))}
           </div>
           <motion.div
-            className="relative border border-[#D9D9D9]  sm:p-2.5 p-1 flex items-center  w-full max-w-[359px]"
+            className="relative border border-[#D9D9D9]  sm:p-2.5 p-1 flex items-center  w-full max-w-89.75"
             whileFocus={{ scale: 1.02 }}
           >
             <input
