@@ -2,6 +2,7 @@
 
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
+<<<<<<< HEAD
 import { ArrowLeft, Stethoscope, Calendar, FileText, Users, CheckCircle, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -18,11 +19,15 @@ const staggerContainer = {
     }
   }
 };
+=======
+import { ArrowLeft, Stethoscope, Calendar, FileText } from "lucide-react";
+>>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
 
 export default function HealthcareProfessionals() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
+<<<<<<< HEAD
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -55,12 +60,30 @@ export default function HealthcareProfessionals() {
               className="flex flex-col gap-3 sm:gap-4"
               variants={fadeInUp}
             >
+=======
+        <Link
+          href="/"
+          className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
+        >
+          <ArrowLeft size={20} />
+          <span>Back to home</span>
+        </Link>
+
+        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
+          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
+            Healthcare Professionals
+          </h1>
+
+          <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
+            <div className="flex flex-col gap-3 sm:gap-4">
+>>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                 Partner with Blivap
               </h2>
               <p className="text-sm sm:text-base text-[#333333] leading-relaxed max-w-3xl">
                 Healthcare professionals are essential to our mission. Blivap 
                 provides you with tools to connect with donors, manage donation 
+<<<<<<< HEAD
                 processes, and ensure the best outcomes for your patients. Join 
                 our network of medical facilities and help save lives every day.
               </p>
@@ -188,7 +211,70 @@ export default function HealthcareProfessionals() {
             </motion.div>
           </div>
         </motion.div>
+=======
+                processes, and ensure the best outcomes for your patients.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm">
+                <div className="bg-[#F9E8EE] p-3 sm:p-4 rounded-full w-fit mb-3 sm:mb-4">
+                  <Stethoscope className="text-primary" size={24} />
+                </div>
+                <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">Donor Network</h3>
+                <p className="text-sm sm:text-base text-[#333333]">
+                  Access our network of verified donors and quickly find 
+                  compatible matches for your patients.
+                </p>
+              </div>
+
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm">
+                <div className="bg-[#E4E5FF] p-3 sm:p-4 rounded-full w-fit mb-3 sm:mb-4">
+                  <Calendar className="text-primary" size={24} />
+                </div>
+                <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">Appointment Management</h3>
+                <p className="text-sm sm:text-base text-[#333333]">
+                  Schedule and manage donation appointments efficiently through 
+                  our integrated platform.
+                </p>
+              </div>
+
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm">
+                <div className="bg-[#F4F2FF] p-3 sm:p-4 rounded-full w-fit mb-3 sm:mb-4">
+                  <FileText className="text-primary" size={24} />
+                </div>
+                <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">Patient Records</h3>
+                <p className="text-sm sm:text-base text-[#333333]">
+                  Maintain secure, comprehensive records of donations and patient 
+                  outcomes in one place.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8">
+              <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black mb-3 sm:mb-4">
+                Join Our Network
+              </h2>
+              <p className="text-sm sm:text-base text-[#333333] leading-relaxed mb-4 sm:mb-6">
+                Register your healthcare facility or practice to access our 
+                donor network, tools, and resources. Help us improve healthcare 
+                outcomes together.
+              </p>
+              <Link
+                href="/contact"
+                className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors"
+              >
+                Contact us to get started
+              </Link>
+            </div>
+          </div>
+        </div>
+>>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
       </div>
     </HomeLayout>
   );
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
