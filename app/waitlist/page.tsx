@@ -14,7 +14,7 @@ export default function WaitList() {
       <div className="mt-20 grid md:grid-cols-2 gap-40 sm:gap-2">
         <div>
           <div className=" ">
-            <p className=" text-[40px] md:text-[56px] ">
+            <p className=" text-4xl md:text-5xl ">
               Are you Ready for a revolution in the <br />
               <span className="font-bold">Medical industry?</span>{" "}
               <span className="text-primary">Explore us</span>
@@ -42,7 +42,7 @@ export default function WaitList() {
               />
               <button
                 type="submit"
-                className="bg-primary text-text-inverse text-base leading-[27px] rounded-[40px] px-8 py-[22px] text-nowrap"
+                className="bg-primary text-text-inverse text-base leading-[27px] rounded-[40px] px-8 py-5 text-nowrap"
               >
                 Get Early Access
               </button>
@@ -65,13 +65,13 @@ export default function WaitList() {
           fill
         /> */}
         <div className="mt-16 text-center w-full ">
-          <p className="text-text-inverse text-[32px]  tracking-[-0.14px]">
+          <p className="text-text-inverse text-3xl  tracking-[-0.14px]">
             We Made Blood and Spam Donation{" "}
             <span className="bg-primary p-2.5">Easier!</span>
           </p>
-          <div className="grid grid-cols-3 items-center justify-center content-center mt-10  lg:mt-[78px]  lg:gap-[33px] gap-2  w-full  ">
-            <div className="flex flex-col md:gap-[71px] gap-1  place-self-center  justify-center relative text-center rounded-lg  md:rounded-[40px] bg-[#F5F5F5] max-h-[430px]  w-full max-w-[308px]  p-3  md:px-[21px] md:pt-10 scale-[0.8] sm:scale-none">
-              <p className="max-w-[170px] font-medium text-base sm:text-[20px] mx-auto leading-[22px]">
+          <div className="grid grid-cols-3 items-center justify-center content-center mt-10  lg:mt-20  lg:gap-8 gap-2  w-full  ">
+            <div className="flex flex-col md:gap-16 gap-1  place-self-center  justify-center relative text-center rounded-lg  md:rounded-[40px] bg-[#F5F5F5] max-h-[430px]  w-full max-w-[308px]  p-3  md:px-5 md:pt-10 scale-[0.8] sm:scale-none">
+              <p className="max-w-[170px] font-medium text-base sm:text-xl mx-auto leading-[22px]">
                 Available Donors; a piece of cake!
               </p>
               <div className="relative flex flex-col justify-center items-center  h-full">
@@ -91,7 +91,7 @@ export default function WaitList() {
                 />
               </div>
             </div>
-            <div className="flex flex-col md:gap-[71px] gap-1  place-self-center justify-center relative text-center  rounded-lg  md:rounded-[40px] bg-[#F5F5F5] max-h-[430px] w-full  max-w-[308px]   p-3  md:px-[21px] md:pb-10 scale-[0.8] sm:scale-none">
+            <div className="flex flex-col md:gap-16 gap-1  place-self-center justify-center relative text-center  rounded-lg  md:rounded-[40px] bg-[#F5F5F5] max-h-[430px] w-full  max-w-[308px]   p-3  md:px-5 md:pb-10 scale-[0.8] sm:scale-none">
               <div className="relative flex flex-col justify-center items-center  h-full rotate-180">
                 <Image
                   className="-mt-[50px]"
@@ -112,7 +112,7 @@ export default function WaitList() {
                 Becoming a Donor easier than ever!
               </p>
             </div>
-            <div className=" flex flex-col   md:gap-[71px] gap-1 place-self-center justify-center relative text-center rounded-lg  md:rounded-[40px] bg-[#F5F5F5] max-h-[430px] w-full  max-w-[308px] p-3  md:px-[21px] md:pt-10 scale-[0.8] sm:scale-none">
+            <div className=" flex flex-col   md:gap-16 gap-1 place-self-center justify-center relative text-center rounded-lg  md:rounded-[40px] bg-[#F5F5F5] max-h-[430px] w-full  max-w-[308px] p-3  md:px-5 md:pt-10 scale-[0.8] sm:scale-none">
               <p className="max-w-[170px] font-medium text-base sm:text-[20px]  mx-auto leading-[22px]">
                 Earning Money While saving a life!
               </p>
@@ -138,7 +138,7 @@ export default function WaitList() {
       </div>
 
       <div className="flex flex-col justify-center relative text-center mt-[325px]">
-        <p className=" font-bold text-[32px] leading-10 ">
+        <p className=" font-bold text-3xl leading-10 ">
           To be released on AppStore & Google Play Store soon....
         </p>
         <div className="relative flex flex-col justify-center items-center  h-full mt-[146px]">
@@ -160,12 +160,12 @@ export default function WaitList() {
         </div>
       </div>
       <div className="relative flex flex-col md:flex-row justify-between w-full  bg-[#F5F5F5] rounded-t-[40px] p-3 pt-4 md:pt-[58px] md:px-[63px] md:pb-[69px] gap-6">
-        <div className="flex flex-col gap-[31px]">
+        <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <p className="font-bold text-[40px] text-primary font-helvetica">
+            <p className="font-bold text-4xl text-primary font-helvetica">
               Blivap
             </p>
-            <p className="max-w-[343px] text-[18px] leading-[22px] text-[#959595]">
+            <p className="max-w-[343px] text-lg leading-[22px] text-[#959595]">
               Blivap is a Blood Donation App Service Inc. company 2022
             </p>
           </div>
@@ -194,9 +194,9 @@ export default function WaitList() {
           </div>
         </div>
         <div className="flex gap-2 md:gap-6 justify-between">
-          <div className="flex flex-col gap-[11px]">
+          <div className="flex flex-col gap-3">
             <p className="font-bold text-lg text-black">About Product</p>
-            <ul className="flex flex-col gap-[11px]">
+            <ul className="flex flex-col gap-3">
               <li className="text-[#959595] text-base leading-[27px]">Patch</li>
               <li className="text-[#959595] text-base leading-[27px]">
                 Updates
@@ -206,9 +206,9 @@ export default function WaitList() {
               </li>
             </ul>
           </div>
-          <div className="flex flex-col gap-[11px]">
+          <div className="flex flex-col gap-3">
             <p className="font-bold text-lg text-black">Company</p>
-            <ul className="flex flex-col gap-[11px]">
+            <ul className="flex flex-col gap-3">
               <li className="text-[#959595] text-base leading-[27px]">Patch</li>
               <li className="text-[#959595] text-base leading-[27px]">
                 Updates
@@ -218,9 +218,9 @@ export default function WaitList() {
               </li>
             </ul>
           </div>
-          <div className="flex flex-col gap-[11px]">
+          <div className="flex flex-col gap-3">
             <p className="font-bold text-lg text-black">Support</p>
-            <ul className="flex flex-col gap-[11px]">
+            <ul className="flex flex-col gap-3">
               <li className="text-[#959595] text-base leading-[27px]">
                 Help Center
               </li>

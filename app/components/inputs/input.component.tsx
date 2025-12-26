@@ -20,7 +20,7 @@ export const Input = (props: InputProps) => {
     onChange,
   } = props;
   return (
-    <div className="flex flex-col gap-[7px] w-full">
+    <div className="flex flex-col gap-2 w-full">
       <p className="text-[#666666] text-base">{label}</p>
       <div className="border border-[#66666659] rounded-xl w-full">
         <input

@@ -7,16 +7,16 @@ export const RegisterTab = () => {
     <div className="flex flex-col gap-10 items-center max-w-[454px] w-full">
       <p className="text-base font-medium text-[#333333]">Sign up</p>
       <div className="flex flex-col gap-4 w-full items-center">
-        <div className="flex items-center justify-center gap-[18px]  border border-[#333333] rounded-[40px] py-[16.5]  w-full">
+        <div className="flex items-center justify-center gap-5  border border-[#333333] rounded-[40px] py-4  w-full">
           <FaFacebook className="text-[#0C82EE]" size={28} />
           <p>Sign up with Facebook</p>
         </div>
-        <div className="flex items-center justify-center gap-[18px]  border border-[#333333] rounded-[40px] py-[16.5]  w-full">
+        <div className="flex items-center justify-center gap-5  border border-[#333333] rounded-[40px] py-4  w-full">
           <FaGoogle className=" bg-from" size={24} />
           <p>Sign up with Google</p>
         </div>
       </div>
-      <div className="flex items-center gap-[23px] w-full">
+      <div className="flex items-center gap-6 w-full">
         <div className="h-0.5 w-full bg-[#66666640]" />
         <p className="text-[#666666]">OR</p>
         <div className="h-0.5 w-full bg-[#66666640]" />
@@ -68,7 +68,7 @@ export const RegisterTab = () => {
                 label="Email"
               />
               <button
-                className="bg-[#111111] disabled:bg-[#11111140] rounded-[40px] py-[15px] text-white font-medium text-[22px]"
+                className="bg-[#111111] disabled:bg-[#11111140] rounded-[40px] py-4 text-white font-medium text-xl"
                 type="submit"
               >
                 Sign up

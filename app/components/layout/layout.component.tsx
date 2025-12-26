@@ -50,7 +50,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       {/* Sidebar */}
       <div
         className={classNames(
-          "flex flex-col gap-[43px] w-full max-w-[230px] md:max-w-[292px] bg-white fixed left-0 h-full pt-8 px-4 md:pl-8 transition-transform duration-200 ease-out z-50",
+          "flex flex-col gap-10 w-full max-w-[230px] md:max-w-[292px] bg-white fixed left-0 h-full pt-8 px-4 md:pl-8 transition-transform duration-200 ease-out z-50",
           {
             // On mobile: completely hidden when closed (-translate-x-full), visible when open (translate-x-0)
             // On desktop: always visible (md:translate-x-0 overrides)
@@ -59,11 +59,11 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           },
         )}
       >
-        <p className="font-bold text-primary text-[32px] font-helvetica">
+        <p className="font-bold text-primary text-3xl font-helvetica">
           Blivap
         </p>
         <NavLinks onLinkClick={closeDrawer} />
-        <div className="flex flex-col gap-[22px]">
+        <div className="flex flex-col gap-5">
           <p className="font-bold text-xs uppercase text-foundation-dark">
             Other
           </p>
@@ -85,8 +85,8 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
                 <p className="text-xs text-[#6B7280]">Donor</p>
               </div>
             </div>
-            <div className="relative border-[0.5px] border-[#9CA3AF] rounded-full sm:p-4 p-1 flex items-center justify-center order-1 md:order-2">
-              <div className="absolute size-[7.5px] bg-[#FF0000] rounded-full right-2 top-1 sm:top-4 sm:right-4.5" />
+            <div className="relative border border-[#9CA3AF] rounded-full sm:p-4 p-1 flex items-center justify-center order-1 md:order-2">
+              <div className="absolute size-2 bg-[#FF0000] rounded-full right-2 top-1 sm:top-4 sm:right-4.5" />
               <FiBell size={24} className="stroke-2 text-2xl" />
             </div>
           </div>
@@ -120,12 +120,12 @@ const ToggleSwitch = ({ checked, onChange }: ToggleSwitchProps) => {
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="relative inline-flex justify-between items-center gap-2 p-2 rounded-full bg-[#F3F2F3] w-[52px] h-[30px]"
+      className="relative inline-flex justify-between items-center gap-2 p-2 rounded-full bg-[#F3F2F3] w-14 h-8"
     >
       {/* Sliding background circle */}
       <span
         className={classNames(
-          "absolute inline-block h-[22px] w-[22px] rounded-full bg-white transition-all duration-200 ease-in-out",
+          "absolute inline-block h-5 w-5 rounded-full bg-white transition-all duration-200 ease-in-out",
           {
             "translate-x-[23px]": checked, // Moves from left (3.5px) to right position
             "translate-x-0": !checked,

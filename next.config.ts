@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   // This ensures Fast Refresh works properly
   // Allow any device to access the dev server
   allowedDevOrigins: ["*"],
+  images: {
+    domains: ["i.pinimg.com"],
+  },
 };
 
 export default nextConfig;
