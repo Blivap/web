@@ -91,7 +91,6 @@ export default function Home() {
             />
           </motion.div>
         </motion.div>
-        gk
         <div className="mt-4.5 grid grid-cols-1 md:grid-cols-5 ">
           <motion.div
             className="col-span-1 md:col-span-2 flex flex-col px-4 sm:px-6 md:pl-19.5 pt-8 sm:pt-12 md:pt-[62px] gap-6 sm:gap-8 md:gap-[45px] min-h-[400px] sm:min-h-[500px] md:h-146.75 bg-primary"
