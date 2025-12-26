@@ -21,11 +21,11 @@ export default function AuthPage() {
       <Image src="/images/auth_bg.png" alt="background" fill />
       <div
         onClick={router.back}
-        className=" border-[0.7px] border-[#960018] absolute z-10 rounded-full size-6 lg:size-[45px] top-6 left-5 sm:left-8 lg:top-[122px] lg:left-[83px] flex justify-center items-center bg-[#FBFBFB59] text-[#960018]"
+        className=" border border-[#960018] absolute z-10 rounded-full size-6 lg:size-11 top-6 left-5 sm:left-8 lg:top-[122px] lg:left-[83px] flex justify-center items-center bg-[#FBFBFB59] text-[#960018]"
       >
         <ArrowLeft strokeWidth={1} size={20} />
       </div>
-      <div className="flex flex-col gap-10 relative w-full max-w-[732px] bg-white  rounded-3xl p-4 md:px-16 pt-12 md:pb-[52px]">
+      <div className="flex flex-col gap-10 relative w-full max-w-[732px] bg-white  rounded-3xl p-4 md:px-16 pt-12 md:pb-13">
         <div className="flex rounded-xl overflow-hidden w-full bg-[#111111]/25">
           <div
             onClick={() => handleTabChange("register")}
@@ -33,7 +33,7 @@ export default function AuthPage() {
               "bg-[#111111]": activeTab !== "login",
             })}
           >
-            <p className="text-white text-[18px]">Sign up</p>
+            <p className="text-white text-lg">Sign up</p>
           </div>
           <div
             onClick={() => handleTabChange("login")}
@@ -41,7 +41,7 @@ export default function AuthPage() {
               "bg-[#111111]": activeTab === "login",
             })}
           >
-            <p className="text-white text-[18px]">Log in</p>
+            <p className="text-white text-lg">Log in</p>
           </div>
         </div>
         <div className="flex  justify-center">

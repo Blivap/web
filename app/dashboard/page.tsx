@@ -13,7 +13,7 @@ export default function Dashboard() {
       <div className="flex flex-col gap-10">
         <div className="grid xl:grid-cols-6 gap-5 w-full">
           <div className=" col-span-3 xl:col-span-4 flex flex-col gap-6">
-            <div className="flex flex-col gap-[25px] relative bg-primary rounded-2xl w-full  px-[17px] pt-[9px] pb-3.5 sm:pt-11 sm:px-[47px] sm:pb-[43px]  bg-[url('/public/images/background_pattern.png')]">
+            <div className="flex flex-col gap-6 relative bg-primary rounded-2xl w-full  px-4 pt-2 pb-3.5 sm:pt-11 sm:px-12 sm:pb-11  bg-[url('/public/images/background_pattern.png')]">
               {/* <Image
                 src="/images/group.png"
                 alt="background pattern"
@@ -24,11 +24,11 @@ export default function Dashboard() {
                 <div className="flex flex-col gap-2">
                   <p className="text-sm text-[#FFFFFFB2]">My portfolio</p>
                   <div className=" flex  items-baseline">
-                    <p className="font-bold text-[32px] text-white">
+                    <p className="font-bold text-3xl text-white">
                       {visible ? "₦250,000" : "******"}
                     </p>
                     <span
-                      className="text-[#FFFFFF80] ml-[9px] text-lg"
+                      className="text-[#FFFFFF80] ml-2 text-lg"
                       onClick={() => setVisible((prev) => !prev)}
                     >
                       {visible ? <BsEye /> : <BsEyeSlash />}
@@ -42,11 +42,11 @@ export default function Dashboard() {
                 />
               </div>
               <div className="flex gap-6">
-                <button className="flex items-center gap-1 text-xs text-white py-[7px] bg-[#B05E5E] rounded-[20px] px-2.5">
+                <button className="flex items-center gap-1 text-xs text-white py-2 bg-[#B05E5E] rounded-[20px] px-2.5">
                   <ArrowUpToLine size={16} />
                   <p>Withdraw</p>
                 </button>
-                <button className="flex items-center gap-1 text-xs text-white py-[7px] bg-[#B05E5E] rounded-[20px] px-2.5">
+                <button className="flex items-center gap-1 text-xs text-white py-2 bg-[#B05E5E] rounded-[20px] px-2.5">
                   <Plus size={16} />
                   <p>Add Money</p>
                 </button>
@@ -58,14 +58,14 @@ export default function Dashboard() {
                 <p className="font-medium text-xl hidden sm:block">
                   Register as a new Donor
                 </p>
-                <div className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-[7.5px] px-[13px] sm:p-3 h-full">
+                <div className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-2 px-3 sm:p-3 h-full">
                   <div className="flex flex-col items-center justify-center sm:border border-[#DADADA] rounded-[10px] h-full gap-3.5  sm:gap-[38px] sm:p-2">
-                    <div className="size-[54px] bg-[#F9E8EE] rounded-full" />
+                    <div className="size-14 bg-[#F9E8EE] rounded-full" />
                     <div className="flex flex-col sm:gap-3.5 text-center">
-                      <p className="text-[11px] sm:text-xl font-semibold ">
+                      <p className="text-xs sm:text-xl font-semibold ">
                         Register as a new donor
                       </p>
-                      <p className="text-[10px] sm:text-[15px] text-[#333333]">
+                      <p className="text-xs sm:text-base text-[#333333]">
                         You want to register as a donor
                       </p>
                     </div>
@@ -77,14 +77,14 @@ export default function Dashboard() {
                   {" "}
                   Book an appointment
                 </p>
-                <div className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-[7.5px] px-[13px] sm:p-3 h-full">
+                <div className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-2 px-3 sm:p-3 h-full">
                   <div className="flex flex-col items-center justify-center sm:border border-[#DADADA] rounded-[10px] h-full gap-3.5  sm:gap-[38px] sm:p-2">
-                    <div className="size-[54px] bg-[#E4E5FF] rounded-full" />
+                    <div className="size-14 bg-[#E4E5FF] rounded-full" />
                     <div className="flex flex-col sm:gap-3.5 text-center">
-                      <p className="text-[11px] sm:text-xl font-semibold ">
+                      <p className="text-xs sm:text-xl font-semibold ">
                         I want an appointment
                       </p>
-                      <p className="text-[10px] sm:text-[15px] text-[#333333]">
+                      <p className="text-xs sm:text-base text-[#333333]">
                         You want to come and donate (again)
                       </p>
                     </div>
@@ -116,7 +116,7 @@ export default function Dashboard() {
                           <Avatar className="hidden sm:flex" />
                           <div className="flex flex-col">
                             <p className="font-medium">811532</p>
-                            <div className="flex gap-[27px] mt-[7px]">
+                            <div className="flex gap-7 mt-2">
                               <div className="flex gap-1 items-center">
                                 <FaStar className="text-[#FFD000]" />
                                 <p className="text-xs md:text-base font-medium text-[#6B7280]">
@@ -138,8 +138,8 @@ export default function Dashboard() {
                             </p>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-[7px]">
-                          <div className="px-[4.5px] py-px rounded-full bg-[#FFE2E2] font-medium text-[10px] leading-[22px] size-fit">
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="px-1 py-px rounded-full bg-[#FFE2E2] font-medium text-xs leading-[22px] size-fit">
                             o+
                           </div>
                           <p className="text-xs md:text-base font-medium text-[#6B7280]">
@@ -148,7 +148,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="flex  justify-end">
-                        <button className="w-full sm:w-auto rounded-[10px] bg-primary py-2.5 px-[42.5px] text-white font-medium text-sm">
+                        <button className="w-full sm:w-auto rounded-[10px] bg-primary py-2.5 px-11 text-white font-medium text-sm">
                           Book an appointment
                         </button>
                       </div>
@@ -168,7 +168,7 @@ export default function Dashboard() {
                   .fill(null)
                   .map((_, i) => (
                     <div key={i} className="flex gap-2 items-center">
-                      <div className="h-[9px] rounded-[9px] bg-primary w-5" />
+                      <div className="h-2 rounded-lg bg-primary w-5" />
                       <div className="flex items-center gap-4 justify-between w-full">
                         <div className="flex gap-4">
                           <Avatar />
@@ -179,7 +179,7 @@ export default function Dashboard() {
                             </p>{" "}
                           </div>
                         </div>
-                        <div className="bg-[#FFE2E2] rounded-[20px] p-[7px] text-sm">
+                        <div className="bg-[#FFE2E2] rounded-[20px] p-2 text-sm">
                           <p>₦750,000</p>
                         </div>
                       </div>
@@ -197,10 +197,10 @@ export default function Dashboard() {
                   .fill(null)
                   .map((_, i) => (
                     <div key={i} className="flex gap-2 items-center">
-                      <div className="h-[9px] rounded-[9px] bg-primary w-5 hidden sm:block" />
+                      <div className="h-2 rounded-lg bg-primary w-5 hidden sm:block" />
                       <div className="flex items-center gap-4 justify-between w-full">
                         <div className="flex gap-4">
-                          <Avatar className="size-[42px] sm:size-11" />
+                          <Avatar className="size-10 sm:size-11" />
                           <div className="flex flex-col ">
                             <p className="text-sm">811532</p>{" "}
                             <p className="text-sm text-[#6B7280]">
@@ -208,7 +208,7 @@ export default function Dashboard() {
                             </p>{" "}
                           </div>
                         </div>
-                        <div className="bg-[#FFE2E2] rounded-[20px] p-[7px] text-sm">
+                        <div className="bg-[#FFE2E2] rounded-[20px] p-2 text-sm">
                           <p>₦750,000</p>
                         </div>
                       </div>
