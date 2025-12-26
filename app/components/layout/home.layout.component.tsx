@@ -7,6 +7,7 @@ import { PropsWithChildren } from "react";
 export const HomeLayout = (props: PropsWithChildren<unknown>) => {
   const pathName = usePathname();
   const isActive = (href: string) => {
+    if (href === "/") return pathName === "/";
     return pathName.includes(href);
   };
   return (
@@ -32,7 +33,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                 href={e.href}
                 className={classNames(
                   "text-base text-[#171717] py-2.5 px-3.75 font-inter",
-                  { "bg-white": active },
+                  { "bg-white": active }
                 )}
               >
                 {e.label}

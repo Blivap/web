@@ -5,160 +5,353 @@ import { HomeLayout } from "./components/layout/home.layout.component";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
-// import Image from "next/image";
+// Animation variants
+const fadeInUp = {
+  initial: { opacity: 0, y: 30 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: "easeOut" }
+};
+
+const fadeInLeft = {
+  initial: { opacity: 0, x: -30 },
+  animate: { opacity: 1, x: 0 },
+  transition: { duration: 0.6, ease: "easeOut" }
+};
+
+const fadeInRight = {
+  initial: { opacity: 0, x: 30 },
+  animate: { opacity: 1, x: 0 },
+  transition: { duration: 0.6, ease: "easeOut" }
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const scaleIn = {
+  initial: { opacity: 0, scale: 0.9 },
+  animate: { opacity: 1, scale: 1 },
+  transition: { duration: 0.5, ease: "easeOut" }
+};
 
 export default function Home() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col ">
-        <div className="px-20 mt-2 flex items-center justify-between">
+        <motion.div 
+          className="px-20 mt-2 flex items-center justify-between"
+          initial="initial"
+          animate="animate"
+          variants={fadeInUp}
+        >
           <p className="font-bold font-helvetica text-primary text-[32px]">
             Blivap
           </p>
-          <div className="relative border-[0.5px] border-[#9CA3AF] rounded-full sm:p-4 p-1 flex items-center justify-center">
+          <motion.div 
+            className="relative border-[0.5px] border-[#9CA3AF] rounded-full sm:p-4 p-1 flex items-center justify-center"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <div className="absolute size-[7.5px] bg-[#FF0000] rounded-full right-2 top-1 sm:top-4 sm:right-4.5" />
             <FiBell size={24} className="stroke-1 text-2xl" />
-          </div>
-        </div>
-        <div className="px-20 mt-2 flex items-center justify-between">
+          </motion.div>
+        </motion.div>
+        <motion.div 
+          className="px-20 mt-2 flex items-center justify-between"
+          initial="initial"
+          animate="animate"
+          variants={fadeInUp}
+          transition={{ delay: 0.1 }}
+        >
           <div className="flex gap-8">
             {["About blood", "About donating", "What we do"].map((text, id) => (
-              <p key={id}>{text}</p>
+              <motion.p 
+                key={id}
+                whileHover={{ scale: 1.05, color: "#960018" }}
+                className="cursor-pointer transition-colors"
+              >
+                {text}
+              </motion.p>
             ))}
           </div>
-          <div className="relative border border-[#D9D9D9]  sm:p-2.5 p-1 flex items-center  w-full max-w-[359px]">
+          <motion.div 
+            className="relative border border-[#D9D9D9]  sm:p-2.5 p-1 flex items-center  w-full max-w-[359px]"
+            whileFocus={{ scale: 1.02 }}
+          >
             <input
               className="outline-none w-full text-[18px] font-inter placeholder:text-[#6B7280] leading-[22px]"
               type="text"
               placeholder="What are you looking for"
             />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
         <div className="mt-4.5 grid md:grid-cols-5">
-          <div className="col-span-2 flex flex-col pl-[78px] pt-[62px] gap-[45px] h-[587px] bg-primary">
-            <div className="flex flex-col gap-6">
-              <p className="text-[48px] text-white leading-14">
-                Save lives with your blood or spam
-              </p>
-              <Link
-                className="w-fit bg-black text-white py-3.5 px-[25px]"
-                href="#"
+          <motion.div 
+            className="col-span-2 flex flex-col pl-[78px] pt-[62px] gap-[45px] h-[587px] bg-primary"
+            initial="initial"
+            animate="animate"
+            variants={fadeInLeft}
+            transition={{ delay: 0.2 }}
+          >
+            <motion.div 
+              className="flex flex-col gap-6"
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+            >
+              <motion.p 
+                className="text-[48px] text-white leading-14"
+                variants={fadeInUp}
               >
-                Register as a donor (EN){" "}
-              </Link>
-            </div>
-            <div className="flex flex-col gap-6 bg-white px-9 pt-12 pb-[108px] shadow-[0_4px_30px_#0000001A] max-w-[562px] relative w-full md:translate-x-18 z-10">
+                Save lives with your blood or spam
+              </motion.p>
+              <motion.div variants={fadeInUp}>
+                <Link
+                  className="w-fit bg-black text-white py-3.5 px-[25px] inline-block"
+                  href="#"
+                >
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="block"
+                  >
+                    Register as a donor (EN){" "}
+                  </motion.span>
+                </Link>
+              </motion.div>
+            </motion.div>
+            <motion.div 
+              className="flex flex-col gap-6 bg-white px-9 pt-12 pb-[108px] shadow-[0_4px_30px_#0000001A] max-w-[562px] relative w-full md:translate-x-18 z-10"
+              initial="initial"
+              animate="animate"
+              variants={scaleIn}
+              transition={{ delay: 0.4 }}
+            >
               <p className="font-medium text-2xl text-black">Quick links</p>
-              <div className="flex flex-col gap-4">
+              <motion.div 
+                className="flex flex-col gap-4"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+              >
                 {["About donating", "Research", "About Blivap"].map((e, i) => (
-                  <div
+                  <motion.div
                     key={i}
                     className="flex items-center justify-between border-b border-[#E5E7EB] pb-4"
+                    variants={fadeInUp}
+                    whileHover={{ x: 5 }}
                   >
                     <p className="text-[18px]">{e}</p>
                     <ArrowRight strokeWidth={1.3} />
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
-            </div>
-          </div>
-          <div className="relative col-span-3 bg-green-300 min-h-[587px]">
+              </motion.div>
+            </motion.div>
+          </motion.div>
+          <motion.div 
+            className="relative col-span-3 bg-green-300 min-h-[587px]"
+            initial="initial"
+            animate="animate"
+            variants={fadeInRight}
+            transition={{ delay: 0.3 }}
+          >
             <Image src="/images/hero_image.jpg" alt="home illustration" fill />
-            <div className="absolute w-[90%] h-6 bg-[#0005F2] -bottom-6"></div>
-          </div>
+            <motion.div 
+              className="absolute w-[90%] h-6 bg-[#0005F2] -bottom-6"
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+            />
+          </motion.div>
         </div>
-        <div className="mt-37.75grid md:grid-cols-5">
-          <div className="col-span-3 flex flex-col pl-[78px] pt-[62px] gap-[29px] pb-[107px] pr-[90px] bg-[#F4F2FF]">
-            <div className="flex flex-col gap-6">
-              <p className="text-[32px] text-black leading-10">
+        <motion.div 
+          className="mt-37.75 grid md:grid-cols-5"
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+        >
+          <motion.div 
+            className="col-span-3 flex flex-col pl-[78px] pt-[62px] gap-[29px] pb-[107px] pr-[90px] bg-[#F4F2FF]"
+            variants={fadeInLeft}
+          >
+            <motion.div 
+              className="flex flex-col gap-6"
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+            >
+              <motion.p 
+                className="text-[32px] text-black leading-10"
+                variants={fadeInUp}
+              >
                 Together we help bring people who need Blood/Spam to people who
                 are willing to donate blood/Spam
-              </p>
-              <p className="w-fit text-[#333333] text-base">
+              </motion.p>
+              <motion.p 
+                className="w-fit text-[#333333] text-base"
+                variants={fadeInUp}
+              >
                 Blivap stands for life. For people. For making a difference at
                 these moments when it really matters. Thanks to our dedicated
                 donors, patients get a chance at a better future and you also
                 get a better life by donating.
-              </p>
-            </div>
-            <div className="flex gap-4">
+              </motion.p>
+            </motion.div>
+            <motion.div 
+              className="flex gap-4"
+              variants={fadeInUp}
+            >
               <Link
                 href="#"
-                className="w-fit text-white text-base py-3.5 px-[17.7px] bg-primary"
+                className="w-fit text-white text-base py-3.5 px-[17.7px] bg-primary inline-block"
               >
-                Become a donor
+                <motion.span
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="block"
+                >
+                  Become a donor
+                </motion.span>
               </Link>
               <Link
                 href="#"
-                className="border-2 border-black py-3.5 px-[17.7px] w-fit text-[#333333] text-base"
+                className="border-2 border-black py-3.5 px-[17.7px] w-fit text-[#333333] text-base inline-block"
               >
-                Read more
+                <motion.span
+                  whileHover={{ scale: 1.05, backgroundColor: "#000", color: "#fff" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="block px-[17.7px] py-3.5 -mx-[17.7px] -my-3.5 transition-colors"
+                >
+                  Read more
+                </motion.span>
               </Link>
-            </div>
-          </div>
-          <div className="relative col-span-2 bg-white  -translate-x-10 translate-y-[33px] flex flex-col gap-[66px]">
-            <div className="flex flex-col gap-[82px] mt-[60px] max-w-[482px] px-[58px]">
-              <div className="flex flex-col gap-4">
-                <p className="text-2xl font-medium">Your donation</p>
-                <p className="font-medium">
-                  Tell the story of hope, recovery and future
-                </p>
-              </div>
-              <div className="flex flex-col gap-4">
-                <p className="text-2xl font-medium">About Blivap</p>
-                <p className="font-medium">
-                  In a world full of charge, we continue to deliver safe blood
-                  products
-                </p>
-              </div>
-              <div className="flex flex-col gap-4">
-                <p className="text-2xl font-medium">Lifesaving research</p>
-                <p className="font-medium">
-                  Life saving blood products, therapeutics, services,
-                  diagnostics and knowledge for health care
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-[9px] items-center ml-[25px] mb-[21px]">
+            </motion.div>
+          </motion.div>
+          <motion.div 
+            className="relative col-span-2 bg-white  -translate-x-10 translate-y-[33px] flex flex-col gap-[66px]"
+            variants={fadeInRight}
+          >
+            <motion.div 
+              className="flex flex-col gap-[82px] mt-[60px] max-w-[482px] px-[58px]"
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+            >
+              {[
+                { title: "Your donation", desc: "Tell the story of hope, recovery and future" },
+                { title: "About Blivap", desc: "In a world full of charge, we continue to deliver safe blood products" },
+                { title: "Lifesaving research", desc: "Life saving blood products, therapeutics, services, diagnostics and knowledge for health care" }
+              ].map((item, i) => (
+                <motion.div 
+                  key={i}
+                  className="flex flex-col gap-4"
+                  variants={fadeInUp}
+                  whileHover={{ x: 5 }}
+                >
+                  <p className="text-2xl font-medium">{item.title}</p>
+                  <p className="font-medium">{item.desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+            <motion.div 
+              className="flex gap-[9px] items-center ml-[25px] mb-[21px]"
+              whileHover={{ x: 5 }}
+            >
               <p className="text-primary font-medium">What we do</p>{" "}
               <ArrowRight className="text-primary" size={16} />
-            </div>
-          </div>
-        </div>
-        <div className="mt-37.75 grid md:grid-cols-5">
-          <div className="z-10 col-span-2 bg-[#F9E8EE] w-177 translate-y-8.25 flex flex-col gap-16.5 px-19.75 pt-30 pb-29.5">
-            <p className="font-medium text-[32px]">Save a Life</p>
-            <div className="flex flex-col gap-8">
-              <p className="text-base text-[#333333] font-medium">
+            </motion.div>
+          </motion.div>
+        </motion.div>
+        <motion.div 
+          className="mt-37.75 grid md:grid-cols-5"
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+        >
+          <motion.div 
+            className="z-10 col-span-2 bg-[#F9E8EE] w-177 translate-y-8.25 flex flex-col gap-16.5 px-19.75 pt-30 pb-29.5"
+            variants={fadeInLeft}
+          >
+            <motion.p 
+              className="font-medium text-[32px]"
+              variants={fadeInUp}
+            >
+              Save a Life
+            </motion.p>
+            <motion.div 
+              className="flex flex-col gap-8"
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+            >
+              <motion.p 
+                className="text-base text-[#333333] font-medium"
+                variants={fadeInUp}
+              >
                 Nigeria has a lack of blood crises, this issue is the cause of
                 many deaths and we as an organization decided to fix that
                 problem by creating Blivap. Blivap helps connect two individuals
                 who blood groups match and are one is willing to sell he or her
                 blood to save another. We as Blivap also help connects people in
                 need of sperm donors.
-              </p>
-              <div className="flex gap-2.25 items-center ">
+              </motion.p>
+              <motion.div 
+                className="flex gap-2.25 items-center"
+                variants={fadeInUp}
+                whileHover={{ x: 5 }}
+              >
                 <p className="text-primary font-medium">About donating</p>
                 <ArrowRight className="text-primary" size={16} />
-              </div>
-            </div>
-          </div>
-          <div className="col-span-3 relative z-0">
+              </motion.div>
+            </motion.div>
+          </motion.div>
+          <motion.div 
+            className="col-span-3 relative z-0"
+            variants={fadeInRight}
+          >
             <Image
               src="/images/africa-humanitarian-aid-doctor-taking-care-patient.png"
               alt="blood pressure"
               fill
             />
-          </div>
-        </div>
-        <div className="mt-23.25 flex flex-col gap-9 mx-19.75">
-          <p className="font-medium text-[40px] leading-[22.4px]">News</p>
+          </motion.div>
+        </motion.div>
+        <motion.div 
+          className="mt-23.25 flex flex-col gap-9 mx-19.75"
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={fadeInUp}
+        >
+          <motion.p 
+            className="font-medium text-[40px] leading-[22.4px]"
+            variants={fadeInUp}
+          >
+            News
+          </motion.p>
           <div className="flex flex-col gap-8.5">
             <div className="flex gap-4">
-              <div className="relative w-161.75">
+              <motion.div 
+                className="relative w-161.75"
+                variants={scaleIn}
+                whileHover={{ scale: 1.02 }}
+              >
                 <Image src="/images/black_woman.jpg" alt="News image" fill />
-                <div className="absolute bottom-7 left-6.25 bg-white pt-5 pl-4.25 max-w-77">
+                <motion.div 
+                  className="absolute bottom-7 left-6.25 bg-white pt-5 pl-4.25 max-w-77"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                >
                   <div className="flex items-center gap-2.75">
                     <p className="py-[1.5px] px-[7.5px] bg-[#F4F2FF] text-[#6B7280]">
                       News
@@ -171,21 +364,32 @@ export default function Home() {
                     Nigeria invest in blood pushing the idea and saving more
                     life.{" "}
                   </p>
-                  <div className="flex gap-2.25 items-center mt-10 mb-4.75">
+                  <motion.div 
+                    className="flex gap-2.25 items-center mt-10 mb-4.75"
+                    whileHover={{ x: 5 }}
+                  >
                     <p className="text-primary font-medium">Read news</p>
                     <ArrowRight className="text-primary" size={16} />
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col gap-9.75">
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+              <motion.div 
+                className="flex flex-col gap-9.75"
+                variants={staggerContainer}
+                initial="initial"
+                whileInView="animate"
+                viewport={{ once: true }}
+              >
                 {[
                   "Nigerian- Medical system just release the cure for HIV",
                   "Scientists discover new mechanism regulating",
                   "Scientists discover prevention for Malaria and Fever",
                 ].map((title, id) => (
-                  <div
+                  <motion.div
                     key={id}
                     className="flex gap-4 shadow-[0_4px_20px_#00000026]"
+                    variants={fadeInUp}
+                    whileHover={{ scale: 1.02, y: -5 }}
                   >
                     <div className="w-56.5 h-33.75 bg-gray-300 relative">
                       <Image
@@ -201,74 +405,59 @@ export default function Home() {
                         </p>
                         <p className="text-base font-medium">{title}</p>
                       </div>
-                      <div className="flex gap-2.25 items-center ">
+                      <motion.div 
+                        className="flex gap-2.25 items-center"
+                        whileHover={{ x: 5 }}
+                      >
                         <p className="text-primary font-medium">Read news</p>
                         <ArrowRight className="text-primary" size={16} />
-                      </div>
+                      </motion.div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </div>
-            <Link
-              href="#"
-              className="w-fit text-white text-base py-3.5 px-[17.7px] bg-primary"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Read more
-            </Link>
+              <Link
+                href="#"
+                className="w-fit text-white text-base py-3.5 px-[17.7px] bg-primary inline-block"
+              >
+                Read more
+              </Link>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
         <div className="relative mt-63.75 bg-black flex flex-col gap-14.25 pt-13.75 px-20.25 pb-14.25">
           <p className="font-bold font-helvetica text-[32px] leading-5.5 text-white tracking-[-0.41px]">
             Blivap
           </p>
           <div className="flex justify-between">
-            <div className="flex flex-col gap-5">
-              <p className="font-semibold text-[18px] text-white tracking-[-0.41px]">
-                Knowledge
-              </p>
-              <p className=" text-base text-white tracking-[-0.41px]">
-                Giving blood
-              </p>
-              <p className=" text-base text-white tracking-[-0.41px]">
-                About blood
-              </p>
-              <p className=" text-base text-white tracking-[-0.41px]">
-                About Sperm
-              </p>
-              <p className=" text-base text-white tracking-[-0.41px]">
-                our expertise
-              </p>
-            </div>
-            <div className="flex flex-col gap-5">
-              <p className="font-semibold text-[18px] text-white tracking-[-0.41px]">
-                Our audiences
-              </p>
-              <p className=" text-base text-white tracking-[-0.41px]">
-                Health care
-              </p>
-              <p className=" text-base text-white tracking-[-0.41px]">Donors</p>
-            </div>
-            <div className="flex flex-col gap-5">
-              <p className="font-semibold text-[18px] text-white tracking-[-0.41px]">
-                About Blivap
-              </p>
-              <p className=" text-base text-white tracking-[-0.41px]">News</p>
-              <p className=" text-base text-white tracking-[-0.41px]">
-                Education
-              </p>
-            </div>
-            <div className="flex flex-col gap-5">
-              <p className="font-semibold text-[18px] text-white tracking-[-0.41px]">
-                Service & Contract
-              </p>
-              <p className=" text-base text-white tracking-[-0.41px]">
-                Frequently asked question
-              </p>
-              <p className=" text-base text-white tracking-[-0.41px]">
-                Contact us
-              </p>
-            </div>
+            {[
+              { title: "Knowledge", items: ["Giving blood", "About blood", "About Sperm", "our expertise"] },
+              { title: "Our audiences", items: ["Health care", "Donors"] },
+              { title: "About Blivap", items: ["News", "Education"] },
+              { title: "Service & Contract", items: ["Frequently asked question", "Contact us"] }
+            ].map((section, i) => (
+              <div 
+                key={i}
+                className="flex flex-col gap-5"
+              >
+                <p className="font-semibold text-[18px] text-white tracking-[-0.41px]">
+                  {section.title}
+                </p>
+                {section.items.map((item, j) => (
+                  <p 
+                    key={j}
+                    className="text-base text-white tracking-[-0.41px] cursor-pointer hover:text-primary transition-colors"
+                  >
+                    {item}
+                  </p>
+                ))}
+              </div>
+            ))}
           </div>
           <div className="absolute -top-28 right-20.25 bg-[#F4F2FF]  flex flex-col gap-6.25 shadow-[0px_0px_20px_#00000040] max-w-132 px-6 py-3.5">
             <div className="flex flex-col gap-3.5">
@@ -281,16 +470,21 @@ export default function Home() {
             </div>
             <Link
               href="#"
-              className="w-fit text-white text-base py-3.5 px-[17.7px] bg-primary"
+              className="w-fit text-white text-base py-3.5 px-[17.7px] bg-primary hover:bg-primary/90 transition-colors inline-block"
             >
               Register as a donor
             </Link>
           </div>
         </div>
         <div className="bg-[#171717] flex py-8 gap-11 pl-20.25">
-          <p className="text-white">coordinated Vulnerability Disclosure</p>
-          <p className="text-white">Privacy & Cookies</p>
-          <p className="text-white">Terms and conditions</p>
+          {["coordinated Vulnerability Disclosure", "Privacy & Cookies", "Terms and conditions"].map((text, i) => (
+            <p 
+              key={i}
+              className="text-white cursor-pointer hover:text-primary transition-colors"
+            >
+              {text}
+            </p>
+          ))}
         </div>
       </div>
     </HomeLayout>
