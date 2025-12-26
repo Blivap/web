@@ -33,15 +33,11 @@ export default function Dashboard() {
       >
         <div className="grid xl:grid-cols-6 gap-5 w-full">
           <div className=" col-span-3 xl:col-span-4 flex flex-col gap-6">
-<<<<<<< HEAD
             <motion.div 
               className="flex flex-col gap-[25px] relative bg-primary rounded-2xl w-full  px-[17px] pt-[9px] pb-3.5 sm:pt-11 sm:px-[47px] sm:pb-[43px]  bg-[url('/public/images/background_pattern.png')]"
               variants={fadeInUp}
               whileHover={{ scale: 1.01 }}
             >
-=======
-            <div className="flex flex-col gap-6 relative bg-primary rounded-2xl w-full  px-4 pt-2 pb-3.5 sm:pt-11 sm:px-12 sm:pb-11  bg-[url('/public/images/background_pattern.png')]">
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
               {/* <Image
                 src="/images/group.png"
                 alt="background pattern"
@@ -79,7 +75,7 @@ export default function Dashboard() {
                   <p>Add Money</p>
                 </button>
               </div>
-            </div>
+            </motion.div>
 
             <motion.div 
               className="grid grid-cols-2 grid-rows-1 gap-5"
@@ -92,15 +88,11 @@ export default function Dashboard() {
                 <p className="font-medium text-xl hidden sm:block">
                   Register as a new Donor
                 </p>
-<<<<<<< HEAD
                 <motion.div 
                   className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-[7.5px] px-[13px] sm:p-3 h-full cursor-pointer"
                   whileHover={{ scale: 1.02, y: -5 }}
                   whileTap={{ scale: 0.98 }}
                 >
-=======
-                <div className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-2 px-3 sm:p-3 h-full">
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
                   <div className="flex flex-col items-center justify-center sm:border border-[#DADADA] rounded-[10px] h-full gap-3.5  sm:gap-[38px] sm:p-2">
                     <div className="size-14 bg-[#F9E8EE] rounded-full" />
                     <div className="flex flex-col sm:gap-3.5 text-center">
@@ -122,15 +114,11 @@ export default function Dashboard() {
                   {" "}
                   Book an appointment
                 </p>
-<<<<<<< HEAD
                 <motion.div 
                   className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-[7.5px] px-[13px] sm:p-3 h-full cursor-pointer"
                   whileHover={{ scale: 1.02, y: -5 }}
                   whileTap={{ scale: 0.98 }}
                 >
-=======
-                <div className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-2 px-3 sm:p-3 h-full">
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
                   <div className="flex flex-col items-center justify-center sm:border border-[#DADADA] rounded-[10px] h-full gap-3.5  sm:gap-[38px] sm:p-2">
                     <div className="size-14 bg-[#E4E5FF] rounded-full" />
                     <div className="flex flex-col sm:gap-3.5 text-center">
@@ -206,15 +194,11 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="flex  justify-end">
-<<<<<<< HEAD
                         <motion.button 
                           className="w-full sm:w-auto rounded-[10px] bg-primary py-2.5 px-[42.5px] text-white font-medium text-sm"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-=======
-                        <button className="w-full sm:w-auto rounded-[10px] bg-primary py-2.5 px-11 text-white font-medium text-sm">
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
                           Book an appointment
                         </motion.button>
                       </div>
@@ -268,7 +252,6 @@ export default function Dashboard() {
                 {Array(4)
                   .fill(null)
                   .map((_, i) => (
-<<<<<<< HEAD
                     <motion.div 
                       key={i} 
                       className="flex gap-2 items-center"
@@ -276,10 +259,6 @@ export default function Dashboard() {
                       whileHover={{ x: 5 }}
                     >
                       <div className="h-[9px] rounded-[9px] bg-primary w-5 hidden sm:block" />
-=======
-                    <div key={i} className="flex gap-2 items-center">
-                      <div className="h-2 rounded-lg bg-primary w-5 hidden sm:block" />
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
                       <div className="flex items-center gap-4 justify-between w-full">
                         <div className="flex gap-4">
                           <Avatar className="size-10 sm:size-11" />

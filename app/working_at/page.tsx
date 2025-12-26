@@ -2,32 +2,34 @@
 
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
-<<<<<<< HEAD
-import { ArrowLeft, Briefcase, Users, Heart, Target, CheckCircle, Globe } from "lucide-react";
+import {
+  ArrowLeft,
+  Briefcase,
+  Users,
+  Heart,
+  Target,
+  CheckCircle,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut" }
+  transition: { duration: 0.6, ease: "easeOut" },
 };
 
 const staggerContainer = {
   animate: {
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
-=======
-import { ArrowLeft, Briefcase, Users, Heart } from "lucide-react";
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
 
 export default function WorkingAt() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-<<<<<<< HEAD
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -42,13 +44,13 @@ export default function WorkingAt() {
           </Link>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="flex flex-col gap-4 sm:gap-6 md:gap-8"
           initial="initial"
           animate="animate"
           variants={staggerContainer}
         >
-          <motion.h1 
+          <motion.h1
             className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
             variants={fadeInUp}
           >
@@ -56,40 +58,23 @@ export default function WorkingAt() {
           </motion.h1>
 
           <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            <motion.div 
+            <motion.div
               className="flex flex-col gap-3 sm:gap-4"
               variants={fadeInUp}
             >
-=======
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
-        >
-          <ArrowLeft size={20} />
-          <span>Back to home</span>
-        </Link>
-
-        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-            Working at Blivap
-          </h1>
-
-          <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            <div className="flex flex-col gap-3 sm:gap-4">
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                 Join Our Mission
               </h2>
               <p className="text-sm sm:text-base text-[#333333] leading-relaxed max-w-3xl">
-                At Blivap, we're building a team of passionate individuals 
-                dedicated to saving lives and improving healthcare access. Join 
-<<<<<<< HEAD
-                us in making a meaningful difference in people's lives while 
-                building a rewarding career in a purpose-driven organization.
+                At Blivap, we&apos;re building a team of passionate individuals
+                dedicated to saving lives and improving healthcare access. Join
+                us in making a meaningful difference in people&apos;s lives
+                while building a rewarding career in a purpose-driven
+                organization.
               </p>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8"
               variants={staggerContainer}
             >
@@ -98,37 +83,46 @@ export default function WorkingAt() {
                   icon: Heart,
                   title: "Our Mission",
                   desc: "We're committed to addressing the blood crisis and making life-saving donations accessible to everyone. Every team member plays a crucial role in this mission.",
-                  color: "bg-[#F9E8EE]"
+                  color: "bg-[#F9E8EE]",
                 },
                 {
                   icon: Users,
                   title: "Our Culture",
                   desc: "We value collaboration, innovation, and a shared commitment to making a positive impact on healthcare. We foster an inclusive, supportive work environment.",
-                  color: "bg-[#E4E5FF]"
+                  color: "bg-[#E4E5FF]",
                 },
                 {
                   icon: Briefcase,
                   title: "Open Positions",
                   desc: "We're always looking for talented individuals to join our team. From engineering to healthcare, marketing to operations, we have opportunities for growth.",
-                  color: "bg-[#F4F2FF]"
-                }
+                  color: "bg-[#F4F2FF]",
+                },
               ].map((value, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
                   className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm"
                   variants={fadeInUp}
-                  whileHover={{ y: -5, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
+                  whileHover={{
+                    y: -5,
+                    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                  }}
                 >
-                  <div className={`${value.color} p-3 sm:p-4 rounded-full w-fit mb-3 sm:mb-4`}>
+                  <div
+                    className={`${value.color} p-3 sm:p-4 rounded-full w-fit mb-3 sm:mb-4`}
+                  >
                     <value.icon className="text-primary" size={24} />
                   </div>
-                  <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">{value.title}</h3>
-                  <p className="text-sm sm:text-base text-[#333333]">{value.desc}</p>
+                  <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">
+                    {value.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-[#333333]">
+                    {value.desc}
+                  </p>
                 </motion.div>
               ))}
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 border-2 border-[#F4F2FF]"
               variants={fadeInUp}
             >
@@ -140,7 +134,9 @@ export default function WorkingAt() {
               </div>
               <div className="grid md:grid-cols-2 gap-4 mb-6">
                 <div>
-                  <h4 className="font-semibold text-base mb-2">Career Development</h4>
+                  <h4 className="font-semibold text-base mb-2">
+                    Career Development
+                  </h4>
                   <ul className="flex flex-col gap-2 text-sm text-[#333333]">
                     <li className="flex items-start gap-2">
                       <CheckCircle className="text-primary mt-1" size={16} />
@@ -161,7 +157,9 @@ export default function WorkingAt() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-base mb-2">Work Environment</h4>
+                  <h4 className="font-semibold text-base mb-2">
+                    Work Environment
+                  </h4>
                   <ul className="flex flex-col gap-2 text-sm text-[#333333]">
                     <li className="flex items-start gap-2">
                       <CheckCircle className="text-primary mt-1" size={16} />
@@ -184,7 +182,7 @@ export default function WorkingAt() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8"
               variants={fadeInUp}
             >
@@ -192,10 +190,11 @@ export default function WorkingAt() {
                 Interested in Joining Us?
               </h2>
               <p className="text-sm sm:text-base text-[#333333] leading-relaxed mb-6">
-                We're growing and always looking for passionate people to join 
-                our mission. Send us your resume and let's talk about how you can 
-                contribute to saving lives. Whether you're a developer, healthcare 
-                professional, designer, or marketer, we'd love to hear from you.
+                We&apos;re growing and always looking for passionate people to
+                join our mission. Send us your resume and let&apos;s talk about
+                how you can contribute to saving lives. Whether you&apos;re a
+                developer, healthcare professional, designer, or marketer,
+                we&apos;d love to hear from you.
               </p>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -211,70 +210,7 @@ export default function WorkingAt() {
             </motion.div>
           </div>
         </motion.div>
-=======
-                us in making a meaningful difference in people's lives.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
-              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm">
-                <div className="bg-[#F9E8EE] p-3 sm:p-4 rounded-full w-fit mb-3 sm:mb-4">
-                  <Heart className="text-primary" size={24} />
-                </div>
-                <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">Our Mission</h3>
-                <p className="text-sm sm:text-base text-[#333333]">
-                  We're committed to addressing the blood crisis and making 
-                  life-saving donations accessible to everyone.
-                </p>
-              </div>
-
-              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm">
-                <div className="bg-[#E4E5FF] p-3 sm:p-4 rounded-full w-fit mb-3 sm:mb-4">
-                  <Users className="text-primary" size={24} />
-                </div>
-                <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">Our Culture</h3>
-                <p className="text-sm sm:text-base text-[#333333]">
-                  We value collaboration, innovation, and a shared commitment to 
-                  making a positive impact on healthcare.
-                </p>
-              </div>
-
-              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm">
-                <div className="bg-[#F4F2FF] p-3 sm:p-4 rounded-full w-fit mb-3 sm:mb-4">
-                  <Briefcase className="text-primary" size={24} />
-                </div>
-                <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">Open Positions</h3>
-                <p className="text-sm sm:text-base text-[#333333]">
-                  We're always looking for talented individuals to join our team. 
-                  Check back regularly for new opportunities.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8">
-              <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black mb-3 sm:mb-4">
-                Interested in Joining Us?
-              </h2>
-              <p className="text-sm sm:text-base text-[#333333] leading-relaxed mb-4 sm:mb-6">
-                We're growing and always looking for passionate people to join 
-                our mission. Send us your resume and let's talk about how you can 
-                contribute to saving lives.
-              </p>
-              <Link
-                href="/contact"
-                className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors"
-              >
-                Contact us
-              </Link>
-            </div>
-          </div>
-        </div>
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
       </div>
     </HomeLayout>
   );
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653

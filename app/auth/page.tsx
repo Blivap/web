@@ -25,7 +25,6 @@ export default function AuthPage() {
       <Image src="/images/auth_bg.png" alt="background" fill />
       <motion.div
         onClick={router.back}
-<<<<<<< HEAD
         className=" border-[0.7px] border-[#960018] absolute z-10 rounded-full size-6 lg:size-[45px] top-6 left-5 sm:left-8 lg:top-[122px] lg:left-[83px] flex justify-center items-center bg-[#FBFBFB59] text-[#960018] cursor-pointer"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -41,13 +40,6 @@ export default function AuthPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-=======
-        className=" border border-[#960018] absolute z-10 rounded-full size-6 lg:size-11 top-6 left-5 sm:left-8 lg:top-[122px] lg:left-[83px] flex justify-center items-center bg-[#FBFBFB59] text-[#960018]"
-      >
-        <ArrowLeft strokeWidth={1} size={20} />
-      </div>
-      <div className="flex flex-col gap-10 relative w-full max-w-[732px] bg-white  rounded-3xl p-4 md:px-16 pt-12 md:pb-13">
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
         <div className="flex rounded-xl overflow-hidden w-full bg-[#111111]/25">
           <motion.div
             onClick={() => handleTabChange("register")}
@@ -57,15 +49,9 @@ export default function AuthPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-<<<<<<< HEAD
             <p className="text-white text-[18px]">Sign up</p>
           </motion.div>
           <motion.div
-=======
-            <p className="text-white text-lg">Sign up</p>
-          </div>
-          <div
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
             onClick={() => handleTabChange("login")}
             className={classNames("py-4  w-1/2 text-center cursor-pointer", {
               "bg-[#111111]": activeTab === "login",
@@ -73,13 +59,8 @@ export default function AuthPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-<<<<<<< HEAD
             <p className="text-white text-[18px]">Log in</p>
           </motion.div>
-=======
-            <p className="text-white text-lg">Log in</p>
-          </div>
->>>>>>> bdc9cb24c25b1f7b49ec93466a597447b4e79653
         </div>
         <AnimatePresence mode="wait">
           <motion.div 
