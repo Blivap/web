@@ -1,6 +1,6 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySit",
+  "name": "Blivap",
+  "short_name": "Blivap",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +15,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#ffffff",
+  "theme_color": "#960018",
   "background_color": "#ffffff",
   "display": "standalone"
 }
