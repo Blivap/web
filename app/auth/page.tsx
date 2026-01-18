@@ -19,13 +19,11 @@ export default function AuthPage() {
   const handleTabChange = (tab: Tab) => {
     router.push(`?tab=${tab}`, { scroll: false });
   };
-  
+
   return (
     <div className="relative flex justify-center items-center  w-full flex-1  ">
- 
-    
-      <motion.div 
-        className="flex flex-col gap-10 relative w-full max-w-[732px] bg-white  rounded-3xl p-4 md:px-16 pt-12 md:pb-[52px]"
+      <motion.div
+        className="flex flex-col gap-10 relative w-full  bg-white  rounded-3xl p-4 md:px-16 pt-12 md:pb-[52px]"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
@@ -53,7 +51,7 @@ export default function AuthPage() {
           </motion.div>
         </div>
         <AnimatePresence mode="wait">
-          <motion.div 
+          <motion.div
             key={activeTab}
             className="flex  justify-center"
             initial={{ opacity: 0, x: 20 }}
@@ -65,7 +63,6 @@ export default function AuthPage() {
           </motion.div>
         </AnimatePresence>
       </motion.div>
-      <div className="w-1/2 bg-[#960018] rounded-l-[60px] h-full"></div>
     </div>
   );
 }
