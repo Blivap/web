@@ -21,19 +21,9 @@ export default function AuthPage() {
   };
   
   return (
-    <div className="relative flex justify-center items-center bg-[#F5B1B1] w-full flex-1 backdrop-blur-[76px] p-3 md:py-[116px]">
-      <Image src="/images/auth_bg.png" alt="background" fill />
-      <motion.div
-        onClick={router.back}
-        className=" border-[0.7px] border-[#960018] absolute z-10 rounded-full size-6 lg:size-[45px] top-6 left-5 sm:left-8 lg:top-[122px] lg:left-[83px] flex justify-center items-center bg-[#FBFBFB59] text-[#960018] cursor-pointer"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-      >
-        <ArrowLeft strokeWidth={1} size={20} />
-      </motion.div>
+    <div className="relative flex justify-center items-center  w-full flex-1  ">
+ 
+    
       <motion.div 
         className="flex flex-col gap-10 relative w-full max-w-[732px] bg-white  rounded-3xl p-4 md:px-16 pt-12 md:pb-[52px]"
         initial={{ opacity: 0, y: 30 }}
@@ -75,6 +65,7 @@ export default function AuthPage() {
           </motion.div>
         </AnimatePresence>
       </motion.div>
+      <div className="w-1/2 bg-[#960018] rounded-l-[60px] h-full"></div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { PropsWithChildren, useState } from "react";
 
 export const HomeLayout = (props: PropsWithChildren<unknown>) => {
   const pathName = usePathname();
+
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const isActive = (href: string) => {

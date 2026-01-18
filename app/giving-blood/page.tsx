@@ -113,7 +113,7 @@ export default function GivingBlood() {
                   <ul className="flex flex-col gap-2 text-sm sm:text-base text-[#333333]">
                     {section.items.map((item, j) => (
                       <li key={j} className="flex items-start gap-2">
-                        <CheckCircle className="text-primary mt-1 flex-shrink-0" size={18} />
+                        <CheckCircle className="text-primary mt-1 shrink-0" size={18} />
                         <span>{item}</span>
                       </li>
                     ))}
