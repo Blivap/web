@@ -113,16 +113,10 @@ export default function Home() {
               </motion.p>
               <motion.div variants={fadeInUp}>
                 <Link
-                  className="w-fit bg-black text-white py-2.5 sm:py-3.5 px-4 sm:px-[25px] inline-block text-sm sm:text-base"
-                  href="#"
+                  className="w-fit bg-black hover:bg-black/80 active:bg-black transition duration-150  text-white py-2.5 sm:py-3.5 px-4 sm:px-6.25 inline-block text-sm sm:text-base"
+                  href="auth?tab=register"
                 >
-                  <motion.span
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="block"
-                  >
-                    Register as a donor (EN){" "}
-                  </motion.span>
+                  Register as a donor (EN)
                 </Link>
               </motion.div>
             </motion.div>
@@ -173,7 +167,7 @@ export default function Home() {
               className="absolute w-[90%] h-4 sm:h-6 bg-[#0005F2] -bottom-4 sm:-bottom-6"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
+              transition={{ delay: 0.3, duration: 0.2 }}
             />
           </motion.div>
         </div>
