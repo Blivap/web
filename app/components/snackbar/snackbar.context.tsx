@@ -13,13 +13,13 @@ interface SnackbarContextType {
   showSnackbar: (
     message: string,
     severity?: SnackbarSeverity,
-    duration?: number,
+    duration?: number
   ) => void;
   hideSnackbar: () => void;
 }
 
 const SnackbarContext = createContext<SnackbarContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
@@ -28,7 +28,7 @@ export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
   const showSnackbar = (
     message: string,
     severity: SnackbarSeverity = "info",
-    duration: number = 3000,
+    duration: number = 3000
   ) => {
     setSnackbar({ message, severity, duration });
   };
