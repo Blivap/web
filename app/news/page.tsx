@@ -9,48 +9,50 @@ import { motion } from "framer-motion";
 const newsItems = [
   {
     id: 1,
-    title: "Nigeria invests in blood donation, pushing the idea and saving more lives",
+    title:
+      "Nigeria invests in blood donation, pushing the idea and saving more lives",
     date: "9 December 2025",
     category: "News",
     image: "/images/black_woman.jpg",
     featured: true,
-    excerpt: "The Nigerian healthcare system has made significant strides in promoting blood donation awareness..."
+    excerpt:
+      "The Nigerian healthcare system has made significant strides in promoting blood donation awareness...",
   },
   {
     id: 2,
     title: "Nigerian Medical system just released the cure for HIV",
     date: "9 December 2025",
     category: "Medical Breakthrough",
-    image: "/images/news_image.jpg"
+    image: "/images/news_image.jpg",
   },
   {
     id: 3,
     title: "Scientists discover new mechanism regulating blood cell production",
     date: "9 December 2025",
     category: "Research",
-    image: "/images/news_image.jpg"
+    image: "/images/news_image.jpg",
   },
   {
     id: 4,
     title: "Scientists discover prevention for Malaria and Fever",
     date: "9 December 2025",
     category: "Research",
-    image: "/images/news_image.jpg"
-  }
+    image: "/images/news_image.jpg",
+  },
 ];
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut" }
+  transition: { duration: 0.6, ease: "easeOut" },
 };
 
 const staggerContainer = {
   animate: {
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 export default function News() {
@@ -71,13 +73,13 @@ export default function News() {
           </Link>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="flex flex-col gap-4 sm:gap-6 md:gap-8"
           initial="initial"
           animate="animate"
           variants={staggerContainer}
         >
-          <motion.h1 
+          <motion.h1
             className="font-medium text-2xl sm:text-3xl md:text-4xl leading-tight sm:leading-6 md:leading-[22.4px]"
             variants={fadeInUp}
           >
@@ -88,8 +90,8 @@ export default function News() {
             {newsItems
               .filter((item) => item.featured)
               .map((item) => (
-                <motion.div 
-                  key={item.id} 
+                <motion.div
+                  key={item.id}
                   className="relative"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -103,7 +105,7 @@ export default function News() {
                       fill
                       sizes="(max-width: 768px) 100vw, 100vw"
                     />
-                    <motion.div 
+                    <motion.div
                       className="absolute bottom-4 sm:bottom-7 left-4 sm:left-6 lg:left-6.25 bg-white pt-3 sm:pt-4 lg:pt-5 pl-3 sm:pl-4 lg:pl-4.25 pr-3 sm:pr-4 max-w-full sm:max-w-2xl z-10 rounded-lg"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -128,11 +130,13 @@ export default function News() {
                           {item.excerpt}
                         </p>
                       )}
-                      <motion.div 
+                      <motion.div
                         className="flex gap-2.25 items-center"
                         whileHover={{ x: 5 }}
                       >
-                        <p className="text-primary font-medium text-sm sm:text-base">Read news</p>
+                        <p className="text-primary font-medium text-sm sm:text-base">
+                          Read news
+                        </p>
                         <ArrowRight className="text-primary" size={14} />
                       </motion.div>
                     </motion.div>
@@ -140,18 +144,21 @@ export default function News() {
                 </motion.div>
               ))}
 
-            <motion.div 
+            <motion.div
               className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
               variants={staggerContainer}
             >
               {newsItems
                 .filter((item) => !item.featured)
-                .map((item, i) => (
+                .map((item) => (
                   <motion.div
                     key={item.id}
                     className="flex flex-col gap-3 sm:gap-4 shadow-[0_4px_20px_#00000026] bg-white rounded-xl overflow-hidden"
                     variants={fadeInUp}
-                    whileHover={{ y: -5, boxShadow: "0 10px 30px rgba(0,0,0,0.15)" }}
+                    whileHover={{
+                      y: -5,
+                      boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+                    }}
                   >
                     <div className="w-full h-40 sm:h-48 bg-gray-300 relative">
                       <Image
@@ -168,12 +175,16 @@ export default function News() {
                           {item.date}
                         </p>
                       </div>
-                      <h3 className="text-sm sm:text-base font-medium">{item.title}</h3>
-                      <motion.div 
+                      <h3 className="text-sm sm:text-base font-medium">
+                        {item.title}
+                      </h3>
+                      <motion.div
                         className="flex gap-2.25 items-center mt-2"
                         whileHover={{ x: 5 }}
                       >
-                        <p className="text-primary font-medium text-xs sm:text-sm">Read news</p>
+                        <p className="text-primary font-medium text-xs sm:text-sm">
+                          Read news
+                        </p>
                         <ArrowRight className="text-primary" size={12} />
                       </motion.div>
                     </div>

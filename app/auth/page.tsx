@@ -1,6 +1,4 @@
 "use client";
-import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import classNames from "classnames";
 import { LoginTab } from "../components/authtab/login-tab.component";
@@ -23,7 +21,7 @@ export default function AuthPage() {
   return (
     <div className="relative flex justify-center items-center  w-full flex-1  ">
       <motion.div
-        className="flex flex-col gap-10 relative w-full  bg-white  rounded-3xl p-4 md:px-16 pt-12 md:pb-[52px]"
+        className="flex flex-col gap-10 relative w-full  bg-white  rounded-3xl p-4 md:px-16 pt-12 md:pb-13"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}

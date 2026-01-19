@@ -59,9 +59,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           },
         )}
       >
-        <p className="font-bold text-primary text-3xl font-helvetica">
-          Blivap
-        </p>
+        <p className="font-bold text-primary text-3xl font-helvetica">Blivap</p>
         <NavLinks onLinkClick={closeDrawer} />
         <div className="flex flex-col gap-5">
           <p className="font-bold text-xs uppercase text-foundation-dark">
