@@ -93,7 +93,7 @@ export default function Home() {
         </motion.div>
         <div className="mt-4.5 grid grid-cols-1 md:grid-cols-5 ">
           <motion.div
-            className="col-span-1 md:col-span-2 flex flex-col px-4 sm:px-6 md:pl-19.5 pt-8 sm:pt-12 md:pt-[62px] gap-6 sm:gap-8 md:gap-[45px] min-h-[400px] sm:min-h-[500px] md:h-146.75 bg-primary"
+            className="col-span-1 md:col-span-2 flex flex-col px-4 sm:px-6 md:pl-19.5 pt-8 sm:pt-12 md:pt-15.5 gap-6 sm:gap-8 md:gap-45 min-h-100 sm:min-h-125 md:h-146.75 bg-primary"
             initial="initial"
             animate="animate"
             variants={fadeInLeft}
@@ -121,7 +121,7 @@ export default function Home() {
               </motion.div>
             </motion.div>
             <motion.div
-              className="flex flex-col gap-4 sm:gap-6 bg-white px-4 sm:px-6 md:px-9 pt-6 sm:pt-8 md:pt-12 pb-8 sm:pb-12 md:pb-[108px] shadow-[0_4px_30px_#0000001A] max-w-[562px] relative w-full md:translate-x-18 z-10 mt-4 sm:mt-0"
+              className="flex flex-col gap-4 sm:gap-6 bg-white px-4 sm:px-6 md:px-9 pt-6 sm:pt-8 md:pt-12 pb-8 sm:pb-12 md:pb-27 shadow-[0_4px_30px_#0000001A] max-w-140.5 relative w-full md:translate-x-18 z-10 mt-4 sm:mt-0"
               initial="initial"
               animate="animate"
               variants={scaleIn}
@@ -151,7 +151,7 @@ export default function Home() {
             </motion.div>
           </motion.div>
           <motion.div
-            className="relative col-span-1 md:col-span-3 bg-green-300 min-h-[300px] sm:min-h-[400px] md:min-h-146.75"
+            className="relative col-span-1 md:col-span-3 bg-green-300 min-h-75 sm:min-h-100 md:min-h-146.75"
             initial="initial"
             animate="animate"
             variants={fadeInRight}
@@ -179,7 +179,7 @@ export default function Home() {
           variants={staggerContainer}
         >
           <motion.div
-            className="col-span-1 md:col-span-3 flex flex-col px-4 sm:px-6 md:pl-19.5 pt-8 sm:pt-12 md:pt-[62px] gap-6 sm:gap-8 md:gap-[29px] pb-8 sm:pb-12 md:pb-[107px] pr-4 sm:pr-6 md:pr-[90px] bg-[#F4F2FF]"
+            className="col-span-1 md:col-span-3 flex flex-col px-4 sm:px-6 md:pl-19.5 pt-8 sm:pt-12 md:pt-15.5 gap-6 sm:gap-8 md:gap-7.25 pb-8 sm:pb-12 md:pb-[107px] pr-4 sm:pr-6 md:pr-[90px] bg-[#F4F2FF]"
             variants={fadeInLeft}
           >
             <motion.div

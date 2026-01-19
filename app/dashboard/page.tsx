@@ -10,22 +10,22 @@ import { motion } from "framer-motion";
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 }
+  transition: { duration: 0.5 },
 };
 
 const staggerContainer = {
   animate: {
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 export default function Dashboard() {
   const [visible, setVisible] = useState(false);
   return (
     <Layout>
-      <motion.div 
+      <motion.div
         className="flex flex-col gap-10"
         initial="initial"
         animate="animate"
@@ -33,7 +33,7 @@ export default function Dashboard() {
       >
         <div className="grid xl:grid-cols-6 gap-5 w-full">
           <div className=" col-span-3 xl:col-span-4 flex flex-col gap-6">
-            <motion.div 
+            <motion.div
               className="flex flex-col gap-[25px] relative bg-primary rounded-2xl w-full  px-[17px] pt-[9px] pb-3.5 sm:pt-11 sm:px-[47px] sm:pb-[43px]  bg-[url('/public/images/background_pattern.png')]"
               variants={fadeInUp}
               whileHover={{ scale: 1.01 }}
@@ -77,18 +77,15 @@ export default function Dashboard() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="grid grid-cols-2 grid-rows-1 gap-5"
               variants={staggerContainer}
             >
-              <motion.div 
-                className="flex flex-col gap-4"
-                variants={fadeInUp}
-              >
+              <motion.div className="flex flex-col gap-4" variants={fadeInUp}>
                 <p className="font-medium text-xl hidden sm:block">
                   Register as a new Donor
                 </p>
-                <motion.div 
+                <motion.div
                   className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-[7.5px] px-[13px] sm:p-3 h-full cursor-pointer"
                   whileHover={{ scale: 1.02, y: -5 }}
                   whileTap={{ scale: 0.98 }}
@@ -106,15 +103,12 @@ export default function Dashboard() {
                   </div>
                 </motion.div>
               </motion.div>
-              <motion.div 
-                className="flex flex-col gap-4"
-                variants={fadeInUp}
-              >
+              <motion.div className="flex flex-col gap-4" variants={fadeInUp}>
                 <p className="font-medium text-xl hidden sm:block">
                   {" "}
                   Book an appointment
                 </p>
-                <motion.div 
+                <motion.div
                   className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-[7.5px] px-[13px] sm:p-3 h-full cursor-pointer"
                   whileHover={{ scale: 1.02, y: -5 }}
                   whileTap={{ scale: 0.98 }}
@@ -144,7 +138,7 @@ export default function Dashboard() {
                   View All
                 </p>
               </div>
-              <motion.div 
+              <motion.div
                 className="grid gap-4  flex-1 h-full max-h-[400px] overflow-auto"
                 variants={staggerContainer}
               >
@@ -194,7 +188,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="flex  justify-end">
-                        <motion.button 
+                        <motion.button
                           className="w-full sm:w-auto rounded-[10px] bg-primary py-2.5 px-[42.5px] text-white font-medium text-sm"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
@@ -237,7 +231,7 @@ export default function Dashboard() {
                   ))}
               </div>
             </div>
-            <motion.div 
+            <motion.div
               className="flex flex-col gap-8 rounded-2xl  bg-white  shadow-[0_0_4px_#00000026] p-6"
               variants={fadeInUp}
             >
@@ -245,15 +239,15 @@ export default function Dashboard() {
                 <p className="font-medium text-base">Recent donors</p>
                 <p className="text-sm">Amount made</p>
               </div>
-              <motion.div 
+              <motion.div
                 className="flex flex-col gap-6"
                 variants={staggerContainer}
               >
                 {Array(4)
                   .fill(null)
                   .map((_, i) => (
-                    <motion.div 
-                      key={i} 
+                    <motion.div
+                      key={i}
                       className="flex gap-2 items-center"
                       variants={fadeInUp}
                       whileHover={{ x: 5 }}

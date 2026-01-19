@@ -9,22 +9,22 @@ import { useState } from "react";
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut" }
+  transition: { duration: 0.6, ease: "easeOut" },
 };
 
 const staggerContainer = {
   animate: {
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    message: ""
+    message: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -50,13 +50,13 @@ export default function Contact() {
           </Link>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="flex flex-col gap-4 sm:gap-6 md:gap-8"
           initial="initial"
           animate="animate"
           variants={staggerContainer}
         >
-          <motion.h1 
+          <motion.h1
             className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
             variants={fadeInUp}
           >
@@ -64,7 +64,7 @@ export default function Contact() {
           </motion.h1>
 
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-            <motion.div 
+            <motion.div
               className="flex flex-col gap-4 sm:gap-6"
               variants={fadeInUp}
             >
@@ -73,9 +73,10 @@ export default function Contact() {
                   Get in Touch
                 </h2>
                 <p className="text-sm sm:text-base text-[#333333] leading-relaxed">
-                  Have questions about donating, need support, or want to learn 
-                  more about Blivap? We're here to help. Reach out to us through 
-                  any of the channels below, and we'll respond as soon as possible.
+                  Have questions about donating, need support, or want to learn
+                  more about Blivap? We&apos;re here to help. Reach out to us
+                  through any of the channels below, and we&apos;ll respond as
+                  soon as possible.
                 </p>
               </div>
 
@@ -85,23 +86,23 @@ export default function Contact() {
                     icon: Mail,
                     title: "Email",
                     items: ["support@blivap.com", "info@blivap.com"],
-                    color: "bg-[#F9E8EE]"
+                    color: "bg-[#F9E8EE]",
                   },
                   {
                     icon: Phone,
                     title: "Phone",
                     items: ["+234 XXX XXX XXXX"],
                     subtext: "Mon-Fri, 9AM-5PM WAT",
-                    color: "bg-[#E4E5FF]"
+                    color: "bg-[#E4E5FF]",
                   },
                   {
                     icon: MapPin,
                     title: "Address",
                     items: ["Blivap Headquarters", "Lagos, Nigeria"],
-                    color: "bg-[#F4F2FF]"
-                  }
+                    color: "bg-[#F4F2FF]",
+                  },
                 ].map((contact, i) => (
-                  <motion.div 
+                  <motion.div
                     key={i}
                     className="flex items-start gap-3 sm:gap-4"
                     whileHover={{ x: 5 }}
@@ -110,12 +111,21 @@ export default function Contact() {
                       <contact.icon className="text-primary" size={20} />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-base sm:text-lg mb-1">{contact.title}</h3>
+                      <h3 className="font-semibold text-base sm:text-lg mb-1">
+                        {contact.title}
+                      </h3>
                       {contact.items.map((item, j) => (
-                        <p key={j} className="text-sm sm:text-base text-[#333333]">{item}</p>
+                        <p
+                          key={j}
+                          className="text-sm sm:text-base text-[#333333]"
+                        >
+                          {item}
+                        </p>
                       ))}
                       {contact.subtext && (
-                        <p className="text-xs sm:text-sm text-[#6B7280] mt-1">{contact.subtext}</p>
+                        <p className="text-xs sm:text-sm text-[#6B7280] mt-1">
+                          {contact.subtext}
+                        </p>
                       )}
                     </div>
                   </motion.div>
@@ -123,14 +133,17 @@ export default function Contact() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-sm"
               variants={fadeInUp}
             >
               <h2 className="font-medium text-xl sm:text-2xl text-black mb-4 sm:mb-6">
                 Send us a Message
               </h2>
-              <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:gap-4">
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col gap-3 sm:gap-4"
+              >
                 <div>
                   <label className="block text-sm font-medium text-[#333333] mb-2">
                     Name
@@ -138,7 +151,9 @@ export default function Contact() {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="w-full border border-[#D9D9D9] rounded-lg px-4 py-3 outline-none focus:border-primary transition-colors"
                     placeholder="Your name"
                     required
@@ -151,7 +166,9 @@ export default function Contact() {
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     className="w-full border border-[#D9D9D9] rounded-lg px-4 py-3 outline-none focus:border-primary transition-colors"
                     placeholder="your.email@example.com"
                     required
@@ -164,7 +181,9 @@ export default function Contact() {
                   <textarea
                     rows={5}
                     value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, message: e.target.value })
+                    }
                     className="w-full border border-[#D9D9D9] rounded-lg px-4 py-3 outline-none focus:border-primary resize-none transition-colors"
                     placeholder="Your message..."
                     required
