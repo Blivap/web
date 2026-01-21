@@ -4,30 +4,12 @@ import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
 import { ArrowLeft, Droplet, Heart, Users, Target } from "lucide-react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut" },
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
 
 export default function WhatWeDo() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
+        <div
         >
           <Link
             href="/"
@@ -36,29 +18,23 @@ export default function WhatWeDo() {
             <ArrowLeft size={20} />
             <span>Back to home</span>
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div
+        <div
           className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-          initial="initial"
-          animate="animate"
-          variants={staggerContainer}
         >
-          <motion.h1
+          <h1
             className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-            variants={fadeInUp}
           >
             What We Do
-          </motion.h1>
+          </h1>
 
           <div className="flex flex-col gap-6 sm:gap-8 md:gap-12">
-            <motion.div
+            <div
               className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center"
-              variants={fadeInUp}
             >
-              <motion.div
+              <div
                 className="flex flex-col gap-3 sm:gap-4"
-                variants={fadeInUp}
               >
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                   Connecting Donors and Recipients
@@ -75,12 +51,10 @@ export default function WhatWeDo() {
                   those who need them most. We leverage technology to create a
                   seamless, safe, and efficient donation ecosystem.
                 </p>
-              </motion.div>
+              </div>
 
-              <motion.div
+              <div
                 className="relative h-48 sm:h-64 md:h-96 bg-primary rounded-2xl overflow-hidden"
-                variants={fadeInUp}
-                whileHover={{ scale: 1.02 }}
               >
                 <Image
                   src="/images/hero_image.jpg"
@@ -88,12 +62,11 @@ export default function WhatWeDo() {
                   fill
                   className="object-cover rounded-2xl opacity-80"
                 />
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
 
-            <motion.div
+            <div
               className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8"
-              variants={staggerContainer}
             >
               {[
                 {
@@ -115,14 +88,9 @@ export default function WhatWeDo() {
                   color: "bg-[#F4F2FF]",
                 },
               ].map((service, i) => (
-                <motion.div
+                <div
                   key={i}
-                  className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm flex flex-col items-center text-center"
-                  variants={fadeInUp}
-                  whileHover={{
-                    y: -5,
-                    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-                  }}
+                  className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm flex flex-col items-center text-center hover:shadow-md transition-shadow"
                 >
                   <div
                     className={`${service.color} p-3 sm:p-4 rounded-full mb-3 sm:mb-4`}
@@ -135,13 +103,12 @@ export default function WhatWeDo() {
                   <p className="text-sm sm:text-base text-[#333333]">
                     {service.desc}
                   </p>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
 
-            <motion.div
+            <div
               className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8"
-              variants={fadeInUp}
             >
               <div className="flex items-center gap-3 mb-4">
                 <Target className="text-primary" size={28} />
@@ -161,22 +128,19 @@ export default function WhatWeDo() {
                   { number: "5,000+", label: "Active Donors" },
                   { number: "50+", label: "Partner Facilities" },
                 ].map((stat, i) => (
-                  <motion.div
+                  <div
                     key={i}
                     className="bg-white p-4 rounded-lg text-center"
-                    whileHover={{ scale: 1.05 }}
                   >
                     <p className="text-2xl font-bold text-primary mb-1">
                       {stat.number}
                     </p>
                     <p className="text-sm text-[#333333]">{stat.label}</p>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <div
                 >
                   <Link
                     href="/about-donating"
@@ -184,10 +148,8 @@ export default function WhatWeDo() {
                   >
                     Become a donor
                   </Link>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                </div>
+                <div
                 >
                   <Link
                     href="/about"
@@ -195,11 +157,11 @@ export default function WhatWeDo() {
                   >
                     Learn more about Blivap
                   </Link>
-                </motion.div>
+                </div>
               </div>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </HomeLayout>
   );

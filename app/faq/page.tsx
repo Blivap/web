@@ -4,7 +4,6 @@ import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 
 const faqs = [
   {
@@ -49,23 +48,13 @@ const faqs = [
   },
 ];
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 },
-  transition: { duration: 0.3 },
-};
-
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
+        <div
         >
           <Link
             href="/"
@@ -74,75 +63,51 @@ export default function FAQ() {
             <ArrowLeft size={20} />
             <span>Back to home</span>
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div
+        <div
           className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-          initial="initial"
-          animate="animate"
         >
-          <motion.h1
+          <h1
             className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-            variants={fadeInUp}
           >
             Frequently Asked Questions
-          </motion.h1>
+          </h1>
 
-          <motion.div
+          <div
             className="flex flex-col gap-3 sm:gap-4 max-w-3xl"
-            variants={fadeInUp}
           >
             {faqs.map((faq, index) => (
-              <motion.div
+              <div
                 key={index}
                 className="bg-white rounded-xl shadow-sm overflow-hidden"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
               >
-                <motion.button
+                <button
                   onClick={() =>
                     setOpenIndex(openIndex === index ? null : index)
                   }
                   className="w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left hover:bg-gray-50 transition-colors"
-                  whileHover={{ backgroundColor: "#f9fafb" }}
                 >
                   <h3 className="font-semibold text-base sm:text-lg text-black pr-3 sm:pr-4">
                     {faq.question}
                   </h3>
-                  <motion.div
-                    animate={{ rotate: openIndex === index ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ChevronDown className="text-primary shrink-0" size={20} />
-                  </motion.div>
-                </motion.button>
-                <AnimatePresence>
+                  <ChevronDown className="text-primary shrink-0" size={20} />
+                </button>
                   {openIndex === index && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
+                    <div className="overflow-hidden">
                       <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
                         <p className="text-sm sm:text-base text-[#333333] leading-relaxed">
                           {faq.answer}
                         </p>
                       </div>
-                    </motion.div>
+                    </div>
                   )}
-                </AnimatePresence>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
 
-          <motion.div
+          <div
             className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 max-w-3xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
           >
             <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black mb-3 sm:mb-4">
               Still have questions?
@@ -152,16 +117,14 @@ export default function FAQ() {
               here to help. Contact us through any of our channels and
               we&apos;ll get back to you as soon as possible.
             </p>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                href="/contact"
-                className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
-              >
-                Contact us
-              </Link>
-            </motion.div>
-          </motion.div>
-        </motion.div>
+            <Link
+              href="/contact"
+              className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
+            >
+              Contact us
+            </Link>
+          </div>
+        </div>
       </div>
     </HomeLayout>
   );

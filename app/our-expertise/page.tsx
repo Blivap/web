@@ -10,30 +10,12 @@ import {
   Target,
   CheckCircle,
 } from "lucide-react";
-import { motion } from "framer-motion";
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut" },
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
 
 export default function OurExpertise() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
+        <div
         >
           <Link
             href="/"
@@ -42,25 +24,20 @@ export default function OurExpertise() {
             <ArrowLeft size={20} />
             <span>Back to home</span>
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div
+        <div
           className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-          initial="initial"
-          animate="animate"
-          variants={staggerContainer}
         >
-          <motion.h1
+          <h1
             className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-            variants={fadeInUp}
           >
             Our Expertise
-          </motion.h1>
+          </h1>
 
           <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            <motion.div
+            <div
               className="flex flex-col gap-3 sm:gap-4"
-              variants={fadeInUp}
             >
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                 Leading the Way in Donation Services
@@ -72,11 +49,10 @@ export default function OurExpertise() {
                 team combines medical knowledge, technological innovation, and
                 compassionate service delivery.
               </p>
-            </motion.div>
+            </div>
 
-            <motion.div
+            <div
               className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8"
-              variants={staggerContainer}
             >
               {[
                 {
@@ -98,14 +74,9 @@ export default function OurExpertise() {
                   color: "bg-[#F4F2FF]",
                 },
               ].map((expertise, i) => (
-                <motion.div
+                <div
                   key={i}
-                  className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm"
-                  variants={fadeInUp}
-                  whileHover={{
-                    y: -5,
-                    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-                  }}
+                  className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div
                     className={`${expertise.color} p-3 sm:p-4 rounded-full w-fit mb-3 sm:mb-4`}
@@ -118,13 +89,12 @@ export default function OurExpertise() {
                   <p className="text-sm sm:text-base text-[#333333]">
                     {expertise.desc}
                   </p>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
 
-            <motion.div
+            <div
               className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 border-2 border-[#F4F2FF]"
-              variants={fadeInUp}
             >
               <div className="flex items-center gap-3 mb-4">
                 <Target className="text-primary" size={28} />
@@ -180,11 +150,10 @@ export default function OurExpertise() {
                   </ul>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
+            <div
               className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8"
-              variants={fadeInUp}
             >
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black mb-3 sm:mb-4">
                 Trusted by Thousands
@@ -195,9 +164,7 @@ export default function OurExpertise() {
                 continuing to improve and expand our services, always putting
                 safety and quality first.
               </p>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <div
               >
                 <Link
                   href="/about"
@@ -205,10 +172,10 @@ export default function OurExpertise() {
                 >
                   Learn more about us
                 </Link>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </HomeLayout>
   );

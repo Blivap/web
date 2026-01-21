@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/app/store/hooks";
 import { initializeAuth } from "@/app/store/slices/authSlice";
 import { useCheckUser } from "@/app/hooks/auth/useCheckUser.hook";
 import Cookies from "js-cookie";
-import { Splash } from "@/app/components/splash/splash.component";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -52,42 +51,47 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Check user details (calls /authentication/me) when authenticated
   const { isChecking } = useCheckUser();
 
+  const isPublicRoute = useMemo(() => PUBLIC_ROUTES.includes(pathname), [pathname]);
+
   useEffect(() => {
-    const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
     const token = Cookies.get("auth_token");
+    const isPublic = PUBLIC_ROUTES.includes(pathname);
 
     // If user is authenticated and trying to access home or auth routes, redirect to dashboard
     if (
-      (pathname === "/auth/login" || pathname === "/auth/register") &&
+      (pathname === "/" || pathname === "/auth/login" || pathname === "/auth/register") &&
       (isAuthenticated || token)
     ) {
-      router.push("/");
+      router.push("/dashboard");
       return;
     }
 
     // If route is not public and user is not authenticated, redirect to home
-    if (!isPublicRoute && !isAuthenticated) {
+    if (!isPublic && !isAuthenticated) {
       if (!token) {
         router.push("/");
       }
     }
-  }, [isAuthenticated, pathname, router]);
-
-  const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, pathname]);
 
   // For protected routes, wait for auth init + user check before rendering
   if (!isPublicRoute && (!authInitialized || isChecking)) {
     return null;
   }
 
-  if (pathname === "/auth/login" || pathname === "/auth/register") {
+  // If user is authenticated and on home/auth routes, don't render (redirecting)
+  if (pathname === "/" || pathname === "/auth/login" || pathname === "/auth/register") {
     const token = Cookies.get("auth_token");
     if (isAuthenticated || token) {
-      return null;
+      return null; // Will redirect in useEffect
     }
   }
 
-  // Public routes always render (after initial auth init, which is cheap)
+  // Public routes always render
+  if (isPublicRoute) {
+    return <>{children}</>;
+  }
 
   // Protected routes: if unauthenticated and no token, render nothing (redirect in effect)
   if (!isAuthenticated) {
@@ -96,8 +100,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       return null;
     }
   }
-  if (isPublicRoute) {
-    return <>{children}</>;
-  }
+
   return <>{children}</>;
 }

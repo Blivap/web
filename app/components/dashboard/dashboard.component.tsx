@@ -3,47 +3,17 @@ import { ArrowRight, ArrowUpToLine, Droplet, Plus } from "lucide-react";
 import { FaStar } from "react-icons/fa";
 import { useState } from "react";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
-import { motion } from "framer-motion";
 import { Layout } from "../layout/layout.component";
 import { Avatar } from "../Avatar/avatar.component";
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 },
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
 
 export const Dashboard = () => {
   const [visible, setVisible] = useState(false);
   return (
     <Layout>
-      <motion.div
-        className="flex flex-col gap-10"
-        initial="initial"
-        animate="animate"
-        variants={staggerContainer}
-      >
+      <div className="flex flex-col gap-10">
         <div className="grid xl:grid-cols-6 gap-5 w-full">
           <div className=" col-span-3 xl:col-span-4 flex flex-col gap-6">
-            <motion.div
-              className="flex flex-col gap-[25px] relative bg-primary rounded-2xl w-full  px-[17px] pt-[9px] pb-3.5 sm:pt-11 sm:px-[47px] sm:pb-[43px]  bg-[url('/public/images/background_pattern.png')]"
-              variants={fadeInUp}
-              whileHover={{ scale: 1.01 }}
-            >
-              {/* <Image
-                src="/images/group.png"
-                alt="background pattern"
-                width={200}
-                height={200}
-              /> */}
+            <div className="flex flex-col gap-[25px] relative bg-primary rounded-2xl w-full  px-[17px] pt-[9px] pb-3.5 sm:pt-11 sm:px-[47px] sm:pb-[43px]  bg-[url('/public/images/background_pattern.png')]">
               <div className="flex justify-between">
                 <div className="flex flex-col gap-2">
                   <p className="text-sm text-[#FFFFFFB2]">My portfolio</p>
@@ -75,21 +45,14 @@ export const Dashboard = () => {
                   <p>Add Money</p>
                 </button>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              className="grid grid-cols-2 grid-rows-1 gap-5"
-              variants={staggerContainer}
-            >
-              <motion.div className="flex flex-col gap-4" variants={fadeInUp}>
+            <div className="grid grid-cols-2 grid-rows-1 gap-5">
+              <div className="flex flex-col gap-4">
                 <p className="font-medium text-xl hidden sm:block">
                   Register as a new Donor
                 </p>
-                <motion.div
-                  className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-[7.5px] px-[13px] sm:p-3 h-full cursor-pointer"
-                  whileHover={{ scale: 1.02, y: -5 }}
-                  whileTap={{ scale: 0.98 }}
-                >
+                <div className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-[7.5px] px-[13px] sm:p-3 h-full cursor-pointer hover:shadow-lg transition-shadow">
                   <div className="flex flex-col items-center justify-center sm:border border-[#DADADA] rounded-[10px] h-full gap-3.5  sm:gap-[38px] sm:p-2">
                     <div className="size-14 bg-[#F9E8EE] rounded-full" />
                     <div className="flex flex-col sm:gap-3.5 text-center">
@@ -101,18 +64,14 @@ export const Dashboard = () => {
                       </p>
                     </div>
                   </div>
-                </motion.div>
-              </motion.div>
-              <motion.div className="flex flex-col gap-4" variants={fadeInUp}>
+                </div>
+              </div>
+              <div className="flex flex-col gap-4">
                 <p className="font-medium text-xl hidden sm:block">
                   {" "}
                   Book an appointment
                 </p>
-                <motion.div
-                  className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-[7.5px] px-[13px] sm:p-3 h-full cursor-pointer"
-                  whileHover={{ scale: 1.02, y: -5 }}
-                  whileTap={{ scale: 0.98 }}
-                >
+                <div className="bg-white rounded-2xl  shadow-[0_4px_4px_#0000001A] py-[7.5px] px-[13px] sm:p-3 h-full cursor-pointer hover:shadow-lg transition-shadow">
                   <div className="flex flex-col items-center justify-center sm:border border-[#DADADA] rounded-[10px] h-full gap-3.5  sm:gap-[38px] sm:p-2">
                     <div className="size-14 bg-[#E4E5FF] rounded-full" />
                     <div className="flex flex-col sm:gap-3.5 text-center">
@@ -124,9 +83,9 @@ export const Dashboard = () => {
                       </p>
                     </div>
                   </div>
-                </motion.div>
-              </motion.div>
-            </motion.div>
+                </div>
+              </div>
+            </div>
 
             <div className="flex flex-col gap-4 flex-1 h-full">
               <div className="flex justify-between">
@@ -138,18 +97,13 @@ export const Dashboard = () => {
                   View All
                 </p>
               </div>
-              <motion.div
-                className="grid gap-4  flex-1 h-full max-h-[400px] overflow-auto"
-                variants={staggerContainer}
-              >
+              <div className="grid gap-4  flex-1 h-full max-h-[400px] overflow-auto">
                 {Array(3)
                   .fill(null)
                   .map((_, i) => (
-                    <motion.div
+                    <div
                       key={i}
-                      className="flex flex-col gap-2 bg-white rounded-[10px] p-2.5"
-                      variants={fadeInUp}
-                      whileHover={{ scale: 1.02, x: 5 }}
+                      className="flex flex-col gap-2 bg-white rounded-[10px] p-2.5 hover:shadow-md transition-shadow"
                     >
                       <div className="flex justify-between">
                         <div className="flex gap-2">
@@ -188,17 +142,13 @@ export const Dashboard = () => {
                         </div>
                       </div>
                       <div className="flex  justify-end">
-                        <motion.button
-                          className="w-full sm:w-auto rounded-[10px] bg-primary py-2.5 px-[42.5px] text-white font-medium text-sm"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
+                        <button className="w-full sm:w-auto rounded-[10px] bg-primary py-2.5 px-[42.5px] text-white font-medium text-sm hover:bg-primary/90 transition-colors">
                           Book an appointment
-                        </motion.button>
+                        </button>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
-              </motion.div>
+              </div>
             </div>
           </div>
           <div className="col-span-3 xl:col-span-2 flex flex-col gap-8 ">
@@ -231,26 +181,18 @@ export const Dashboard = () => {
                   ))}
               </div>
             </div>
-            <motion.div
-              className="flex flex-col gap-8 rounded-2xl  bg-white  shadow-[0_0_4px_#00000026] p-6"
-              variants={fadeInUp}
-            >
+            <div className="flex flex-col gap-8 rounded-2xl  bg-white  shadow-[0_0_4px_#00000026] p-6">
               <div className="flex justify-between">
                 <p className="font-medium text-base">Recent donors</p>
                 <p className="text-sm">Amount made</p>
               </div>
-              <motion.div
-                className="flex flex-col gap-6"
-                variants={staggerContainer}
-              >
+              <div className="flex flex-col gap-6">
                 {Array(4)
                   .fill(null)
                   .map((_, i) => (
-                    <motion.div
+                    <div
                       key={i}
                       className="flex gap-2 items-center"
-                      variants={fadeInUp}
-                      whileHover={{ x: 5 }}
                     >
                       <div className="h-[9px] rounded-[9px] bg-primary w-5 hidden sm:block" />
                       <div className="flex items-center gap-4 justify-between w-full">
@@ -267,13 +209,13 @@ export const Dashboard = () => {
                           <p>₦750,000</p>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </Layout>
   );
 };
