@@ -3,22 +3,7 @@
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
 import { ArrowLeft, Mail, Phone, MapPin, Send } from "lucide-react";
-import { motion } from "framer-motion";
 import { useState } from "react";
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut" },
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -36,11 +21,7 @@ export default function Contact() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
-        >
+        <div>
           <Link
             href="/"
             className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
@@ -48,26 +29,15 @@ export default function Contact() {
             <ArrowLeft size={20} />
             <span>Back to home</span>
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div
-          className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-          initial="initial"
-          animate="animate"
-          variants={staggerContainer}
-        >
-          <motion.h1
-            className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-            variants={fadeInUp}
-          >
+        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
+          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
             Contact Us
-          </motion.h1>
+          </h1>
 
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-            <motion.div
-              className="flex flex-col gap-4 sm:gap-6"
-              variants={fadeInUp}
-            >
+            <div className="flex flex-col gap-4 sm:gap-6">
               <div>
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black mb-3 sm:mb-4">
                   Get in Touch
@@ -102,10 +72,9 @@ export default function Contact() {
                     color: "bg-[#F4F2FF]",
                   },
                 ].map((contact, i) => (
-                  <motion.div
+                  <div
                     key={i}
                     className="flex items-start gap-3 sm:gap-4"
-                    whileHover={{ x: 5 }}
                   >
                     <div className={`${contact.color} p-2 sm:p-3 rounded-full`}>
                       <contact.icon className="text-primary" size={20} />
@@ -128,15 +97,12 @@ export default function Contact() {
                         </p>
                       )}
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-sm"
-              variants={fadeInUp}
-            >
+            <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-sm">
               <h2 className="font-medium text-xl sm:text-2xl text-black mb-4 sm:mb-6">
                 Send us a Message
               </h2>
@@ -189,19 +155,17 @@ export default function Contact() {
                     required
                   />
                 </div>
-                <motion.button
+                <button
                   type="submit"
                   className="w-full sm:w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <Send size={18} />
                   Send Message
-                </motion.button>
+                </button>
               </form>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </HomeLayout>
   );

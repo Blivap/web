@@ -11,30 +11,12 @@ import {
   Users,
 } from "lucide-react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut" },
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
 
 export default function AboutDonating() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
+        <div
         >
           <Link
             href="/"
@@ -43,29 +25,23 @@ export default function AboutDonating() {
             <ArrowLeft size={20} />
             <span>Back to home</span>
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div
+        <div
           className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-          initial="initial"
-          animate="animate"
-          variants={staggerContainer}
         >
-          <motion.h1
+          <h1
             className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-            variants={fadeInUp}
           >
             About Donating
-          </motion.h1>
+          </h1>
 
           <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            <motion.div
+            <div
               className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center"
-              variants={fadeInUp}
             >
-              <motion.div
+              <div
                 className="flex flex-col gap-3 sm:gap-4"
-                variants={fadeInUp}
               >
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                   How to Become a Donor
@@ -82,9 +58,7 @@ export default function AboutDonating() {
                   with those in need while ensuring your safety and well-being
                   throughout the process.
                 </p>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <div
                   className="mt-4"
                 >
                   <Link
@@ -93,13 +67,11 @@ export default function AboutDonating() {
                   >
                     Register as a donor
                   </Link>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
 
-              <motion.div
+              <div
                 className="relative h-48 sm:h-64 md:h-96 bg-[#F9E8EE] rounded-2xl overflow-hidden"
-                variants={fadeInUp}
-                whileHover={{ scale: 1.02 }}
               >
                 <Image
                   src="/images/africa-humanitarian-aid-doctor-taking-care-patient.png"
@@ -107,12 +79,11 @@ export default function AboutDonating() {
                   fill
                   className="object-cover rounded-2xl"
                 />
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
 
-            <motion.div
+            <div
               className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8"
-              variants={staggerContainer}
             >
               {[
                 {
@@ -134,14 +105,9 @@ export default function AboutDonating() {
                   color: "bg-[#F4F2FF]",
                 },
               ].map((step, i) => (
-                <motion.div
+                <div
                   key={i}
-                  className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm"
-                  variants={fadeInUp}
-                  whileHover={{
-                    y: -5,
-                    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-                  }}
+                  className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div
                     className={`${step.color} p-3 rounded-full w-fit mb-3 sm:mb-4`}
@@ -154,19 +120,18 @@ export default function AboutDonating() {
                   <p className="text-sm sm:text-base text-[#333333]">
                     {step.desc}
                   </p>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
 
-            <motion.div
+            <div
               className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8"
-              variants={fadeInUp}
             >
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black mb-3 sm:mb-4">
                 Benefits of Donating
               </h2>
               <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mb-6">
-                <motion.div whileHover={{ x: 5 }}>
+                <div>
                   <div className="flex items-center gap-3 mb-3">
                     <Users className="text-primary" size={24} />
                     <h3 className="font-semibold text-lg sm:text-xl">
@@ -194,8 +159,8 @@ export default function AboutDonating() {
                       </span>
                     </li>
                   </ul>
-                </motion.div>
-                <motion.div whileHover={{ x: 5 }}>
+                </div>
+                <div>
                   <div className="flex items-center gap-3 mb-3">
                     <Heart className="text-primary" size={24} />
                     <h3 className="font-semibold text-lg sm:text-xl">
@@ -224,11 +189,9 @@ export default function AboutDonating() {
                       <span>Free health screening with each donation</span>
                     </li>
                   </ul>
-                </motion.div>
+                </div>
               </div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <div
               >
                 <Link
                   href="/auth?tab=register"
@@ -236,10 +199,10 @@ export default function AboutDonating() {
                 >
                   Start Your Donor Journey
                 </Link>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </HomeLayout>
   );

@@ -4,7 +4,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { SnackbarProvider } from "./components/snackbar/snackbar.context";
 import { Snackbar } from "./components/snackbar/snackbar.component";
-import { StructuredData } from "./components/seo/structured-data";
 import { config } from "./utils/config";
 import StoreProvider from "./store/provider";
 import { ProtectedRoute } from "./components/auth/protected-route";
