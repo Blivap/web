@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Suspense } from "react";
 import { SnackbarProvider } from "./components/snackbar/snackbar.context";
 import { Snackbar } from "./components/snackbar/snackbar.component";
 import { StructuredData } from "./components/seo/structured-data";
-import config from "./utils/config";
+import { config } from "./utils/config";
+import StoreProvider from "./store/provider";
+import { ProtectedRoute } from "./components/auth/protected-route";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,7 +45,7 @@ const helvetica = localFont({
   ],
   display: "swap",
 });
-const { url, env } = config();
+const { url, env } = config;
 
 const siteUrl = env === "development" ? "http://localhost:3000" : url;
 const ogImageUrl = `${siteUrl}/api/og`;
@@ -136,34 +137,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link
-          rel="icon"
-          type="image/png"
-          href="/favicon-96x96.png"
-          sizes="96x96"
-        />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="shortcut icon" href="/favicon.ico" />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/apple-touch-icon.png"
-        />
-        <meta name="apple-mobile-web-app-title" content="Blivap" />
-        <link rel="manifest" href="/site.webmanifest" />
-        <meta name="theme-color" content="#960018" />
-        <meta name="msapplication-TileColor" content="#960018" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-        <StructuredData />
-      </head>
       <body
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased grow min-h-screen flex`}
       >
-        <SnackbarProvider>
-          <Suspense fallback={<div>Blivap</div>}>{children}</Suspense>
-          <Snackbar />
-        </SnackbarProvider>
+        <StoreProvider>
+          <SnackbarProvider>
+            <ProtectedRoute>{children}</ProtectedRoute>
+            <Snackbar />
+          </SnackbarProvider>
+        </StoreProvider>
       </body>
     </html>
   );

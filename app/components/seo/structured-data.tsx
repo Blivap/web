@@ -1,8 +1,8 @@
 "use client";
 
-import config from "../../utils/config";
+import { config } from "../../utils/config";
 
-const { url, env } = config();
+const { url, env } = config;
 const siteUrl = env === "development" ? "http://localhost:3000" : url;
 
 export function StructuredData() {
@@ -74,7 +74,9 @@ export function StructuredData() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(medicalBusinessSchema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(medicalBusinessSchema),
+        }}
       />
     </>
   );

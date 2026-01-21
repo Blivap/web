@@ -75,3 +75,37 @@ body {
   color: var(--foreground);
   font-family: var(--font-poppins);
 }
+.logo-animation {
+  animation:
+    spin-pause 6s ease-in-out infinite,
+    fade 6s ease-in-out infinite;
+}
+
+/* Rotation with pauses */
+@keyframes spin-pause {
+  0% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(360deg);
+  }
+  60% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(720deg);
+  }
+}
+
+/* Continuous fade */
+@keyframes fade {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
+}
