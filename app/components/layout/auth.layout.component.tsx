@@ -2,9 +2,11 @@ import Image from "next/image";
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex-1 flex justify-center  w-full ">
-      <div className="w-1/2">{children}</div>
-      <div className="flex justify-center items-center relative w-1/2 bg-[#960018] rounded-l-[60px] h-full overflow-clip">
+    <div className="flex-1 flex justify-center  items-center  w-full ">
+      <div className="flex justify-center w-full    md:px-10 xl:px-23 py-6 px-3">
+        {children}
+      </div>
+      <div className="hidden lg:flex justify-center items-center relative w-full   bg-[#960018] rounded-l-[60px] h-full overflow-hidden self-end">
         <Image
           src="/images/authbg.jpg"
           alt="Auth bg"
@@ -13,6 +15,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
           className={`
                     object-cover
                     transition-opacity duration-700
+                    rounded-l-[60px]
                     opacity-0
                     data-[loaded=true]:opacity-[0.6]
                     `}

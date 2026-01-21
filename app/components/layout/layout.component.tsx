@@ -149,7 +149,7 @@ const NavLinks = ({ onLinkClick }: NavLinksProps) => {
   const navItems: NavItem[] = [
     {
       title: "Dashboard",
-      href: "dashboard",
+      href: "",
       icon: DashBoardIcon,
       // Optional: customize colors per route
       activeColor: "#960018", // Primary color when active

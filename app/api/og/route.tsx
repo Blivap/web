@@ -18,10 +18,13 @@ export async function GET(request: Request) {
       fontData = await fetch(
         new URL(
           "../../../public/fonts/helvetica/Helvetica.woff",
-          import.meta.url
-        )
+          import.meta.url,
+        ),
       ).then((res) => res.arrayBuffer());
     } catch (e) {
+      if (e instanceof Error) {
+        console.error("Error loading font:", e.message);
+      }
       fontData = null;
     }
 
@@ -29,8 +32,8 @@ export async function GET(request: Request) {
       fontDataBold = await fetch(
         new URL(
           "../../../public/fonts/helvetica/Helvetica.woff",
-          import.meta.url
-        )
+          import.meta.url,
+        ),
       ).then((res) => res.arrayBuffer());
     } catch (e) {
       if (e instanceof Error) {
@@ -195,7 +198,7 @@ export async function GET(request: Request) {
               ]
             : []),
         ],
-      }
+      },
     );
   } catch (e) {
     if (e instanceof Error) {

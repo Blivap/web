@@ -1,11 +1,11 @@
 "use client";
-import { Layout } from "../components/layout/layout.component";
 import { ArrowRight, ArrowUpToLine, Droplet, Plus } from "lucide-react";
-import { Avatar } from "../components/Avatar/avatar.component";
 import { FaStar } from "react-icons/fa";
 import { useState } from "react";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { motion } from "framer-motion";
+import { Layout } from "../layout/layout.component";
+import { Avatar } from "../Avatar/avatar.component";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -21,7 +21,7 @@ const staggerContainer = {
   },
 };
 
-export default function Dashboard() {
+export const Dashboard = () => {
   const [visible, setVisible] = useState(false);
   return (
     <Layout>
@@ -276,4 +276,4 @@ export default function Dashboard() {
       </motion.div>
     </Layout>
   );
-}
+};
