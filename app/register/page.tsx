@@ -7,7 +7,7 @@ import { Formik } from "formik";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const { handleRegister, isLoading } = useRegister();
   return (
     <AuthLayout>

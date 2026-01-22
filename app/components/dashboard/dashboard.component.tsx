@@ -190,10 +190,7 @@ export const Dashboard = () => {
                 {Array(4)
                   .fill(null)
                   .map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex gap-2 items-center"
-                    >
+                    <div key={i} className="flex gap-2 items-center">
                       <div className="h-[9px] rounded-[9px] bg-primary w-5 hidden sm:block" />
                       <div className="flex items-center gap-4 justify-between w-full">
                         <div className="flex gap-4">

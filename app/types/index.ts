@@ -3,7 +3,6 @@ export type IRegisterPayload = {
   lastname: string;
   email: string;
   password: string;
-  confirmPassword: string;
 };
 
 export type IRegisterApiPayload = {

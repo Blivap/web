@@ -9,8 +9,7 @@ export default function WhatWeDo() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <div
-        >
+        <div>
           <Link
             href="/"
             className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
@@ -20,22 +19,14 @@ export default function WhatWeDo() {
           </Link>
         </div>
 
-        <div
-          className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-        >
-          <h1
-            className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-          >
+        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
+          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
             What We Do
           </h1>
 
           <div className="flex flex-col gap-6 sm:gap-8 md:gap-12">
-            <div
-              className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center"
-            >
-              <div
-                className="flex flex-col gap-3 sm:gap-4"
-              >
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center">
+              <div className="flex flex-col gap-3 sm:gap-4">
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                   Connecting Donors and Recipients
                 </h2>
@@ -53,9 +44,7 @@ export default function WhatWeDo() {
                 </p>
               </div>
 
-              <div
-                className="relative h-48 sm:h-64 md:h-96 bg-primary rounded-2xl overflow-hidden"
-              >
+              <div className="relative h-48 sm:h-64 md:h-96 bg-primary rounded-2xl overflow-hidden">
                 <Image
                   src="/images/hero_image.jpg"
                   alt="What we do"
@@ -65,9 +54,7 @@ export default function WhatWeDo() {
               </div>
             </div>
 
-            <div
-              className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8"
-            >
+            <div className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
               {[
                 {
                   icon: Droplet,
@@ -107,9 +94,7 @@ export default function WhatWeDo() {
               ))}
             </div>
 
-            <div
-              className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8"
-            >
+            <div className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8">
               <div className="flex items-center gap-3 mb-4">
                 <Target className="text-primary" size={28} />
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
@@ -128,10 +113,7 @@ export default function WhatWeDo() {
                   { number: "5,000+", label: "Active Donors" },
                   { number: "50+", label: "Partner Facilities" },
                 ].map((stat, i) => (
-                  <div
-                    key={i}
-                    className="bg-white p-4 rounded-lg text-center"
-                  >
+                  <div key={i} className="bg-white p-4 rounded-lg text-center">
                     <p className="text-2xl font-bold text-primary mb-1">
                       {stat.number}
                     </p>
@@ -140,8 +122,7 @@ export default function WhatWeDo() {
                 ))}
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <div
-                >
+                <div>
                   <Link
                     href="/about-donating"
                     className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
@@ -149,8 +130,7 @@ export default function WhatWeDo() {
                     Become a donor
                   </Link>
                 </div>
-                <div
-                >
+                <div>
                   <Link
                     href="/about"
                     className="w-fit border-2 border-primary text-primary text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 hover:bg-primary/10 transition-colors inline-block"

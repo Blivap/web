@@ -44,7 +44,7 @@ export const HomeComponent = () => {
               <div>
                 <Link
                   className="w-fit bg-black hover:bg-black/80 active:bg-black transition duration-150  text-white py-2.5 sm:py-3.5 px-4 sm:px-6.25 inline-block text-sm sm:text-base"
-                  href="auth?tab=register"
+                  href="/register"
                 >
                   Register as a donor (EN)
                 </Link>
@@ -122,10 +122,7 @@ export const HomeComponent = () => {
                   desc: "Life saving blood products, therapeutics, services, diagnostics and knowledge for health care",
                 },
               ].map((item, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col gap-3 sm:gap-4"
-                >
+                <div key={i} className="flex flex-col gap-3 sm:gap-4">
                   <p className="text-lg sm:text-xl md:text-2xl font-medium">
                     {item.title}
                   </p>

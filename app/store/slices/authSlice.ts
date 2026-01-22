@@ -58,6 +58,9 @@ const authSlice = createSlice({
       Cookies.remove("auth_token");
     },
     setUser: (state, action: PayloadAction<IUser>) => {
+      console.log("[authSlice/setUser] new state:", {
+        user: action.payload,
+      });
       state.user = action.payload;
     },
   },

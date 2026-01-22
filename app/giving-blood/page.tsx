@@ -15,8 +15,7 @@ export default function GivingBlood() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <div
-        >
+        <div>
           <Link
             href="/"
             className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
@@ -26,19 +25,13 @@ export default function GivingBlood() {
           </Link>
         </div>
 
-        <div
-          className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-        >
-          <h1
-            className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-          >
+        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
+          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
             Giving Blood
           </h1>
 
           <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            <div
-              className="flex flex-col gap-3 sm:gap-4"
-            >
+            <div className="flex flex-col gap-3 sm:gap-4">
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                 The Gift of Life
               </h2>
@@ -50,9 +43,7 @@ export default function GivingBlood() {
               </p>
             </div>
 
-            <div
-              className="grid md:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8"
-            >
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
               {[
                 {
                   icon: Droplet,
@@ -108,9 +99,7 @@ export default function GivingBlood() {
               ))}
             </div>
 
-            <div
-              className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 border-2 border-[#F4F2FF]"
-            >
+            <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 border-2 border-[#F4F2FF]">
               <div className="flex items-center gap-3 mb-4">
                 <Shield className="text-primary" size={28} />
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
@@ -161,9 +150,7 @@ export default function GivingBlood() {
               </div>
             </div>
 
-            <div
-              className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8"
-            >
+            <div className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8">
               <div className="flex items-center gap-3 mb-4">
                 <Heart className="text-primary" size={28} />
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
@@ -176,10 +163,9 @@ export default function GivingBlood() {
                 an hour, and you&apos;ll be making a life-saving contribution to
                 your community.
               </p>
-              <div
-              >
+              <div>
                 <Link
-                  href="/auth?tab=register"
+                  href="/register"
                   className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
                 >
                   Register as a donor

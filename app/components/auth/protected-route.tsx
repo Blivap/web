@@ -13,8 +13,8 @@ interface ProtectedRouteProps {
 
 const PUBLIC_ROUTES = [
   "/",
-  "/auth/login",
-  "/auth/register",
+  "/login",
+  "/register",
   "/researchers",
   "/healthcare&professionals",
   "/working_at",
@@ -33,12 +33,13 @@ const PUBLIC_ROUTES = [
   "/research",
   "/what-we-do",
   "/not_found",
+  "/not-found",
 ];
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, token, user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const [authInitialized, setAuthInitialized] = useState<boolean>(false);
 
@@ -51,7 +52,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Check user details (calls /authentication/me) when authenticated
   const { isChecking } = useCheckUser();
 
-  const isPublicRoute = useMemo(() => PUBLIC_ROUTES.includes(pathname), [pathname]);
+  const isPublicRoute = useMemo(
+    () => PUBLIC_ROUTES.includes(pathname),
+    [pathname],
+  );
 
   useEffect(() => {
     const token = Cookies.get("auth_token");
@@ -59,7 +63,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     // If user is authenticated and trying to access home or auth routes, redirect to dashboard
     if (
-      (pathname === "/" || pathname === "/auth/login" || pathname === "/auth/register") &&
+      (pathname === "/" ||
+        pathname === "/login" ||
+        pathname === "/register") &&
       (isAuthenticated || token)
     ) {
       router.push("/dashboard");
@@ -76,12 +82,21 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, [isAuthenticated, pathname]);
 
   // For protected routes, wait for auth init + user check before rendering
-  if (!isPublicRoute && (!authInitialized || isChecking)) {
+  // Also wait if we have a token but no user (user is being fetched)
+  const cookieToken = Cookies.get("auth_token");
+  const hasToken = token || cookieToken;
+  const waitingForUser = hasToken && !user && isChecking;
+  
+  if (!isPublicRoute && (!authInitialized || waitingForUser)) {
     return null;
   }
 
   // If user is authenticated and on home/auth routes, don't render (redirecting)
-  if (pathname === "/" || pathname === "/auth/login" || pathname === "/auth/register") {
+  if (
+    pathname === "/" ||
+    pathname === "/auth/login" ||
+    pathname === "/auth/register"
+  ) {
     const token = Cookies.get("auth_token");
     if (isAuthenticated || token) {
       return null; // Will redirect in useEffect

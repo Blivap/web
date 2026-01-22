@@ -9,8 +9,7 @@ export default function AboutBlood() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <div
-        >
+        <div>
           <Link
             href="/"
             className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
@@ -20,22 +19,14 @@ export default function AboutBlood() {
           </Link>
         </div>
 
-        <div
-          className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-        >
-          <h1
-            className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-          >
+        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
+          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
             About Blood
           </h1>
 
           <div className="flex flex-col gap-4 sm:gap-6">
-            <div
-              className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8"
-            >
-              <div
-                className="flex flex-col gap-3 sm:gap-4"
-              >
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+              <div className="flex flex-col gap-3 sm:gap-4">
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                   Understanding Blood
                 </h2>
@@ -54,9 +45,7 @@ export default function AboutBlood() {
                 </p>
               </div>
 
-              <div
-                className="relative h-48 sm:h-64 md:h-96 bg-[#F4F2FF] rounded-2xl overflow-hidden"
-              >
+              <div className="relative h-48 sm:h-64 md:h-96 bg-[#F4F2FF] rounded-2xl overflow-hidden">
                 <Image
                   src="/images/hero_image.jpg"
                   alt="Blood donation"
@@ -66,9 +55,7 @@ export default function AboutBlood() {
               </div>
             </div>
 
-            <div
-              className="flex flex-col gap-4 sm:gap-6 mt-6 sm:mt-8"
-            >
+            <div className="flex flex-col gap-4 sm:gap-6 mt-6 sm:mt-8">
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                 Blood Types and Compatibility
               </h2>
@@ -130,9 +117,7 @@ export default function AboutBlood() {
               </div>
             </div>
 
-            <div
-              className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8"
-            >
+            <div className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8">
               <div className="flex items-center gap-3 mb-4">
                 <div className="bg-primary p-3 rounded-full">
                   <Heart className="text-white" size={28} />
@@ -162,10 +147,7 @@ export default function AboutBlood() {
                     desc: "Vital for chemotherapy and treatment",
                   },
                 ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="bg-white p-4 rounded-lg"
-                  >
+                  <div key={i} className="bg-white p-4 rounded-lg">
                     <h4 className="font-semibold text-base mb-2">
                       {item.title}
                     </h4>
@@ -173,8 +155,7 @@ export default function AboutBlood() {
                   </div>
                 ))}
               </div>
-              <div
-              >
+              <div>
                 <Link
                   href="/about-donating"
                   className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"

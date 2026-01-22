@@ -109,10 +109,7 @@ export default function About() {
                   { number: "50+", label: "Partner Facilities" },
                   { number: "15+", label: "Cities Covered" },
                 ].map((stat, i) => (
-                  <div
-                    key={i}
-                    className="bg-white p-4 rounded-lg text-center"
-                  >
+                  <div key={i} className="bg-white p-4 rounded-lg text-center">
                     <p className="text-2xl font-bold text-primary mb-1">
                       {stat.number}
                     </p>
@@ -129,7 +126,7 @@ export default function About() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div>
                   <Link
-                    href="/auth?tab=register"
+                    href="/register"
                     className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
                   >
                     Register as a donor

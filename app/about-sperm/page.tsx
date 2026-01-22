@@ -15,8 +15,7 @@ export default function AboutSperm() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <div
-        >
+        <div>
           <Link
             href="/"
             className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
@@ -26,19 +25,13 @@ export default function AboutSperm() {
           </Link>
         </div>
 
-        <div
-          className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-        >
-          <h1
-            className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-          >
+        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
+          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
             About Sperm Donation
           </h1>
 
           <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            <div
-              className="flex flex-col gap-3 sm:gap-4"
-            >
+            <div className="flex flex-col gap-3 sm:gap-4">
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                 Helping Families Grow
               </h2>
@@ -51,9 +44,7 @@ export default function AboutSperm() {
               </p>
             </div>
 
-            <div
-              className="grid md:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8"
-            >
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
               {[
                 {
                   icon: Heart,
@@ -112,9 +103,7 @@ export default function AboutSperm() {
               ))}
             </div>
 
-            <div
-              className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 border-2 border-[#F4F2FF]"
-            >
+            <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 border-2 border-[#F4F2FF]">
               <div className="flex items-center gap-3 mb-4">
                 <Shield className="text-primary" size={28} />
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
@@ -171,9 +160,7 @@ export default function AboutSperm() {
               </div>
             </div>
 
-            <div
-              className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8"
-            >
+            <div className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8">
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black mb-3 sm:mb-4">
                 Get Started
               </h2>
@@ -183,10 +170,9 @@ export default function AboutSperm() {
                 simple, secure, and supportive. Join our community and help
                 create families.
               </p>
-              <div
-              >
+              <div>
                 <Link
-                  href="/auth?tab=register"
+                  href="/register"
                   className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
                 >
                   Register now

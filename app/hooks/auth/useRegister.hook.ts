@@ -5,19 +5,23 @@ import { IAuthResponse, IRegisterPayload } from "@/app/types";
 import { useSnackbar } from "@/app/components/snackbar/snackbar.context";
 import { useAppDispatch } from "@/app/store/hooks";
 import { setCredentials } from "@/app/store/slices/authSlice";
+import { useRouter } from "next/navigation";
 
 export const useRegister = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
-
+  const router = useRouter();
   const handleRegister = async (
-    payload: Omit<IRegisterPayload, "confirmPassword">,
+    payload: IRegisterPayload & { confirmPassword?: string },
   ): Promise<boolean> => {
     setIsLoading(true);
+   
     try {
+      // Exclude confirmPassword from the API payload
+      const { confirmPassword, ...apiPayload } = payload;
       const { data, status, message, error } =
-        await $api.auth.register(payload);
+        await $api.auth.register(apiPayload);
       if (status >= 200 && status < 300) {
         const envelope = (data || {}) as {
           message?: string;
@@ -40,6 +44,7 @@ export const useRegister = () => {
               user: authData?.user || undefined,
             }),
           );
+          router.push("/dashboard");
         }
         return true;
       } else {

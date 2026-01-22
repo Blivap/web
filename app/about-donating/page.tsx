@@ -16,8 +16,7 @@ export default function AboutDonating() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <div
-        >
+        <div>
           <Link
             href="/"
             className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
@@ -27,22 +26,14 @@ export default function AboutDonating() {
           </Link>
         </div>
 
-        <div
-          className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-        >
-          <h1
-            className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-          >
+        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
+          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
             About Donating
           </h1>
 
           <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            <div
-              className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center"
-            >
-              <div
-                className="flex flex-col gap-3 sm:gap-4"
-              >
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center">
+              <div className="flex flex-col gap-3 sm:gap-4">
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                   How to Become a Donor
                 </h2>
@@ -58,11 +49,9 @@ export default function AboutDonating() {
                   with those in need while ensuring your safety and well-being
                   throughout the process.
                 </p>
-                <div
-                  className="mt-4"
-                >
+                <div className="mt-4">
                   <Link
-                    href="/auth?tab=register"
+                    href="/register"
                     className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
                   >
                     Register as a donor
@@ -70,9 +59,7 @@ export default function AboutDonating() {
                 </div>
               </div>
 
-              <div
-                className="relative h-48 sm:h-64 md:h-96 bg-[#F9E8EE] rounded-2xl overflow-hidden"
-              >
+              <div className="relative h-48 sm:h-64 md:h-96 bg-[#F9E8EE] rounded-2xl overflow-hidden">
                 <Image
                   src="/images/africa-humanitarian-aid-doctor-taking-care-patient.png"
                   alt="Donation process"
@@ -82,9 +69,7 @@ export default function AboutDonating() {
               </div>
             </div>
 
-            <div
-              className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8"
-            >
+            <div className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
               {[
                 {
                   icon: Shield,
@@ -124,9 +109,7 @@ export default function AboutDonating() {
               ))}
             </div>
 
-            <div
-              className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8"
-            >
+            <div className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8">
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black mb-3 sm:mb-4">
                 Benefits of Donating
               </h2>
@@ -191,10 +174,9 @@ export default function AboutDonating() {
                   </ul>
                 </div>
               </div>
-              <div
-              >
+              <div>
                 <Link
-                  href="/auth?tab=register"
+                  href="/register"
                   className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
                 >
                   Start Your Donor Journey

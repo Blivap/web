@@ -72,10 +72,7 @@ export default function Contact() {
                     color: "bg-[#F4F2FF]",
                   },
                 ].map((contact, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-3 sm:gap-4"
-                  >
+                  <div key={i} className="flex items-start gap-3 sm:gap-4">
                     <div className={`${contact.color} p-2 sm:p-3 rounded-full`}>
                       <contact.icon className="text-primary" size={20} />
                     </div>

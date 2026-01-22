@@ -63,10 +63,7 @@ export default function News() {
             {newsItems
               .filter((item) => item.featured)
               .map((item) => (
-                <div
-                  key={item.id}
-                  className="relative"
-                >
+                <div key={item.id} className="relative">
                   <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-2xl overflow-hidden">
                     <Image
                       className="w-full h-full object-cover"
