@@ -10,14 +10,44 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/dashboard/", "/settings/", "/wallet/"],
+        disallow: [
+          "/api/",
+          "/dashboard/",
+          "/settings/",
+          "/wallet/",
+          "/history/",
+          "/active_donors/",
+          "/waitlist/",
+        ],
       },
       {
         userAgent: "Googlebot",
         allow: "/",
-        disallow: ["/api/", "/dashboard/", "/settings/", "/wallet/"],
+        disallow: [
+          "/api/",
+          "/dashboard/",
+          "/settings/",
+          "/wallet/",
+          "/history/",
+          "/active_donors/",
+          "/waitlist/",
+        ],
+      },
+      {
+        userAgent: "Bingbot",
+        allow: "/",
+        disallow: [
+          "/api/",
+          "/dashboard/",
+          "/settings/",
+          "/wallet/",
+          "/history/",
+          "/active_donors/",
+          "/waitlist/",
+        ],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl,
   };
 }

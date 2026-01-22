@@ -7,6 +7,7 @@ import { Snackbar } from "./components/snackbar/snackbar.component";
 import { config } from "./utils/config";
 import StoreProvider from "./store/provider";
 import { ProtectedRoute } from "./components/auth/protected-route";
+import { StructuredData } from "./components/seo/structured-data";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,11 @@ const ogImageUrl = `${siteUrl}/api/og`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  },
   title: {
     default: "Blivap — Give Blood. Save Lives.",
     template: "%s | Blivap",
@@ -70,10 +76,16 @@ export const metadata: Metadata = {
     "donor platform",
     "blood donor",
     "medical services",
+    "Nigeria blood donation",
+    "blood donor Nigeria",
+    "sperm donor Nigeria",
+    "medical platform",
   ],
-  authors: [{ name: "Blivap" }],
+  authors: [{ name: "Blivap", url: siteUrl }],
   creator: "Blivap",
   publisher: "Blivap",
+  applicationName: "Blivap",
+  referrer: "origin-when-cross-origin",
   formatDetection: {
     email: false,
     address: false,
@@ -82,6 +94,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
+    alternateLocale: ["en_NG"],
     url: siteUrl,
     siteName: "Blivap",
     title: "Blivap — Give Blood. Save Lives.",
@@ -109,9 +122,11 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
+      noimageindex: false,
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
@@ -122,10 +137,45 @@ export const metadata: Metadata = {
   },
   category: "Healthcare",
   classification: "Medical Services",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/icon0.svg",
+        color: "#960018",
+      },
+    ],
+  },
   other: {
     "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-title": "Blivap",
     "mobile-web-app-capable": "yes",
+    "theme-color": "#960018",
+    "msapplication-TileColor": "#960018",
+    "msapplication-config": "/site.webmanifest",
+    // WhatsApp and other social media
+    "og:image:width": "1200",
+    "og:image:height": "630",
+    "og:image:type": "image/png",
+    "og:image:secure_url": ogImageUrl,
+    // LinkedIn
+    "linkedin:owner": "Blivap",
+    // Additional SEO
+    "geo.region": "NG",
+    "geo.placename": "Nigeria",
+    "ICBM": "9.0820, 8.6753",
   },
 };
 
@@ -136,6 +186,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <StructuredData />
+      </head>
       <body
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased grow min-h-screen flex`}
       >
