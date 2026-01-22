@@ -8,6 +8,7 @@ import { PropsWithChildren, useState } from "react";
 
 export const HomeLayout = (props: PropsWithChildren<unknown>) => {
   const pathName = usePathname();
+
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const isActive = (href: string) => {
@@ -40,7 +41,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
           {
             "opacity-100 pointer-events-auto": drawerOpen,
             "opacity-0 pointer-events-none": !drawerOpen,
-          }
+          },
         )}
       />
 
@@ -51,7 +52,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
           {
             "-translate-x-full": !drawerOpen,
             "translate-x-0": drawerOpen,
-          }
+          },
         )}
       >
         <div className="flex items-center justify-between mb-4">
@@ -76,7 +77,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                 onClick={closeDrawer}
                 className={classNames(
                   "text-base text-[#171717] py-2.5 px-3.75 font-inter",
-                  { "bg-white": active }
+                  { "bg-white": active },
                 )}
               >
                 {e.label}
@@ -124,7 +125,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                   href={e.href}
                   className={classNames(
                     "text-base text-[#171717] py-2.5 px-3.75 font-inter",
-                    { "bg-white": active }
+                    { "bg-white": active },
                   )}
                 >
                   {e.label}

@@ -12,10 +12,13 @@ import {
 import classNames from "classnames";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PropsWithChildren, useState, ReactElement } from "react";
+import { PropsWithChildren, useState, ReactElement, useEffect } from "react";
 import { Avatar } from "../Avatar/avatar.component";
 import { FaBars } from "react-icons/fa";
 import { FiBell } from "react-icons/fi";
+import { useAppSelector } from "@/app/store/hooks";
+import { useLogout } from "@/app/hooks/auth/useLogout.hook";
+import { useDashboard } from "@/app/hooks/dashboard/useDashboard.hook";
 
 // Define navigation item structure
 interface NavItem {
@@ -29,8 +32,9 @@ interface NavItem {
 export const Layout = (props: PropsWithChildren<unknown>) => {
   const [drawer, setDrawer] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-
+  const { handleLogout } = useLogout();
   const closeDrawer = () => setDrawer(false);
+  const {user, isChecking} = useDashboard();
 
   return (
     <div className="flex-1 bg-[#f8f8f8] w-full overflow-scroll">
@@ -59,9 +63,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           },
         )}
       >
-        <p className="font-bold text-primary text-3xl font-helvetica">
-          Blivap
-        </p>
+        <p className="font-bold text-primary text-3xl font-helvetica">Blivap</p>
         <NavLinks onLinkClick={closeDrawer} />
         <div className="flex flex-col gap-5">
           <p className="font-bold text-xs uppercase text-foundation-dark">
@@ -72,16 +74,24 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
             <span>{isDarkMode ? "Dark Mode" : "Light Mode"}</span>
             <ToggleSwitch checked={isDarkMode} onChange={setIsDarkMode} />
           </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center font-medium text-base gap-4 transition-colors duration-200 text-foundation-dark hover:text-primary"
+          >
+            <span>Logout</span>
+          </button>
         </div>
       </div>
       {/* Topbar */}
       <div className="fixed top-0 left-0 right-0 md:left-[292px] z-30 bg-[#f8f8f8] ">
         <div className="w-full py-3.5 px-5 md:px-9 flex items-center justify-between ">
           <div className="flex items-center md:w-full justify-between gap-4">
-            <div className="flex items-center gap-2 order-2 md:order-1">
+            <div className="flex items-center gap-2 order-2 md:order-1" key={user?.id || "no-user"}>
               <Avatar className="sm:size-12! size-9!" />
               <div className="flex flex-col sm:gap-1">
-                <p className="text-[#000000] font-medium">648382</p>
+                <p className="text-[#000000] font-medium">
+                  000000
+                </p>
                 <p className="text-xs text-[#6B7280]">Donor</p>
               </div>
             </div>
@@ -151,7 +161,7 @@ const NavLinks = ({ onLinkClick }: NavLinksProps) => {
   const navItems: NavItem[] = [
     {
       title: "Dashboard",
-      href: "dashboard",
+      href: "",
       icon: DashBoardIcon,
       // Optional: customize colors per route
       activeColor: "#960018", // Primary color when active

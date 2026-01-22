@@ -1,0 +1,32 @@
+{
+  "name": "Blivap - Give Blood. Save Lives.",
+  "short_name": "Blivap",
+  "description": "Connect with blood and sperm donors across Nigeria. Join Blivap to donate, save lives, and make a meaningful impact.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#960018",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/Logo/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Logo/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Logo/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "en-US",
+  "dir": "ltr"
+}

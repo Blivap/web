@@ -2,32 +2,20 @@
 
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
-import { ArrowLeft, Droplet, CheckCircle, Clock, Shield, Heart } from "lucide-react";
-import { motion } from "framer-motion";
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: "easeOut" }
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
+import {
+  ArrowLeft,
+  Droplet,
+  CheckCircle,
+  Clock,
+  Shield,
+  Heart,
+} from "lucide-react";
 
 export default function GivingBlood() {
   return (
     <HomeLayout>
       <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
-        >
+        <div>
           <Link
             href="/"
             className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
@@ -35,41 +23,27 @@ export default function GivingBlood() {
             <ArrowLeft size={20} />
             <span>Back to home</span>
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div 
-          className="flex flex-col gap-4 sm:gap-6 md:gap-8"
-          initial="initial"
-          animate="animate"
-          variants={staggerContainer}
-        >
-          <motion.h1 
-            className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-            variants={fadeInUp}
-          >
+        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
+          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
             Giving Blood
-          </motion.h1>
+          </h1>
 
           <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            <motion.div 
-              className="flex flex-col gap-3 sm:gap-4"
-              variants={fadeInUp}
-            >
+            <div className="flex flex-col gap-3 sm:gap-4">
               <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
                 The Gift of Life
               </h2>
               <p className="text-sm sm:text-base text-[#333333] leading-relaxed max-w-3xl">
-                Giving blood is one of the most selfless acts you can do. Your 
-                donation can save up to three lives and make a significant 
-                difference in someone's health journey. Every donation matters, 
-                and every donor is a hero.
+                Giving blood is one of the most selfless acts you can do. Your
+                donation can save up to three lives and make a significant
+                difference in someone&apos;s health journey. Every donation
+                matters, and every donor is a hero.
               </p>
-            </motion.div>
+            </div>
 
-            <motion.div 
-              className="grid md:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8"
-              variants={staggerContainer}
-            >
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
               {[
                 {
                   icon: Droplet,
@@ -80,9 +54,9 @@ export default function GivingBlood() {
                     "Bring a valid ID (driver's license, passport, or national ID)",
                     "Wear comfortable clothing with sleeves that can be rolled up",
                     "Avoid heavy exercise 24 hours before donation",
-                    "Drink plenty of water (at least 500ml before donation)"
+                    "Drink plenty of water (at least 500ml before donation)",
                   ],
-                  color: "bg-[#F9E8EE]"
+                  color: "bg-[#F9E8EE]",
                 },
                 {
                   icon: CheckCircle,
@@ -93,39 +67,39 @@ export default function GivingBlood() {
                     "Avoid heavy lifting or strenuous activity for 24 hours",
                     "Keep the bandage on for at least 4 hours",
                     "Eat iron-rich foods to help replenish your blood",
-                    "Avoid alcohol for 24 hours after donation"
+                    "Avoid alcohol for 24 hours after donation",
                   ],
-                  color: "bg-[#E4E5FF]"
-                }
+                  color: "bg-[#E4E5FF]",
+                },
               ].map((section, i) => (
-                <motion.div 
+                <div
                   key={i}
-                  className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm"
-                  variants={fadeInUp}
-                  whileHover={{ y: -5, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
+                  className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                     <div className={`${section.color} p-2 sm:p-3 rounded-full`}>
                       <section.icon className="text-primary" size={20} />
                     </div>
-                    <h3 className="font-semibold text-lg sm:text-xl">{section.title}</h3>
+                    <h3 className="font-semibold text-lg sm:text-xl">
+                      {section.title}
+                    </h3>
                   </div>
                   <ul className="flex flex-col gap-2 text-sm sm:text-base text-[#333333]">
                     {section.items.map((item, j) => (
                       <li key={j} className="flex items-start gap-2">
-                        <CheckCircle className="text-primary mt-1 flex-shrink-0" size={18} />
+                        <CheckCircle
+                          className="text-primary mt-1 shrink-0"
+                          size={18}
+                        />
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
 
-            <motion.div 
-              className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 border-2 border-[#F4F2FF]"
-              variants={fadeInUp}
-            >
+            <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 border-2 border-[#F4F2FF]">
               <div className="flex items-center gap-3 mb-4">
                 <Shield className="text-primary" size={28} />
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
@@ -134,7 +108,9 @@ export default function GivingBlood() {
               </div>
               <div className="grid md:grid-cols-2 gap-4 mb-6">
                 <div>
-                  <h4 className="font-semibold text-base mb-2">General Requirements</h4>
+                  <h4 className="font-semibold text-base mb-2">
+                    General Requirements
+                  </h4>
                   <ul className="flex flex-col gap-2 text-sm text-[#333333]">
                     <li className="flex items-start gap-2">
                       <CheckCircle className="text-primary mt-1" size={16} />
@@ -172,12 +148,9 @@ export default function GivingBlood() {
                   </ul>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div 
-              className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8"
-              variants={fadeInUp}
-            >
+            <div className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8">
               <div className="flex items-center gap-3 mb-4">
                 <Heart className="text-primary" size={28} />
                 <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
@@ -185,24 +158,22 @@ export default function GivingBlood() {
                 </h2>
               </div>
               <p className="text-sm sm:text-base text-[#333333] leading-relaxed mb-6">
-                Join thousands of donors who are making a difference. Register 
-                today and start saving lives. The entire process takes less than 
-                an hour, and you'll be making a life-saving contribution to your community.
+                Join thousands of donors who are making a difference. Register
+                today and start saving lives. The entire process takes less than
+                an hour, and you&apos;ll be making a life-saving contribution to
+                your community.
               </p>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              <div>
                 <Link
-                  href="/auth?tab=register"
+                  href="/register"
                   className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
                 >
                   Register as a donor
                 </Link>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </HomeLayout>
   );
