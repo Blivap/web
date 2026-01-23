@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", "/api/og"],
         disallow: [
           "/api/",
           "/dashboard/",
@@ -22,7 +22,7 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: "Googlebot",
-        allow: "/",
+        allow: ["/", "/api/og"],
         disallow: [
           "/api/",
           "/dashboard/",
@@ -35,7 +35,7 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: "Bingbot",
-        allow: "/",
+        allow: ["/", "/api/og"],
         disallow: [
           "/api/",
           "/dashboard/",

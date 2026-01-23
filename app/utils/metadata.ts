@@ -23,10 +23,13 @@ export function generateMetadata({
   path = "",
   image,
 }: PageMetadata): Metadata {
-  const pageUrl = `${siteUrl}${path}`;
+  const pageUrl = new URL(path || "/", siteUrl).toString();
   const ogImageUrl = image
-    ? `${siteUrl}${image}`
-    : `${siteUrl}/api/og${path ? `?title=${encodeURIComponent(title)}` : ""}`;
+    ? new URL(image, siteUrl).toString()
+    : new URL(
+        `/api/og${path ? `?title=${encodeURIComponent(title)}` : ""}`,
+        siteUrl,
+      ).toString();
 
   const defaultKeywords = [
     "blood donation",
@@ -62,6 +65,7 @@ export function generateMetadata({
           height: 630,
           alt: `${title} | Blivap`,
           type: "image/png",
+          secureUrl: ogImageUrl,
         },
       ],
     },

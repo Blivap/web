@@ -48,7 +48,8 @@ const helvetica = localFont({
 const { url, env } = config;
 
 const siteUrl = env === "development" ? "http://localhost:3000" : url;
-const ogImageUrl = `${siteUrl}/api/og`;
+// Ensure OG image URL is absolute
+const ogImageUrl = new URL("/api/og", siteUrl).toString();
 
 export const viewport: Viewport = {
   width: "device-width",

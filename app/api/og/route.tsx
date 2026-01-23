@@ -1,6 +1,12 @@
 import { ImageResponse } from "@vercel/og";
 
 export const runtime = "edge";
+export const alt = "Blivap — Give Blood. Save Lives.";
+export const contentType = "image/png";
+export const size = {
+  width: 1200,
+  height: 630,
+};
 
 export async function GET(request: Request) {
   try {
@@ -8,12 +14,25 @@ export async function GET(request: Request) {
     const hasTitle = searchParams.has("title");
     const title = hasTitle
       ? searchParams.get("title")?.slice(0, 100)
-      : "Blivap — Give Blood. Save Lives.";
+      : "Blivap connects blood and sperm donors with people in need across Nigeria.";
 
     // Try to load fonts, but don't fail if they're not available
     let fontData;
     let fontDataBold;
-
+let logoData;
+    try {
+      logoData = await fetch(
+        new URL(
+          "../../../public/logo.svg",
+          import.meta.url,
+        ).toString(),
+      ).then((res) => res.arrayBuffer());
+    } catch (e) {
+      if (e instanceof Error) {
+        console.error("Error loading logo:", e.message);
+      }
+      logoData = null;
+    }
     try {
       fontData = await fetch(
         new URL(
@@ -64,7 +83,8 @@ export async function GET(request: Request) {
           {/* Content */}
           <div tw="flex flex-col items-center justify-center relative z-10">
             {/* Logo/Brand Name */}
-            <div tw="flex items-center mb-8">
+            <img  src={logoData ? `data:image/svg+xml;base64,${Buffer.from(logoData).toString('base64')}` : ''} alt="Logo" tw="w-24 h-24 mb-8 bg-red-500" />
+            {/* <div tw="flex items-center mb-8">
               <div
                 tw="flex items-center justify-center"
                 style={{
@@ -86,7 +106,7 @@ export async function GET(request: Request) {
                   <span tw="text-white text-5xl font-bold">B</span>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Main Title */}
             <h1
@@ -176,8 +196,7 @@ export async function GET(request: Request) {
         </div>
       </div>,
       {
-        width: 1200,
-        height: 630,
+        ...size,
         fonts: [
           ...(fontData
             ? [
