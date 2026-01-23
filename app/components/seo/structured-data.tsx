@@ -12,11 +12,11 @@ export function StructuredData() {
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
-      url: `${siteUrl}/Logo/android-chrome-512x512.png`,
+      url: `${siteUrl}/android-chrome-512x512.png`,
       width: 512,
       height: 512,
     },
-    image: `${siteUrl}/Logo/android-chrome-512x512.png`,
+    image: `${siteUrl}/android-chrome-512x512.png`,
     description:
       "Blivap connects blood and sperm donors with people in need across Nigeria. Join our platform to donate, save lives, and make a meaningful impact in your community.",
     foundingDate: "2024",
@@ -74,7 +74,7 @@ export function StructuredData() {
     description:
       "Medical donation platform connecting blood and sperm donors with recipients in Nigeria. Join our platform to donate, save lives, and earn money while making a difference.",
     url: siteUrl,
-    image: `${siteUrl}/Logo/android-chrome-512x512.png`,
+    image: `${siteUrl}/android-chrome-512x512.png`,
     medicalSpecialty: ["Blood Donation", "Sperm Donation", "Medical Services"],
     areaServed: {
       "@type": "Country",

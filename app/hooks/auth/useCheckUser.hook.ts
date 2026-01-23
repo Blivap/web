@@ -18,7 +18,7 @@ export const useCheckUser = () => {
       // Check if we have a token (from Redux or cookie) but no user
       const cookieToken = Cookies.get("auth_token");
       const hasToken = token || cookieToken;
-      
+
       if (hasToken && !user && !hasCheckedRef.current) {
         hasCheckedRef.current = true;
         setIsChecking(true);

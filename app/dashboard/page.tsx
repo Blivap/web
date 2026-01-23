@@ -5,10 +5,8 @@ import { useState } from "react";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { Layout } from "../components/layout/layout.component";
 import { Avatar } from "../components/Avatar/avatar.component";
-import { useDashboard } from "../hooks/dashboard/useDashboard.hook";
 
-
-export default function Dashboard (){
+export default function Dashboard() {
   const [visible, setVisible] = useState(false);
   return (
     <Layout>
@@ -217,4 +215,4 @@ export default function Dashboard (){
       </div>
     </Layout>
   );
-};
+}

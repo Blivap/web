@@ -16,9 +16,10 @@ export const useRegister = () => {
     payload: IRegisterPayload & { confirmPassword?: string },
   ): Promise<boolean> => {
     setIsLoading(true);
-   
+
     try {
       // Exclude confirmPassword from the API payload
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...apiPayload } = payload;
       const { data, status, message, error } =
         await $api.auth.register(apiPayload);

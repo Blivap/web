@@ -3,7 +3,8 @@ import { generateMetadata } from "../utils/metadata";
 
 export const metadata: Metadata = generateMetadata({
   title: "Login",
-  description: "Login to your Blivap account to access your donor dashboard, manage donations, and connect with recipients.",
+  description:
+    "Login to your Blivap account to access your donor dashboard, manage donations, and connect with recipients.",
   keywords: ["login", "sign in", "Blivap login", "donor login"],
   path: "/login",
 });

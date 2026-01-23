@@ -13,7 +13,7 @@ export default function LoginPage() {
     <AuthLayout>
       <div className="flex flex-col gap-15 max-w-132 w-full">
         <div className="flex items-center gap-2.5">
-          <Image src="/logo.png" alt="Login" width={45} height={45} />
+          <Image src="/logo.svg" alt="Logo" width={45} height={45} />
           <p className="font-semibold text-[20px] text-[#19181F]">Blivap</p>
         </div>
         <div className="flex flex-col gap-8">

@@ -6,7 +6,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex justify-center w-full    md:px-10 xl:px-23 py-6 px-3">
         {children}
       </div>
-      <div className="w-full hidden lg:block"/>
+      <div className="w-full hidden lg:block" />
       <div className="fixed hidden lg:flex justify-center items-center  w-1/2 right-0 top-0   bg-[#960018] rounded-l-[60px] h-full overflow-hidden self-end">
         <Image
           src="/images/authbg.jpg"

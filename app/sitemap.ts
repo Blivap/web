@@ -16,7 +16,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/faq", priority: 0.8, changeFreq: "weekly" as const },
     { path: "/giving-blood", priority: 0.9, changeFreq: "weekly" as const },
     { path: "/healthcare", priority: 0.8, changeFreq: "weekly" as const },
-    { path: "/healthcare&professionals", priority: 0.8, changeFreq: "weekly" as const },
+    {
+      path: "/healthcare&professionals",
+      priority: 0.8,
+      changeFreq: "weekly" as const,
+    },
     { path: "/news", priority: 0.8, changeFreq: "daily" as const },
     { path: "/our-expertise", priority: 0.8, changeFreq: "weekly" as const },
     { path: "/research", priority: 0.8, changeFreq: "weekly" as const },

@@ -15,10 +15,6 @@ export const metadata: Metadata = generateMetadata({
   path: "/faq",
 });
 
-export default function FAQLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function FAQLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

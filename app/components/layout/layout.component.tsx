@@ -12,11 +12,10 @@ import {
 import classNames from "classnames";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PropsWithChildren, useState, ReactElement, useEffect } from "react";
+import { PropsWithChildren, useState, ReactElement } from "react";
 import { Avatar } from "../Avatar/avatar.component";
 import { FaBars } from "react-icons/fa";
 import { FiBell } from "react-icons/fi";
-import { useAppSelector } from "@/app/store/hooks";
 import { useLogout } from "@/app/hooks/auth/useLogout.hook";
 import { useDashboard } from "@/app/hooks/dashboard/useDashboard.hook";
 
@@ -34,7 +33,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const { handleLogout } = useLogout();
   const closeDrawer = () => setDrawer(false);
-  const {user, isChecking} = useDashboard();
+  const { user } = useDashboard();
 
   return (
     <div className="flex-1 bg-[#f8f8f8] w-full overflow-scroll">
@@ -86,12 +85,13 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       <div className="fixed top-0 left-0 right-0 md:left-[292px] z-30 bg-[#f8f8f8] ">
         <div className="w-full py-3.5 px-5 md:px-9 flex items-center justify-between ">
           <div className="flex items-center md:w-full justify-between gap-4">
-            <div className="flex items-center gap-2 order-2 md:order-1" key={user?.id || "no-user"}>
+            <div
+              className="flex items-center gap-2 order-2 md:order-1"
+              key={user?.id || "no-user"}
+            >
               <Avatar className="sm:size-12! size-9!" />
               <div className="flex flex-col sm:gap-1">
-                <p className="text-[#000000] font-medium">
-                  000000
-                </p>
+                <p className="text-[#000000] font-medium">000000</p>
                 <p className="text-xs text-[#6B7280]">Donor</p>
               </div>
             </div>
@@ -161,7 +161,7 @@ const NavLinks = ({ onLinkClick }: NavLinksProps) => {
   const navItems: NavItem[] = [
     {
       title: "Dashboard",
-      href: "",
+      href: "dashboard",
       icon: DashBoardIcon,
       // Optional: customize colors per route
       activeColor: "#960018", // Primary color when active

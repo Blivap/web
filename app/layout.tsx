@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter, Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -50,13 +50,14 @@ const { url, env } = config;
 const siteUrl = env === "development" ? "http://localhost:3000" : url;
 const ogImageUrl = `${siteUrl}/api/og`;
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
   title: {
     default: "Blivap — Give Blood. Save Lives.",
     template: "%s | Blivap",
@@ -147,12 +148,11 @@ export const metadata: Metadata = {
     ],
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
     ],
     other: [
       {
         rel: "mask-icon",
-        url: "/icon0.svg",
+        url: "/logo.svg",
         color: "#960018",
       },
     ],
@@ -175,7 +175,7 @@ export const metadata: Metadata = {
     // Additional SEO
     "geo.region": "NG",
     "geo.placename": "Nigeria",
-    "ICBM": "9.0820, 8.6753",
+    ICBM: "9.0820, 8.6753",
   },
 };
 
@@ -188,6 +188,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <StructuredData />
+        <meta name="apple-mobile-web-app-title" content="b" />
       </head>
       <body
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased grow min-h-screen flex`}
