@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AxiosError } from "axios";
 import { $api } from "@/app/api";
 import { IAuthResponse, IRegisterPayload } from "@/app/types";
+import { isEmailUnverified, normalizeUser } from "@/app/utils/user";
 import { useSnackbar } from "@/app/components/snackbar/snackbar.context";
 import { useAppDispatch } from "@/app/store/hooks";
 import { setCredentials } from "@/app/store/slices/authSlice";
@@ -39,13 +40,19 @@ export const useRegister = () => {
         );
 
         if (token) {
+          const userPayload =
+            normalizeUser(authData?.user) ?? authData?.user;
           dispatch(
             setCredentials({
               token,
-              user: authData?.user || undefined,
+              user: userPayload ?? undefined,
             }),
           );
-          router.push("/dashboard");
+          if (isEmailUnverified(authData?.user)) {
+            router.push("/verify-email");
+          } else {
+            router.push("/dashboard");
+          }
         }
         return true;
       } else {

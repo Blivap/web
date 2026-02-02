@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { $api } from "@/app/api";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { setUser, logout } from "@/app/store/slices/authSlice";
+import { normalizeUser } from "@/app/utils/user";
 import Cookies from "js-cookie";
 
 export const useCheckUser = () => {
@@ -25,15 +26,17 @@ export const useCheckUser = () => {
         try {
           const { data, status } = await $api.auth.me();
           if (status >= 200 && status < 300 && data) {
-            console.log("[useCheckUser] User fetched:", data);
-            dispatch(setUser(data));
+            const userPayload = normalizeUser(data);
+            if (userPayload) {
+              dispatch(setUser(userPayload));
+            } else {
+              hasCheckedRef.current = false;
+            }
           } else {
-            console.log("[useCheckUser] Failed to fetch user, logging out");
             dispatch(logout());
             hasCheckedRef.current = false;
           }
         } catch (error: unknown) {
-          console.error("[useCheckUser] Error fetching user:", error);
           if (error instanceof AxiosError) {
             const status = error.response?.status;
             if (status === 401 || status === 403) {

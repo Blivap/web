@@ -8,7 +8,7 @@ export const Splash = () => {
         height={200}
         width={200}
         src="/logo.svg"
-        className="mx-auto animate-pulse duration-200 ease-in-out logo-animation"
+        className="mx-auto"
       />
     </div>
   );

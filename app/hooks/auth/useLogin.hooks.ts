@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import { $api } from "@/app/api";
 import { ILoginPayload, IAuthResponse } from "@/app/types";
+import { isEmailUnverified, normalizeUser } from "@/app/utils/user";
 import { useSnackbar } from "@/app/components/snackbar/snackbar.context";
 import { useAppDispatch } from "@/app/store/hooks";
 import { setCredentials } from "@/app/store/slices/authSlice";
@@ -10,17 +12,12 @@ export const useLogin = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const handleLogin = async (payload: ILoginPayload): Promise<boolean> => {
     setIsLoading(true);
     try {
       const { data, status, message, error } = await $api.auth.login(payload);
       if (status >= 200 && status < 300) {
-        console.log("[useLogin] raw response:", {
-          data,
-          status,
-          message,
-          error,
-        });
         // Backend shape: { message: string; data: { accessToken, user, ... } }
         const envelope = (data || {}) as {
           message?: string;
@@ -29,10 +26,9 @@ export const useLogin = () => {
         const authData = envelope.data ?? ((data || {}) as IAuthResponse);
 
         const token =
-          authData.accessToken ?? authData.access_token ?? authData.token;
-
-        console.log("[useLogin] parsed authData:", authData);
-        console.log("[useLogin] resolved token:", token);
+          authData?.accessToken ??
+          (authData as { access_token?: string })?.access_token ??
+          authData?.token;
 
         showSnackbar(
           message || envelope.message || "Login successful!",
@@ -40,13 +36,18 @@ export const useLogin = () => {
         );
 
         if (token) {
-          console.log("[useLogin] dispatching setCredentials");
+          const userPayload = normalizeUser(authData?.user ?? authData) ?? authData?.user;
           dispatch(
             setCredentials({
               token,
-              user: authData.user || undefined,
+              user: userPayload ?? undefined,
             }),
           );
+          if (isEmailUnverified(userPayload ?? authData?.user)) {
+            router.push("/verify-email");
+          } else {
+            router.push("/dashboard");
+          }
         }
         return true;
       } else {

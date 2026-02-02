@@ -1,0 +1,289 @@
+{
+  "info": {
+    "_postman_id": "418cd99c-6dce-4210-bc71-436bd03e2fd1",
+    "name": "Blivap API",
+    "description": "API collection for the Blivap backend. Covers Authentication and Root endpoints.\n\n**Base URL**: Set `baseUrl` in your environment (e.g. `http://localhost:3000`).\n\n**Auth**: Login to get `accessToken`; it is saved to the environment and used by protected routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "User authentication, profile, and session endpoints.",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.environment.set('accessToken', jsonData.data.accessToken);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/authentication/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["authentication", "login"]
+            },
+            "description": "Authenticate with email and password. Returns user and accessToken. Token is stored in `accessToken` for protected routes."
+          },
+          "response": []
+        },
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePass1!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/authentication/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["authentication", "signup"]
+            },
+            "description": "Register a new user. Password must be at least 8 characters with uppercase, lowercase, number, and special character."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailValidationToken\": \"token-from-verification-email\",\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/authentication/verify-email",
+              "host": ["{{baseUrl}}"],
+              "path": ["authentication", "verify-email"]
+            },
+            "description": "Verify email using the token sent to the user's email."
+          },
+          "response": []
+        },
+        {
+          "name": "Resend Email Verification Link",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authentication/resend-email-verification-link?email=john@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["authentication", "resend-email-verification-link"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "john@example.com"
+                }
+              ]
+            },
+            "description": "Resend the email verification link to the given email."
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/authentication/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["authentication", "forgot-password"]
+            },
+            "description": "Request a password reset. Sends reset link/code to the email."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resetToken\": \"token-from-reset-email\",\n  \"password\": \"NewSecurePass1!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/authentication/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["authentication", "reset-password"]
+            },
+            "description": "Set new password using the reset token from the forgot-password email."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/authentication/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["authentication", "me"]
+            },
+            "description": "Get the authenticated user's profile. Requires valid JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\",\n  \"phonenumber\": \"+2348012345678\",\n  \"profileImage\": \"https://example.com/avatar.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/authentication/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["authentication", "me"]
+            },
+            "description": "Update the authenticated user's profile. All fields are optional."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"CurrentPass1!\",\n  \"password\": \"NewSecurePass1!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/authentication/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["authentication", "change-password"]
+            },
+            "description": "Change password for the authenticated user. Requires current password."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/authentication/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["authentication", "logout"]
+            },
+            "description": "Invalidate the current JWT. Requires valid JWT in Authorization header."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Root",
+      "description": "Root and health check.",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Root endpoint. Returns 'Welcome to the Blivap API!' when the app is running."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ]
+}

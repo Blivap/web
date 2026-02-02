@@ -91,7 +91,13 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
             >
               <Avatar className="sm:size-12! size-9!" />
               <div className="flex flex-col sm:gap-1">
-                <p className="text-[#000000] font-medium">000000</p>
+                <p className="text-[#000000] font-medium">
+                  {user?.firstname ??
+                    user?.lastname ??
+                    user?.email?.split("@")[0] ??
+                    user?.id?.slice(0, 6) ??
+                    "User"}
+                </p>
                 <p className="text-xs text-[#6B7280]">Donor</p>
               </div>
             </div>

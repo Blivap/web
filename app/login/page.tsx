@@ -64,6 +64,14 @@ export default function LoginPage() {
                       placeholder="Enter your password"
                     />
 
+                    <div className="flex justify-end">
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm font-medium text-primary hover:underline"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
                     <button
                       type="submit"
                       disabled={!isValid || isLoading}
@@ -77,9 +85,9 @@ export default function LoginPage() {
             </Formik>
             <div className="flex flex-col items-center gap-8 ">
               <p className="text-base text-[#49475A]">
-                Already have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
-                  href="register"
+                  href="/register"
                   className="font-semibold text-primary underline"
                 >
                   Register
@@ -104,7 +112,7 @@ export default function LoginPage() {
                   height={32}
                 />
                 <Image
-                  src="/icons/Facebook.svg"
+                  src="/icons/facebook.svg"
                   alt="Facebook"
                   width={32}
                   height={32}

@@ -19,20 +19,6 @@ export async function GET(request: Request) {
     // Try to load fonts, but don't fail if they're not available
     let fontData;
     let fontDataBold;
-let logoData;
-    try {
-      logoData = await fetch(
-        new URL(
-          "../../../public/logo.svg",
-          import.meta.url,
-        ).toString(),
-      ).then((res) => res.arrayBuffer());
-    } catch (e) {
-      if (e instanceof Error) {
-        console.error("Error loading logo:", e.message);
-      }
-      logoData = null;
-    }
     try {
       fontData = await fetch(
         new URL(
@@ -82,31 +68,18 @@ let logoData;
 
           {/* Content */}
           <div tw="flex flex-col items-center justify-center relative z-10">
-            {/* Logo/Brand Name */}
-            <img  src={logoData ? `data:image/svg+xml;base64,${Buffer.from(logoData).toString('base64')}` : ''} alt="Logo" tw="w-24 h-24 mb-8 bg-red-500" />
-            {/* <div tw="flex items-center mb-8">
-              <div
-                tw="flex items-center justify-center"
-                style={{
-                  width: "120px",
-                  height: "120px",
-                  borderRadius: "60px",
-                  background: "rgba(255, 255, 255, 0.15)",
-                }}
-              >
-                <div
-                  tw="flex items-center justify-center"
-                  style={{
-                    width: "100px",
-                    height: "100px",
-                    borderRadius: "50px",
-                    background: "rgba(255, 255, 255, 0.2)",
-                  }}
-                >
-                  <span tw="text-white text-5xl font-bold">B</span>
-                </div>
-              </div>
-            </div> */}
+            {/* Logo/Brand - text B (no Buffer in Edge) */}
+            <div
+              tw="flex items-center justify-center mb-8"
+              style={{
+                width: "120px",
+                height: "120px",
+                borderRadius: "60px",
+                background: "rgba(255, 255, 255, 0.15)",
+              }}
+            >
+              <span tw="text-white text-6xl font-bold">B</span>
+            </div>
 
             {/* Main Title */}
             <h1

@@ -189,7 +189,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <StructuredData />
-        <meta name="apple-mobile-web-app-title" content="b" />
+        <meta name="apple-mobile-web-app-title" content="Blivap" />
       </head>
       <body
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased grow min-h-screen flex`}

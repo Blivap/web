@@ -54,3 +54,33 @@ export type IAuthResponse = {
   token?: string;
   user?: IUser | null;
 };
+
+export type IVerifyEmailPayload = {
+  emailValidationToken: string;
+  email: string;
+};
+
+export type IResendVerificationQuery = {
+  email: string;
+};
+
+export type IForgotPasswordPayload = {
+  email: string;
+};
+
+export type IResetPasswordPayload = {
+  resetToken: string;
+  password: string;
+};
+
+export type IEditProfilePayload = {
+  firstname?: string;
+  lastname?: string;
+  phonenumber?: string | null;
+  profileImage?: string | null;
+};
+
+export type IChangePasswordPayload = {
+  oldPassword: string;
+  password: string;
+};

@@ -109,10 +109,19 @@ export default function SignUpPage() {
               <p className="text-base text-[#49475A]">
                 Already have an account?{" "}
                 <Link
-                  href="login"
+                  href="/login"
                   className="font-semibold text-primary underline"
                 >
                   Login
+                </Link>
+              </p>
+              <p className="text-base text-[#49475A]">
+                Need to verify your email?{" "}
+                <Link
+                  href="/verify-email"
+                  className="font-semibold text-primary underline"
+                >
+                  Verify email
                 </Link>
               </p>
               <div className="flex items-center w-full max-w-99.75">
@@ -134,7 +143,7 @@ export default function SignUpPage() {
                   height={32}
                 />
                 <Image
-                  src="/icons/Facebook.svg"
+                  src="/icons/facebook.svg"
                   alt="Facebook"
                   width={32}
                   height={32}
