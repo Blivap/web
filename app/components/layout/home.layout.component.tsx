@@ -19,7 +19,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
   const closeDrawer = () => setDrawerOpen(false);
 
   const navItems = [
-    { href: "/", label: "Donors" },
+    { href: "/", label: "Home" },
     { href: "/researchers", label: "Researchers" },
     {
       href: "/healthcare&professionals",
@@ -160,17 +160,32 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
             {
               title: "Knowledge",
               items: [
-                "Giving blood",
-                "About blood",
-                "About Sperm",
-                "our expertise",
+                { label: "Giving blood", href: "/giving-blood" },
+                { label: "About blood", href: "/about-blood" },
+                { label: "About Sperm", href: "/about-sperm" },
+                { label: "our expertise", href: "/our-expertise" },
               ],
             },
-            { title: "Our audiences", items: ["Health care", "Donors"] },
-            { title: "About Blivap", items: ["News", "Education"] },
+            {
+              title: "Our audiences",
+              items: [
+                { label: "Health care", href: "/healthcare" },
+                { label: "Donors", href: "/register" },
+              ],
+            },
+            {
+              title: "About Blivap",
+              items: [
+                { label: "News", href: "/news" },
+                { label: "Education", href: "/education" },
+              ],
+            },
             {
               title: "Service & Contract",
-              items: ["Frequently asked question", "Contact us"],
+              items: [
+                { label: "Frequently asked question", href: "/faq" },
+                { label: "Contact us", href: "/contact" },
+              ],
             },
           ].map((section, i) => (
             <div key={i} className="flex flex-col gap-3 sm:gap-4 md:gap-5">
@@ -178,12 +193,13 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                 {section.title}
               </p>
               {section.items.map((item, j) => (
-                <p
+                <Link
                   key={j}
-                  className="text-xs sm:text-sm md:text-base text-white tracking-[-0.41px] cursor-pointer hover:text-primary transition-colors"
+                  href={item.href}
+                  className="text-xs sm:text-sm md:text-base text-white tracking-[-0.41px] hover:text-primary transition-colors"
                 >
-                  {item}
-                </p>
+                  {item.label}
+                </Link>
               ))}
             </div>
           ))}
@@ -198,7 +214,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
             </p>
           </div>
           <Link
-            href="#"
+            href="/register"
             className="w-full sm:w-fit text-white text-sm sm:text-base py-2.5 sm:py-3.5 px-4 sm:px-[17.7px] bg-primary hover:bg-primary/90 transition-colors inline-block text-center"
           >
             Register as a donor
@@ -207,16 +223,20 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
       </div>
       <div className="bg-[#171717] flex flex-col sm:flex-row py-6 sm:py-8 gap-4 sm:gap-6 md:gap-11 px-4 sm:px-6 md:px-12 lg:pl-20.25">
         {[
-          "coordinated Vulnerability Disclosure",
-          "Privacy & Cookies",
-          "Terms and conditions",
-        ].map((text, i) => (
-          <p
+          {
+            label: "Coordinated Vulnerability Disclosure",
+            href: "/vulnerability-disclosure",
+          },
+          { label: "Privacy & Cookies", href: "/privacy" },
+          { label: "Terms and conditions", href: "/terms" },
+        ].map((item, i) => (
+          <Link
             key={i}
-            className="text-white cursor-pointer hover:text-primary transition-colors text-xs sm:text-sm md:text-base"
+            href={item.href}
+            className="text-white hover:text-primary transition-colors text-xs sm:text-sm md:text-base"
           >
-            {text}
-          </p>
+            {item.label}
+          </Link>
         ))}
       </div>
     </div>

@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
   // Allow any device to access the dev server
   allowedDevOrigins: ["*"],
 
+  // Serve manifest at both URLs (browsers/PWA often request manifest.webmanifest)
+  async rewrites() {
+    return [{ source: "/manifest.webmanifest", destination: "/manifest.json" }];
+  },
+
   images: {
     remotePatterns: [
       {
