@@ -115,15 +115,7 @@ export default function SignUpPage() {
                   Login
                 </Link>
               </p>
-              <p className="text-base text-[#49475A]">
-                Need to verify your email?{" "}
-                <Link
-                  href="/verify-email"
-                  className="font-semibold text-primary underline"
-                >
-                  Verify email
-                </Link>
-              </p>
+
               <div className="flex items-center w-full max-w-99.75">
                 <div className="w-full h-px bg-gray-300"></div>
                 <p className="mx-4 text-gray-500">or</p>
