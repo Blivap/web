@@ -18,7 +18,9 @@ export function AuthLoader() {
         className="shrink-0"
         priority
       />
-      <p className="text-sm font-medium text-[#49475A]">Checking authentication</p>
+      <p className="text-sm font-medium text-[#49475A]">
+        Checking authentication
+      </p>
       <div className="flex items-center gap-1.5" aria-hidden="true">
         <span
           className="h-2 w-2 rounded-full bg-primary"

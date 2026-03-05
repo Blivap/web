@@ -36,7 +36,8 @@ export const useLogin = () => {
         );
 
         if (token) {
-          const userPayload = normalizeUser(authData?.user ?? authData) ?? authData?.user;
+          const userPayload =
+            normalizeUser(authData?.user ?? authData) ?? authData?.user;
           dispatch(
             setCredentials({
               token,

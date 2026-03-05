@@ -5,7 +5,12 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppSelector } from "@/app/store/hooks";
 
-const AUTH_ONLY_PAGES = ["/login", "/register", "/forgot-password", "/reset-password"];
+const AUTH_ONLY_PAGES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+];
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();

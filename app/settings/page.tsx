@@ -35,9 +35,7 @@ export default function SettingsPage() {
         <h1 className="font-bold text-2xl text-[#100F14]">Settings</h1>
 
         <section className="flex flex-col gap-6">
-          <h2 className="font-semibold text-xl text-[#100F14]">
-            Edit profile
-          </h2>
+          <h2 className="font-semibold text-xl text-[#100F14]">Edit profile</h2>
           <Formik
             initialValues={profileInitialValues}
             enableReinitialize
@@ -51,13 +49,7 @@ export default function SettingsPage() {
               })
             }
           >
-            {({
-              values,
-              handleSubmit,
-              errors,
-              handleChange,
-              handleBlur,
-            }) => (
+            {({ values, handleSubmit, errors, handleChange, handleBlur }) => (
               <form
                 className="flex flex-col gap-6"
                 onSubmit={handleSubmit}

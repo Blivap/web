@@ -49,8 +49,8 @@ export default function Terms() {
               age, health, and location requirements for blood and sperm
               donation). You are responsible for providing accurate information
               and for ensuring you are eligible at the time of each donation. We
-              reserve the right to refuse or suspend participation if eligibility
-              is not met.
+              reserve the right to refuse or suspend participation if
+              eligibility is not met.
             </p>
           </section>
 
@@ -59,11 +59,10 @@ export default function Terms() {
               Use of the platform
             </h2>
             <p className="text-sm sm:text-base text-[#333333] leading-relaxed">
-              You agree to use Blivap only for lawful purposes and in
-              accordance with these terms. You must not misuse the platform,
-              provide false information, or attempt to harm other users or our
-              systems. We may suspend or terminate your account for breach of
-              these terms.
+              You agree to use Blivap only for lawful purposes and in accordance
+              with these terms. You must not misuse the platform, provide false
+              information, or attempt to harm other users or our systems. We may
+              suspend or terminate your account for breach of these terms.
             </p>
           </section>
 
@@ -74,9 +73,10 @@ export default function Terms() {
             <p className="text-sm sm:text-base text-[#333333] leading-relaxed">
               Compensation for donations (where applicable) is as described on
               the platform at the time of booking. Payment terms and processing
-              are subject to our payment policy. We do not guarantee availability
-              of donation opportunities and may cancel or reschedule in
-              accordance with our policies and partner requirements.
+              are subject to our payment policy. We do not guarantee
+              availability of donation opportunities and may cancel or
+              reschedule in accordance with our policies and partner
+              requirements.
             </p>
           </section>
 
@@ -87,10 +87,9 @@ export default function Terms() {
             <p className="text-sm sm:text-base text-[#333333] leading-relaxed">
               Blivap connects donors with those in need and works with
               accredited partners. Our liability is limited to the extent
-              permitted by law. We are not liable for indirect, consequential, or
-              special damages arising from your use of the platform or from
-              donation-related procedures carried out by third-party
-              facilities.
+              permitted by law. We are not liable for indirect, consequential,
+              or special damages arising from your use of the platform or from
+              donation-related procedures carried out by third-party facilities.
             </p>
           </section>
 

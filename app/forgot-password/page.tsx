@@ -62,7 +62,10 @@ export default function ForgotPasswordPage() {
             )}
           </Formik>
           <p className="text-base text-[#49475A]">
-            <Link href="/login" className="font-semibold text-primary underline">
+            <Link
+              href="/login"
+              className="font-semibold text-primary underline"
+            >
               Back to login
             </Link>
           </p>

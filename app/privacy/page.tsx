@@ -34,9 +34,9 @@ export default function Privacy() {
             <p className="text-sm sm:text-base text-[#333333] leading-relaxed">
               Blivap (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is
               committed to protecting your privacy. This policy explains how we
-              collect, use, store, and protect your personal information when you
-              use our platform to donate blood or sperm, or when you access our
-              services in Nigeria.
+              collect, use, store, and protect your personal information when
+              you use our platform to donate blood or sperm, or when you access
+              our services in Nigeria.
             </p>
           </section>
 
@@ -48,8 +48,8 @@ export default function Privacy() {
               We collect information you provide when registering (name, email,
               phone, address, health-related information for donor eligibility),
               information from your use of our services (donation history,
-              preferences), and technical data (IP address, device type, browser)
-              to improve our platform and security.
+              preferences), and technical data (IP address, device type,
+              browser) to improve our platform and security.
             </p>
           </section>
 

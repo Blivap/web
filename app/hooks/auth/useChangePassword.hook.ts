@@ -24,8 +24,8 @@ export function useChangePassword() {
     } catch (err) {
       const msg =
         err instanceof AxiosError
-          ? (err.response?.data as { message?: string })?.message ??
-            err.message
+          ? ((err.response?.data as { message?: string })?.message ??
+            err.message)
           : "Change failed. Please try again.";
       showSnackbar(msg, "error");
       return false;

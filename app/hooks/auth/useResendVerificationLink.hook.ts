@@ -16,10 +16,7 @@ export function useResendVerificationLink() {
       const { status, message, error } =
         await $api.auth.resendEmailVerificationLink(query);
       if (status >= 200 && status < 300) {
-        showSnackbar(
-        "Verification link sent.",
-          "success",
-        );
+        showSnackbar("Verification link sent.", "success");
         return true;
       }
       showSnackbar(error ?? message ?? "Failed to resend link.", "error");
@@ -27,8 +24,8 @@ export function useResendVerificationLink() {
     } catch (err) {
       const msg =
         err instanceof AxiosError
-          ? (err.response?.data as { message?: string })?.message ??
-            err.message
+          ? ((err.response?.data as { message?: string })?.message ??
+            err.message)
           : "Failed to resend verification link.";
       showSnackbar(msg, "error");
       return false;

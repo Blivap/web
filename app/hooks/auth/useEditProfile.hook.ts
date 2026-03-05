@@ -34,7 +34,7 @@ export function useEditProfile() {
           profileImage:
             payload.profileImage !== undefined && payload.profileImage !== null
               ? payload.profileImage
-              : apiUser?.profileImage ?? currentUser?.profileImage ?? null,
+              : (apiUser?.profileImage ?? currentUser?.profileImage ?? null),
         } as IUser;
         dispatch(setUser(mergedUser));
         showSnackbar(message ?? "Profile updated.", "success");
@@ -45,8 +45,8 @@ export function useEditProfile() {
     } catch (err) {
       const msg =
         err instanceof AxiosError
-          ? (err.response?.data as { message?: string })?.message ??
-            err.message
+          ? ((err.response?.data as { message?: string })?.message ??
+            err.message)
           : "Update failed. Please try again.";
       showSnackbar(msg, "error");
       return null;

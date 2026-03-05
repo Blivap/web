@@ -15,8 +15,7 @@ export function useResetPassword() {
   ): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const { status, message, error } =
-        await $api.auth.resetPassword(payload);
+      const { status, message, error } = await $api.auth.resetPassword(payload);
       if (status >= 200 && status < 300) {
         showSnackbar(message ?? "Password reset successfully.", "success");
         router.replace("/login");
@@ -27,8 +26,8 @@ export function useResetPassword() {
     } catch (err) {
       const msg =
         err instanceof AxiosError
-          ? (err.response?.data as { message?: string })?.message ??
-            err.message
+          ? ((err.response?.data as { message?: string })?.message ??
+            err.message)
           : "Reset failed. Please try again.";
       showSnackbar(msg, "error");
       return false;

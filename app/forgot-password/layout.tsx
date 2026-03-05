@@ -3,8 +3,7 @@ import { generateMetadata } from "../utils/metadata";
 
 export const metadata: Metadata = generateMetadata({
   title: "Forgot Password",
-  description:
-    "Request a password reset link for your Blivap account.",
+  description: "Request a password reset link for your Blivap account.",
   keywords: ["forgot password", "password reset", "Blivap"],
   path: "/forgot-password",
 });

@@ -40,8 +40,7 @@ export const useRegister = () => {
         );
 
         if (token) {
-          const userPayload =
-            normalizeUser(authData?.user) ?? authData?.user;
+          const userPayload = normalizeUser(authData?.user) ?? authData?.user;
           dispatch(
             setCredentials({
               token,

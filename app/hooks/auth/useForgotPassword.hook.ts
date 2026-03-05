@@ -30,8 +30,8 @@ export function useForgotPassword() {
     } catch (err) {
       const msg =
         err instanceof AxiosError
-          ? (err.response?.data as { message?: string })?.message ??
-            err.message
+          ? ((err.response?.data as { message?: string })?.message ??
+            err.message)
           : "Request failed. Please try again.";
       showSnackbar(msg, "error");
       return false;

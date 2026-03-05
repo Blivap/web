@@ -7,15 +7,13 @@ import { useResendVerificationLink } from "@/app/hooks/auth/useResendVerificatio
 import { verifyEmailSchema } from "@/app/schema/auth.schema";
 import { Formik } from "formik";
 import Image from "next/image";
-import Link from "next/link";
 import { useAppSelector } from "../store/hooks";
 import { useLogout } from "../hooks/auth/useLogout.hook";
 import { LogOut } from "lucide-react";
 
 export default function VerifyEmailPage() {
   const { verifyEmail, isLoading } = useVerifyEmail();
-  const { resendLink, isLoading: isResending } =
-    useResendVerificationLink();
+  const { resendLink, isLoading: isResending } = useResendVerificationLink();
   const { user } = useAppSelector((state) => state.auth);
   const { handleLogout } = useLogout();
   return (
@@ -37,7 +35,6 @@ export default function VerifyEmailPage() {
           </div>
           <Formik
             initialValues={{
-            
               emailValidationToken: "",
             }}
             validationSchema={verifyEmailSchema}
@@ -79,7 +76,7 @@ export default function VerifyEmailPage() {
                   Didn&apos;t receive the email?{" "}
                   <button
                     type="button"
-                    disabled={isResending }
+                    disabled={isResending}
                     onClick={() =>
                       values.emailValidationToken
                         ? resendLink({ email: user?.email ?? "" })
@@ -90,10 +87,12 @@ export default function VerifyEmailPage() {
                     {isResending ? "Sending..." : "Resend verification link"}
                   </button>
                 </p>
-                <button className="border border-primary rounded-md py-2 px-4 hover:bg-primary/5 active:bg-transparent transition-colors duration-200 w-fit flex items-center gap-2 text-base text-[#49475A] cursor-pointer" onClick={handleLogout}>
-                 <LogOut size={16}/>
-                 Logout
-                
+                <button
+                  className="border border-primary rounded-md py-2 px-4 hover:bg-primary/5 active:bg-transparent transition-colors duration-200 w-fit flex items-center gap-2 text-base text-[#49475A] cursor-pointer"
+                  onClick={handleLogout}
+                >
+                  <LogOut size={16} />
+                  Logout
                 </button>
               </div>
             )}
