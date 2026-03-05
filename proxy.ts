@@ -69,7 +69,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Apply middleware to all routes except for API routes and static assets
-    "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json).*)",
+    // Apply middleware to all routes except API, static assets, and public images
+    "/((?!api|_next/static|_next/image|images|favicon.ico|robots.txt|sitemap.xml|manifest.json).*)",
   ],
 };
