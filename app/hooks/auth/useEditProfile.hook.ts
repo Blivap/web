@@ -3,13 +3,14 @@ import { AxiosError } from "axios";
 import { $api } from "@/app/api";
 import { IEditProfilePayload, IUser } from "@/app/types";
 import { useSnackbar } from "@/app/components/snackbar/snackbar.context";
-import { useAppDispatch } from "@/app/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { setUser } from "@/app/store/slices/authSlice";
 
 export function useEditProfile() {
   const [isLoading, setIsLoading] = useState(false);
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
+  const currentUser = useAppSelector((state) => state.auth.user);
 
   const updateProfile = async (
     payload: IEditProfilePayload,
@@ -19,10 +20,25 @@ export function useEditProfile() {
       const { data, status, message, error } =
         await $api.auth.updateProfile(payload);
       if (status >= 200 && status < 300 && data) {
-        const user = (data as { data?: IUser })?.data ?? (data as IUser);
-        dispatch(setUser(user));
+        const apiUser = (data as { data?: IUser })?.data ?? (data as IUser);
+        // Merge with current user so we keep emailVerified and set profileImage from payload (API may omit or return partial data)
+        const mergedUser: IUser = {
+          ...(currentUser ?? {}),
+          ...apiUser,
+          id: apiUser?.id ?? currentUser?.id ?? "",
+          firstname: apiUser?.firstname ?? currentUser?.firstname ?? "",
+          lastname: apiUser?.lastname ?? currentUser?.lastname ?? "",
+          email: apiUser?.email ?? currentUser?.email ?? "",
+          emailVerified:
+            apiUser?.emailVerified ?? currentUser?.emailVerified ?? false,
+          profileImage:
+            payload.profileImage !== undefined && payload.profileImage !== null
+              ? payload.profileImage
+              : apiUser?.profileImage ?? currentUser?.profileImage ?? null,
+        } as IUser;
+        dispatch(setUser(mergedUser));
         showSnackbar(message ?? "Profile updated.", "success");
-        return user as IUser;
+        return mergedUser;
       }
       showSnackbar(error ?? message ?? "Update failed.", "error");
       return null;

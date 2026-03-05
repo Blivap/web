@@ -49,9 +49,9 @@ export const useRegister = () => {
             }),
           );
           if (isEmailUnverified(authData?.user)) {
-            router.push("/verify-email");
+            router.replace("/verify-email");
           } else {
-            router.push("/dashboard");
+            router.replace("/dashboard");
           }
         }
         return true;

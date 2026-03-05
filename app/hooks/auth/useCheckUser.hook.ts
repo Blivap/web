@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import { $api } from "@/app/api";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { setUser, logout } from "@/app/store/slices/authSlice";
@@ -8,6 +9,7 @@ import Cookies from "js-cookie";
 
 export const useCheckUser = () => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { token, isAuthenticated, user } = useAppSelector(
     (state) => state.auth,
   );
@@ -35,12 +37,17 @@ export const useCheckUser = () => {
           } else {
             dispatch(logout());
             hasCheckedRef.current = false;
+            router.replace("/login");
+            return;
           }
         } catch (error: unknown) {
           if (error instanceof AxiosError) {
             const status = error.response?.status;
             if (status === 401 || status === 403) {
               dispatch(logout());
+              hasCheckedRef.current = false;
+              router.replace("/login");
+              return;
             }
           }
           hasCheckedRef.current = false;
@@ -56,7 +63,7 @@ export const useCheckUser = () => {
     }
 
     checkUser();
-  }, [token, isAuthenticated, user, dispatch]);
+  }, [token, isAuthenticated, user, dispatch, router]);
 
   return { isChecking };
 };

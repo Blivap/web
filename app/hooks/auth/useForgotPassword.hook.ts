@@ -22,7 +22,7 @@ export function useForgotPassword() {
           message ?? "If an account exists, you will receive a reset link.",
           "success",
         );
-        router.push("/login");
+        router.replace("/login");
         return true;
       }
       showSnackbar(error ?? message ?? "Request failed.", "error");

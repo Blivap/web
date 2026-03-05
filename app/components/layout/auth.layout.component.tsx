@@ -1,6 +1,23 @@
+"use client";
+
+import { useEffect } from "react";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useAppSelector } from "@/app/store/hooks";
+
+const AUTH_ONLY_PAGES = ["/login", "/register", "/forgot-password", "/reset-password"];
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+
+  useEffect(() => {
+    if (isAuthenticated && pathname && AUTH_ONLY_PAGES.includes(pathname)) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, pathname, router]);
+
   return (
     <div className="flex-1 flex justify-center  items-center  w-full ">
       <div className="flex justify-center w-full    md:px-10 xl:px-23 py-6 px-3">

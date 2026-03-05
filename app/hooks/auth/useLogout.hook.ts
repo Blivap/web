@@ -17,7 +17,7 @@ export const useLogout = () => {
     }
     dispatch(logout());
     showSnackbar("Logged out successfully", "success");
-    router.push("/");
+    router.replace("/login");
   };
 
   return { handleLogout };

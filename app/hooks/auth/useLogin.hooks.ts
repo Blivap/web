@@ -44,9 +44,9 @@ export const useLogin = () => {
             }),
           );
           if (isEmailUnverified(userPayload ?? authData?.user)) {
-            router.push("/verify-email");
+            router.replace("/verify-email");
           } else {
-            router.push("/dashboard");
+            router.replace("/dashboard");
           }
         }
         return true;

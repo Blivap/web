@@ -1,4 +1,4 @@
-import LoginRepository from "./authRepository";
+import AuthRepository from "./authRepository";
 export const $api = {
-  auth: LoginRepository(),
+  auth: AuthRepository(),
 };

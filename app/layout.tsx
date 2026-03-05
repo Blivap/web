@@ -6,8 +6,8 @@ import { SnackbarProvider } from "./components/snackbar/snackbar.context";
 import { Snackbar } from "./components/snackbar/snackbar.component";
 import { config } from "./utils/config";
 import StoreProvider from "./store/provider";
-import { ProtectedRoute } from "./components/auth/protected-route";
 import { StructuredData } from "./components/seo/structured-data";
+import { AuthChecker } from "./components/auth/auth-checker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -195,10 +195,12 @@ export default function RootLayout({
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased grow min-h-screen flex`}
       >
         <StoreProvider>
-          <SnackbarProvider>
-            <ProtectedRoute>{children}</ProtectedRoute>
-            <Snackbar />
-          </SnackbarProvider>
+          <AuthChecker>
+            <SnackbarProvider>
+              {children}
+              <Snackbar />
+            </SnackbarProvider>
+          </AuthChecker>
         </StoreProvider>
       </body>
     </html>

@@ -212,6 +212,7 @@ export const HomeComponent = () => {
                   alt="News image"
                   fill
                   className="object-cover"
+                  unoptimized
                 />
                 <div className="absolute bottom-4 sm:bottom-7 w-[90%] left-4 sm:left-6.25 bg-white pt-4 sm:pt-5 pl-3 sm:pl-4.25 max-w-full sm:max-w-77 pr-4">
                   <div className="flex items-center gap-2 sm:gap-2.75 flex-wrap">

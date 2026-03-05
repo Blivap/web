@@ -32,21 +32,17 @@ const authSlice = createSlice({
         });
       }
     },
+    // Restore token from cookie only; user must be fetched via /me before we set isAuthenticated
     initializeAuth: (state) => {
       if (typeof window !== "undefined") {
         const token = Cookies.get("auth_token") || null;
         if (token) {
-          state.isAuthenticated = true;
           state.token = token;
+          // isAuthenticated stays false until setUser or setCredentials runs (after /me or login)
         }
       }
     },
     logout: (state) => {
-      console.log("[authSlice/logout] previous state:", {
-        isAuthenticated: state.isAuthenticated,
-        token: state.token,
-        user: state.user,
-      });
       state.isAuthenticated = false;
       state.token = null;
       state.user = null;
@@ -54,6 +50,7 @@ const authSlice = createSlice({
     },
     setUser: (state, action: PayloadAction<IUser>) => {
       state.user = action.payload;
+      state.isAuthenticated = true;
     },
   },
 });
