@@ -50,7 +50,7 @@ export const useRegister = () => {
           if (isEmailUnverified(authData?.user)) {
             router.replace("/verify-email");
           } else {
-            router.replace("/dashboard");
+            router.replace("/overview");
           }
         }
         return true;

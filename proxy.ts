@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_ROUTES: string[] = [
   "/",
+  "/book-demo",
   "/login",
   "/register",
   "/forgot-password",
@@ -44,13 +45,19 @@ export function proxy(request: NextRequest) {
   const publicPath = isPublicPath(pathname);
   const verifyEmailPage = isVerifyEmail(pathname);
 
-  // Authenticated users must not access any public route; send them to dashboard
+  // Authenticated users must not access any public route; send them to overview
   if (publicPath && isAuthenticated) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/overview", request.url));
   }
 
   // Unauthenticated users must not access protected pages (verify-email, dashboard, etc.)
   if (verifyEmailPage && !isAuthenticated) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+  if (pathname === "/overview" && !isAuthenticated) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+  if (pathname.startsWith("/overview/") && !isAuthenticated) {
     return NextResponse.redirect(new URL("/", request.url));
   }
   if (pathname === "/dashboard" && !isAuthenticated) {

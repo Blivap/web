@@ -49,7 +49,7 @@ export const HomeComponent = () => {
               <div>
                 <Link
                   className="w-fit bg-black hover:bg-black/80 active:bg-black transition duration-150  text-white py-2.5 sm:py-3.5 px-4 sm:px-6.25 inline-block text-sm sm:text-base"
-                  href="/register"
+                  href="/book-demo"
                 >
                   Register as a donor (EN)
                 </Link>
@@ -108,13 +108,13 @@ export const HomeComponent = () => {
             </div>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link
-                href="/register"
+                href="/book-demo"
                 className="w-full sm:w-fit text-white text-sm sm:text-base py-2.5 sm:py-3.5 px-4 sm:px-[17.7px] bg-primary hover:bg-primary/90 transition-colors inline-block text-center"
               >
                 Become a donor
               </Link>
               <Link
-                href="/about"
+                href="/book-demo"
                 className="w-full sm:w-fit border-2 border-black py-2.5 sm:py-3.5 px-4 sm:px-[17.7px] text-[#333333] hover:bg-black hover:text-white text-sm sm:text-base transition-colors inline-block text-center"
               >
                 Read more
@@ -294,7 +294,7 @@ export const HomeComponent = () => {
             </div>
             <div>
               <Link
-                href="/news"
+                href="/book-demo"
                 className="w-fit text-white text-base py-3.5 px-[17.7px] bg-primary hover:bg-primary/90 transition-colors inline-block"
               >
                 Read more

@@ -47,7 +47,7 @@ export const useLogin = () => {
           if (isEmailUnverified(userPayload ?? authData?.user)) {
             router.replace("/verify-email");
           } else {
-            router.replace("/dashboard");
+            router.replace("/overview");
           }
         }
         return true;

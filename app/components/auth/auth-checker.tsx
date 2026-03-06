@@ -42,9 +42,9 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
       user &&
       !user.emailVerified &&
       user.profileImage &&
-      pathname !== "/dashboard"
+      pathname !== "/overview" && !pathname.startsWith("/overview/")
     ) {
-      router.replace("/dashboard");
+      router.replace("/overview");
     }
   }, [user, pathname, router]);
 
@@ -73,7 +73,7 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     user &&
     !user.emailVerified &&
     user.profileImage &&
-    pathname !== "/dashboard"
+    pathname !== "/overview" && !pathname.startsWith("/overview/")
   ) {
     return <AuthLoader />;
   }

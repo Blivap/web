@@ -192,7 +192,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Blivap" />
       </head>
       <body
-        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased grow min-h-screen flex`}
+        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased text-sm min-h-screen w-full`}
       >
         <StoreProvider>
           <AuthChecker>

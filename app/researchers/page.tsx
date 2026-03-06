@@ -158,7 +158,7 @@ export default function Researchers() {
               </p>
               <div>
                 <Link
-                  href="/register"
+                  href="/book-demo"
                   className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
                 >
                   Register as researcher

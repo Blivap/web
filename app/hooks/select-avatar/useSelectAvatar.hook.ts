@@ -36,7 +36,7 @@ export function useSelectAvatar() {
     if (!selectedAvatar) return;
     const updated = await updateProfile({ profileImage: selectedAvatar });
     if (updated) {
-      router.replace("/dashboard");
+      router.replace("/overview");
     }
   };
 

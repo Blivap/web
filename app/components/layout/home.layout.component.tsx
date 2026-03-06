@@ -4,12 +4,30 @@ import classNames from "classnames";
 import { Globe, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useState, useEffect } from "react";
+
+const randomBetween = (minMs: number, maxMs: number) =>
+  Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 
 export const HomeLayout = (props: PropsWithChildren<unknown>) => {
   const pathName = usePathname();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [bannerVisible, setBannerVisible] = useState(true);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const scheduleToggle = () => {
+      const duration = bannerVisible
+        ? randomBetween(12000, 22000)
+        : randomBetween(8000, 15000);
+      timeoutId = setTimeout(() => {
+        setBannerVisible((v) => !v);
+      }, duration);
+    };
+    scheduleToggle();
+    return () => clearTimeout(timeoutId);
+  }, [bannerVisible]);
 
   const isActive = (href: string) => {
     if (href === "/") return pathName === "/";
@@ -204,7 +222,23 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
             </div>
           ))}
         </div>
-        <div className="absolute hidden  -top-20 sm:-top-24 md:-top-28 right-4 sm:right-6 md:right-12 lg:right-20.25 bg-[#F4F2FF] sm:flex flex-col gap-4 sm:gap-5 md:gap-6.25 shadow-[0px_0px_20px_#00000040] max-w-full sm:max-w-md md:max-w-132 px-4 sm:px-5 md:px-6 py-3 sm:py-3.5">
+        <div
+          className={classNames(
+            "absolute hidden sm:flex flex-col gap-4 sm:gap-5 md:gap-6.25 -top-20 sm:-top-24 md:-top-28 right-4 sm:right-6 md:right-12 lg:right-20.25 bg-[#F4F2FF] shadow-[0px_0px_20px_#00000040] max-w-full sm:max-w-md md:max-w-132 px-4 sm:px-5 md:px-6 py-3 sm:py-3.5 transition-opacity duration-500 ease-in-out",
+            bannerVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          )}
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              setBannerVisible(false);
+            }}
+            className="absolute top-2 right-2 p-1 rounded-full text-[#6B7280] hover:bg-[#E5E7EB] hover:text-black transition-colors"
+            aria-label="Close banner"
+          >
+            <X size={18} />
+          </button>
           <div className="flex flex-col gap-2 sm:gap-3 md:gap-3.5">
             <p className="font-medium text-base sm:text-lg md:text-xl leading-5.5">
               Save lives and earn money with your blood or spam
@@ -214,7 +248,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
             </p>
           </div>
           <Link
-            href="/register"
+            href="/book-demo"
             className="w-full sm:w-fit text-white text-sm sm:text-base py-2.5 sm:py-3.5 px-4 sm:px-[17.7px] bg-primary hover:bg-primary/90 transition-colors inline-block text-center"
           >
             Register as a donor

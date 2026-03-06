@@ -19,7 +19,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (isAuthenticated && pathname && AUTH_ONLY_PAGES.includes(pathname)) {
-      router.replace("/dashboard");
+      router.replace("/overview");
     }
   }, [isAuthenticated, pathname, router]);
 
