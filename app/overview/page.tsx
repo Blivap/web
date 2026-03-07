@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Droplet, Star, Gem, DropletIcon } from "lucide-react";
 import Link from "next/link";
 import { Layout } from "../components/layout/layout.component";
@@ -130,7 +131,8 @@ export default function OverviewPage() {
 
         {/* Tabs: switch by index, no route — TabItem children are the panels */}
         <div className="flex flex-col gap-10">
-          <Tabs defaultTabValue="overview" className="flex flex-col gap-10">
+          <Suspense fallback={<div className="flex flex-col gap-10 min-h-[200px]" />}>
+            <Tabs defaultTabValue="overview" className="flex flex-col gap-10">
             <TabItem label="Overview">
               <div className="flex flex-col gap-10">
                 <section className="flex flex-col gap-3">
@@ -224,6 +226,7 @@ export default function OverviewPage() {
               </section>
             </TabItem>
           </Tabs>
+          </Suspense>
         </div>
       </div>
     </Layout>
