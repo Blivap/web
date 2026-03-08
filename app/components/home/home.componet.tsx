@@ -5,8 +5,8 @@ import Image from "next/image";
 export const HomeComponent = () => {
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col gap-6 sm:gap-8 md:gap-12 w-full">
-        <header className="px-3.5 sm:px-6 md:px-8 xl:px-36 w-full max-w-[1440px] mx-auto mt-4 sm:mt-6">
+      <div className="flex-1 flex flex-col gap-6 sm:gap-8 md:gap-12 w-full min-[1441px]:max-w-[1440px] min-[1441px]:mx-auto min-[1441px]:px-36">
+        <header className="px-3.5 sm:px-6 md:px-8 xl:px-36 w-full max-w-[1440px] mx-auto mt-4 sm:mt-6 min-[1441px]:max-w-none min-[1441px]:px-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3">
             <Link href="/" className="flex flex-col gap-0.5 shrink-0">
               <span className="font-semibold font-helvetica text-primary text-4xl tracking-tight">

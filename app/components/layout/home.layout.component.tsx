@@ -124,8 +124,8 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
       </div>
 
       {/* Top Navigation Bar */}
-      <div className="fixed top-0 z-40 bg-[#F4F2FF] pb-2 lg:pb-0  pt-4  flex justify-center items-center px-4 sm:px-6 md:px-8 lg:px-20 w-full">
-        <div className="flex items-center justify-between w-full max-w-[1140px]">
+      <div className="fixed top-0 z-40 bg-[#F4F2FF] pb-2 lg:pb-0  pt-4  flex justify-center items-center px-4 sm:px-6 md:px-8 lg:px-20 min-[1441px]:px-36 w-full">
+        <div className="flex items-center justify-between w-full max-w-[1140px] min-[1441px]:max-w-[1440px]">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setDrawerOpen((prev) => !prev)}
@@ -179,7 +179,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
         </div>
       </div>
       {props.children}
-      <div className="bg-black px-4 sm:px-6 md:px-8 lg:px-20">
+      <div className="bg-black px-4 sm:px-6 md:px-8 lg:px-20 min-[1441px]:px-36">
         <div className="relative mt-6 sm:mt-8 md:mt-12 max-w-[1440px] mx-auto flex flex-col gap-6 sm:gap-8 pt-6 sm:pt-8 px-4 sm:px-6 md:px-12 lg:px-20 pb-6 sm:pb-8 ">
           <p className="font-bold font-helvetica text-4xl text-primary ">
             Blivap
@@ -269,8 +269,8 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
           </div>
         </div>
       </div>
-      <div className="flex bg-[#171717] px-4 sm:px-6 md:px-8 lg:px-20">
-        <div className=" flex flex-col sm:flex-row py-4 sm:py-5 gap-3 sm:gap-4 px-4 sm:px-6 md:px-12 lg:px-20  w-full max-w-[1440px] mx-auto">
+      <div className="flex bg-[#171717] px-4 sm:px-6 md:px-8 lg:px-20 min-[1441px]:px-36">
+        <div className=" flex flex-col sm:flex-row py-4 sm:py-5 gap-3 sm:gap-4 px-4 sm:px-6 md:px-12 lg:px-20 w-full max-w-[1440px] mx-auto">
           {[
             {
               label: "Vulnerability disclosure",
