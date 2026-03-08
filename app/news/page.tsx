@@ -2,145 +2,148 @@
 
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Calendar } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 
 const newsItems = [
   {
     id: 1,
-    title:
-      "Nigeria invests in blood donation, pushing the idea and saving more lives",
-    date: "9 December 2025",
+    title: "Nigeria invests in blood donation, saving more lives",
+    date: "9 Dec 2025",
     category: "News",
     image: "/images/black_woman.jpg",
     featured: true,
     excerpt:
-      "The Nigerian healthcare system has made significant strides in promoting blood donation awareness...",
+      "The Nigerian healthcare system has made significant strides in promoting blood donation awareness.",
   },
   {
     id: 2,
-    title: "Nigerian Medical system just released the cure for HIV",
-    date: "9 December 2025",
-    category: "Medical Breakthrough",
+    title: "Nigerian medical system releases breakthrough in HIV research",
+    date: "9 Dec 2025",
+    category: "Medical",
     image: "/images/news_image.jpg",
+    excerpt: "Latest developments in treatment and prevention.",
   },
   {
     id: 3,
     title: "Scientists discover new mechanism regulating blood cell production",
-    date: "9 December 2025",
+    date: "9 Dec 2025",
     category: "Research",
     image: "/images/news_image.jpg",
+    excerpt: "Findings could improve donation and transfusion outcomes.",
   },
   {
     id: 4,
-    title: "Scientists discover prevention for Malaria and Fever",
-    date: "9 December 2025",
+    title: "Prevention advances for Malaria and Fever",
+    date: "9 Dec 2025",
     category: "Research",
     image: "/images/news_image.jpg",
+    excerpt: "New approaches to disease prevention in the region.",
   },
 ];
 
 export default function News() {
+  const featured = newsItems.find((i) => i.featured);
+  const more = newsItems.filter((i) => !i.featured);
+
   return (
     <HomeLayout>
-      <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <div>
-          <Link
-            href="/"
-            className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
-          >
-            <ArrowLeft size={20} />
-            <span>Back to home</span>
-          </Link>
-        </div>
-
-        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-          <h1 className="font-medium text-2xl sm:text-3xl md:text-4xl leading-tight sm:leading-6 md:leading-[22.4px]">
+      <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-6 sm:py-8 xl:px-36 max-w-[1440px] mx-auto">
+        <header className="mb-8">
+          <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight">
             News
           </h1>
+          <p className="text-xs text-[#6B7280] mt-1">
+            Updates and stories from Blivap and healthcare.
+          </p>
+        </header>
 
-          <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            {newsItems
-              .filter((item) => item.featured)
-              .map((item) => (
-                <div key={item.id} className="relative">
-                  <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-2xl overflow-hidden">
+        {/* Featured article */}
+        {featured && (
+          <article className="mb-10">
+            <Link
+              href="#"
+              className="group flex flex-col sm:flex-row rounded-xl border border-[#E5E7EB] bg-white overflow-hidden hover:border-[#D1D5DB] hover:shadow-md transition-all"
+            >
+              <div className="relative w-full sm:w-2/5 min-h-[200px] sm:min-h-0 sm:aspect-4/3 shrink-0">
+                <Image
+                  src={featured.image}
+                  alt={featured.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, 40vw"
+                />
+              </div>
+              <div className="flex flex-col justify-center p-4 sm:p-6 flex-1 min-w-0">
+                <span className="text-[10px] uppercase tracking-wider text-[#6B7280] font-medium">
+                  {featured.category}
+                </span>
+                <h2 className="mt-1.5 text-base sm:text-lg font-semibold text-black leading-snug group-hover:text-primary transition-colors">
+                  {featured.title}
+                </h2>
+                <time
+                  className="mt-1 text-[10px] text-[#9CA3AF]"
+                  dateTime="2025-12-09"
+                >
+                  {featured.date}
+                </time>
+                {featured.excerpt && (
+                  <p className="mt-2 text-xs text-[#6B7280] leading-relaxed line-clamp-2">
+                    {featured.excerpt}
+                  </p>
+                )}
+                <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary group-hover:gap-2 transition-all">
+                  Read article
+                  <ArrowRight size={12} />
+                </span>
+              </div>
+            </Link>
+          </article>
+        )}
+
+        {/* More articles – list layout */}
+        <section>
+          <h2 className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider mb-4">
+            More articles
+          </h2>
+          <ul className="flex flex-col divide-y divide-[#E5E7EB] border border-[#E5E7EB] rounded-xl bg-white overflow-hidden">
+            {more.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href="#"
+                  className="group flex flex-col sm:flex-row gap-3 p-4 hover:bg-[#FAFAFA] transition-colors"
+                >
+                  <div className="relative w-full sm:w-24 h-20 sm:h-16 rounded-lg overflow-hidden shrink-0 bg-[#F3F4F6]">
                     <Image
-                      className="w-full h-full object-cover"
                       src={item.image}
-                      alt={item.title}
+                      alt=""
                       fill
-                      sizes="(max-width: 768px) 100vw, 100vw"
+                      className="object-cover"
+                      sizes="96px"
                     />
-                    <div className="absolute bottom-4 sm:bottom-7 left-4 sm:left-6 lg:left-6.25 bg-white pt-3 sm:pt-4 lg:pt-5 pl-3 sm:pl-4 lg:pl-4.25 pr-3 sm:pr-4 max-w-full sm:max-w-2xl z-10 rounded-lg">
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-2.75 mb-3 sm:mb-4">
-                        <p className="py-0.5 px-2 bg-[#F4F2FF] text-[#6B7280] text-xs sm:text-sm">
-                          {item.category}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} className="text-[#6B7280]" />
-                          <p className="font-medium text-xs sm:text-sm text-[#6B7280]">
-                            {item.date}
-                          </p>
-                        </div>
-                      </div>
-                      <h2 className="text-lg sm:text-xl md:text-2xl leading-tight sm:leading-6 md:leading-6.5 tracking-[-0.41px] font-medium mb-3 sm:mb-4">
-                        {item.title}
-                      </h2>
-                      {item.excerpt && (
-                        <p className="text-sm sm:text-base text-[#333333] mb-3">
-                          {item.excerpt}
-                        </p>
-                      )}
-                      <div className="flex gap-2.25 items-center">
-                        <p className="text-primary font-medium text-sm sm:text-base">
-                          Read news
-                        </p>
-                        <ArrowRight className="text-primary" size={14} />
-                      </div>
-                    </div>
                   </div>
-                </div>
-              ))}
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {newsItems
-                .filter((item) => !item.featured)
-                .map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex flex-col gap-3 sm:gap-4 shadow-[0_4px_20px_#00000026] bg-white rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
-                  >
-                    <div className="w-full h-40 sm:h-48 bg-gray-300 relative">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-2 p-3 sm:p-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={12} className="text-[#6B7280]" />
-                        <p className="font-medium text-xs sm:text-sm text-[#6B7280]">
-                          {item.date}
-                        </p>
-                      </div>
-                      <h3 className="text-sm sm:text-base font-medium">
-                        {item.title}
-                      </h3>
-                      <div className="flex gap-2.25 items-center mt-2">
-                        <p className="text-primary font-medium text-xs sm:text-sm">
-                          Read news
-                        </p>
-                        <ArrowRight className="text-primary" size={12} />
-                      </div>
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] text-[#9CA3AF]">
+                      {item.date}
+                    </span>
+                    <h3 className="mt-0.5 text-sm font-semibold text-black leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                      {item.title}
+                    </h3>
+                    {"excerpt" in item && item.excerpt && (
+                      <p className="mt-1 text-xs text-[#6B7280] line-clamp-1">
+                        {item.excerpt}
+                      </p>
+                    )}
                   </div>
-                ))}
-            </div>
-          </div>
-        </div>
+                  <span className="self-start sm:self-center shrink-0 inline-flex items-center gap-1 text-xs font-medium text-primary opacity-0 sm:opacity-100 group-hover:opacity-100 transition-opacity">
+                    Read
+                    <ArrowRight size={12} />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </HomeLayout>
   );

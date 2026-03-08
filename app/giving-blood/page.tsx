@@ -3,7 +3,6 @@
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
 import {
-  ArrowLeft,
   Droplet,
   CheckCircle,
   Clock,
@@ -14,164 +13,144 @@ import {
 export default function GivingBlood() {
   return (
     <HomeLayout>
-      <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <div>
-          <Link
-            href="/"
-            className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
-          >
-            <ArrowLeft size={20} />
-            <span>Back to home</span>
-          </Link>
-        </div>
+      <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-6 sm:py-8 xl:px-36 max-w-[1440px] mx-auto">
+        <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-6">
+          Giving blood
+        </h1>
 
-        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-            Giving Blood
-          </h1>
+        <div className="flex flex-col gap-6">
+          <div>
+            <h2 className="font-semibold text-base text-black mb-2">
+              The gift of life
+            </h2>
+            <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed max-w-2xl">
+              Giving blood is one of the most selfless acts you can do. Your
+              donation can save up to three lives. Every donation matters.
+            </p>
+          </div>
 
-          <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            <div className="flex flex-col gap-3 sm:gap-4">
-              <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
-                The Gift of Life
-              </h2>
-              <p className="text-sm sm:text-base text-[#333333] leading-relaxed max-w-3xl">
-                Giving blood is one of the most selfless acts you can do. Your
-                donation can save up to three lives and make a significant
-                difference in someone&apos;s health journey. Every donation
-                matters, and every donor is a hero.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
-              {[
-                {
-                  icon: Droplet,
-                  title: "Before Donation",
-                  items: [
-                    "Eat a healthy meal and stay hydrated",
-                    "Get a good night's sleep (at least 7-8 hours)",
-                    "Bring a valid ID (driver's license, passport, or national ID)",
-                    "Wear comfortable clothing with sleeves that can be rolled up",
-                    "Avoid heavy exercise 24 hours before donation",
-                    "Drink plenty of water (at least 500ml before donation)",
-                  ],
-                  color: "bg-[#F9E8EE]",
-                },
-                {
-                  icon: CheckCircle,
-                  title: "After Donation",
-                  items: [
-                    "Rest for 10-15 minutes before leaving",
-                    "Drink plenty of fluids (water, juice) for the next 24 hours",
-                    "Avoid heavy lifting or strenuous activity for 24 hours",
-                    "Keep the bandage on for at least 4 hours",
-                    "Eat iron-rich foods to help replenish your blood",
-                    "Avoid alcohol for 24 hours after donation",
-                  ],
-                  color: "bg-[#E4E5FF]",
-                },
-              ].map((section, i) => (
-                <div
-                  key={i}
-                  className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                    <div className={`${section.color} p-2 sm:p-3 rounded-full`}>
-                      <section.icon className="text-primary" size={20} />
-                    </div>
-                    <h3 className="font-semibold text-lg sm:text-xl">
-                      {section.title}
-                    </h3>
+          <div className="grid md:grid-cols-2 gap-3 sm:gap-4">
+            {[
+              {
+                icon: Droplet,
+                title: "Before donation",
+                items: [
+                  "Eat a healthy meal and stay hydrated",
+                  "Get 7–8 hours sleep",
+                  "Bring valid ID",
+                  "Wear comfortable clothing (sleeves that roll up)",
+                  "Avoid heavy exercise 24 hours before",
+                  "Drink at least 500ml water before",
+                ],
+                color: "bg-[#FDF2F4]",
+              },
+              {
+                icon: CheckCircle,
+                title: "After donation",
+                items: [
+                  "Rest 10–15 minutes before leaving",
+                  "Drink plenty of fluids for 24 hours",
+                  "Avoid heavy lifting for 24 hours",
+                  "Keep bandage on at least 4 hours",
+                  "Eat iron-rich foods",
+                  "Avoid alcohol for 24 hours",
+                ],
+                color: "bg-[#EEF2FF]",
+              },
+            ].map((section, i) => (
+              <div
+                key={i}
+                className="bg-white p-3 sm:p-4 rounded-lg border border-[#E5E7EB]"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={`${section.color} p-2 rounded-full`}>
+                    <section.icon className="text-primary" size={18} />
                   </div>
-                  <ul className="flex flex-col gap-2 text-sm sm:text-base text-[#333333]">
-                    {section.items.map((item, j) => (
-                      <li key={j} className="flex items-start gap-2">
-                        <CheckCircle
-                          className="text-primary mt-1 shrink-0"
-                          size={18}
-                        />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <h3 className="font-semibold text-sm">{section.title}</h3>
                 </div>
-              ))}
-            </div>
+                <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280]">
+                  {section.items.map((item, j) => (
+                    <li key={j} className="flex items-start gap-2">
+                      <CheckCircle
+                        className="text-primary shrink-0 mt-0.5"
+                        size={12}
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
 
-            <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 border-2 border-[#F4F2FF]">
-              <div className="flex items-center gap-3 mb-4">
-                <Shield className="text-primary" size={28} />
-                <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
-                  Eligibility Requirements
-                </h2>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <h4 className="font-semibold text-base mb-2">
-                    General Requirements
-                  </h4>
-                  <ul className="flex flex-col gap-2 text-sm text-[#333333]">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Age: 18-65 years old</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Weight: At least 50kg</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Good general health</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>No recent illness or infection</span>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-base mb-2">Frequency</h4>
-                  <ul className="flex flex-col gap-2 text-sm text-[#333333]">
-                    <li className="flex items-start gap-2">
-                      <Clock className="text-primary mt-1" size={16} />
-                      <span>Whole blood: Every 56 days (8 weeks)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Clock className="text-primary mt-1" size={16} />
-                      <span>Platelets: Every 7 days (up to 24 times/year)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Clock className="text-primary mt-1" size={16} />
-                      <span>Plasma: Every 28 days</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+          <div className="bg-white p-4 rounded-lg border border-[#E5E7EB]">
+            <div className="flex items-center gap-2 mb-4">
+              <Shield className="text-primary" size={18} />
+              <h2 className="font-semibold text-base text-black">
+                Eligibility
+              </h2>
             </div>
-
-            <div className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8">
-              <div className="flex items-center gap-3 mb-4">
-                <Heart className="text-primary" size={28} />
-                <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
-                  Ready to Give?
-                </h2>
-              </div>
-              <p className="text-sm sm:text-base text-[#333333] leading-relaxed mb-6">
-                Join thousands of donors who are making a difference. Register
-                today and start saving lives. The entire process takes less than
-                an hour, and you&apos;ll be making a life-saving contribution to
-                your community.
-              </p>
+            <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Link
-                  href="/register"
-                  className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
-                >
-                  Register as a donor
-                </Link>
+                <h4 className="font-semibold text-xs mb-2 text-black">
+                  General
+                </h4>
+                <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280]">
+                  {[
+                    "Age: 18–65",
+                    "Weight: at least 50kg",
+                    "Good general health",
+                    "No recent illness",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <CheckCircle
+                        className="text-primary shrink-0 mt-0.5"
+                        size={12}
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold text-xs mb-2 text-black">
+                  Frequency
+                </h4>
+                <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280]">
+                  <li className="flex items-start gap-2">
+                    <Clock className="text-primary shrink-0 mt-0.5" size={12} />
+                    Whole blood: every 56 days
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Clock className="text-primary shrink-0 mt-0.5" size={12} />
+                    Platelets: every 7 days
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Clock className="text-primary shrink-0 mt-0.5" size={12} />
+                    Plasma: every 28 days
+                  </li>
+                </ul>
               </div>
             </div>
+          </div>
+
+          <div className="bg-[#F9FAFB] p-4 rounded-lg border border-[#E5E7EB]">
+            <div className="flex items-center gap-2 mb-2">
+              <Heart className="text-primary" size={18} />
+              <h2 className="font-semibold text-base text-black">
+                Ready to give?
+              </h2>
+            </div>
+            <p className="text-xs text-[#6B7280] leading-relaxed mb-4">
+              Join thousands of donors making a difference. The process takes
+              less than an hour.
+            </p>
+            <Link
+              href="/register"
+              className="text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 text-white rounded-md inline-block transition-colors"
+            >
+              Register as a donor
+            </Link>
           </div>
         </div>
       </div>

@@ -3,7 +3,6 @@
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
 import {
-  ArrowLeft,
   Award,
   Shield,
   Users,
@@ -14,152 +13,131 @@ import {
 export default function OurExpertise() {
   return (
     <HomeLayout>
-      <div className="flex-1 flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10">
-        <div>
-          <Link
-            href="/"
-            className="mb-6 inline-flex items-center gap-2 text-primary hover:underline"
-          >
-            <ArrowLeft size={20} />
-            <span>Back to home</span>
-          </Link>
-        </div>
+      <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-6 sm:py-8 xl:px-36 max-w-[1440px] mx-auto">
+        <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-6">
+          Our expertise
+        </h1>
 
-        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-          <h1 className="font-bold font-helvetica text-primary text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-            Our Expertise
-          </h1>
+        <div className="flex flex-col gap-6">
+          <div>
+            <h2 className="font-semibold text-base text-black mb-2">
+              Leading the way in donation services
+            </h2>
+            <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed max-w-2xl">
+              Blivap combines healthcare, technology, and community building to
+              make donation services accessible, safe, and effective. Medical
+              knowledge, innovation, and compassionate service.
+            </p>
+          </div>
 
-          <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
-            <div className="flex flex-col gap-3 sm:gap-4">
-              <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
-                Leading the Way in Donation Services
-              </h2>
-              <p className="text-sm sm:text-base text-[#333333] leading-relaxed max-w-3xl">
-                Blivap brings together years of expertise in healthcare,
-                technology, and community building to create a platform that
-                makes donation services accessible, safe, and effective. Our
-                team combines medical knowledge, technological innovation, and
-                compassionate service delivery.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
-              {[
-                {
-                  icon: Shield,
-                  title: "Safety First",
-                  desc: "We maintain the highest standards of safety and quality in all our donation processes, ensuring the well-being of both donors and recipients. All our partner facilities are certified and regularly audited.",
-                  color: "bg-[#F9E8EE]",
-                },
-                {
-                  icon: Award,
-                  title: "Quality Assurance",
-                  desc: "Our rigorous screening and matching processes ensure that every donation meets the highest quality standards. We follow international best practices and local regulations.",
-                  color: "bg-[#E4E5FF]",
-                },
-                {
-                  icon: Users,
-                  title: "Community Focus",
-                  desc: "We understand the needs of our community and work tirelessly to improve access to life-saving donations. Our platform is built with the community in mind.",
-                  color: "bg-[#F4F2FF]",
-                },
-              ].map((expertise, i) => (
+          <div className="grid md:grid-cols-3 gap-3 sm:gap-4">
+            {[
+              {
+                icon: Shield,
+                title: "Safety first",
+                desc: "Highest standards of safety and quality. Partner facilities are certified and regularly audited.",
+                color: "bg-[#FDF2F4]",
+              },
+              {
+                icon: Award,
+                title: "Quality assurance",
+                desc: "Rigorous screening and matching. We follow international best practices and local regulations.",
+                color: "bg-[#EEF2FF]",
+              },
+              {
+                icon: Users,
+                title: "Community focus",
+                desc: "We understand community needs and work to improve access to life-saving donations.",
+                color: "bg-[#F5F3FF]",
+              },
+            ].map((expertise, i) => (
+              <div
+                key={i}
+                className="bg-white p-3 sm:p-4 rounded-lg border border-[#E5E7EB]"
+              >
                 <div
-                  key={i}
-                  className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                  className={`${expertise.color} p-2 rounded-full w-fit mb-2`}
                 >
-                  <div
-                    className={`${expertise.color} p-3 sm:p-4 rounded-full w-fit mb-3 sm:mb-4`}
-                  >
-                    <expertise.icon className="text-primary" size={24} />
-                  </div>
-                  <h3 className="font-semibold text-lg sm:text-xl mb-2 sm:mb-3">
-                    {expertise.title}
-                  </h3>
-                  <p className="text-sm sm:text-base text-[#333333]">
-                    {expertise.desc}
-                  </p>
+                  <expertise.icon className="text-primary" size={18} />
                 </div>
-              ))}
-            </div>
-
-            <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8 border-2 border-[#F4F2FF]">
-              <div className="flex items-center gap-3 mb-4">
-                <Target className="text-primary" size={28} />
-                <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
-                  Our Core Competencies
-                </h2>
+                <h3 className="font-semibold text-sm mb-1.5">
+                  {expertise.title}
+                </h3>
+                <p className="text-xs text-[#6B7280] leading-relaxed">
+                  {expertise.desc}
+                </p>
               </div>
-              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <h4 className="font-semibold text-base mb-2">
-                    Medical Expertise
-                  </h4>
-                  <ul className="flex flex-col gap-2 text-sm text-[#333333]">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Partnership with certified medical facilities</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Qualified healthcare professionals</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Comprehensive screening processes</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Quality control and assurance</span>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-base mb-2">
-                    Technology Innovation
-                  </h4>
-                  <ul className="flex flex-col gap-2 text-sm text-[#333333]">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Advanced matching algorithms</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Secure platform and data protection</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Real-time tracking and notifications</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>Mobile-first design for accessibility</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="bg-[#F4F2FF] p-4 sm:p-6 md:p-8 rounded-2xl mt-6 sm:mt-8">
-              <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black mb-3 sm:mb-4">
-                Trusted by Thousands
+          <div className="bg-white p-4 rounded-lg border border-[#E5E7EB]">
+            <div className="flex items-center gap-2 mb-4">
+              <Target className="text-primary" size={18} />
+              <h2 className="font-semibold text-base text-black">
+                Our core competencies
               </h2>
-              <p className="text-sm sm:text-base text-[#333333] leading-relaxed mb-6">
-                Our expertise has helped thousands of donors and recipients
-                connect safely and effectively. We&apos;re committed to
-                continuing to improve and expand our services, always putting
-                safety and quality first.
-              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Link
-                  href="/about"
-                  className="w-fit text-white text-sm sm:text-base py-2.5 sm:py-3 px-3 sm:px-4 bg-primary hover:bg-primary/90 transition-colors inline-block"
-                >
-                  Learn more about us
-                </Link>
+                <h4 className="font-semibold text-xs mb-2 text-black">
+                  Medical expertise
+                </h4>
+                <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280]">
+                  {[
+                    "Certified medical facility partnerships",
+                    "Qualified healthcare professionals",
+                    "Comprehensive screening",
+                    "Quality control and assurance",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <CheckCircle
+                        className="text-primary shrink-0 mt-0.5"
+                        size={12}
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold text-xs mb-2 text-black">
+                  Technology
+                </h4>
+                <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280]">
+                  {[
+                    "Advanced matching algorithms",
+                    "Secure platform and data",
+                    "Real-time tracking",
+                    "Mobile-first design",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <CheckCircle
+                        className="text-primary shrink-0 mt-0.5"
+                        size={12}
+                      />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
+          </div>
+
+          <div className="bg-[#F9FAFB] p-4 rounded-lg border border-[#E5E7EB]">
+            <h2 className="font-semibold text-base text-black mb-2">
+              Trusted by thousands
+            </h2>
+            <p className="text-xs text-[#6B7280] leading-relaxed mb-4">
+              Our expertise has helped thousands connect safely. We&apos;re
+              committed to improving and expanding, always putting safety and
+              quality first.
+            </p>
+            <Link
+              href="/about"
+              className="text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 text-white rounded-md inline-block transition-colors"
+            >
+              Learn more about us
+            </Link>
           </div>
         </div>
       </div>

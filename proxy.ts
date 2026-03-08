@@ -26,6 +26,9 @@ const PUBLIC_ROUTES: string[] = [
   "/what-we-do",
   "/not_found",
   "/not-found",
+  "/privacy",
+  "/terms",
+  "/vulnerability-disclosure",
 ];
 
 function isPublicPath(pathname: string): boolean {
