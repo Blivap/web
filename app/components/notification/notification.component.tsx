@@ -60,7 +60,7 @@ export const NotificationBell = () => {
       onClick={() => setIsOpen(!isOpen)}
       className="relative border border-[#9CA3AF] rounded-full p-2 flex items-center justify-center order-1 md:order-2 cursor-pointer"
     >
-      <div className="absolute size-1 bg-[#FF0000] rounded-full top-2 right-3" />
+      <div className="absolute size-1 bg-[#FF0000] rounded-full top-2 right-3 border border-white" />
       <FiBell size={18} className="stroke-2 text-sm" />
       <span
         ref={panelRef}

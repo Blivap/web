@@ -13,19 +13,19 @@ const BECOME_DONOR_CARDS = [
     icon: Droplet,
     title: "Register as a blood donor",
     subtitle: "Save lives with your blood",
-    href: "#",
+    href: "/donors/new?type=blood",
   },
   {
     icon: Gem,
     title: "Register as a sperm donor",
     subtitle: "Help families with your sperm",
-    href: "#",
+    href: "/donors/new?type=sperm",
   },
   {
     icon: Gem,
     title: "Register as an ovary donor",
     subtitle: "Give the gift of life with your egg",
-    href: "#",
+    href: "/donors/new?type=ovary",
   },
 ];
 
@@ -131,101 +131,105 @@ export default function OverviewPage() {
 
         {/* Tabs: switch by index, no route — TabItem children are the panels */}
         <div className="flex flex-col gap-10">
-          <Suspense fallback={<div className="flex flex-col gap-10 min-h-[200px]" />}>
+          <Suspense
+            fallback={<div className="flex flex-col gap-10 min-h-[200px]" />}
+          >
             <Tabs defaultTabValue="overview" className="flex flex-col gap-10">
-            <TabItem label="Overview">
-              <div className="flex flex-col gap-10">
-                <section className="flex flex-col gap-3">
-                  <h2 className="text-base font-medium text-black">
-                    Become a Donor
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#F0F0EF] p-6">
-                    {BECOME_DONOR_CARDS.map((card) => {
-                      const Icon = card.icon;
-                      return (
-                        <Link
-                          key={card.title}
-                          href={card.href}
-                          className="flex flex-col items-center  gap-[38px] p-5 rounded-xl bg-white hover:bg-white/70 hover:shadow-[2px_3px_5px_#00000014] active:shadow-none transition-colors duration-150 border border-[#DADADA]"
-                        >
-                          <div className="flex items-center justify-center size-10 rounded-full bg-[#F9E8EE] text-primary">
-                            <Icon className="size-5" />
-                          </div>
-                          <div className="flex flex-col gap-3.5">
-                            <p className="font-semibold text-black">
-                              {card.title}
-                            </p>
-                            <p className="text-sm text-[#6B7280]">
-                              {card.subtitle}
-                            </p>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </section>
+              <TabItem label="Overview">
+                <div className="flex flex-col gap-10">
+                  <section className="flex flex-col gap-3">
+                    <h2 className="text-base font-medium text-black">
+                      Become a Donor
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#F0F0EF] p-6">
+                      {BECOME_DONOR_CARDS.map((card) => {
+                        const Icon = card.icon;
+                        return (
+                          <Link
+                            key={card.title}
+                            href={card.href}
+                            className="flex flex-col items-center  gap-[38px] p-5 rounded-xl bg-white hover:bg-white/70 hover:shadow-[2px_3px_5px_#00000014] active:shadow-none transition-colors duration-150 border border-[#DADADA]"
+                          >
+                            <div className="flex items-center justify-center size-10 rounded-full bg-[#F9E8EE] text-primary">
+                              <Icon className="size-5" />
+                            </div>
+                            <div className="flex flex-col gap-3.5">
+                              <p className="font-semibold text-black">
+                                {card.title}
+                              </p>
+                              <p className="text-sm text-[#6B7280]">
+                                {card.subtitle}
+                              </p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </section>
 
-                <section className="flex flex-col gap-3">
-                  <h2 className="text-base font-medium text-black">
-                    Active Donors
-                  </h2>
-                  <div className="flex flex-col bg-white rounded-xl border border-[#DADADA] overflow-hidden px-5 max-h-[350px] overflow-y-auto">
-                    {ACTIVE_DONORS.map((donor, index) => (
-                      <div
-                        key={donor.id}
-                        className={`flex flex-wrap items-center gap-3 sm:gap-4 px-[18px] py-[17px] ${
-                          index > 0 ? "border-t  border-[#DADADA]" : ""
-                        }`}
-                      >
-                        <Avatar className="size-10!" />
-                        <div className="flex flex-col min-w-0">
-                          <p className="font-medium text-black text-xs">
-                            {donor.id}
+                  <section className="flex flex-col gap-3">
+                    <h2 className="text-base font-medium text-black">
+                      Active Donors
+                    </h2>
+                    <div className="flex flex-col bg-white rounded-xl border border-[#DADADA] overflow-hidden px-5 max-h-[350px] overflow-y-auto">
+                      {ACTIVE_DONORS.map((donor, index) => (
+                        <div
+                          key={donor.id}
+                          className={`flex flex-wrap items-center gap-3 sm:gap-4 px-[18px] py-[17px] ${
+                            index > 0 ? "border-t  border-[#DADADA]" : ""
+                          }`}
+                        >
+                          <Avatar className="size-10!" />
+                          <div className="flex flex-col min-w-0">
+                            <p className="font-medium text-black text-xs">
+                              {donor.id}
+                            </p>
+                            <p className="text-xs text-[#6B7280]">
+                              {donor.packs}
+                            </p>
+                          </div>
+                          <span className="p-1 rounded-full bg-[#FCE7E7] text-primary text-[8px] font-medium">
+                            {donor.bloodType}
+                          </span>
+                          <div className="flex items-center gap-1 text-[#6B7280] text-sm">
+                            <Star className="size-4 fill-amber-400 text-amber-400" />
+                            <span>{donor.rating}</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-[#6B7280] text-sm">
+                            <DropletIcon className="size-2 text-primary" />
+                            <span>{donor.donations} donations</span>
+                          </div>
+                          <p className="text-sm text-[#6B7280]">
+                            {donor.location}
                           </p>
-                          <p className="text-xs text-[#6B7280]">
-                            {donor.packs}
-                          </p>
+                          <button className="ml-auto rounded-lg bg-primary px-6 py-[8.5px] text-xs font-medium text-white hover:bg-primary/90 transition-colors">
+                            Book Appointment
+                          </button>
                         </div>
-                        <span className="p-1 rounded-full bg-[#FCE7E7] text-primary text-[8px] font-medium">
-                          {donor.bloodType}
-                        </span>
-                        <div className="flex items-center gap-1 text-[#6B7280] text-sm">
-                          <Star className="size-4 fill-amber-400 text-amber-400" />
-                          <span>{donor.rating}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-[#6B7280] text-sm">
-                          <DropletIcon className="size-2 text-primary" />
-                          <span>{donor.donations} donations</span>
-                        </div>
-                        <p className="text-sm text-[#6B7280]">
-                          {donor.location}
-                        </p>
-                        <button className="ml-auto rounded-lg bg-primary px-6 py-[8.5px] text-xs font-medium text-white hover:bg-primary/90 transition-colors">
-                          Book Appointment
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  </section>
+                </div>
+              </TabItem>
+              <TabItem label="Payment">
+                <section className="flex flex-col gap-4">
+                  <h2 className="text-lg font-bold text-black">Payment</h2>
+                  <p className="text-[#6B7280]">
+                    Payment settings and history will appear here.
+                  </p>
                 </section>
-              </div>
-            </TabItem>
-            <TabItem label="Payment">
-              <section className="flex flex-col gap-4">
-                <h2 className="text-lg font-bold text-black">Payment</h2>
-                <p className="text-[#6B7280]">
-                  Payment settings and history will appear here.
-                </p>
-              </section>
-            </TabItem>
-            <TabItem label="Notifications">
-              <section className="flex flex-col gap-4">
-                <h2 className="text-lg font-bold text-black">Notifications</h2>
-                <p className="text-[#6B7280]">
-                  Your notifications will appear here.
-                </p>
-              </section>
-            </TabItem>
-          </Tabs>
+              </TabItem>
+              <TabItem label="Notifications">
+                <section className="flex flex-col gap-4">
+                  <h2 className="text-lg font-bold text-black">
+                    Notifications
+                  </h2>
+                  <p className="text-[#6B7280]">
+                    Your notifications will appear here.
+                  </p>
+                </section>
+              </TabItem>
+            </Tabs>
           </Suspense>
         </div>
       </div>

@@ -10,7 +10,6 @@ const PUBLIC_ROUTES: string[] = [
   "/researchers",
   "/healthcare&professionals",
   "/working_at",
-  "/donors",
   "/about",
   "/about-blood",
   "/about-donating",
@@ -67,6 +66,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
   if (pathname === "/select_avatar" && !isAuthenticated) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+  // /donors, /donors/new, and all /donors/* require authentication
+  if ((pathname === "/donors" || pathname.startsWith("/donors/")) && !isAuthenticated) {
     return NextResponse.redirect(new URL("/", request.url));
   }
   // Any other non-public page requires authentication

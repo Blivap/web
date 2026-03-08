@@ -180,19 +180,20 @@ const NavLinks = ({ onLinkClick }: NavLinksProps) => {
       inactiveColor: "#070416", // Foundation dark when inactive
     },
     {
+      title: "Donors",
+      href: "donors",
+      icon: DonorsIcon,
+      activeColor: "#960018",
+      inactiveColor: "#070416",
+    },
+    {
       title: "Wallet",
       href: "wallet",
       icon: WalletIcon,
       activeColor: "#960018",
       inactiveColor: "#070416",
     },
-    {
-      title: "Active Donors",
-      href: "active_donors",
-      icon: DonorsIcon,
-      activeColor: "#960018",
-      inactiveColor: "#070416",
-    },
+
     {
       title: "History",
       href: "history",
