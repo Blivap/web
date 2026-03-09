@@ -13,9 +13,7 @@ export interface RadioProps extends Omit<
 }
 
 const Radio = forwardRef<HTMLInputElement, RadioProps>(
-  ({ children, labelClassName = "", className, ...inputProps }, ref) => {
-    const { checked } = inputProps;
-
+  ({ children, labelClassName = "", ...inputProps }, ref) => {
     return (
       <label
         className={`inline-flex items-center gap-2 cursor-pointer select-none ${

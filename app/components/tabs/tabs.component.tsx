@@ -73,13 +73,19 @@ export function Tabs({
     [children],
   );
 
-  const defaultLower = (defaultTabValue ?? items[0]?.props.label ?? "").toLowerCase();
+  const defaultLower = (
+    defaultTabValue ??
+    items[0]?.props.label ??
+    ""
+  ).toLowerCase();
 
   const tabValueFromQuery = (() => {
     const t = searchParams.get(TAB_QUERY_KEY);
     if (t === null || t === "") return defaultLower;
     const lower = t.toLowerCase();
-    const match = items.find((item) => item.props.label.toLowerCase() === lower);
+    const match = items.find(
+      (item) => item.props.label.toLowerCase() === lower,
+    );
     return match ? match.props.label.toLowerCase() : defaultLower;
   })();
 

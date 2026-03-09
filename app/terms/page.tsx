@@ -42,7 +42,9 @@ export default function Terms() {
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="font-semibold text-base text-black">Use of the platform</h2>
+            <h2 className="font-semibold text-base text-black">
+              Use of the platform
+            </h2>
             <p className="text-xs text-[#6B7280] leading-relaxed">
               You agree to use Blivap only for lawful purposes and in accordance
               with these terms. You must not misuse the platform, provide false
@@ -52,7 +54,9 @@ export default function Terms() {
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="font-semibold text-base text-black">Donations and compensation</h2>
+            <h2 className="font-semibold text-base text-black">
+              Donations and compensation
+            </h2>
             <p className="text-xs text-[#6B7280] leading-relaxed">
               Compensation for donations (where applicable) is as described on
               the platform at the time of booking. Payment terms and processing
@@ -64,7 +68,9 @@ export default function Terms() {
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="font-semibold text-base text-black">Limitation of liability</h2>
+            <h2 className="font-semibold text-base text-black">
+              Limitation of liability
+            </h2>
             <p className="text-xs text-[#6B7280] leading-relaxed">
               Blivap connects donors with those in need and works with
               accredited partners. Our liability is limited to the extent

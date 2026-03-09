@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useEditProfile } from "@/app/hooks/auth/useEditProfile.hook";
 import { $api } from "@/app/api";
 import { AxiosError } from "axios";
 import { useSnackbar } from "@/app/components/snackbar/snackbar.context";

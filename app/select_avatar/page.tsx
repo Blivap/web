@@ -4,7 +4,6 @@ import classNames from "classnames";
 import Image from "next/image";
 import { Button } from "../components/button/button.component";
 import { useSelectAvatar } from "../hooks/select-avatar/useSelectAvatar.hook";
-import { Loader2 } from "lucide-react";
 
 export default function SelectAvatarPage() {
   const {

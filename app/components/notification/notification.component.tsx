@@ -6,7 +6,6 @@ import { FiBell } from "react-icons/fi";
 
 export const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [closeComplete, setCloseComplete] = useState(true);
   const panelRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +27,6 @@ export const NotificationBell = () => {
     const el = panelRef.current;
     if (!el) return;
     if (isOpen) {
-      setCloseComplete(false);
       el.style.visibility = "visible";
       gsap.to(el, {
         opacity: 1,
@@ -46,13 +44,10 @@ export const NotificationBell = () => {
         overwrite: true,
         onComplete: () => {
           if (el) el.style.visibility = "hidden";
-          setCloseComplete(true);
         },
       });
     }
   }, [isOpen]);
-
-  const showClosedStyle = !isOpen && closeComplete;
 
   return (
     <div
@@ -69,11 +64,7 @@ export const NotificationBell = () => {
           "w-[280px] md:w-[350px] h-[400px] absolute top-10 left-0 md:left-auto md:-right-1 bg-white rounded border border-[#DADADA] shadow-[2px_3px_5px_#00000014] p-3 origin-top-right",
           isOpen ? "pointer-events-auto" : "pointer-events-none",
         )}
-        style={
-          showClosedStyle
-            ? { visibility: "hidden", opacity: 0, transform: "scale(0.96)" }
-            : { visibility: "visible" }
-        }
+        style={{ visibility: "hidden", opacity: 0, transform: "scale(0.96)" }}
       >
         <p className="text-sm font-medium text-black">Notifications</p>
         <div className="flex flex-col gap-2">

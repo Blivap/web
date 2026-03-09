@@ -74,6 +74,32 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-poppins);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) #f3f4f6;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border: 2px solid #f3f4f6;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #7f0014;
+}
+
+*::-webkit-scrollbar-corner {
+  background: #f3f4f6;
 }
 
 @keyframes authLoaderDot {
@@ -96,3 +122,21 @@ body {
   scrollbar-width: none; /* Firefox */
 }
 
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) #f3f4f6;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+}

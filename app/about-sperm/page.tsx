@@ -2,13 +2,7 @@
 
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
-import {
-  Heart,
-  Shield,
-  CheckCircle,
-  Lock,
-  Users,
-} from "lucide-react";
+import { Heart, Shield, CheckCircle, Lock, Users } from "lucide-react";
 
 export default function AboutSperm() {
   return (

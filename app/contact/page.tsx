@@ -49,7 +49,8 @@ export default function Contact() {
               Get in touch
             </h1>
             <p className="text-sm text-text-secondary max-w-xl leading-relaxed">
-              Have questions about donating, partnerships, or our platform? We’re here to help and usually respond within 24 hours.
+              Have questions about donating, partnerships, or our platform?
+              We’re here to help and usually respond within 24 hours.
             </p>
           </div>
         </section>
@@ -88,7 +89,11 @@ export default function Contact() {
                   </>
                 );
                 return method.href ? (
-                  <a key={method.label} href={method.href} className={cardClass}>
+                  <a
+                    key={method.label}
+                    href={method.href}
+                    className={cardClass}
+                  >
                     {content}
                   </a>
                 ) : (

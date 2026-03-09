@@ -9,7 +9,6 @@ import {
   IResetPasswordPayload,
   IEditProfilePayload,
   IChangePasswordPayload,
-  IAvatar,
 } from "../types";
 import { IResponse } from "../types";
 

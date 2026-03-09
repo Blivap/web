@@ -2,13 +2,7 @@
 
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
-import {
-  Briefcase,
-  Users,
-  Heart,
-  Target,
-  CheckCircle,
-} from "lucide-react";
+import { Briefcase, Users, Heart, Target, CheckCircle } from "lucide-react";
 
 export default function WorkingAt() {
   return (

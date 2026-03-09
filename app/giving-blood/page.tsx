@@ -2,13 +2,7 @@
 
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
-import {
-  Droplet,
-  CheckCircle,
-  Clock,
-  Shield,
-  Heart,
-} from "lucide-react";
+import { Droplet, CheckCircle, Clock, Shield, Heart } from "lucide-react";
 
 export default function GivingBlood() {
   return (

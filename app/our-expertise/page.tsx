@@ -2,13 +2,7 @@
 
 import { HomeLayout } from "../components/layout/home.layout.component";
 import Link from "next/link";
-import {
-  Award,
-  Shield,
-  Users,
-  Target,
-  CheckCircle,
-} from "lucide-react";
+import { Award, Shield, Users, Target, CheckCircle } from "lucide-react";
 
 export default function OurExpertise() {
   return (

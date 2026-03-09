@@ -69,7 +69,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
   // /donors, /donors/new, and all /donors/* require authentication
-  if ((pathname === "/donors" || pathname.startsWith("/donors/")) && !isAuthenticated) {
+  if (
+    (pathname === "/donors" || pathname.startsWith("/donors/")) &&
+    !isAuthenticated
+  ) {
     return NextResponse.redirect(new URL("/", request.url));
   }
   // Any other non-public page requires authentication

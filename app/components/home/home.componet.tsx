@@ -1,8 +1,59 @@
+"use client";
+import { useMemo } from "react";
 import { HomeLayout } from "../layout/home.layout.component";
+import { NewsFallbackImage } from "../image/news-fallback-image.component";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Newspaper } from "lucide-react";
 import Image from "next/image";
+import { useNews } from "@/app/hooks/news/useNews.hooks";
+import type { NewsCategory } from "@/app/api/newsRepository";
+import { format } from "date-fns";
+
+const HOME_NEWS_CATEGORY: NewsCategory = "health";
+
+function NewsFeatureSkeleton() {
+  return (
+    <div className="relative w-full min-h-48 sm:min-h-100 overflow-hidden bg-[#E5E7EB] animate-pulse">
+      <div className="absolute inset-0 bg-linear-to-br from-[#E5E7EB] via-[#F3F4F6] to-[#E5E7EB]" />
+      <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm p-3 sm:p-4 max-w-[308px] m-[25px]">
+        <div className="h-3 w-28 bg-[#D1D5DB] rounded-full" />
+        <div className="mt-2 h-4 w-full bg-[#E5E7EB] rounded-full" />
+        <div className="mt-2 h-4 w-4/5 bg-[#E5E7EB] rounded-full" />
+        <div className="mt-3 h-3 w-20 bg-[#F3D5DB] rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+function NewsCardSkeleton() {
+  return (
+    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 shadow-[0px_4px_20px_#00000026] animate-pulse">
+      <div className="w-full sm:w-[266px] h-[135px] shrink-0 bg-[#E5E7EB]" />
+      <div className="flex flex-col min-w-0 flex-1 py-[11px] px-5 md:px-0 gap-2">
+        <div className="flex flex-col gap-2">
+          <div className="h-3 w-24 bg-[#D1D5DB] rounded-full" />
+          <div className="h-3.5 w-full bg-[#E5E7EB] rounded-full" />
+          <div className="h-3.5 w-5/6 bg-[#E5E7EB] rounded-full" />
+        </div>
+        <div className="h-3 w-16 bg-[#F3D5DB] rounded-full mt-1" />
+      </div>
+    </div>
+  );
+}
+
 export const HomeComponent = () => {
+  const homeNewsParams = useMemo(
+    () => ({
+      category: HOME_NEWS_CATEGORY,
+      lang: "en" as const,
+      max: 4,
+    }),
+    [],
+  );
+  const { news, isLoading, isRateLimited } = useNews(homeNewsParams);
+  const featuredNews = news?.[0];
+  const newsItems = news?.slice(1, 4) ?? [];
+
   return (
     <HomeLayout>
       <div className="flex-1 flex flex-col gap-6 sm:gap-8 md:gap-12 w-full min-[1441px]:max-w-[1440px] min-[1441px]:mx-auto min-[1441px]:px-36">
@@ -173,86 +224,114 @@ export const HomeComponent = () => {
         <div className="mt-6 sm:mt-8 md:mt-10 flex flex-col gap-4 mx-4 sm:mx-6 md:mx-12 lg:mx-36">
           <p className="font-semibold text-lg sm:text-xl text-black">News</p>
           <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              <div className="relative w-full  min-h-48 sm:min-h-100 ">
-                <Image
-                  src="/images/black_woman.jpg"
-                  alt="News"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm p-3 sm:p-4 max-w-[308px] m-[25px] ">
-                  <p className="text-[10px] uppercase tracking-wide text-[#6B7280] font-medium">
-                    News · 9 Dec 2025
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-black leading-snug">
-                    Nigeria invests in blood initiatives, saving more lives.
-                  </p>
+            {isRateLimited ? (
+              <div className="rounded-2xl border border-[#F3D5DB] bg-[#FFF7F8] p-5 sm:p-6 flex flex-col gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="shrink-0 rounded-full bg-primary/10 p-3 text-primary">
+                    <Newspaper size={18} />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <p className="text-base font-semibold text-black">
+                      Daily news updates will be back soon
+                    </p>
+                    <p className="text-sm text-[#6B7280] max-w-2xl leading-relaxed">
+                      We have reached today&apos;s news provider request limit.
+                      Fresh health headlines will appear again after the
+                      provider resets access at 00:00 UTC.
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/about-donating"
+                  className="w-fit text-white text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 rounded-none! inline-block transition-colors"
+                >
+                  Learn more about donating
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                  {isLoading ? (
+                    <NewsFeatureSkeleton />
+                  ) : (
+                    <div className="relative w-full min-h-48 sm:min-h-100">
+                      <NewsFallbackImage
+                        src={featuredNews?.image}
+                        alt={featuredNews?.title || "News"}
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm p-3 sm:p-4 max-w-[308px] m-[25px]">
+                        <p className="text-[10px] uppercase tracking-wide text-[#6B7280] font-medium">
+                          News ·{" "}
+                          {featuredNews?.publishedAt
+                            ? format(featuredNews.publishedAt, "d MMMM yyyy")
+                            : "9 Dec 2025"}
+                        </p>
+                        <p className="mt-1 text-sm font-medium text-black leading-snug">
+                          {featuredNews?.description ||
+                            "Nigeria invests in blood initiatives, saving more lives."}
+                        </p>
+                        <Link
+                          href={featuredNews?.url || "/news"}
+                          className="inline-flex items-center gap-1 mt-2 text-primary font-medium text-xs hover:underline"
+                        >
+                          Read news <ArrowRight size={12} />
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-3 flex-1">
+                    {isLoading
+                      ? Array.from({ length: 3 }).map((_, index) => (
+                          <NewsCardSkeleton key={index} />
+                        ))
+                      : newsItems.map((e) => (
+                          <div
+                            key={e.id}
+                            className="flex flex-col sm:flex-row gap-2 sm:gap-3 hover:border-[#D1D5DB] shadow-[0px_4px_20px_#00000026] active:shadow-none transition-shadow duration-200"
+                          >
+                            <div className="relative w-full sm:w-[266px] h-[135px] shrink-0">
+                              <NewsFallbackImage
+                                src={e.image}
+                                alt={e.title || "News"}
+                                fallbackSrc="/images/news_image.jpg"
+                                className="object-cover"
+                                sizes="96px"
+                              />
+                            </div>
+                            <div className="flex flex-col min-w-0 flex-1 py-[11px] px-5 md:px-0 gap-2">
+                              <div className="flex flex-col gap-2">
+                                <p className="text-[#6B7280] text-xs">
+                                  {e.publishedAt
+                                    ? format(e.publishedAt, "d MMMM yyyy")
+                                    : "9 December 2025"}
+                                </p>
+                                <p className="text-xs font-medium text-black line-clamp-2">
+                                  {e.description}
+                                </p>
+                              </div>
+                              <Link
+                                href={e.url}
+                                className="text-primary font-medium text-xs mt-1 hover:underline w-fit"
+                              >
+                                Read news
+                              </Link>
+                            </div>
+                          </div>
+                        ))}
+                  </div>
+                </div>
+                {isLoading ? (
+                  <div className="h-8 w-24 bg-[#E5E7EB] rounded-sm animate-pulse" />
+                ) : (
                   <Link
                     href="/news"
-                    className="inline-flex items-center gap-1 mt-2 text-primary font-medium text-xs hover:underline"
+                    className="w-fit text-white text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 rounded-none! inline-block transition-colors"
                   >
-                    Read news <ArrowRight size={12} />
+                    Read more
                   </Link>
-                </div>
-              </div>
-              <div className="flex flex-col gap-3 flex-1">
-                {[
-                  {
-                    description:
-                      "Nigerian medical system releases breakthrough in HIV research",
-                    url: "https://i.pinimg.com/1200x/36/b9/b6/36b9b6b9f82b4a9dc290f40c25dccebe.jpg",
-                  },
-                  {
-                    description:
-                      "Scientists discover new mechanism regulating blood health",
-                    url: "https://i.pinimg.com/1200x/36/b9/b6/36b9b6b9f82b4a9dc290f40c25dccebe.jpg",
-                  },
-                  {
-                    description: "Prevention advances for Malaria and Fever",
-                    url: "https://i.pinimg.com/1200x/36/b9/b6/36b9b6b9f82b4a9dc290f40c25dccebe.jpg",
-                  },
-                ].map((item, id) => (
-                  <div
-                    key={id}
-                    className="flex flex-col sm:flex-row gap-2 sm:gap-3  hover:border-[#D1D5DB] shadow-[0px_4px_20px_#00000026] active:shadow-none transition-shadow duration-200"
-                  >
-                    <div className="relative w-full sm:w-[266px] h-[135px] shrink-0">
-                      <Image
-                        className="object-cover"
-                        src={item.url}
-                        alt=""
-                        fill
-                        sizes="96px"
-                      />
-                    </div>
-                    <div className="flex flex-col min-w-0 flex-1 py-[11px] px-5 md:px-0 gap-2">
-                      <div className="flex flex-col gap-2">
-                        <p className="text-[#6B7280] text-xs">
-                          9 December 2025
-                        </p>
-                        <p className="text-xs font-medium text-black line-clamp-2">
-                          {item.description}
-                        </p>
-                      </div>
-                      <Link
-                        href="/news"
-                        className="text-primary font-medium text-xs mt-1 hover:underline w-fit"
-                      >
-                        Read news
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <Link
-              href="/book-demo"
-              className="w-fit text-white text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 rounded-none! inline-block transition-colors"
-            >
-              Read more
-            </Link>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -12,17 +12,9 @@ import {
 import classNames from "classnames";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  PropsWithChildren,
-  useState,
-  ReactElement,
-  useRef,
-  useEffect,
-} from "react";
-import gsap from "gsap";
+import { PropsWithChildren, useState, ReactElement } from "react";
 import { Avatar } from "../Avatar/avatar.component";
 import { FaBars } from "react-icons/fa";
-import { FiBell } from "react-icons/fi";
 import { useLogout } from "@/app/hooks/auth/useLogout.hook";
 import { useDashboard } from "@/app/hooks/dashboard/useDashboard.hook";
 import { NotificationBell } from "../notification/notification.component";
