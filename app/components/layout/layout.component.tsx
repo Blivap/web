@@ -12,12 +12,20 @@ import {
 import classNames from "classnames";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PropsWithChildren, useState, ReactElement } from "react";
+import {
+  PropsWithChildren,
+  useEffect,
+  useRef,
+  useState,
+  ReactElement,
+} from "react";
+import gsap from "gsap";
 import { Avatar } from "../Avatar/avatar.component";
 import { FaBars } from "react-icons/fa";
 import { useLogout } from "@/app/hooks/auth/useLogout.hook";
 import { useDashboard } from "@/app/hooks/dashboard/useDashboard.hook";
 import { NotificationBell } from "../notification/notification.component";
+import { ChevronDown, LogOut, Settings } from "lucide-react";
 
 // Define navigation item structure
 interface NavItem {
@@ -31,9 +39,54 @@ interface NavItem {
 export const Layout = (props: PropsWithChildren<unknown>) => {
   const [drawer, setDrawer] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { handleLogout } = useLogout();
   const closeDrawer = () => setDrawer(false);
   const { user } = useDashboard();
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const profileContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        profileContainerRef.current &&
+        !profileContainerRef.current.contains(e.target as Node)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isProfileMenuOpen]);
+
+  useEffect(() => {
+    const el = profileMenuRef.current;
+    if (!el) return;
+    if (isProfileMenuOpen) {
+      el.style.visibility = "visible";
+      gsap.to(el, {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        duration: 0.2,
+        ease: "power2.out",
+        overwrite: true,
+      });
+    } else {
+      gsap.to(el, {
+        opacity: 0,
+        scale: 0.96,
+        y: -6,
+        duration: 0.15,
+        ease: "power2.in",
+        overwrite: true,
+        onComplete: () => {
+          if (el) el.style.visibility = "hidden";
+        },
+      });
+    }
+  }, [isProfileMenuOpen]);
 
   return (
     <div className=" bg-[#f8f8f8]  h-screen grow flex ">
@@ -73,12 +126,6 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
             <span>{isDarkMode ? "Dark Mode" : "Light Mode"}</span>
             <ToggleSwitch checked={isDarkMode} onChange={setIsDarkMode} />
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center font-medium text-base gap-4 transition-colors duration-200 text-foundation-dark hover:text-primary"
-          >
-            <span>Logout</span>
-          </button>
         </div>
       </div>
       {/* Topbar */}
@@ -86,18 +133,74 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
         <div className="w-full py-3.5 px-5 md:px-9 flex items-center justify-between ">
           <div className="flex items-center md:w-full justify-between gap-4">
             <div
-              className="flex items-center gap-2 order-2 md:order-1"
-              key={user?.id || "no-user"}
+              ref={profileContainerRef}
+              className="relative flex items-center gap-3 order-2 md:order-1"
             >
-              <Avatar
-                className="sm:size-10! size-9!"
-                src={user?.profileImage}
-              />
-              <div className="flex flex-col ">
-                <p className="text-[#000000] font-medium text-sm">
-                  {user?.id?.slice(0, 6) ?? "User"}
-                </p>
-                <p className="text-xs text-[#6B7280]">Donor</p>
+              <button
+                type="button"
+                onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+                className="flex items-center gap-3 cursor-pointer rounded-full border border-transparent hover:border-[#E5E7EB] pr-2 transition-colors"
+              >
+                <div
+                  className="flex items-center gap-2"
+                  key={user?.id || "no-user"}
+                >
+                  <Avatar
+                    className="sm:size-10! size-9!"
+                    src={user?.profileImage}
+                  />
+                  <div className="flex flex-col text-left">
+                    <p className="text-[#000000] font-medium text-sm">
+                      {user?.id?.slice(0, 6) ?? "User"}
+                    </p>
+                    <p className="text-xs text-[#6B7280]">Donor</p>
+                  </div>
+                </div>
+                <ChevronDown
+                  size={16}
+                  className={classNames("transition-transform duration-200", {
+                    "rotate-180": isProfileMenuOpen,
+                  })}
+                />
+              </button>
+              <div
+                ref={profileMenuRef}
+                className={classNames(
+                  "absolute top-full left-0 md:left-auto md:-right-20 mt-3 w-[220px] bg-white z-20 rounded-xl border border-[#DADADA] shadow-[2px_4px_10px_#00000014] p-2 origin-top-right ",
+                  isProfileMenuOpen
+                    ? "pointer-events-auto"
+                    : "pointer-events-none",
+                )}
+                style={{
+                  visibility: "hidden",
+                  opacity: 0,
+                  transform: "translateY(-6px) scale(0.96)",
+                }}
+              >
+                <div className="px-3 py-2 border-b border-[#F3F4F6]">
+                  <p className="text-sm font-medium text-black">
+                    {user?.id?.slice(0, 6) ?? "User"}
+                  </p>
+                  <p className="text-xs text-[#6B7280]">Donor account</p>
+                </div>
+                <div className="flex flex-col pt-2">
+                  <Link
+                    href="/settings"
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] hover:bg-[#F9FAFB] hover:text-primary transition-colors"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <Settings size={16} />
+                    Settings
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] hover:bg-[#F9FAFB] hover:text-primary transition-colors text-left"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
               </div>
             </div>
             <NotificationBell />
