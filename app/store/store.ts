@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
+import selectAvatarReducer from "./slices/selectAvatarSlice";
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       auth: authReducer,
+      selectAvatar: selectAvatarReducer,
     },
   });
 };

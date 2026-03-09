@@ -48,6 +48,11 @@ export type IUser = {
   isDeleted: boolean;
   lastActive: string;
 };
+export type IAvatar = {
+  id: string;
+  publicId: string;
+  url: string;
+};
 export type IAuthResponse = {
   accessToken?: string;
   access_token?: string;

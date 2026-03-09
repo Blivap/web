@@ -9,6 +9,7 @@ import {
   IResetPasswordPayload,
   IEditProfilePayload,
   IChangePasswordPayload,
+  IAvatar,
 } from "../types";
 import { IResponse } from "../types";
 
@@ -84,36 +85,6 @@ export default function authRepository() {
     logout(): Promise<IResponse<unknown>> {
       return fetcher(`${url}/logout`, {
         method: "POST",
-      });
-    },
-    getAvatars(): Promise<IResponse<{ data: string[] }>> {
-      const avatarUrls = [
-        "https://picsum.photos/600/400?random=1",
-        "https://picsum.photos/600/400?random=2",
-        "https://picsum.photos/600/400?random=3",
-        "https://picsum.photos/600/400?random=4",
-        "https://picsum.photos/600/600?random=5",
-        "https://picsum.photos/600/600?random=6",
-        "https://picsum.photos/800/500?random=7",
-        "https://picsum.photos/800/500?random=8",
-        "https://picsum.photos/500/700?random=9",
-        "https://picsum.photos/500/700?random=10",
-        "https://picsum.photos/700/700?random=11",
-        "https://picsum.photos/900/600?random=12",
-        "https://picsum.photos/1200/800?random=13",
-        "https://picsum.photos/400/400?random=14",
-        "https://picsum.photos/400/400?random=15",
-        "https://picsum.photos/400/400?random=16",
-      ];
-      const delayMs = 600;
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            data: { data: avatarUrls },
-            status: 200,
-            message: "OK",
-          });
-        }, delayMs);
       });
     },
   };
