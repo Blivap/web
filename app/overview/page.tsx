@@ -103,7 +103,7 @@ export default function OverviewPage() {
     <Layout>
       <div className="flex flex-col gap-[104px] lg:p-10 lg:pb-0">
         {/* Header: Welcome, account info, avatar */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mt-4">
+        <div className="flex flex-row sm:items-start sm:justify-between gap-4 mt-4">
           <div className="flex flex-col gap-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-black">
               Welcome
