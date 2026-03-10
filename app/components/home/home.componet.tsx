@@ -41,7 +41,7 @@ function NewsCardSkeleton() {
 export const HomeComponent = () => {
   const homeNewsParams = useMemo(
     () => ({
-      query: "health",
+      query: "blood donation",
       lang: "en" as const,
       max: 4,
     }),
