@@ -46,8 +46,12 @@ export default function NewsRepository() {
       to,
       truncate = "content",
     }: GetNewsParams = {}) => {
-      const { url, apiKey } = config.news;
-      const baseUrl = url?.endsWith("/") ? url : `${url}/`;
+      // Prefer an explicit GNews base URL from config; otherwise, fall back
+      // to the official public API endpoint.
+      const { url: configuredNewsUrl, apiKey } = config.news;
+      const rawBaseUrl = configuredNewsUrl || "https://gnews.io/api/v4/";
+      const baseUrl = rawBaseUrl.endsWith("/") ? rawBaseUrl : `${rawBaseUrl}/`;
+
       const normalizedQuery = query?.trim().slice(0, MAX_NEWS_QUERY_LENGTH);
       const endpoint = normalizedQuery ? "search" : "top-headlines";
       const safeMax = Math.min(MAX_NEWS_MAX, Math.max(MIN_NEWS_MAX, max));
@@ -78,6 +82,7 @@ export default function NewsRepository() {
       const response = await fetch(
         `${baseUrl}${endpoint}?${searchParams.toString()}`,
       );
+
       const data = await response.json();
       const errors = Array.isArray((data as { errors?: unknown })?.errors)
         ? ((data as { errors?: string[] }).errors ?? [])

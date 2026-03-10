@@ -6,10 +6,7 @@ import Link from "next/link";
 import { ArrowRight, Newspaper } from "lucide-react";
 import Image from "next/image";
 import { useNews } from "@/app/hooks/news/useNews.hooks";
-import type { NewsCategory } from "@/app/api/newsRepository";
 import { format } from "date-fns";
-
-const HOME_NEWS_CATEGORY: NewsCategory = "health";
 
 function NewsFeatureSkeleton() {
   return (
@@ -44,7 +41,7 @@ function NewsCardSkeleton() {
 export const HomeComponent = () => {
   const homeNewsParams = useMemo(
     () => ({
-      category: HOME_NEWS_CATEGORY,
+      query: "health",
       lang: "en" as const,
       max: 4,
     }),
