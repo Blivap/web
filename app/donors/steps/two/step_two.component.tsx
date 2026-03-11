@@ -39,19 +39,21 @@ export function StepTwo({
           e.preventDefault();
           handleContinue();
         }}
-        className="flex flex-col gap-6 mt-6 xl:mt-10"
+        className="flex flex-col gap-[22px] mt-6 xl:mt-10"
       >
-        <h2 className="text-lg font-semibold text-text-primary">
-          Enter your personal details
-        </h2>
-        <p className="text-sm text-text-secondary -mt-2">
-          Enter your personal details as stated on your passport, ID card or
-          driver&apos;s license.
-        </p>
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-text-primary">
+            Enter your personal details
+          </h2>
+          <p className="text-sm text-text-secondary ">
+            Enter your personal details as stated on your passport, ID card or
+            driver&apos;s license.
+          </p>
+        </div>
 
         <div className="flex flex-col gap-2">
           <span className="text-sm font-medium text-text-primary">Gender</span>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-4">
             {["man", "woman"].map((val) => (
               <Radio
                 key={val}
@@ -67,7 +69,7 @@ export function StepTwo({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid  gap-4">
           <div>
             <label
               htmlFor="fullName"
@@ -122,7 +124,7 @@ export function StepTwo({
           </div>
         </div>
 
-        <div className="bg-[#FDF2F4] rounded-lg p-4 sm:p-5 w-full">
+        <div className="bg-[#FDF2F4] rounded-lg p-4 sm:p-6 w-full">
           <h3 className="text-sm font-semibold text-text-primary mb-1">
             Email address
           </h3>
@@ -145,10 +147,7 @@ export function StepTwo({
           Enter your personal details
         </h2>
         <div className="flex flex-col gap-2 -mt-2">
-          <span className="text-sm font-medium text-text-primary">
-            Country of residence
-          </span>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-col gap-4">
             <Radio
               name="countryResidence"
               value="nigeria"
@@ -174,7 +173,7 @@ export function StepTwo({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label
               htmlFor="postalCode"
@@ -212,24 +211,24 @@ export function StepTwo({
               className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
             />
           </div>
+          <div>
+            <label
+              htmlFor="address"
+              className="block text-sm font-medium text-text-primary mb-1.5"
+            >
+              Address
+            </label>
+            <input
+              id="address"
+              type="text"
+              value={personal.address}
+              onChange={(e) => handlePersonalChange("address", e.target.value)}
+              placeholder="Address"
+              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+            />
+          </div>
         </div>
-        <div>
-          <label
-            htmlFor="address"
-            className="block text-sm font-medium text-text-primary mb-1.5"
-          >
-            Address
-          </label>
-          <input
-            id="address"
-            type="text"
-            value={personal.address}
-            onChange={(e) => handlePersonalChange("address", e.target.value)}
-            placeholder="Address"
-            className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-          />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid  gap-4">
           <div>
             <label
               htmlFor="streetName"
@@ -268,25 +267,25 @@ export function StepTwo({
               className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
             />
           </div>
-        </div>
-        <div>
-          <label
-            htmlFor="phoneNumber"
-            className="block text-sm font-medium text-text-primary mb-1.5"
-          >
-            Phone number *
-          </label>
-          <input
-            id="phoneNumber"
-            type="tel"
-            value={personal.phoneNumber}
-            onChange={(e) =>
-              handlePersonalChange("phoneNumber", e.target.value)
-            }
-            placeholder="Phone number*"
-            required
-            className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-          />
+          <div>
+            <label
+              htmlFor="phoneNumber"
+              className="block text-sm font-medium text-text-primary mb-1.5"
+            >
+              Phone number *
+            </label>
+            <input
+              id="phoneNumber"
+              type="tel"
+              value={personal.phoneNumber}
+              onChange={(e) =>
+                handlePersonalChange("phoneNumber", e.target.value)
+              }
+              placeholder="Phone number*"
+              required
+              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+            />
+          </div>
         </div>
 
         <button

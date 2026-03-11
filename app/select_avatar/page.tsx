@@ -4,6 +4,7 @@ import classNames from "classnames";
 import Image from "next/image";
 import { Button } from "../components/button/button.component";
 import { useSelectAvatar } from "../hooks/select-avatar/useSelectAvatar.hook";
+import { useEffect } from "react";
 
 export default function SelectAvatarPage() {
   const {
@@ -12,8 +13,14 @@ export default function SelectAvatarPage() {
     handleSelectAvatar,
     handleContinue,
     isLoading,
+    getAvatars,
+    isConfirming,
   } = useSelectAvatar();
-
+  useEffect(() => {
+    if (!avatars) {
+      void getAvatars();
+    }
+  }, [avatars, getAvatars]);
   return (
     <div className="flex flex-1 items-center justify-center p-5">
       <div className="flex flex-col gap-[56px]">
@@ -53,9 +60,9 @@ export default function SelectAvatarPage() {
                 ))}
           </div>
           <Button
-            disabled={!selectedAvatar || isLoading}
-            loading={isLoading}
-            onClick={handleContinue}
+            disabled={!selectedAvatar || isConfirming}
+            loading={isConfirming}
+            onClick={() => handleContinue(false)}
             className="rounded-[40px]!"
           >
             Continue

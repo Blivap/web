@@ -1,8 +1,14 @@
 import classNames from "classnames";
-import { ChangeEventHandler, FocusEventHandler, useState } from "react";
+import {
+  ChangeEventHandler,
+  DetailedHTMLProps,
+  FocusEventHandler,
+  InputHTMLAttributes,
+  useState,
+} from "react";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 
-interface InputProps {
+type InputProps = {
   name: string;
   placeholder?: string;
   error?: string;
@@ -11,7 +17,10 @@ interface InputProps {
   type?: string;
   onChange?: ChangeEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
-}
+  labelClassName?: string;
+  inputClassName?: string;
+  containerClassName?: string;
+} & DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export const Input = (props: InputProps) => {
   const [toggelePassword, setTogglePassword] = useState(false);
   const {
@@ -23,19 +32,35 @@ export const Input = (props: InputProps) => {
     value,
     onBlur,
     onChange,
+    labelClassName,
+    inputClassName,
+    containerClassName,
+    ...rest
   } = props;
   return (
-    <div className="flex flex-col gap-2 w-full">
-      <p className="text-[#9794AA] text-base font-medium">{label}</p>
+    <div
+      className={classNames("flex flex-col gap-2 w-full", containerClassName)}
+    >
+      <p
+        className={classNames(
+          "text-[#9794AA] text-base font-medium",
+          labelClassName,
+        )}
+      >
+        {label}
+      </p>
       <div className="grid gap-px">
         <div
           className={classNames(
-            "flex items-center border border-[#66666659] rounded-md w-full px-5 gap-3",
+            "flex items-center border border-[#66666659] rounded-md w-full px-4 gap-2",
             { "border-red-500": error },
           )}
         >
           <input
-            className="outline-none py-[19.5px]  w-full text-base font-medium"
+            className={classNames(
+              "outline-none py-4 w-full text-base font-medium",
+              inputClassName,
+            )}
             type={
               type === "password"
                 ? toggelePassword
@@ -48,6 +73,7 @@ export const Input = (props: InputProps) => {
             value={value}
             onChange={onChange}
             onBlur={onBlur}
+            {...rest}
           />
           {type === "password" && (
             <button
@@ -55,7 +81,7 @@ export const Input = (props: InputProps) => {
               onClick={() => setTogglePassword((prev) => !prev)}
               className="cursor-pointer"
             >
-              {toggelePassword ? <BsEye size={24} /> : <BsEyeSlash size={24} />}
+              {toggelePassword ? <BsEye size={24} /> : <BsEyeSlash size={16} />}
             </button>
           )}
         </div>

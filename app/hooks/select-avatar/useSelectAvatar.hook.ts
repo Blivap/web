@@ -1,17 +1,19 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { $api } from "@/app/api";
 import { AxiosError } from "axios";
 import { useSnackbar } from "@/app/components/snackbar/snackbar.context";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { setUser } from "@/app/store/slices/authSlice";
 import {
   setAvatars,
   setIsLoading,
   setSelectedAvatar,
   toggleSelectedAvatar,
 } from "@/app/store/slices/selectAvatarSlice";
+import { normalizeUser } from "@/app/utils/user";
 
 export function useSelectAvatar() {
   const router = useRouter();
@@ -20,7 +22,9 @@ export function useSelectAvatar() {
   const { avatars, isLoading, selectedAvatar } = useAppSelector(
     (state) => state.selectAvatar,
   );
+  const user = useAppSelector((state) => state.auth.user);
 
+  const [isConfirming, setIsConfirming] = useState<boolean>(false);
   const getAvatars = useCallback(async () => {
     try {
       dispatch(setIsLoading(true));
@@ -40,23 +44,44 @@ export function useSelectAvatar() {
     }
   }, [dispatch, showSnackbar]);
 
-  useEffect(() => {
-    if (!avatars) {
-      void getAvatars();
-    }
-  }, [avatars, getAvatars]);
-
   const handleSelectAvatar = (avatarUrl: string) => {
     dispatch(toggleSelectedAvatar(avatarUrl));
   };
 
-  const handleContinue = async () => {
+  const handleContinue = async (shouldRedirect: boolean = true) => {
     try {
       if (!selectedAvatar) return;
+      setIsConfirming(true);
       const { data, status } = await $api.avatar.setAvatar(selectedAvatar);
       if (status >= 200 && status < 300 && data) {
-        dispatch(setSelectedAvatar(data.data.url));
-        router.replace("/overview");
+        const newProfileImage = data.data?.url ?? selectedAvatar;
+        dispatch(setSelectedAvatar(newProfileImage));
+
+        // Update UI immediately from setAvatar response (avoids me() cache / "have to do it twice")
+        if (user) {
+          dispatch(
+            setUser({ ...user, profileImage: newProfileImage }),
+          );
+        }
+        if (typeof window !== "undefined" && newProfileImage) {
+          window.dispatchEvent(
+            new CustomEvent("blivap:set-avatar", {
+              detail: newProfileImage,
+            }),
+          );
+        }
+
+        // Refetch full user so rest of profile stays in sync
+        const { data: meData, status: meStatus } = await $api.auth.me();
+        if (meStatus >= 200 && meStatus < 300 && meData) {
+          const userPayload = normalizeUser(meData);
+          if (userPayload) dispatch(setUser(userPayload));
+        }
+
+        if (shouldRedirect) {
+          router.replace("/overview");
+          return;
+        }
       }
     } catch (err: unknown) {
       const message =
@@ -65,6 +90,8 @@ export function useSelectAvatar() {
             err.message)
           : "Unable to set avatar.";
       showSnackbar(message, "error");
+    } finally {
+      setIsConfirming(false);
     }
   };
 
@@ -73,6 +100,8 @@ export function useSelectAvatar() {
     selectedAvatar,
     handleSelectAvatar,
     handleContinue,
+    getAvatars,
     isLoading,
+    isConfirming,
   };
 }

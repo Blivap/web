@@ -215,8 +215,8 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
         </div>
       </div>
       {/* Main content area */}
-      <div className="relative flex flex-col gap-6 md:ml-[252px] m-2 md:m-2 pt-[74px] md:pl-2  flex-1  ">
-        <div className="flex-1 bg-white overflow-y-auto p-4 rounded border border-[#DADADA] no-scrollbar">
+      <div className="relative flex flex-col gap-6 md:ml-[252px] m-2 md:m-2 pt-[74px] md:pl-2  flex-1 overflow-hidden ">
+        <div className="flex-1 bg-white overflow-y-auto p-4 rounded border border-[#DADADA] no-scrollbar overflow-scroll">
           {props.children}
         </div>
       </div>

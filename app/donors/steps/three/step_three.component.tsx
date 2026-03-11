@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -81,6 +81,21 @@ const TIME_SLOTS = [
   "15:20",
 ];
 
+// Single diamond: rows 1, 2, 3, 4, 5, 4, 3, 1 (total 22)
+const DIAMOND_ROW_SIZES = [1, 2, 3, 4, 5, 4, 3, 1];
+
+function getDiamondRows<T>(items: T[]): T[][] {
+  const rows: T[][] = [];
+  let i = 0;
+  for (const size of DIAMOND_ROW_SIZES) {
+    if (i >= items.length) break;
+    rows.push(items.slice(i, i + size));
+    i += size;
+  }
+  if (i < items.length) rows.push(items.slice(i));
+  return rows;
+}
+
 export function StepThree({
   appointment,
   handleAppointmentChange,
@@ -89,6 +104,7 @@ export function StepThree({
   active,
 }: StepThreeProps) {
   const [hospitalCarouselIndex, setHospitalCarouselIndex] = useState(0);
+  const hospitalCarouselRef = useRef<HTMLDivElement | null>(null);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date();
     return { year: d.getFullYear(), month: d.getMonth() };
@@ -118,9 +134,40 @@ export function StepThree({
     [calendarMonth],
   );
 
+  // Keep the selected hospital card smoothly in view when index changes
+  // by scrolling the carousel container itself. Users can still scroll it
+  // with mouse or touch; this just recenters on button/index changes.
+  useEffect(() => {
+    const container = hospitalCarouselRef.current;
+    if (!container) return;
+
+    const items = container.querySelectorAll<HTMLLabelElement>("label");
+    if (!items.length) return;
+
+    const maxIndex = items.length - 1;
+    const clampedIndex = Math.max(0, Math.min(hospitalCarouselIndex, maxIndex));
+    const current = items[clampedIndex];
+    if (!current) return;
+
+    const containerWidth = container.clientWidth;
+    const itemWidth = current.clientWidth;
+    const itemLeft = current.offsetLeft;
+
+    const targetScrollLeft =
+      itemLeft - Math.max(0, (containerWidth - itemWidth) / 2);
+
+    container.scrollTo({
+      left: targetScrollLeft,
+      behavior: "smooth",
+    });
+  }, [hospitalCarouselIndex]);
+
   return (
     active && (
-      <form onSubmit={onConfirm} className="flex flex-col gap-6 mt-6 xl:mt-10">
+      <form
+        onSubmit={onConfirm}
+        className="flex flex-col gap-6 mt-6 xl:mt-10 overflow-hidden"
+      >
         <h2 className="text-lg font-semibold text-text-primary">
           Schedule your inspection appointment
         </h2>
@@ -134,20 +181,18 @@ export function StepThree({
           different location. You can indicate your preferred blood bank during
           the screening.
         </p>
-
-        <h3 className="text-base font-semibold text-text-primary">
-          Choose a location and time
-        </h3>
-        <p className="text-sm text-text-secondary -mt-2">
+        <p className="text-sm text-text-primary">
+          <span className="font-semibold "> Choose a location and time</span>
+          <br />
           Below you&apos;ll find the 5 locations closest to you. Select your
           favorite or search for a new location.
         </p>
 
-        <div>
+        <div className="flex flex-col flex-1 gap-4 p-4 py-6 bg-[#F7F5F3]">
           <p className="text-sm font-semibold text-text-primary text-center mb-3">
             Select a Hospital
           </p>
-          <div className="relative">
+          <div className="relative w-full ">
             <button
               type="button"
               onClick={() =>
@@ -172,17 +217,15 @@ export function StepThree({
             >
               <ChevronRight size={20} />
             </button>
-            <div className="overflow-hidden">
-              <div
-                className="flex transition-transform duration-300 ease-out"
-                style={{
-                  transform: `translateX(-${hospitalCarouselIndex * 100}%)`,
-                }}
-              >
+            <div
+              ref={hospitalCarouselRef}
+              className="relative w-full overflow-x-auto no-scrollbar"
+            >
+              <div className="flex gap-4">
                 {MOCK_HOSPITALS.map((h) => (
                   <label
                     key={h.id}
-                    className={`shrink-0 w-full min-w-0 px-2 sm:px-4 py-4 sm:py-6 rounded-lg border-2 cursor-pointer transition-colors block ${
+                    className={`shrink-0 w-full max-w-[178px] min-w-0 px-2 sm:px-4 py-4 sm:py-6 rounded-lg border-2 cursor-pointer transition-colors block  ${
                       appointment.hospitalId === h.id
                         ? "border-primary bg-primary/5"
                         : "border-border bg-white hover:border-primary/50"
@@ -227,17 +270,6 @@ export function StepThree({
                 ))}
               </div>
             </div>
-            <div className="flex justify-center gap-1.5 mt-3">
-              {MOCK_HOSPITALS.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setHospitalCarouselIndex(i)}
-                  aria-label={`Go to hospital ${i + 1}`}
-                  className={`w-2 h-2 rounded-full transition-colors ${i === hospitalCarouselIndex ? "bg-primary" : "bg-border hover:bg-primary/50"}`}
-                />
-              ))}
-            </div>
           </div>
         </div>
 
@@ -245,12 +277,12 @@ export function StepThree({
           <p className="text-sm font-semibold text-text-primary text-center mb-4">
             Select date and time
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">
+          <div className="grid grid-cols-1 justify-center content-center place-content-center lg:grid-cols-7 gap-6 border border-[#DADADA] px-10 py-15">
+            <div className="col-span-3 flex flex-col gap-8 items-center w-full">
+              <label className="block text-xs font-medium text-text-primary mb-2 bg-[#FFE2E2] rounded-[50px] px-5 py-2">
                 Choose a date
               </label>
-              <div className="border border-border rounded-lg p-4 bg-white">
+              <div className="w-full">
                 <div className="flex items-center justify-between mb-3">
                   <button
                     type="button"
@@ -263,7 +295,7 @@ export function StepThree({
                     className="p-1 rounded hover:bg-[#F3F4F6] text-text-primary"
                     aria-label="Previous month"
                   >
-                    <ChevronLeft size={20} />
+                    <ChevronLeft size={16} strokeWidth={0.8} />
                   </button>
                   <span className="text-sm font-medium text-text-primary capitalize">
                     {monthLabel}
@@ -279,13 +311,16 @@ export function StepThree({
                     className="p-1 rounded hover:bg-[#F3F4F6] text-text-primary"
                     aria-label="Next month"
                   >
-                    <ChevronRight size={20} />
+                    <ChevronRight size={16} strokeWidth={0.8} />
                   </button>
                 </div>
                 <div className="grid grid-cols-7 gap-1 text-center">
                   {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
                     (d) => (
-                      <span key={d} className="text-xs text-text-tertiary py-1">
+                      <span
+                        key={d}
+                        className="text-[8px] font-semibold text-black  py-1"
+                      >
                         {d}
                       </span>
                     ),
@@ -314,24 +349,32 @@ export function StepThree({
                 </div>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">
+            <div className="col-span-1 h-px w-full place-self-center lg:h-full max-h-[380px] lg:w-px  bg-[#DADADA] self-center mx-auto" />
+            <div className="col-span-3  flex flex-col gap-8 items-center w-full">
+              <label className="block text-xs font-medium text-text-primary mb-2 bg-[#FFE2E2] rounded-[50px] px-5 py-2">
                 Choose a time
               </label>
-              <div className="flex flex-wrap gap-2">
-                {TIME_SLOTS.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => handleAppointmentChange("time", t)}
-                    className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
-                      appointment.time === t
-                        ? "bg-primary text-white border-primary"
-                        : "border-border text-text-primary hover:border-primary/50"
-                    }`}
+              <div className="flex flex-col items-center gap-2">
+                {getDiamondRows(TIME_SLOTS).map((row, rowIndex) => (
+                  <div
+                    key={rowIndex}
+                    className="flex flex-wrap justify-center gap-2"
                   >
-                    {t}
-                  </button>
+                    {row.map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => handleAppointmentChange("time", t)}
+                        className={`px-3 py-2 text-xs rounded-lg shadow-[0px_0px_4px_#00000026] transition-colors ${
+                          appointment.time === t
+                            ? "bg-primary text-white border-primary"
+                            : "border-border text-text-primary hover:border-primary/50"
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
                 ))}
               </div>
             </div>
@@ -348,7 +391,9 @@ export function StepThree({
               }
               className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
             />
-            <span>I agree to the terms and conditions.</span>
+            <span className="text-xs">
+              I agree to the terms and conditions.
+            </span>
           </label>
           <label className="flex items-start gap-3 cursor-pointer text-sm text-text-primary">
             <input
@@ -359,7 +404,7 @@ export function StepThree({
               }
               className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
             />
-            <span>
+            <span className="text-xs">
               Yes, I give Blivap permission to process and use my data as stated
               in the{" "}
               <Link href="/privacy" className="underline hover:text-primary">
