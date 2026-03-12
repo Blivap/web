@@ -94,7 +94,7 @@ export const NotificationBell = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
-
+  //  fade in and out the panel
   useEffect(() => {
     const el = panelRef.current;
     if (!el) return;
