@@ -108,10 +108,12 @@ export default function About() {
             </p>
             <div className="flex flex-wrap gap-2">
               <Link
-                href="/register"
+                href="https://calendly.com/care-blivap/30min"
+                target="_blank"
+                rel="noreferrer"
                 className="text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors inline-block"
               >
-                Register as a donor
+                Book Demo
               </Link>
               <Link
                 href="/contact"

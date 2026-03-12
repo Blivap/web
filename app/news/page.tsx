@@ -562,8 +562,10 @@ export default function News() {
                 </p>
               </div>
               <Link
-                href="/book-demo"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-primary hover:bg-white/90 transition-colors"
+                href="https://calendly.com/care-blivap/30min"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-primary hover:bg白/90 transition-colors"
               >
                 Book a demo
                 <ArrowRight size={14} />

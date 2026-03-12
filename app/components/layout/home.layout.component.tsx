@@ -261,10 +261,12 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
               </p>
             </div>
             <Link
-              href="/book-demo"
+              href="https://calendly.com/care-blivap/30min"
+              target="_blank"
+              rel="noreferrer"
               className="w-full sm:w-fit text-white text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 rounded-md inline-block text-center transition-colors mt-1"
             >
-              Register as a donor
+              Book a demo
             </Link>
           </div>
         </div>

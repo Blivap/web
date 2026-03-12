@@ -66,7 +66,9 @@ export const HomeComponent = () => {
             </Link>
             <div className="flex items-center gap-2 sm:gap-4">
               <Link
-                href="/book-demo"
+                href="https://calendly.com/care-blivap/30min"
+                target="_blank"
+                rel="noreferrer"
                 className="text-xs font-medium py-2 px-4 rounded-full bg-primary text-white hover:bg-primary/90 transition-colors"
               >
                 Book a demo
@@ -82,9 +84,11 @@ export const HomeComponent = () => {
               </p>
               <Link
                 className="w-fit bg-black hover:bg-black/80 text-white text-xs font-medium py-2 px-3.5 rounded-md inline-block transition-colors"
-                href="/book-demo"
+                href="https://calendly.com/care-blivap/30min"
+                target="_blank"
+                rel="noreferrer"
               >
-                Register as a donor (EN)
+                Book a demo
               </Link>
             </div>
             <div className="flex flex-col gap-3 bg-white px-4 sm:px-5 md:px-6 pt-4 sm:pt-5 pb-5 sm:pb-6 shadow-sm max-w-150 relative w-full  z-10 mt-2 sm:mt-0 rounded-lg border border-[#E5E7EB]">
@@ -138,7 +142,9 @@ export const HomeComponent = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Link
-                href="/book-demo"
+                href="https://calendly.com/care-blivap/30min"
+                target="_blank"
+                rel="noreferrer"
                 className="w-full sm:w-fit text-white text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 rounded-md inline-block text-center transition-colors"
               >
                 Book a demo
