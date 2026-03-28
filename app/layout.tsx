@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter, Poppins } from "next/font/google";
 import localFont from "next/font/local";
-import "./globals.css";
-import { SnackbarProvider } from "./components/snackbar/snackbar.context";
-import { Snackbar } from "./components/snackbar/snackbar.component";
-import { config } from "./utils/config";
+import "@/styles/globals.css";
+import { SnackbarProvider } from "@/components/feedback/snackbar/snackbar.context";
+import { Snackbar } from "@/components/feedback/snackbar/snackbar.component";
+import { config } from "@/config/env";
 import StoreProvider from "./store/provider";
-import { StructuredData } from "./components/seo/structured-data";
-import { AuthChecker } from "./components/auth/auth-checker";
+import { StructuredData } from "@/components/seo/structured-data";
+import { AuthChecker } from "@/components/auth/auth-checker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

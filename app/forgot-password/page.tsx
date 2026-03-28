@@ -1,9 +1,9 @@
 "use client";
 
-import { Input } from "@/app/components/inputs/input.component";
-import { AuthLayout } from "@/app/components/layout/auth.layout.component";
-import { useForgotPassword } from "@/app/hooks/auth/useForgotPassword.hook";
-import { forgotPasswordSchema } from "@/app/schema/auth.schema";
+import { Input } from "@/components/forms/inputs/input.component";
+import { AuthLayout } from "@/components/layout/auth.layout.component";
+import { useForgotPassword } from "@/hooks/auth/useForgotPassword.hook";
+import { forgotPasswordSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import Image from "next/image";
 import Link from "next/link";

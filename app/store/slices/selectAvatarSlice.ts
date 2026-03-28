@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { IAvatar } from "@/app/types";
+import { IAvatar } from "@/types";
 
 interface SelectAvatarState {
   avatars: IAvatar[] | null;

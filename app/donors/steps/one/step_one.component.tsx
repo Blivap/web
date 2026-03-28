@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Info } from "lucide-react";
-import { Radio } from "@/app/components/inputs/Radio";
+import { Radio } from "@/components/forms/Radio";
 
 export type MedicalAnswers = Record<string, string>;
 
@@ -231,6 +231,19 @@ export function StepOne({
             Continue
           </button>
         </form>
+        <div className="border-[#960018] border-l-4 bg-[#FFE2E2] flex gap-4 p-4 mt-10 sm:mt-12.5 ">
+          <Info size={16} className="text-primary" />
+          <div className="flex flex-col gap-0.75">
+            <p className="text-xs font-semibold text-primary uppercase">
+              Confidentiality Note
+            </p>
+            <p className="text-xs text-[#5A403F]">
+              Your answers are protected under medical secrecy regulations.
+              High-integrity data ensures the safety of both donor and
+              recipient.
+            </p>
+          </div>
+        </div>
       </>
     )
   );

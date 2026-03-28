@@ -2,8 +2,8 @@
 
 import classNames from "classnames";
 import Image from "next/image";
-import { Button } from "../components/button/button.component";
-import { useSelectAvatar } from "../hooks/select-avatar/useSelectAvatar.hook";
+import { Button } from "../../components/button/button.component";
+import { useSelectAvatar } from "@/hooks/select-avatar/useSelectAvatar.hook";
 import { useEffect } from "react";
 
 export default function SelectAvatarPage() {

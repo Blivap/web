@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { generateMetadata as genMeta } from "./utils/metadata";
-import { HomeComponent } from "./components/home/home.componet";
+import { generateMetadata as genMeta } from "../lib/utils/metadata";
+import { HomeComponent } from "../components/home/home.componet";
 
 export const metadata: Metadata = genMeta({
   title: "Blivap — Give Blood. Save Lives.",

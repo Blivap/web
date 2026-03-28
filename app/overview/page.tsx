@@ -3,10 +3,10 @@
 import { Suspense } from "react";
 import { Droplet, Star, Gem, DropletIcon } from "lucide-react";
 import Link from "next/link";
-import { Layout } from "../components/layout/layout.component";
-import { Avatar } from "../components/Avatar/avatar.component";
-import { Tabs, TabItem } from "../components/tabs/tabs.component";
-import { useDashboard } from "../hooks/dashboard/useDashboard.hook";
+import { Layout } from "../../components/layout/layout.component";
+import { Avatar } from "../../components/ui/Avatar/avatar.component";
+import { Tabs, TabItem } from "../../components/ui/tabs/tabs.component";
+import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 
 const BECOME_DONOR_CARDS = [
   {

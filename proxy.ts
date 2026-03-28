@@ -1,34 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { publicRoutes } from "@/config/routes";
 
-const PUBLIC_ROUTES: string[] = [
-  "/",
-  "/book-demo",
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/reset-password",
-  "/researchers",
-  "/healthcare&professionals",
-  "/working_at",
-  "/about",
-  "/about-blood",
-  "/about-donating",
-  "/about-sperm",
-  "/contact",
-  "/education",
-  "/faq",
-  "/giving-blood",
-  "/healthcare",
-  "/news",
-  "/our-expertise",
-  "/research",
-  "/what-we-do",
-  "/not_found",
-  "/not-found",
-  "/privacy",
-  "/terms",
-  "/vulnerability-disclosure",
-];
+const PUBLIC_ROUTES: string[] = [...publicRoutes];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_ROUTES.includes(pathname);

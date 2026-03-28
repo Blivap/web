@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { config } from "../utils/config";
-import { IResponse } from "../types";
+import { config } from "@/config/env";
+import { IResponse } from "../../types";
 import Cookies from "js-cookie";
 
 export const fetcher = async <T = unknown>(

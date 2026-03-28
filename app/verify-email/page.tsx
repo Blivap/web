@@ -1,14 +1,14 @@
 "use client";
 
-import { Input } from "@/app/components/inputs/input.component";
-import { AuthLayout } from "@/app/components/layout/auth.layout.component";
-import { useVerifyEmail } from "@/app/hooks/auth/useVerifyEmail.hook";
-import { useResendVerificationLink } from "@/app/hooks/auth/useResendVerificationLink.hook";
-import { verifyEmailSchema } from "@/app/schema/auth.schema";
+import { Input } from "@/components/forms/inputs/input.component";
+import { AuthLayout } from "@/components/layout/auth.layout.component";
+import { useVerifyEmail } from "@/hooks/auth/useVerifyEmail.hook";
+import { useResendVerificationLink } from "@/hooks/auth/useResendVerificationLink.hook";
+import { verifyEmailSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import Image from "next/image";
 import { useAppSelector } from "../store/hooks";
-import { useLogout } from "../hooks/auth/useLogout.hook";
+import { useLogout } from "@/hooks/auth/useLogout.hook";
 import { LogOut } from "lucide-react";
 
 export default function VerifyEmailPage() {

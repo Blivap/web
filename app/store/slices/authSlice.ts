@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
-import { config } from "@/app/utils/config";
-import { IUser } from "@/app/types";
+import { config } from "@/config/env";
+import { IUser } from "@/types";
 interface AuthState {
   isAuthenticated: boolean;
   token: string | null;

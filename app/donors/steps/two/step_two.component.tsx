@@ -1,6 +1,6 @@
 "use client";
 
-import { Radio } from "@/app/components/inputs/Radio";
+import { Radio } from "@/components/forms/Radio";
 
 export interface PersonalDetails {
   gender: string;

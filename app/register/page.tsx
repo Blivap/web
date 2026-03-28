@@ -1,8 +1,12 @@
 "use client";
-import { Input } from "@/app/components/inputs/input.component";
-import { AuthLayout } from "@/app/components/layout/auth.layout.component";
-import { useRegister } from "@/app/hooks/auth/useRegister.hook";
-import { registerSchema } from "@/app/schema/auth.schema";
+import { Button } from "@/components/button/button.component";
+import { Checkbox } from "@/components/forms/checkbox";
+import { DatePicker } from "@/components/forms/date-picker";
+import { Input } from "@/components/forms/inputs/input.component";
+import { AuthLayout } from "@/components/layout/auth.layout.component";
+import { routes } from "@/config/routes";
+import { useRegister } from "@/hooks/auth/useRegister.hook";
+import { registerSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,17 +15,17 @@ export default function SignUpPage() {
   const { handleRegister, isLoading } = useRegister();
   return (
     <AuthLayout>
-      <div className="flex flex-col gap-15 max-w-132 w-full">
+      <div className="flex flex-col gap-12 mt-10 max-w-132 w-full">
         <div className="flex items-center gap-2.5">
           <Image src="/logo.svg" alt="Logo" width={45} height={45} />
-          <p className="font-semibold text-[20px] text-[#19181F]">Blivap</p>
+          <p className="font-semibold text-3xl text-[#19181F]">Blivap</p>
         </div>
         <div className="flex flex-col gap-8">
-          <div className="flex flex-col gap-6">
-            <p className="font-semibold text-2xl lg:text-[32px] text-[#100F14]">
+          <div className="flex flex-col gap-2">
+            <p className="font-semibold text-2xl  text-[#100F14]">
               Welcome to Blivap👋
             </p>
-            <p className="text-base text-[#49475A]">
+            <p className="text-sm text-[#49475A]">
               Kindly fill in your details below to create an account{" "}
             </p>
           </div>
@@ -30,9 +34,12 @@ export default function SignUpPage() {
               initialValues={{
                 firstname: "",
                 lastname: "",
+                dateOfBirth: "",
                 email: "",
                 password: "",
                 confirmPassword: "",
+                termsAndCondition: false,
+                privacyStatement: false,
               }}
               validationSchema={registerSchema}
               onSubmit={handleRegister}
@@ -43,28 +50,31 @@ export default function SignUpPage() {
                 errors,
                 handleChange,
                 handleBlur,
+                setFieldValue,
                 isValid,
               }) => {
                 return (
                   <form className="grid gap-6" onSubmit={handleSubmit}>
-                    <Input
-                      value={values.firstname}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.firstname}
-                      label="First Name"
-                      name="firstname"
-                      placeholder="Enter your firstname"
-                    />
-                    <Input
-                      value={values.lastname}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.lastname}
-                      label="Last Name"
-                      name="lastname"
-                      placeholder="Enter your lastname"
-                    />
+                    <div className="grid grid-cols-2 gap-4 md:gap-6">
+                      <Input
+                        value={values.firstname}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.firstname}
+                        label="First Name"
+                        name="firstname"
+                        placeholder="Enter your firstname"
+                      />
+                      <Input
+                        value={values.lastname}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.lastname}
+                        label="Last Name"
+                        name="lastname"
+                        placeholder="Enter your lastname"
+                      />
+                    </div>
                     <Input
                       value={values.email}
                       onChange={handleChange}
@@ -73,6 +83,16 @@ export default function SignUpPage() {
                       label="Email Address"
                       name="email"
                       placeholder="Enter your email address"
+                    />
+                    <DatePicker
+                      value={values.dateOfBirth}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={errors.dateOfBirth}
+                      label="Date Of Birth"
+                      name="dateOfBirth"
+                      placeholder="DD-MM-YYYY"
+                      max={new Date().toISOString().slice(0, 10)}
                     />
                     <Input
                       value={values.password}
@@ -94,19 +114,63 @@ export default function SignUpPage() {
                       type="password"
                       placeholder="Enter your password"
                     />
-                    <button
+                    <div className="flex flex-col gap-2">
+                      <Checkbox
+                        label={
+                          <p className="text-[#333333]">
+                            I agree to the{" "}
+                            <Link
+                              href={routes.terms}
+                              className="underline text-primary hover:text-primary/80 transition-colors"
+                            >
+                              terms and conditions
+                            </Link>
+                          </p>
+                        }
+                        name="termsAndCondition"
+                        value={values.termsAndCondition}
+                        onChange={(checked) => {
+                          void setFieldValue("termsAndCondition", checked);
+                        }}
+                        onBlur={handleBlur}
+                        error={errors.termsAndCondition}
+                      />
+
+                      <Checkbox
+                        label={
+                          <p className="text-[#333333]">
+                            I agree to the{" "}
+                            <Link
+                              href={routes.privacy}
+                              className="underline text-primary hover:text-primary/80 transition-colors"
+                            >
+                              privacy statement
+                            </Link>
+                          </p>
+                        }
+                        name="privacyStatement"
+                        value={values.privacyStatement}
+                        onChange={(checked) => {
+                          void setFieldValue("privacyStatement", checked);
+                        }}
+                        onBlur={handleBlur}
+                        error={errors.privacyStatement}
+                      />
+                    </div>
+
+                    <Button
                       type="submit"
                       disabled={!isValid || isLoading}
                       className="w-full disabled:bg-primary/50 disabled:cursor-not-allowed bg-primary text-white py-[12.5px] rounded-lg font-semibold text-base hover:bg-primary/85 active:bg-primary transition duration-200"
                     >
                       Register
-                    </button>
+                    </Button>
                   </form>
                 );
               }}
             </Formik>
             <div className="flex flex-col items-center gap-8 ">
-              <p className="text-base text-[#49475A]">
+              <p className="text-sm text-[#49475A]">
                 Already have an account?{" "}
                 <Link
                   href="/login"

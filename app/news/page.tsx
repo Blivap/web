@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { HomeLayout } from "../components/layout/home.layout.component";
-import { NewsFallbackImage } from "../components/image/news-fallback-image.component";
+import { HomeLayout } from "../../components/layout/home.layout.component";
+import { NewsFallbackImage } from "../../components/image/news-fallback-image.component";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -12,12 +12,12 @@ import {
   RefreshCw,
   Search,
 } from "lucide-react";
-import { useNews } from "../hooks/news/useNews.hooks";
+import { useNews } from "@/hooks/news/useNews.hooks";
 import type {
   NewsCategory,
   NewsCountry,
   NewsLanguage,
-} from "../api/newsRepository";
+} from "../../services/newsRepository";
 
 const HEALTH_CATEGORY: NewsCategory = "health";
 

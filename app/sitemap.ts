@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { config } from "./utils/config";
+import { config } from "@/config/env";
 
 const { url, env } = config;
 const siteUrl = env === "development" ? "http://localhost:3000" : url;

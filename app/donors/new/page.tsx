@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Layout } from "../../components/layout/layout.component";
+import { Layout } from "../../../components/layout/layout.component";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import { Formik, useFormikContext } from "formik";
 

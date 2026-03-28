@@ -1,21 +1,18 @@
 "use client";
 
-import { Layout } from "@/app/components/layout/layout.component";
-import { Input } from "@/app/components/inputs/input.component";
-import { useSettings } from "@/app/hooks/settings/useSettings.hook";
-import {
-  editProfileSchema,
-  changePasswordSchema,
-} from "@/app/schema/auth.schema";
+import { HomeLayout } from "@/components/layout/home.layout.component";
+import { Input } from "@/components/forms/inputs/input.component";
+import { useSettings } from "@/hooks/settings/useSettings.hook";
+import { editProfileSchema, changePasswordSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Camera, Pencil } from "lucide-react";
-import { Avatar } from "@/app/components/Avatar/avatar.component";
-import { useSelectAvatar } from "../hooks/select-avatar/useSelectAvatar.hook";
+import { Avatar } from "@/components/ui/Avatar/avatar.component";
+import { useSelectAvatar } from "@/hooks/select-avatar/useSelectAvatar.hook";
 import { FaPencilAlt } from "react-icons/fa";
 import Image from "next/image";
 import classNames from "classnames";
-import { Button } from "../components/button/button.component";
+import { Button } from "@/components/button/button.component";
 
 export default function SettingsPage() {
   const {
@@ -40,9 +37,9 @@ export default function SettingsPage() {
     }
   }, [avatars, getAvatars]);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-  const setProfileImageRef = useRef<
-    (field: string, value: string) => void
-  >(() => {});
+  const setProfileImageRef = useRef<(field: string, value: string) => void>(
+    () => {},
+  );
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -64,7 +61,7 @@ export default function SettingsPage() {
   );
 
   return (
-    <Layout>
+    <HomeLayout>
       <div className="flex flex-col gap-6 md:gap-8">
         <section className="bg-white border border-[#DADADA] rounded-xl md:rounded-2xl px-4 sm:px-6 md:px-10 py-5 sm:py-7 md:py-8 shadow-[0_8px_16px_rgba(15,23,42,0.03)]">
           <header className="flex flex-col w-fit mb-6 sm:mb-7">
@@ -311,6 +308,6 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
-    </Layout>
+    </HomeLayout>
   );
 }
