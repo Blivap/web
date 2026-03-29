@@ -3,7 +3,7 @@ import { Button } from "@/components/button/button.component";
 import { Checkbox } from "@/components/forms/checkbox";
 import { DatePicker } from "@/components/forms/date-picker";
 import { Input } from "@/components/forms/inputs/input.component";
-import { AuthLayout } from "@/components/layout/auth.layout.component";
+import { AuthLayout } from "@/layout/auth.layout.component";
 import { routes } from "@/config/routes";
 import { useRegister } from "@/hooks/auth/useRegister.hook";
 import { registerSchema } from "@/schema/auth.schema";

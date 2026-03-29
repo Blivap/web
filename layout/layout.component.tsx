@@ -20,12 +20,13 @@ import {
   ReactElement,
 } from "react";
 import gsap from "gsap";
-import { Avatar } from "../ui/Avatar/avatar.component";
+import { Avatar } from "../components/ui/Avatar/avatar.component";
 import { FaBars } from "react-icons/fa";
 import { useLogout } from "@/hooks/auth/useLogout.hook";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
-import { NotificationBell } from "../feedback/notification/notification.component";
+import { NotificationBell } from "../components/feedback/notification/notification.component";
 import { ChevronDown, Info, LogOut, Settings } from "lucide-react";
+import { routes } from "@/config/routes";
 
 // Define navigation item structure
 interface NavItem {
@@ -216,7 +217,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       </div>
       {/* Main content area */}
       <div className="relative flex flex-col gap-6 md:ml-63 m-2 md:m-2 pt-18.5 md:pl-2  flex-1 overflow-hidden ">
-        <div className="flex-1 bg-white overflow-y-auto p-4 rounded border border-[#DADADA] no-scrollbar overflow-scroll">
+        <div className="flex-1 bg-white overflow-y-auto p-4 xl:px-7 rounded border border-[#DADADA] no-scrollbar overflow-scroll">
           {!user?.nationalIdentificationNumberVerified && (
             <div className="border-[#960018] border-l-4 bg-[#FFE2E2] flex gap-4 p-4 mb-10 ">
               <Info size={16} className="text-primary" />
@@ -229,7 +230,10 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
                   securely protected under medical confidentiality laws, and
                   accurate data helps ensure the safety of both donors and
                   recipients.{" "}
-                  <Link href="/settings" className="underline text-primary">
+                  <Link
+                    href={routes.verifyId("")}
+                    className="underline text-primary"
+                  >
                     to verify your account details.
                   </Link>
                 </p>

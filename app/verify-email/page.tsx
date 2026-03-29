@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/forms/inputs/input.component";
-import { AuthLayout } from "@/components/layout/auth.layout.component";
+import { AuthLayout } from "@/layout/auth.layout.component";
 import { useVerifyEmail } from "@/hooks/auth/useVerifyEmail.hook";
 import { useResendVerificationLink } from "@/hooks/auth/useResendVerificationLink.hook";
 import { verifyEmailSchema } from "@/schema/auth.schema";

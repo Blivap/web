@@ -1,6 +1,6 @@
 "use client";
 
-import { HomeLayout } from "../../components/layout/home.layout.component";
+import { HomeLayout } from "../../layout/home.layout.component";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";

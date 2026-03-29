@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { Droplet, Star, Gem, DropletIcon } from "lucide-react";
 import Link from "next/link";
-import { Layout } from "../../components/layout/layout.component";
+import { Layout } from "../../layout/layout.component";
 import { Avatar } from "../../components/ui/Avatar/avatar.component";
 import { Tabs, TabItem } from "../../components/ui/tabs/tabs.component";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
@@ -101,7 +101,7 @@ export default function OverviewPage() {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-[104px] lg:p-10 lg:pb-0">
+      <div className="flex flex-col gap-[104px] ">
         {/* Header: Welcome, account info, avatar */}
         <div className="flex flex-row sm:items-start sm:justify-between gap-4 mt-4">
           <div className="flex flex-col gap-8">

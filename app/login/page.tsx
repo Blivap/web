@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/button/button.component";
 import { Input } from "@/components/forms/inputs/input.component";
-import { AuthLayout } from "@/components/layout/auth.layout.component";
+import { AuthLayout } from "@/layout/auth.layout.component";
 import { useLogin } from "@/hooks/auth/useLogin.hooks";
 import { loginSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";

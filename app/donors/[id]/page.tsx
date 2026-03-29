@@ -1,37 +1,24 @@
 "use client";
 
-import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
-import { Droplet, MapPin, Star } from "lucide-react";
-import { Layout } from "@/components/layout/layout.component";
+import { useParams, useRouter } from "next/navigation";
+import { ArrowRight, Droplet, Info, Star } from "lucide-react";
+import { Layout } from "@/layout/layout.component";
 import { ALL_DONORS } from "../donors.data";
+import { Avatar } from "@/components/ui/Avatar/avatar.component";
+import { Button } from "@/components/button/button.component";
+import { Collapsable } from "./components/collapsable.components";
+import { useAppSelector } from "@/app/store/hooks";
+import { routes } from "@/config/routes";
 
 export default function DonorDetailsPage() {
   const params = useParams<{ id: string }>();
-  const searchParams = useSearchParams();
   const donorId = decodeURIComponent(params.id);
   const donor = ALL_DONORS.find((d) => d.id === donorId);
-
+  const router = useRouter();
+  const user = useAppSelector((state) => state.auth.user);
   return (
     <Layout>
       <section className="flex flex-col gap-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-xl sm:text-3xl font-semibold text-text-primary">
-              Donor details
-            </h1>
-            <p className="text-xs sm:text-sm text-text-secondary">
-              View donor information before booking.
-            </p>
-          </div>
-          <Link
-            href="/donors"
-            className="text-xs sm:text-sm font-medium text-primary hover:underline"
-          >
-            Back to donors
-          </Link>
-        </div>
-
         {!donor ? (
           <div className="rounded-xl border border-border bg-white p-5">
             <p className="text-sm text-text-primary font-medium">
@@ -42,76 +29,73 @@ export default function DonorDetailsPage() {
             </p>
           </div>
         ) : (
-          <div className="rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_8px_16px_rgba(15,23,42,0.03)] p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="relative size-12 rounded-full bg-[#F3F4F6] overflow-hidden flex items-center justify-center">
-                  <span className="text-sm font-semibold text-text-primary">
-                    {donor.id.slice(0, 2)}
-                  </span>
+          <div className="flex flex-col gap-8">
+            <div className="flex gap-[11px]">
+              <Avatar className="size-[100px]!" />
+              <div className="flex items-center gap-[11px]">
+                <div className="grid gap-2">
+                  <div className="flex gap-[27px]">
+                    <div className="flex items-center gap-1">
+                      <Star className="size-4 fill-amber-400 text-amber-400" />
+                      <p className="text-sm font-medium text-[#6B7280] ">4.8</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Droplet className="size-2.5 text-primary" />
+                      <p className="text-sm font-medium text-[#6B7280]">
+                        4 donations
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm font-medium text-[#6B7280]">
+                    Abuja, Nigeria
+                  </p>
+                  <p className="text-xs text-[#6B7280]">2 packs</p>
                 </div>
-                <div className="flex flex-col">
-                  <p className="text-sm font-semibold text-text-primary">
-                    Donor ID: {donor.id}
-                  </p>
-                  <p className="text-xs text-text-secondary">
-                    Available: {donor.packs} packs
-                  </p>
-                </div>
-              </div>
-
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FDECEE] text-xs font-medium text-primary w-fit">
-                <span>Blood type</span>
-                <span className="font-semibold">{donor.bloodType}</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-              <div className="rounded-xl border border-border bg-[#F9FAFB] p-4">
-                <p className="text-xs text-text-secondary mb-2">Rating</p>
-                <div className="flex items-center gap-2">
-                  <Star
-                    className="size-4 text-[#FACC15] fill-[#FACC15]"
-                    strokeWidth={1.5}
-                  />
-                  <p className="text-sm font-semibold text-text-primary">
-                    {donor.rating.toFixed(1)}
-                  </p>
-                </div>
-              </div>
-              <div className="rounded-xl border border-border bg-[#F9FAFB] p-4">
-                <p className="text-xs text-text-secondary mb-2">Donations</p>
-                <div className="flex items-center gap-2">
-                  <Droplet className="size-4 text-primary" />
-                  <p className="text-sm font-semibold text-text-primary">
-                    {donor.donations}
-                  </p>
-                </div>
-              </div>
-              <div className="rounded-xl border border-border bg-[#F9FAFB] p-4">
-                <p className="text-xs text-text-secondary mb-2">Location</p>
-                <div className="flex items-center gap-2">
-                  <MapPin className="size-4 text-text-primary" />
-                  <p className="text-sm font-semibold text-text-primary">
-                    {donor.location}, {donor.country}
-                  </p>
+                <div className="rounded-full bg-[#FFE2E2] p-1.5 text-sm font-medium text-primary shrink-0">
+                  o+
                 </div>
               </div>
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 mt-6">
-              <Link
-                href={`/donors/new?donorId=${encodeURIComponent(donor.id)}&${searchParams.toString()}`}
-                className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-primary text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+            <div className="flex flex-col gap-8 bg-[#FFF0EF] rounded-2xl p-8 w-full max-w-[928px]">
+              <div className="flex flex-col">
+                <p className="text-sm font-bold text-[#261817]">
+                  Answered Screening Questionnaire From 784321{" "}
+                </p>
+                <p className="text-xs text-[#78716C]">
+                  This are the answered question of this donor
+                </p>
+              </div>
+              <div className="grid  gap-4 w-full">
+                {[1, 2, 3, 4, 5, 6].map((item) => (
+                  <Collapsable key={item} isOpen={item === 1} />
+                ))}
+              </div>
+              <div className="border-[#960018] border-l-4 bg-[#FFE2E2] flex gap-4 p-4 mb-10 ">
+                <Info size={16} className="text-primary" />
+                <div className="flex flex-col gap-0.75">
+                  <p className="text-xs font-semibold text-primary uppercase">
+                    Confidentiality Note
+                  </p>
+                  <p className="text-[10px] text-[#5A403F] max-w-200">
+                    Your answers are protected under medical secrecy
+                    regulations. High-integrity data ensures the safety of both
+                    donor and recipient.
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="primary"
+                onClick={() =>
+                  router.push(
+                    user?.nationalIdentificationNumberVerified
+                      ? routes.scheduleAppointment(donorId)
+                      : routes.verifyId(donorId),
+                  )
+                }
+                className="max-w-[271px] self-end py-3 px-10 text-xs font-semibold flex gap-2 items-center"
               >
-                Book appointment
-              </Link>
-              <Link
-                href="/donors"
-                className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg border border-border bg-white text-sm font-medium text-text-primary hover:bg-[#F9FAFB] transition-colors"
-              >
-                Choose another donor
-              </Link>
+                Continue with donation <ArrowRight className="size-4" />
+              </Button>
             </div>
           </div>
         )}

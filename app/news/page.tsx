@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { HomeLayout } from "../../components/layout/home.layout.component";
+import { HomeLayout } from "../../layout/home.layout.component";
 import { NewsFallbackImage } from "../../components/image/news-fallback-image.component";
 import Link from "next/link";
 import {

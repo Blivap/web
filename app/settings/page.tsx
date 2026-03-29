@@ -1,6 +1,5 @@
 "use client";
 
-import { HomeLayout } from "@/components/layout/home.layout.component";
 import { Input } from "@/components/forms/inputs/input.component";
 import { useSettings } from "@/hooks/settings/useSettings.hook";
 import { editProfileSchema, changePasswordSchema } from "@/schema/auth.schema";
@@ -13,6 +12,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import Image from "next/image";
 import classNames from "classnames";
 import { Button } from "@/components/button/button.component";
+import { Layout } from "@/layout/layout.component";
 
 export default function SettingsPage() {
   const {
@@ -61,7 +61,7 @@ export default function SettingsPage() {
   );
 
   return (
-    <HomeLayout>
+    <Layout>
       <div className="flex flex-col gap-6 md:gap-8">
         <section className="bg-white border border-[#DADADA] rounded-xl md:rounded-2xl px-4 sm:px-6 md:px-10 py-5 sm:py-7 md:py-8 shadow-[0_8px_16px_rgba(15,23,42,0.03)]">
           <header className="flex flex-col w-fit mb-6 sm:mb-7">
@@ -308,6 +308,6 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
-    </HomeLayout>
+    </Layout>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import { HomeLayout } from "../layout/home.layout.component";
+import { HomeLayout } from "../../layout/home.layout.component";
 import { NewsFallbackImage } from "../image/news-fallback-image.component";
 import Link from "next/link";
 import { ArrowRight, Newspaper } from "lucide-react";

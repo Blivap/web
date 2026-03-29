@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, Star, Droplet } from "lucide-react";
-import { Layout } from "../../components/layout/layout.component";
+import { Layout } from "../../layout/layout.component";
 import Link from "next/link";
 import { ALL_DONORS, BLOOD_TYPES, type BloodType } from "./donors.data";
 

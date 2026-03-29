@@ -1,6 +1,6 @@
 "use client";
 
-import { HomeLayout } from "../../components/layout/home.layout.component";
+import { HomeLayout } from "../../layout/home.layout.component";
 import Link from "next/link";
 import { Droplet, Heart, Shield, CheckCircle } from "lucide-react";
 import Image from "next/image";

@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/forms/inputs/input.component";
-import { AuthLayout } from "@/components/layout/auth.layout.component";
+import { AuthLayout } from "@/layout/auth.layout.component";
 import { useResetPassword } from "@/hooks/auth/useResetPassword.hook";
 import { resetPasswordSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";

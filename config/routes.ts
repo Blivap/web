@@ -52,7 +52,8 @@ export const routes = {
   wallet: "/wallet",
   history: "/history",
   settings: "/settings",
-
+  verifyId: (id?: string) => `/verify-id${id ? `?donorId=${id}` : ""}`,
+  scheduleAppointment: (id: string) => `/schedule-appointment?donorId=${id}`,
   // Next.js routes
   apiOg: "/api/og",
 } as const;
