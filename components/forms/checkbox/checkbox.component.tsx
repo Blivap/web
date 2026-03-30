@@ -33,12 +33,7 @@ export type CheckboxProps = {
   wrapperClassName?: string;
 } & Omit<
   DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
-  | "type"
-  | "size"
-  | "checked"
-  | "value"
-  | "defaultChecked"
-  | "onChange"
+  "type" | "size" | "checked" | "value" | "defaultChecked" | "onChange"
 >;
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(

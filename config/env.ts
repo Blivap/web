@@ -31,11 +31,8 @@ function resolveSiteUrl(): string {
     : undefined;
 
   return (
-    first(
-      process.env.NEXT_PUBLIC_BASE_URL,
-      process.env.SITE_URL,
-      vercelUrl,
-    ) ?? "http://localhost:3000"
+    first(process.env.NEXT_PUBLIC_BASE_URL, process.env.SITE_URL, vercelUrl) ??
+    "http://localhost:3000"
   );
 }
 

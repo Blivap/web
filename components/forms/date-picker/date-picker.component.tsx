@@ -22,12 +22,7 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  CalendarDays,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 const MONTHS_SHORT = [
   "Jan",
@@ -152,6 +147,12 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
     const [monthMenuOpen, setMonthMenuOpen] = useState(false);
     const [yearMenuOpen, setYearMenuOpen] = useState(false);
 
+    const closePopover = useCallback(() => {
+      setMonthMenuOpen(false);
+      setYearMenuOpen(false);
+      setOpen(false);
+    }, []);
+
     const minDate = useMemo(() => (min ? parseYmd(min) : undefined), [min]);
     const maxDate = useMemo(() => (max ? parseYmd(max) : undefined), [max]);
 
@@ -187,9 +188,11 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
       return { year: base.getFullYear(), month: base.getMonth() };
     });
 
+    /* Sync calendar month to selection when opening or when value changes while open. */
     useEffect(() => {
       if (!open) return;
       const base = selected ?? new Date();
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- align cursor with `selected` when popover opens or value changes
       setCursor(clampCursor(base.getFullYear(), base.getMonth()));
     }, [open, selected, clampCursor]);
 
@@ -223,21 +226,14 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
     );
 
     useEffect(() => {
-      if (!open) {
-        setMonthMenuOpen(false);
-        setYearMenuOpen(false);
-      }
-    }, [open]);
-
-    useEffect(() => {
       if (!open) return;
       const onDoc = (e: MouseEvent) => {
         const el = containerRef.current;
-        if (el && !el.contains(e.target as Node)) setOpen(false);
+        if (el && !el.contains(e.target as Node)) closePopover();
       };
       document.addEventListener("mousedown", onDoc);
       return () => document.removeEventListener("mousedown", onDoc);
-    }, [open]);
+    }, [open, closePopover]);
 
     useEffect(() => {
       if (!monthMenuOpen) return;
@@ -268,16 +264,16 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
         } else if (monthMenuOpen) {
           setMonthMenuOpen(false);
         } else {
-          setOpen(false);
+          closePopover();
         }
       };
       document.addEventListener("keydown", onKey);
       return () => document.removeEventListener("keydown", onKey);
-    }, [open, monthMenuOpen, yearMenuOpen]);
+    }, [open, monthMenuOpen, yearMenuOpen, closePopover]);
 
     const commitValue = (ymd: string) => {
       onChange?.(createChangeEvent(name, ymd));
-      setOpen(false);
+      closePopover();
       requestAnimationFrame(() => onBlur?.(createBlurEvent(name)));
     };
 

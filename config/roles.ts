@@ -47,7 +47,10 @@ export const routeRoleRules: readonly {
   { prefix: routes.donorsNew, roles: [Role.DONOR, Role.HOSPITAL, Role.ADMIN] },
   { prefix: routes.donors, roles: [Role.DONOR, Role.HOSPITAL, Role.ADMIN] },
   { prefix: routes.selectAvatar, roles: [Role.DONOR, Role.ADMIN] },
-  { prefix: routes.verifyEmail, roles: [Role.DONOR, Role.HOSPITAL, Role.ADMIN] },
+  {
+    prefix: routes.verifyEmail,
+    roles: [Role.DONOR, Role.HOSPITAL, Role.ADMIN],
+  },
   { prefix: routes.overview, roles: [Role.DONOR, Role.HOSPITAL, Role.ADMIN] },
   { prefix: routes.dashboard, roles: [Role.DONOR, Role.HOSPITAL, Role.ADMIN] },
   { prefix: routes.wallet, roles: [Role.DONOR, Role.ADMIN] },

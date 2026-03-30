@@ -5,7 +5,6 @@ import { useSettings } from "@/hooks/settings/useSettings.hook";
 import { editProfileSchema, changePasswordSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Camera, Pencil } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
 import { useSelectAvatar } from "@/hooks/select-avatar/useSelectAvatar.hook";
 import { FaPencilAlt } from "react-icons/fa";
@@ -57,7 +56,7 @@ export default function SettingsPage() {
       email: user?.email ?? "",
       profileImage: user?.profileImage ?? "",
     }),
-    [user?.firstname, user?.lastname, user?.phonenumber, user?.profileImage],
+    [user?.firstname, user?.lastname, user?.email, user?.profileImage],
   );
 
   return (

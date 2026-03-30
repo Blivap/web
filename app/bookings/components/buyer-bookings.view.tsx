@@ -28,7 +28,8 @@ const REQUESTER_ENTITIES: RequesterEntity[] = [
     tab: "active",
     date: "Mar 28, 2026",
     title: "Whole blood — O+ · urgent window",
-    subtitle: "Request from: City Medical Center · Estimated collection within 48h",
+    subtitle:
+      "Request from: City Medical Center · Estimated collection within 48h",
     pillLabel: "Awaiting you",
     pillVariant: "pending",
   },
@@ -120,7 +121,10 @@ export function BuyerBookingsView() {
     const newOffers = 1;
     const followUps = 1;
 
-    const mapRow = (e: RequesterEntity, tab: RequesterTab): BookingsShellRow => {
+    const mapRow = (
+      e: RequesterEntity,
+      tab: RequesterTab,
+    ): BookingsShellRow => {
       let actionsSlot: ReactNode;
 
       if (cancelledRequestIds.has(e.id)) {
@@ -144,7 +148,9 @@ export function BuyerBookingsView() {
               type="button"
               className={btnSecondary}
               onClick={() =>
-                showSnackbar("Full request details will open here when connected to your account.")
+                showSnackbar(
+                  "Full request details will open here when connected to your account.",
+                )
               }
             >
               View request
@@ -176,7 +182,9 @@ export function BuyerBookingsView() {
               type="button"
               className={btnSecondary}
               onClick={() =>
-                showSnackbar("Referral progress will sync with your wallet and notifications.")
+                showSnackbar(
+                  "Referral progress will sync with your wallet and notifications.",
+                )
               }
             >
               View status
@@ -185,7 +193,9 @@ export function BuyerBookingsView() {
               type="button"
               className={btnGhost}
               onClick={() =>
-                showSnackbar("A gentle reminder will be sent when messaging is enabled.")
+                showSnackbar(
+                  "A gentle reminder will be sent when messaging is enabled.",
+                )
               }
             >
               Remind contact
@@ -198,7 +208,9 @@ export function BuyerBookingsView() {
             type="button"
             className={btnGhost}
             onClick={() =>
-              showSnackbar("Request history export will be available from your account.")
+              showSnackbar(
+                "Request history export will be available from your account.",
+              )
             }
           >
             View details
@@ -275,8 +287,7 @@ export function BuyerBookingsView() {
           },
           {
             title: `Draft requests (0)`,
-            description:
-              "Incomplete requests you can finish and send later.",
+            description: "Incomplete requests you can finish and send later.",
           },
         ],
         mainListTitle: "Past requests & bookings",

@@ -19,7 +19,13 @@ type DonorBookingEntity = {
   facility: string;
   detailLine: string;
   /** Base status before user actions */
-  baseStatus: "action_needed" | "confirmed" | "scheduled_intro" | "completed" | "declined" | "expired";
+  baseStatus:
+    | "action_needed"
+    | "confirmed"
+    | "scheduled_intro"
+    | "completed"
+    | "declined"
+    | "expired";
   needsConfirmation: boolean;
 };
 
@@ -106,9 +112,10 @@ const DONOR_ENTITIES: DonorBookingEntity[] = [
   },
 ];
 
-function basePill(
-  e: DonorBookingEntity,
-): { label: string; variant: BookingPillVariant } {
+function basePill(e: DonorBookingEntity): {
+  label: string;
+  variant: BookingPillVariant;
+} {
   switch (e.baseStatus) {
     case "action_needed":
       return { label: "Action needed", variant: "pending" };
@@ -141,15 +148,25 @@ export function DonorBookingsView() {
   >({});
   const [reportedIds, setReportedIds] = useState<Set<string>>(() => new Set());
 
-  const accept = useCallback((id: string) => {
-    setResponseById((prev) => ({ ...prev, [id]: "accepted" }));
-    showSnackbar("You accepted this appointment. The facility has been notified.");
-  }, [showSnackbar]);
+  const accept = useCallback(
+    (id: string) => {
+      setResponseById((prev) => ({ ...prev, [id]: "accepted" }));
+      showSnackbar(
+        "You accepted this appointment. The facility has been notified.",
+      );
+    },
+    [showSnackbar],
+  );
 
-  const decline = useCallback((id: string) => {
-    setResponseById((prev) => ({ ...prev, [id]: "declined" }));
-    showSnackbar("You declined this booking. The slot may be offered to others.");
-  }, [showSnackbar]);
+  const decline = useCallback(
+    (id: string) => {
+      setResponseById((prev) => ({ ...prev, [id]: "declined" }));
+      showSnackbar(
+        "You declined this booking. The slot may be offered to others.",
+      );
+    },
+    [showSnackbar],
+  );
 
   const report = useCallback(
     (id: string) => {
@@ -193,7 +210,9 @@ export function DonorBookingsView() {
       if (tab === "active" && e.needsConfirmation) {
         if (response === "accepted") {
           actionsSlot = (
-            <span className="text-xs text-emerald-700">Confirmed — see email for details.</span>
+            <span className="text-xs text-emerald-700">
+              Confirmed — see email for details.
+            </span>
           );
         } else if (response === "declined") {
           actionsSlot = (
@@ -251,7 +270,9 @@ export function DonorBookingsView() {
             type="button"
             className={ghostBtnClass}
             onClick={() =>
-              showSnackbar("Visit summary will be available from your history export.")
+              showSnackbar(
+                "Visit summary will be available from your history export.",
+              )
             }
           >
             Visit summary

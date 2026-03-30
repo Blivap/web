@@ -22,6 +22,7 @@ export const Collapsable = ({ isOpen: initialIsOpen }: CollapsableProps) => {
     if (!isOpen) {
       gsap.set(el, { height: 0, overflow: "hidden" });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only gsap init; `isOpen` must not be a dependency
   }, []);
 
   useEffect(() => {

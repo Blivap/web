@@ -169,10 +169,7 @@ export function BookingsShell({ tabPanels, tabLabels }: BookingsShellProps) {
       <h1 className="text-2xl font-bold text-text-primary sm:text-3xl">
         My Bookings
       </h1>
-      <Tabs
-        defaultTabValue={tabLabels.active}
-        className="flex flex-col gap-8"
-      >
+      <Tabs defaultTabValue={tabLabels.active} className="flex flex-col gap-8">
         <TabItem label={tabLabels.active}>
           <BookingsTabBody {...tabPanels.active} />
         </TabItem>

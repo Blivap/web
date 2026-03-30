@@ -101,4 +101,3 @@ function generateMockDonors(count: number): Donor[] {
 }
 
 export const ALL_DONORS: Donor[] = generateMockDonors(60);
-

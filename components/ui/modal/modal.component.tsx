@@ -84,11 +84,7 @@ export function Modal({
         },
         0,
       );
-      tl.to(
-        backdrop,
-        { opacity: 0, duration: 0.22, ease: "power2.in" },
-        0,
-      );
+      tl.to(backdrop, { opacity: 0, duration: 0.22, ease: "power2.in" }, 0);
     }
 
     return () => {
