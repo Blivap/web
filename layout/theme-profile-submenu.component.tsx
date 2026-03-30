@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { Monitor, Moon, Sun } from "lucide-react";
 
 const rowSurfaceClass =
-  "w-full rounded-lg px-3 py-2.5 text-left text-sm text-[#374151] transition-colors dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/[0.06] hover:text-primary";
+  "w-full rounded-lg px-3 py-2.5 text-left text-sm text-[#374151] transition-colors dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/6 hover:text-primary";
 
 function preferenceLabel(preference: ThemePreference) {
   if (preference === "system") return "Auto";

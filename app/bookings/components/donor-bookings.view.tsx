@@ -135,7 +135,7 @@ function basePill(e: DonorBookingEntity): {
 }
 
 const actionBtnClass =
-  "rounded-md border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-xs font-medium text-text-primary transition-colors hover:bg-[#F9FAFB] dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/[0.06]";
+  "rounded-md border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-xs font-medium text-text-primary transition-colors hover:bg-[#F9FAFB] dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6";
 const dangerBtnClass =
   "rounded-md border border-red-200 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-50 dark:border-red-400/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50";
 const ghostBtnClass =

@@ -141,7 +141,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
         </div>
       </div>
       {/* Topbar */}
-      <div className="fixed top-0 left-0 right-0 md:left-63 z-[60] bg-white dark:bg-[#111118] border-b border-[#DADADA] dark:border-white/10 transition-colors duration-200">
+      <div className="fixed top-0 left-0 right-0 md:left-63 z-60 bg-white dark:bg-[#111118] border-b border-[#DADADA] dark:border-white/10 transition-colors duration-200">
         <div className="w-full py-3.5 px-5 md:px-9 flex items-center justify-between ">
           <div className="flex items-center md:w-full justify-between gap-4">
             <div
@@ -180,7 +180,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
                   )}
                 />
               </button>
-              <div className="absolute top-full left-0 z-[70] mt-3 origin-top-right md:left-auto md:right-auto">
+              <div className="absolute top-full left-0 z-70 mt-3 origin-top-right md:left-auto md:right-auto">
                 <div
                   ref={profileMenuRef}
                   className={classNames(
@@ -212,7 +212,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
                     />
                     <Link
                       href="/settings"
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/[0.06] hover:text-primary transition-colors"
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/6 hover:text-primary transition-colors"
                       onClick={() => setIsProfileMenuOpen(false)}
                     >
                       <Settings size={16} />
@@ -221,7 +221,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/[0.06] hover:text-primary transition-colors text-left"
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/6 hover:text-primary transition-colors text-left"
                     >
                       <LogOut size={16} />
                       Logout

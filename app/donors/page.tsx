@@ -188,7 +188,7 @@ export default function DonorsPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search available donor"
-                className="w-full rounded-xl border border-border bg-[#F9FAFB] py-2.5 pl-9 pr-3 text-xs text-text-primary placeholder:text-text-tertiary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 sm:text-sm dark:border-white/10 dark:bg-white/[0.06]"
+                className="w-full rounded-xl border border-border bg-[#F9FAFB] py-2.5 pl-9 pr-3 text-xs text-text-primary placeholder:text-text-tertiary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 sm:text-sm dark:border-white/10 dark:bg-white/6"
               />
             </div>
 

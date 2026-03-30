@@ -220,7 +220,7 @@ export function WalletPageView() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 rounded-lg bg-[#F8F6F4] px-3 py-2.5 dark:bg-white/[0.06]">
+        <div className="flex items-center gap-2 rounded-lg bg-[#F8F6F4] px-3 py-2.5 dark:bg-white/6">
           <Award className="h-4 w-4 shrink-0 text-primary" strokeWidth={1.75} />
           <p className="text-[11px] leading-relaxed text-text-secondary">
             <span className="font-semibold text-text-primary">
@@ -286,7 +286,7 @@ export function WalletPageView() {
                 m.unlocked
                   ? m.highlight
                     ? "border-primary/40 bg-[#FFF5F5] text-primary dark:bg-primary/15"
-                    : "border-[#E8E6E3] bg-[#FAFAF9] text-text-primary dark:border-white/10 dark:bg-white/[0.05]"
+                    : "border-[#E8E6E3] bg-[#FAFAF9] text-text-primary dark:border-white/10 dark:bg-white/5"
                   : "border-dashed border-[#D4D0CB] text-text-tertiary dark:border-white/20",
               )}
             >

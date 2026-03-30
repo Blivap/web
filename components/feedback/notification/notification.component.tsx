@@ -172,7 +172,7 @@ export const NotificationBell = () => {
                     "rounded-lg p-2.5 transition-colors",
                     n.read
                       ? "bg-white dark:bg-transparent"
-                      : "bg-[#F9FAFB] dark:bg-white/[0.06]",
+                      : "bg-[#F9FAFB] dark:bg-white/6",
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">

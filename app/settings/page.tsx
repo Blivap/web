@@ -287,7 +287,7 @@ export default function SettingsPage() {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center sm:justify-end">
               <button
                 type="button"
-                className="rounded-lg border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB] dark:border-white/10 dark:bg-[#14141a] dark:text-white/85 dark:hover:bg-white/[0.06]"
+                className="rounded-lg border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB] dark:border-white/10 dark:bg-[#14141a] dark:text-white/85 dark:hover:bg-white/6"
                 onClick={() => setIsAvatarModalOpen(false)}
               >
                 Cancel

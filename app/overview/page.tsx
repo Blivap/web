@@ -143,14 +143,14 @@ export default function OverviewPage() {
                     <h2 className="text-base font-medium text-text-primary">
                       Become a Donor
                     </h2>
-                    <div className="grid grid-cols-1 gap-4 bg-[#F0F0EF] p-6 sm:grid-cols-3 dark:bg-white/[0.04]">
+                    <div className="grid grid-cols-1 gap-4 bg-[#F0F0EF] p-6 sm:grid-cols-3 dark:bg-white/4">
                       {BECOME_DONOR_CARDS.map((card) => {
                         const Icon = card.icon;
                         return (
                           <Link
                             key={card.title}
                             href={card.href}
-                            className="flex flex-col items-center gap-[38px] rounded-xl border border-[#DADADA] bg-white p-5 transition-colors duration-150 hover:bg-white/70 hover:shadow-[2px_3px_5px_#00000014] active:shadow-none dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/[0.06] dark:hover:shadow-[2px_4px_16px_rgba(0,0,0,0.35)]"
+                            className="flex flex-col items-center gap-[38px] rounded-xl border border-[#DADADA] bg-white p-5 transition-colors duration-150 hover:bg-white/70 hover:shadow-[2px_3px_5px_#00000014] active:shadow-none dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6 dark:hover:shadow-[2px_4px_16px_rgba(0,0,0,0.35)]"
                           >
                             <div className="flex size-10 items-center justify-center rounded-full bg-[#F9E8EE] text-primary dark:bg-primary/20">
                               <Icon className="size-5" />
