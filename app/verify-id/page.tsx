@@ -8,6 +8,8 @@ import classNames from "classnames";
 import { Check, FileText, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { routes } from "@/config/routes";
 
 function IdCardGood() {
   return (
@@ -63,6 +65,10 @@ export default function VerifyIdPage() {
   const [textPreview, setTextPreview] = useState<string | null>(null);
   const [verifySuccessOpen, setVerifySuccessOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const donorId = searchParams.get("donorId") ?? undefined;
 
   const previewUrl = useMemo(() => {
     if (!selectedFile) return null;
@@ -414,7 +420,12 @@ export default function VerifyIdPage() {
           type="button"
           variant="primary"
           className="rounded-sm! min-w-[160px] px-10 py-3.5 font-bold text-base shadow-none"
-          onClick={() => setVerifySuccessOpen(false)}
+          onClick={() => {
+            setVerifySuccessOpen(false);
+            router.push(
+              donorId ? routes.scheduleAppointment(donorId) : routes.overview,
+            );
+          }}
         >
           Continue
         </Button>
