@@ -401,7 +401,7 @@ export default function VerifyIdPage() {
         <h2 className="mb-3 text-center text-2xl font-bold text-primary">
           Congratulations
         </h2>
-        <p className="mb-8 text-center text-sm leading-snug text-gray-500">
+        <p className="mb-8 text-center text-sm leading-snug text-text-secondary">
           You Have Successfully
           <br />
           Been Verified

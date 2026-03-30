@@ -53,7 +53,7 @@ export function AppointmentBookedModal({
       <h2 className="mb-3 text-center font-serif text-3xl font-bold tracking-tight text-primary sm:text-[2rem]">
         Congratulations
       </h2>
-      <p className="mb-8 text-center text-sm leading-snug text-gray-500 sm:text-base">
+      <p className="mb-8 text-center text-sm leading-snug text-text-secondary sm:text-base">
         You Have Successfully Booked An Appointment
       </p>
       <div
@@ -85,7 +85,7 @@ export function AppointmentBookedModal({
           onChange={(e) => setCode(e.target.value)}
           placeholder="Enter code"
           autoComplete="one-time-code"
-          className="w-full rounded-md border border-[#D1D5DB] bg-white px-4 py-3 text-center text-sm text-text-primary placeholder:text-gray-400 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
+          className="w-full rounded-md border border-border bg-white px-4 py-3 text-center text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 dark:border-white/10 dark:bg-[#14141a]"
         />
         <p className="mt-1 text-center text-xs leading-relaxed text-text-secondary">
           We sent a code to your email. Please enter the code here to confirm

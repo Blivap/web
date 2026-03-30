@@ -44,7 +44,7 @@ export function ProfileThemeCycleRow({
     >
       <span className="flex w-full items-center gap-2">
         <PreferenceIcon preference={preference} />
-        <span className="min-w-0 flex-1 truncate font-medium">
+        <span className="min-w-0 flex-1 truncate">
           Theme: {preferenceLabel(preference)}
         </span>
       </span>

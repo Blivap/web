@@ -244,6 +244,7 @@ export default function ScheduleAppointmentPage() {
               aria-label="Next hospital"
               className="absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-md text-text-primary hover:bg-[#F9FAFB] disabled:pointer-events-none disabled:opacity-40 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6"
             >
+              {" "}
               <ChevronRight size={20} />
             </button>
             <div
