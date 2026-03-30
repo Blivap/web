@@ -63,7 +63,7 @@ export default function SettingsPage() {
   return (
     <Layout>
       <div className="flex flex-col gap-6 md:gap-8">
-        <section className="bg-white border border-[#DADADA] rounded-xl md:rounded-2xl px-4 sm:px-6 md:px-10 py-5 sm:py-7 md:py-8 shadow-[0_8px_16px_rgba(15,23,42,0.03)]">
+        <section className="rounded-xl border border-[#DADADA] bg-white px-4 py-5 shadow-[0_8px_16px_rgba(15,23,42,0.03)] sm:px-6 sm:py-7 md:rounded-2xl md:px-10 md:py-8 dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
           <header className="flex flex-col w-fit mb-6 sm:mb-7">
             <h1 className="text-xl sm:text-2xl font-semibold text-primary">
               Account Setting
@@ -250,7 +250,7 @@ export default function SettingsPage() {
       </div>
       {isAvatarModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
-          <div className="bg-white rounded-2xl w-[90%] max-w-md sm:max-w-lg px-6 sm:px-8 py-7 shadow-xl flex flex-col gap-6">
+          <div className="flex w-[90%] max-w-md flex-col gap-6 rounded-2xl bg-white px-6 py-7 shadow-xl sm:max-w-lg sm:px-8 dark:bg-[#1a1a22] dark:shadow-[0_24px_48px_rgba(0,0,0,0.5)]">
             <h2 className="text-lg sm:text-xl font-semibold text-primary text-center mb-5">
               Select Avatar
             </h2>
@@ -288,7 +288,7 @@ export default function SettingsPage() {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center sm:justify-end">
               <button
                 type="button"
-                className="px-4 py-2 rounded-lg border border-[#E5E7EB] text-sm font-medium text-[#374151] bg-white hover:bg-[#F9FAFB] transition-colors"
+                className="rounded-lg border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB] dark:border-white/10 dark:bg-[#14141a] dark:text-white/85 dark:hover:bg-white/[0.06]"
                 onClick={() => setIsAvatarModalOpen(false)}
               >
                 Cancel

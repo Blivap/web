@@ -75,10 +75,10 @@ export const Collapsable = ({ isOpen: initialIsOpen }: CollapsableProps) => {
   }, [isOpen]);
 
   return (
-    <div className=" rounded-lg border border-[#F5F5F4] bg-white p-5">
+    <div className="rounded-lg border border-[#F5F5F4] bg-white p-5 dark:border-white/10 dark:bg-[#1a1a22]">
       <button
         type="button"
-        className="flex w-full cursor-pointer items-center justify-between gap-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 rounded-md"
+        className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#14141a]"
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
         aria-controls="collapsible-health-panel"
@@ -86,13 +86,13 @@ export const Collapsable = ({ isOpen: initialIsOpen }: CollapsableProps) => {
       >
         <div className="flex items-center gap-2">
           <div className="size-2 shrink-0 rounded-full bg-primary" />
-          <p className="text-xs font-medium text-[#261817]">
+          <p className="text-xs font-medium text-text-primary">
             GENERAL HEALTH & LIFE STYLE
           </p>
         </div>
         <ChevronDown
           ref={chevronRef}
-          className="size-4 shrink-0 text-[#A8A29E]"
+          className="size-4 shrink-0 text-text-tertiary"
           aria-hidden
         />
       </button>
@@ -105,7 +105,7 @@ export const Collapsable = ({ isOpen: initialIsOpen }: CollapsableProps) => {
       >
         <div className="grid grid-cols-2 gap-x-12 gap-y-6 mt-10">
           <div className="flex w-full flex-col gap-3">
-            <p className="text-xs font-semibold text-[#261817]">
+            <p className="text-xs font-semibold text-text-primary">
               Are you between 18 and 64 years old?
             </p>
             <div className="flex w-full gap-2">
@@ -124,7 +124,7 @@ export const Collapsable = ({ isOpen: initialIsOpen }: CollapsableProps) => {
             </div>
           </div>
           <div className="flex w-full flex-col gap-3">
-            <p className="text-xs font-semibold text-[#261817]">
+            <p className="text-xs font-semibold text-text-primary">
               Are you between 18 and 64 years old?
             </p>
             <div className="flex w-full gap-2">
@@ -143,7 +143,7 @@ export const Collapsable = ({ isOpen: initialIsOpen }: CollapsableProps) => {
             </div>
           </div>
           <div className="flex w-full flex-col gap-3">
-            <p className="text-xs font-semibold text-[#261817]">
+            <p className="text-xs font-semibold text-text-primary">
               Are you between 18 and 64 years old?
             </p>
             <div className="flex w-full gap-2">

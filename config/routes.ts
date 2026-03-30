@@ -51,6 +51,7 @@ export const routes = {
   donorsNew: "/donors/new",
   wallet: "/wallet",
   history: "/history",
+  bookings: "/bookings",
   settings: "/settings",
   verifyId: (id?: string) => `/verify-id${id ? `?donorId=${id}` : ""}`,
   scheduleAppointment: (id: string) => `/schedule-appointment?donorId=${id}`,

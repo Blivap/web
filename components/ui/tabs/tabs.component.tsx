@@ -117,7 +117,7 @@ export function Tabs({
     <div className={className}>
       <nav
         className={classNames(
-          "flex gap-6 border-b border-[#E5E7EB]",
+          "flex gap-6 border-b border-[#E5E7EB] dark:border-white/10",
           navClassName,
         )}
         role="tablist"
@@ -134,8 +134,8 @@ export function Tabs({
               className={classNames(
                 "pb-3 text-sm font-medium transition-colors",
                 isActive
-                  ? "text-black border-b-2 border-black"
-                  : "text-[#6B7280] hover:text-black",
+                  ? "border-b-2 border-primary text-primary dark:text-primary"
+                  : "text-text-secondary hover:text-text-primary",
                 tabClassName,
               )}
             >

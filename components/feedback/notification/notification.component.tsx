@@ -125,28 +125,33 @@ export const NotificationBell = () => {
     <div
       ref={containerRef}
       onClick={() => setIsOpen(!isOpen)}
-      className="relative border border-[#9CA3AF] rounded-full p-2 flex items-center justify-center order-1 md:order-2 cursor-pointer"
+      className="relative flex cursor-pointer items-center justify-center rounded-full border border-[#9CA3AF] p-2 transition-colors order-1 md:order-2 dark:border-white/25 dark:hover:border-white/40"
     >
       {unreadCount > 0 && (
-        <div className="absolute size-1.5 bg-[#FF0000] rounded-full top-2 right-3 border border-white" />
+        <div className="absolute top-2 right-3 size-1.5 rounded-full border border-white bg-[#FF0000] dark:border-[#111118]" />
       )}
-      <FiBell size={18} className="stroke-2 text-sm" />
+      <FiBell
+        size={18}
+        className="stroke-2 text-sm text-[#374151] dark:text-white/85"
+      />
       <span
         ref={panelRef}
         onClick={(e) => e.stopPropagation()}
         className={classNames(
-          "w-[280px] md:w-[350px] h-[400px] absolute top-10 left-0 md:left-auto md:-right-1 bg-white rounded border border-[#DADADA] shadow-[2px_3px_5px_#00000014] p-3 origin-top-right flex-1 flex flex-col",
+          "absolute top-10 left-0 flex h-[400px] w-[280px] flex-1 flex-col origin-top-right rounded-xl border border-[#DADADA] bg-white p-3 shadow-[2px_3px_5px_#00000014] md:left-auto md:-right-1 md:w-[350px] dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)]",
           isOpen ? "pointer-events-auto" : "pointer-events-none",
         )}
         style={{ visibility: "hidden", opacity: 0, transform: "scale(0.96)" }}
       >
-        <div className="p-3 border-b border-[#E5E7EB] flex items-center justify-between shrink-0">
-          <p className="text-sm font-semibold text-black">Notifications</p>
+        <div className="flex shrink-0 items-center justify-between border-b border-[#E5E7EB] p-3 dark:border-white/10">
+          <p className="text-sm font-semibold text-black dark:text-white">
+            Notifications
+          </p>
           {unreadCount > 0 && (
             <button
               type="button"
               onClick={markAllAsRead}
-              className="text-xs font-medium text-primary hover:text-primary/80 flex items-center gap-1"
+              className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 dark:hover:text-primary"
             >
               <CheckCheck size={14} />
               Mark all as read
@@ -155,7 +160,7 @@ export const NotificationBell = () => {
         </div>
         <div className="overflow-y-auto flex-1 min-h-0 p-2 custom-scrollbar">
           {notifications.length === 0 ? (
-            <p className="text-xs text-[#6B7280] py-6 text-center">
+            <p className="py-6 text-center text-xs text-[#6B7280] dark:text-white/50">
               No notifications yet.
             </p>
           ) : (
@@ -165,23 +170,27 @@ export const NotificationBell = () => {
                   key={n.id}
                   className={classNames(
                     "rounded-lg p-2.5 transition-colors",
-                    n.read ? "bg-white" : "bg-[#F9FAFB]",
+                    n.read
+                      ? "bg-white dark:bg-transparent"
+                      : "bg-[#F9FAFB] dark:bg-white/[0.06]",
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <p
                         className={classNames(
-                          "text-sm font-medium truncate",
-                          n.read ? "text-[#6B7280]" : "text-black",
+                          "truncate text-sm font-medium",
+                          n.read
+                            ? "text-[#6B7280] dark:text-white/50"
+                            : "text-black dark:text-white",
                         )}
                       >
                         {n.title}
                       </p>
-                      <p className="text-xs text-[#6B7280] mt-0.5 line-clamp-2">
+                      <p className="mt-0.5 line-clamp-2 text-xs text-[#6B7280] dark:text-white/55">
                         {n.message}
                       </p>
-                      <p className="text-[11px] text-[#9CA3AF] mt-1">
+                      <p className="mt-1 text-[11px] text-[#9CA3AF] dark:text-white/40">
                         {formatNotificationTime(n.createdAt)}
                       </p>
                     </div>
@@ -192,7 +201,7 @@ export const NotificationBell = () => {
                           e.stopPropagation();
                           markAsRead(n.id);
                         }}
-                        className="shrink-0 p-1.5 rounded-md hover:bg-[#E5E7EB] text-primary"
+                        className="shrink-0 rounded-md p-1.5 text-primary hover:bg-[#E5E7EB] dark:hover:bg-white/10"
                         title="Mark as read"
                         aria-label={`Mark "${n.title}" as read`}
                       >

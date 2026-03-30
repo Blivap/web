@@ -20,11 +20,11 @@ export default function DonorDetailsPage() {
     <Layout>
       <section className="flex flex-col gap-6">
         {!donor ? (
-          <div className="rounded-xl border border-border bg-white p-5">
-            <p className="text-sm text-text-primary font-medium">
+          <div className="rounded-xl border border-border bg-white p-5 dark:border-white/10 dark:bg-[#1a1a22]">
+            <p className="text-sm font-medium text-text-primary">
               Donor not found
             </p>
-            <p className="text-xs text-text-secondary mt-1">
+            <p className="mt-1 text-xs text-text-secondary">
               We couldn’t find a donor with id “{donorId}”.
             </p>
           </div>
@@ -37,31 +37,33 @@ export default function DonorDetailsPage() {
                   <div className="flex gap-[27px]">
                     <div className="flex items-center gap-1">
                       <Star className="size-4 fill-amber-400 text-amber-400" />
-                      <p className="text-sm font-medium text-[#6B7280] ">4.8</p>
+                      <p className="text-sm font-medium text-text-secondary">
+                        4.8
+                      </p>
                     </div>
                     <div className="flex items-center gap-1">
                       <Droplet className="size-2.5 text-primary" />
-                      <p className="text-sm font-medium text-[#6B7280]">
+                      <p className="text-sm font-medium text-text-secondary">
                         4 donations
                       </p>
                     </div>
                   </div>
-                  <p className="text-sm font-medium text-[#6B7280]">
+                  <p className="text-sm font-medium text-text-secondary">
                     Abuja, Nigeria
                   </p>
-                  <p className="text-xs text-[#6B7280]">2 packs</p>
+                  <p className="text-xs text-text-secondary">2 packs</p>
                 </div>
-                <div className="rounded-full bg-[#FFE2E2] p-1.5 text-sm font-medium text-primary shrink-0">
+                <div className="shrink-0 rounded-full bg-[#FFE2E2] p-1.5 text-sm font-medium text-primary dark:bg-primary/25">
                   o+
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-8 bg-[#FFF0EF] rounded-2xl p-8 w-full max-w-[928px]">
+            <div className="flex w-full max-w-[928px] flex-col gap-8 rounded-2xl bg-[#FFF0EF] p-8 dark:bg-primary/10">
               <div className="flex flex-col">
-                <p className="text-sm font-bold text-[#261817]">
+                <p className="text-sm font-bold text-text-primary">
                   Answered Screening Questionnaire From 784321{" "}
                 </p>
-                <p className="text-xs text-[#78716C]">
+                <p className="text-xs text-text-secondary">
                   This are the answered question of this donor
                 </p>
               </div>
@@ -70,13 +72,13 @@ export default function DonorDetailsPage() {
                   <Collapsable key={item} isOpen={item === 1} />
                 ))}
               </div>
-              <div className="border-[#960018] border-l-4 bg-[#FFE2E2] flex gap-4 p-4 mb-10 ">
+              <div className="mb-10 flex gap-4 border-l-4 border-[#960018] bg-[#FFE2E2] p-4 dark:bg-red-950/35 dark:border-primary">
                 <Info size={16} className="text-primary" />
                 <div className="flex flex-col gap-0.75">
                   <p className="text-xs font-semibold text-primary uppercase">
                     Confidentiality Note
                   </p>
-                  <p className="text-[10px] text-[#5A403F] max-w-200">
+                  <p className="max-w-200 text-[10px] text-[#5A403F] dark:text-red-100/85">
                     Your answers are protected under medical secrecy
                     regulations. High-integrity data ensures the safety of both
                     donor and recipient.

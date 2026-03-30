@@ -1,8 +1,8 @@
 "use client";
 import { Layout } from "@/layout/layout.component";
+import { AppointmentBookedModal } from "@/components/ui/modal/appointment-booked-modal.component";
 
 import { useState, useMemo, useEffect, useRef } from "react";
-import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export interface AppointmentDetails {
@@ -100,6 +100,16 @@ function getDiamondRows<T>(items: T[]): T[][] {
 export default function ScheduleAppointmentPage() {
   const [hospitalCarouselIndex, setHospitalCarouselIndex] = useState(0);
   const hospitalCarouselRef = useRef<HTMLDivElement | null>(null);
+  const [appointmentBookedModalOpen, setAppointmentBookedModalOpen] =
+    useState(false);
+  const [isSendingBooking, setIsSendingBooking] = useState(false);
+  const [appointment, setAppointment] = useState<AppointmentDetails>({
+    hospitalId: "",
+    date: "",
+    time: "",
+    agreeTerms: false,
+    agreePrivacy: false,
+  });
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date();
     return { year: d.getFullYear(), month: d.getMonth() };
@@ -157,28 +167,36 @@ export default function ScheduleAppointmentPage() {
     });
   }, [hospitalCarouselIndex]);
 
-  const appointment = {
-    hospitalId: "",
-    date: "",
-    time: "",
-    agreeTerms: false,
-    agreePrivacy: false,
-  };
-
-  const handleAppointmentChange = (
-    field: keyof AppointmentDetails,
-    value: AppointmentDetails[keyof AppointmentDetails],
+  const handleAppointmentChange = <K extends keyof AppointmentDetails>(
+    field: K,
+    value: AppointmentDetails[K],
   ) => {
-    //  setAppointment({ ...appointment, [field]: value });
+    setAppointment((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleConfirm = (e: React.FormEvent) => {
+  const canConfirmAppointment = Boolean(
+    appointment.hospitalId && appointment.date && appointment.time,
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(appointment);
+    if (!canConfirmAppointment || isSendingBooking) return;
+    setIsSendingBooking(true);
+    try {
+      // TODO: POST booking request to donor; open modal only after success
+      await Promise.resolve();
+      setAppointmentBookedModalOpen(true);
+    } finally {
+      setIsSendingBooking(false);
+    }
   };
+
   return (
     <Layout>
-      <form className="flex flex-col gap-6 mt-6 xl:mt-10 overflow-hidden">
+      <form
+        className="flex flex-col gap-6 mt-6 xl:mt-10 overflow-hidden"
+        onSubmit={handleSubmit}
+      >
         <h2 className="text-lg font-semibold text-text-primary">
           Schedule your inspection appointment
         </h2>
@@ -211,7 +229,7 @@ export default function ScheduleAppointmentPage() {
               }
               disabled={hospitalCarouselIndex === 0}
               aria-label="Previous hospital"
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-border shadow-md flex items-center justify-center text-text-primary hover:bg-[#F9FAFB] disabled:opacity-40 disabled:pointer-events-none"
+              className="absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-md text-text-primary hover:bg-[#F9FAFB] disabled:pointer-events-none disabled:opacity-40 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/[0.06]"
             >
               <ChevronLeft size={20} />
             </button>
@@ -224,7 +242,7 @@ export default function ScheduleAppointmentPage() {
               }
               disabled={hospitalCarouselIndex === MOCK_HOSPITALS.length - 1}
               aria-label="Next hospital"
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-border shadow-md flex items-center justify-center text-text-primary hover:bg-[#F9FAFB] disabled:opacity-40 disabled:pointer-events-none"
+              className="absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-md text-text-primary hover:bg-[#F9FAFB] disabled:pointer-events-none disabled:opacity-40 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/[0.06]"
             >
               <ChevronRight size={20} />
             </button>
@@ -239,7 +257,7 @@ export default function ScheduleAppointmentPage() {
                     className={`shrink-0 w-full max-w-[178px] min-w-0 px-2 sm:px-4 py-4 sm:py-6 rounded-lg border-2 cursor-pointer transition-colors block  ${
                       appointment.hospitalId === h.id
                         ? "border-primary bg-primary/5"
-                        : "border-border bg-white hover:border-primary/50"
+                        : "border-border bg-white hover:border-primary/50 dark:border-white/10 dark:bg-[#1a1a22]"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -288,9 +306,9 @@ export default function ScheduleAppointmentPage() {
           <p className="text-sm font-semibold text-text-primary text-center mb-4">
             Select date and time
           </p>
-          <div className="grid grid-cols-1 justify-center content-center place-content-center lg:grid-cols-7 gap-6 border border-[#DADADA] px-10 py-15">
+          <div className="grid grid-cols-1 place-content-center justify-center gap-6 border border-[#DADADA] px-10 py-15 content-center lg:grid-cols-7 dark:border-white/10">
             <div className="col-span-3 flex flex-col gap-8 items-center w-full">
-              <label className="block text-xs font-medium text-text-primary mb-2 bg-[#FFE2E2] rounded-[50px] px-5 py-2">
+              <label className="mb-2 block rounded-[50px] bg-[#FFE2E2] px-5 py-2 text-xs font-medium text-text-primary dark:bg-primary/20">
                 Choose a date
               </label>
               <div className="w-full">
@@ -303,7 +321,7 @@ export default function ScheduleAppointmentPage() {
                         return { year: d.getFullYear(), month: d.getMonth() };
                       })
                     }
-                    className="p-1 rounded hover:bg-[#F3F4F6] text-text-primary"
+                    className="rounded p-1 text-text-primary hover:bg-[#F3F4F6] dark:hover:bg-white/10"
                     aria-label="Previous month"
                   >
                     <ChevronLeft size={16} strokeWidth={0.8} />
@@ -319,7 +337,7 @@ export default function ScheduleAppointmentPage() {
                         return { year: d.getFullYear(), month: d.getMonth() };
                       })
                     }
-                    className="p-1 rounded hover:bg-[#F3F4F6] text-text-primary"
+                    className="rounded p-1 text-text-primary hover:bg-[#F3F4F6] dark:hover:bg-white/10"
                     aria-label="Next month"
                   >
                     <ChevronRight size={16} strokeWidth={0.8} />
@@ -330,7 +348,7 @@ export default function ScheduleAppointmentPage() {
                     (d) => (
                       <span
                         key={d}
-                        className="text-[8px] font-semibold text-black  py-1"
+                        className="py-1 text-[8px] font-semibold text-text-primary"
                       >
                         {d}
                       </span>
@@ -360,9 +378,9 @@ export default function ScheduleAppointmentPage() {
                 </div>
               </div>
             </div>
-            <div className="col-span-1 h-px w-full place-self-center lg:h-full max-h-[380px] lg:w-px  bg-[#DADADA] self-center mx-auto" />
+            <div className="col-span-1 mx-auto h-px max-h-[380px] w-full place-self-center self-center bg-[#DADADA] lg:h-full lg:w-px dark:bg-white/10" />
             <div className="col-span-3  flex flex-col gap-8 items-center w-full">
-              <label className="block text-xs font-medium text-text-primary mb-2 bg-[#FFE2E2] rounded-[50px] px-5 py-2">
+              <label className="mb-2 block rounded-[50px] bg-[#FFE2E2] px-5 py-2 text-xs font-medium text-text-primary dark:bg-primary/20">
                 Choose a time
               </label>
               <div className="flex flex-col items-center gap-2">
@@ -376,10 +394,10 @@ export default function ScheduleAppointmentPage() {
                         key={t}
                         type="button"
                         onClick={() => handleAppointmentChange("time", t)}
-                        className={`px-3 py-2 text-xs rounded-lg shadow-[0px_0px_4px_#00000026] transition-colors ${
+                        className={`rounded-lg border px-3 py-2 text-xs shadow-[0px_0px_4px_#00000026] transition-colors dark:shadow-[0px_0px_8px_rgba(0,0,0,0.4)] ${
                           appointment.time === t
-                            ? "bg-primary text-white border-primary"
-                            : "border-border text-text-primary hover:border-primary/50"
+                            ? "border-primary bg-primary text-white"
+                            : "border-border bg-white text-text-primary hover:border-primary/50 dark:border-white/10 dark:bg-[#1a1a22]"
                         }`}
                       >
                         {t}
@@ -394,11 +412,22 @@ export default function ScheduleAppointmentPage() {
 
         <button
           type="submit"
+          disabled={!canConfirmAppointment || isSendingBooking}
           className="text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
         >
-          Confirm
+          {isSendingBooking ? "Sending…" : "Confirm"}
         </button>
       </form>
+
+      <AppointmentBookedModal
+        open={appointmentBookedModalOpen}
+        onClose={() => setAppointmentBookedModalOpen(false)}
+        onSendCode={async (code: string) => {
+          // TODO: confirm booking code with API
+          await Promise.resolve();
+          void code;
+        }}
+      />
     </Layout>
   );
 }

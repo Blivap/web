@@ -2,10 +2,11 @@
 
 import { Layout } from "@/layout/layout.component";
 import { Button } from "@/components/button/button.component";
+import { Modal } from "@/components/ui/modal/modal.component";
 import { Radio } from "@/components/forms/Radio";
 import classNames from "classnames";
-import { FileText, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Check, FileText, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
 function IdCardGood() {
@@ -59,33 +60,40 @@ export default function VerifyIdPage() {
   const [residency, setResidency] = useState<"nigeria" | "abroad">("nigeria");
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [textPreview, setTextPreview] = useState<string | null>(null);
+  const [verifySuccessOpen, setVerifySuccessOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (!selectedFile) {
-      setPreviewUrl(null);
-      setTextPreview(null);
-      return;
-    }
-    const url = URL.createObjectURL(selectedFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
+  const previewUrl = useMemo(() => {
+    if (!selectedFile) return null;
+    return URL.createObjectURL(selectedFile);
   }, [selectedFile]);
 
   useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  useEffect(() => {
     if (!selectedFile || selectedFile.type !== "text/plain") {
-      setTextPreview(null);
       return;
     }
+    const file = selectedFile;
+    let cancelled = false;
+    const raf = requestAnimationFrame(() => {
+      if (!cancelled) setTextPreview(null);
+    });
     const reader = new FileReader();
     reader.onload = () => {
+      if (cancelled) return;
       const t = String(reader.result ?? "");
       setTextPreview(t.length > 4000 ? `${t.slice(0, 4000)}…` : t);
     };
-    reader.readAsText(selectedFile);
+    reader.readAsText(file);
     return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
       reader.onload = null;
     };
   }, [selectedFile]);
@@ -118,10 +126,10 @@ export default function VerifyIdPage() {
     <Layout>
       <div className="max-w-[720px] mx-auto md:mx-0 px-1 sm:px-0 pb-10">
         <header className="mb-8 md:mb-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
             Verify Identity
           </h1>
-          <p className="mt-4 text-sm sm:text-[15px] leading-relaxed text-black font-normal max-w-[640px]">
+          <p className="mt-4 text-sm sm:text-[15px] leading-relaxed text-text-primary font-normal max-w-[640px]">
             You meet the most important medical requirements. Fantastic! Enter
             your personal information and schedule your first appointment, you
             won&apos;t donate yet, but we test your blood. This way, we&apos;ll
@@ -133,17 +141,19 @@ export default function VerifyIdPage() {
         </header>
 
         <section className="mb-8 md:mb-10">
-          <h2 className="text-base font-bold text-black">
+          <h2 className="text-base font-bold text-text-primary">
             Enter your personal details
           </h2>
-          <p className="mt-2 text-sm text-black">
+          <p className="mt-2 text-sm text-text-primary">
             Enter your personal details as stated on your NIN Card
           </p>
         </section>
 
         <section className="mb-6 md:mb-8">
-          <h2 className="text-base font-bold text-black">Upload your NIN</h2>
-          <p className="mt-2 text-sm text-black">
+          <h2 className="text-base font-bold text-text-primary">
+            Upload your NIN
+          </h2>
+          <p className="mt-2 text-sm text-text-primary">
             Uploading your NIN will help us with your verification.
           </p>
         </section>
@@ -154,7 +164,7 @@ export default function VerifyIdPage() {
             <div className="flex justify-center sm:justify-start mb-5">
               <IdCardGood />
             </div>
-            <ul className="space-y-2.5 text-sm text-black list-disc pl-5 marker:text-black">
+            <ul className="space-y-2.5 text-sm text-text-primary list-disc pl-5 marker:text-text-primary">
               {doItems.map((item) => (
                 <li key={item} className="leading-snug pl-0.5">
                   {item}
@@ -169,7 +179,7 @@ export default function VerifyIdPage() {
             <div className="flex justify-center sm:justify-start mb-5">
               <IdCardBad />
             </div>
-            <ul className="space-y-2.5 text-sm text-black list-disc pl-5 marker:text-black">
+            <ul className="space-y-2.5 text-sm text-text-primary list-disc pl-5 marker:text-text-primary">
               {dontItems.map((item) => (
                 <li key={item} className="leading-snug pl-0.5">
                   {item}
@@ -180,7 +190,7 @@ export default function VerifyIdPage() {
         </div>
 
         <div className="mb-10">
-          <p className="text-xs text-black mb-2 font-medium">
+          <p className="text-xs text-text-primary mb-2 font-medium">
             Upload Your Receipt
           </p>
           <input
@@ -204,8 +214,9 @@ export default function VerifyIdPage() {
               onDrop={onDrop}
               onClick={openFilePicker}
               className={classNames(
-                "w-full rounded-lg border border-transparent bg-[#FFEBEE] px-6 py-12 text-center transition-colors cursor-pointer",
-                isDragging && "ring-2 ring-primary/40 bg-[#FFE0E5]",
+                "w-full cursor-pointer rounded-lg border border-transparent bg-[#FFEBEE] px-6 py-12 text-center transition-colors dark:bg-primary/15",
+                isDragging &&
+                  "bg-[#FFE0E5] ring-2 ring-primary/40 dark:bg-primary/25",
               )}
             >
               <div className="flex flex-col items-center gap-3">
@@ -237,7 +248,7 @@ export default function VerifyIdPage() {
                     strokeLinejoin="round"
                   />
                 </svg>
-                <p className="text-sm text-black">
+                <p className="text-sm text-text-primary">
                   Drag & Drop or{" "}
                   <span className="text-primary font-semibold underline underline-offset-2">
                     Upload
@@ -258,23 +269,24 @@ export default function VerifyIdPage() {
               onDragLeave={() => setIsDragging(false)}
               onDrop={onDrop}
               className={classNames(
-                "w-full rounded-lg border border-transparent bg-[#FFEBEE] px-5 py-5 transition-colors",
-                isDragging && "ring-2 ring-primary/40 bg-[#FFE0E5]",
+                "w-full rounded-lg border border-transparent bg-[#FFEBEE] px-5 py-5 transition-colors dark:bg-primary/15",
+                isDragging &&
+                  "bg-[#FFE0E5] ring-2 ring-primary/40 dark:bg-primary/25",
               )}
             >
               <p className="text-xs text-[#757575] mb-3">
                 Drop another file here to replace, or use the actions below.
               </p>
-              <div className="rounded-md border border-[#E8C4C8] bg-white overflow-hidden">
+              <div className="overflow-hidden rounded-md border border-[#E8C4C8] bg-white dark:border-white/15 dark:bg-[#1a1a22]">
                 {isPdf && previewUrl ? (
                   <iframe
                     title="Document preview"
                     src={previewUrl}
-                    className="w-full min-h-[220px] max-h-[320px] border-0 bg-[#fafafa]"
+                    className="max-h-[320px] min-h-[220px] w-full border-0 bg-[#fafafa] dark:bg-[#0f0f12]"
                   />
                 ) : selectedFile.type === "text/plain" ? (
                   textPreview != null ? (
-                    <pre className="max-h-[220px] overflow-auto p-4 text-xs text-black whitespace-pre-wrap wrap-break-word font-mono">
+                    <pre className="max-h-[220px] overflow-auto p-4 text-xs text-text-primary whitespace-pre-wrap wrap-break-word font-mono">
                       {textPreview}
                     </pre>
                   ) : (
@@ -284,11 +296,11 @@ export default function VerifyIdPage() {
                   )
                 ) : (
                   <div className="flex items-center gap-4 p-6">
-                    <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-[#F3F4F6] text-[#5C5C5C]">
+                    <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-[#F3F4F6] text-[#5C5C5C] dark:bg-white/10 dark:text-white/55">
                       <FileText className="size-8" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1 text-left">
-                      <p className="text-sm font-medium text-black truncate">
+                      <p className="text-sm font-medium text-text-primary truncate">
                         {selectedFile.name}
                       </p>
                       <p className="text-xs text-[#757575] mt-0.5">
@@ -321,9 +333,11 @@ export default function VerifyIdPage() {
           )}
         </div>
 
-        <section className="rounded-lg bg-[#FCE4EC] px-5 py-6 mb-10">
-          <h2 className="text-base font-bold text-black">Email address</h2>
-          <p className="mt-2 text-sm text-black leading-relaxed mb-4">
+        <section className="mb-10 rounded-lg bg-[#FCE4EC] px-5 py-6 dark:bg-primary/15">
+          <h2 className="text-base font-bold text-text-primary">
+            Email address
+          </h2>
+          <p className="mt-2 text-sm text-text-primary leading-relaxed mb-4">
             A valid email address is required to arrange your donation
             arrangements. Please ensure you enter it correctly.
           </p>
@@ -333,13 +347,13 @@ export default function VerifyIdPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address *"
-            className="w-full rounded-md border border-[#C4C4C4] bg-white px-4 py-3 text-sm text-black placeholder:text-[#9CA3AF] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
+            className="w-full rounded-md border border-[#C4C4C4] bg-white px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-tertiary focus:border-primary focus:ring-1 focus:ring-primary/30 dark:border-white/15 dark:bg-[#14141a]"
             autoComplete="email"
           />
         </section>
 
         <section className="mb-10">
-          <h2 className="text-base font-bold text-black mb-5">
+          <h2 className="text-base font-bold text-text-primary mb-5">
             Enter your personal details
           </h2>
           <div className="flex flex-col gap-4">
@@ -348,7 +362,7 @@ export default function VerifyIdPage() {
               value="nigeria"
               checked={residency === "nigeria"}
               onChange={() => setResidency("nigeria")}
-              labelClassName="text-sm text-black font-normal"
+              labelClassName="text-sm text-text-primary font-normal"
             >
               I live in Nigeria
             </Radio>
@@ -357,7 +371,7 @@ export default function VerifyIdPage() {
               value="abroad"
               checked={residency === "abroad"}
               onChange={() => setResidency("abroad")}
-              labelClassName="text-sm text-black font-normal"
+              labelClassName="text-sm text-text-primary font-normal"
             >
               I live abroad
             </Radio>
@@ -368,11 +382,43 @@ export default function VerifyIdPage() {
           type="button"
           variant="primary"
           className="rounded-none! px-10 py-3.5 font-bold text-base min-w-[140px] shadow-none"
-          onClick={() => {}}
+          onClick={() => setVerifySuccessOpen(true)}
         >
           Confirm
         </Button>
       </div>
+
+      <Modal
+        open={verifySuccessOpen}
+        onClose={() => setVerifySuccessOpen(false)}
+      >
+        <h2 className="mb-3 text-center text-2xl font-bold text-primary">
+          Congratulations
+        </h2>
+        <p className="mb-8 text-center text-sm leading-snug text-gray-500">
+          You Have Successfully
+          <br />
+          Been Verified
+        </p>
+        <div
+          className="mb-10 flex size-24 shrink-0 items-center justify-center rounded-full border-4 border-green-500 text-green-500"
+          aria-hidden
+        >
+          <Check
+            className="size-12 stroke-3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </div>
+        <Button
+          type="button"
+          variant="primary"
+          className="rounded-sm! min-w-[160px] px-10 py-3.5 font-bold text-base shadow-none"
+          onClick={() => setVerifySuccessOpen(false)}
+        >
+          Continue
+        </Button>
+      </Modal>
     </Layout>
   );
 }
