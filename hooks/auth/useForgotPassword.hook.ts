@@ -12,6 +12,7 @@ export function useForgotPassword() {
 
   const forgotPassword = async (
     payload: IForgotPasswordPayload,
+    options?: { redirectOnSuccess?: boolean },
   ): Promise<boolean> => {
     setIsLoading(true);
     try {
@@ -22,7 +23,9 @@ export function useForgotPassword() {
           message ?? "If an account exists, you will receive a reset link.",
           "success",
         );
-        router.replace("/login");
+        if (options?.redirectOnSuccess !== false) {
+          router.replace("/login");
+        }
         return true;
       }
       showSnackbar(error ?? message ?? "Request failed.", "error");

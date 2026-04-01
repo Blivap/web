@@ -55,12 +55,15 @@ function applyDomTheme(resolved: "light" | "dark") {
 export function useThemePreference() {
   const [preference, setPreferenceState] = useState<ThemePreference>("system");
   const [systemSchemeTick, setSystemSchemeTick] = useState(0);
+  /** Until true, resolve "system" as light so first client paint matches SSR (no `window` / matchMedia on server). */
+  const [hasMounted, setHasMounted] = useState(false);
 
   useLayoutEffect(() => {
     const p = getStoredPreference();
     /* One-time client hydration from localStorage — initial state must match SSR ("system"). */
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sync stored preference on mount only
     setPreferenceState(p);
+    setHasMounted(true);
   }, []);
 
   useEffect(() => {
@@ -73,8 +76,13 @@ export function useThemePreference() {
 
   const resolved = useMemo(() => {
     void systemSchemeTick;
+    if (!hasMounted) {
+      if (preference === "light") return "light";
+      if (preference === "dark") return "dark";
+      return "light";
+    }
     return resolveTheme(preference);
-  }, [preference, systemSchemeTick]);
+  }, [preference, systemSchemeTick, hasMounted]);
 
   useEffect(() => {
     applyDomTheme(resolved);

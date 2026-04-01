@@ -1,17 +1,18 @@
 import { useEditProfile } from "@/hooks/auth/useEditProfile.hook";
-import { useChangePassword } from "@/hooks/auth/useChangePassword.hook";
+import { useForgotPassword } from "@/hooks/auth/useForgotPassword.hook";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 
 export function useSettings() {
   const { user } = useDashboard();
   const { updateProfile, isLoading: isProfileLoading } = useEditProfile();
-  const { changePassword, isLoading: isPasswordLoading } = useChangePassword();
+  const { forgotPassword, isLoading: isPasswordResetRequesting } =
+    useForgotPassword();
 
   return {
     user,
     updateProfile,
-    changePassword,
+    forgotPassword,
     isProfileLoading,
-    isPasswordLoading,
+    isPasswordResetRequesting,
   };
 }

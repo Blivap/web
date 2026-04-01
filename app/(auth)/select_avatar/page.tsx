@@ -2,7 +2,7 @@
 
 import classNames from "classnames";
 import Image from "next/image";
-import { Button } from "../../components/button/button.component";
+import { Button } from "../../../components/button/button.component";
 import { useSelectAvatar } from "@/hooks/select-avatar/useSelectAvatar.hook";
 import { useEffect } from "react";
 
@@ -62,7 +62,7 @@ export default function SelectAvatarPage() {
           <Button
             disabled={!selectedAvatar || isConfirming}
             loading={isConfirming}
-            onClick={() => handleContinue(false)}
+            onClick={() => void handleContinue()}
             className="rounded-[40px]!"
           >
             Continue

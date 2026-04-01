@@ -5,11 +5,12 @@ import { Button } from "@/components/button/button.component";
 import { Modal } from "@/components/ui/modal/modal.component";
 import { Radio } from "@/components/forms/Radio";
 import classNames from "classnames";
-import { Check, FileText, Trash2 } from "lucide-react";
+import { Check, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { routes } from "@/config/routes";
+import { useNin } from "@/hooks/nin/useNin.hooks";
 
 function IdCardGood() {
   return (
@@ -62,8 +63,14 @@ export default function VerifyIdPage() {
   const [residency, setResidency] = useState<"nigeria" | "abroad">("nigeria");
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [textPreview, setTextPreview] = useState<string | null>(null);
   const [verifySuccessOpen, setVerifySuccessOpen] = useState(false);
+  const {
+    isLoading: isNinVerifying,
+    error: ninError,
+    clearError: clearNinError,
+    assertPdfFile,
+    verifyNinDocument,
+  } = useNin();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -81,38 +88,22 @@ export default function VerifyIdPage() {
     };
   }, [previewUrl]);
 
-  useEffect(() => {
-    if (!selectedFile || selectedFile.type !== "text/plain") {
-      return;
-    }
-    const file = selectedFile;
-    let cancelled = false;
-    const raf = requestAnimationFrame(() => {
-      if (!cancelled) setTextPreview(null);
-    });
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (cancelled) return;
-      const t = String(reader.result ?? "");
-      setTextPreview(t.length > 4000 ? `${t.slice(0, 4000)}…` : t);
-    };
-    reader.readAsText(file);
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(raf);
-      reader.onload = null;
-    };
-  }, [selectedFile]);
-
   const clearFile = useCallback(() => {
+    clearNinError();
     setSelectedFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, []);
+  }, [clearNinError]);
 
-  const handleFiles = useCallback((files: FileList | null) => {
-    if (!files?.length) return;
-    setSelectedFile(files[0]);
-  }, []);
+  const handleFiles = useCallback(
+    (files: FileList | null) => {
+      clearNinError();
+      if (!files?.length) return;
+      const file = files[0];
+      if (!assertPdfFile(file)) return;
+      setSelectedFile(file);
+    },
+    [assertPdfFile, clearNinError],
+  );
 
   const openFilePicker = useCallback(() => {
     fileInputRef.current?.click();
@@ -124,9 +115,11 @@ export default function VerifyIdPage() {
     handleFiles(e.dataTransfer.files);
   };
 
-  const isPdf =
-    selectedFile?.type === "application/pdf" ||
-    selectedFile?.name.toLowerCase().endsWith(".pdf");
+  const handleConfirmNin = useCallback(async () => {
+    if (!selectedFile) return;
+    const ok = await verifyNinDocument(selectedFile);
+    if (ok) setVerifySuccessOpen(true);
+  }, [selectedFile, verifyNinDocument]);
 
   return (
     <Layout>
@@ -202,7 +195,7 @@ export default function VerifyIdPage() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.doc,.docx,.txt,.rtf"
+            accept="application/pdf,.pdf"
             className="sr-only"
             onChange={(e) => {
               handleFiles(e.target.files);
@@ -261,9 +254,7 @@ export default function VerifyIdPage() {
                   </span>{" "}
                   your NIN
                 </p>
-                <p className="text-xs text-[#757575]">
-                  File types: pdf, doc, docx, txt, rtf
-                </p>
+                <p className="text-xs text-[#757575]">PDF only</p>
               </div>
             </button>
           ) : (
@@ -283,38 +274,20 @@ export default function VerifyIdPage() {
               <p className="text-xs text-[#757575] mb-3">
                 Drop another file here to replace, or use the actions below.
               </p>
+              <p className="text-xs text-text-primary mb-2 truncate font-medium">
+                {selectedFile.name}{" "}
+                <span className="font-normal text-[#757575]">
+                  ({formatFileSize(selectedFile.size)})
+                </span>
+              </p>
               <div className="overflow-hidden rounded-md border border-[#E8C4C8] bg-white dark:border-white/15 dark:bg-[#1a1a22]">
-                {isPdf && previewUrl ? (
+                {previewUrl ? (
                   <iframe
                     title="Document preview"
                     src={previewUrl}
                     className="max-h-[320px] min-h-[220px] w-full border-0 bg-[#fafafa] dark:bg-[#0f0f12]"
                   />
-                ) : selectedFile.type === "text/plain" ? (
-                  textPreview != null ? (
-                    <pre className="max-h-[220px] overflow-auto p-4 text-xs text-text-primary whitespace-pre-wrap wrap-break-word font-mono">
-                      {textPreview}
-                    </pre>
-                  ) : (
-                    <p className="p-6 text-sm text-[#757575]">
-                      Loading preview…
-                    </p>
-                  )
-                ) : (
-                  <div className="flex items-center gap-4 p-6">
-                    <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-[#F3F4F6] text-[#5C5C5C] dark:bg-white/10 dark:text-white/55">
-                      <FileText className="size-8" aria-hidden />
-                    </div>
-                    <div className="min-w-0 flex-1 text-left">
-                      <p className="text-sm font-medium text-text-primary truncate">
-                        {selectedFile.name}
-                      </p>
-                      <p className="text-xs text-[#757575] mt-0.5">
-                        {formatFileSize(selectedFile.size)}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                ) : null}
               </div>
               <div className="flex flex-wrap gap-3 mt-4">
                 <Button
@@ -337,6 +310,11 @@ export default function VerifyIdPage() {
               </div>
             </div>
           )}
+          {ninError ? (
+            <p className="mt-3 text-sm text-red-600 dark:text-red-400" role="alert">
+              {ninError}
+            </p>
+          ) : null}
         </div>
 
         <section className="mb-10 rounded-lg bg-[#FCE4EC] px-5 py-6 dark:bg-primary/15">
@@ -388,9 +366,11 @@ export default function VerifyIdPage() {
           type="button"
           variant="primary"
           className="rounded-none! px-10 py-3.5 font-bold text-base min-w-[140px] shadow-none"
-          onClick={() => setVerifySuccessOpen(true)}
+          disabled={!selectedFile}
+          loading={isNinVerifying}
+          onClick={() => void handleConfirmNin()}
         >
-          Confirm
+          {isNinVerifying ? "Verifying…" : "Confirm"}
         </Button>
       </div>
 

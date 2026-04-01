@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/forms/inputs/input.component";
 import { useSettings } from "@/hooks/settings/useSettings.hook";
-import { editProfileSchema, changePasswordSchema } from "@/schema/auth.schema";
+import { editProfileSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
@@ -17,9 +17,9 @@ export default function SettingsPage() {
   const {
     user,
     updateProfile,
-    changePassword,
+    forgotPassword,
     isProfileLoading,
-    isPasswordLoading,
+    isPasswordResetRequesting,
   } = useSettings();
   const {
     avatars,
@@ -127,9 +127,9 @@ export default function SettingsPage() {
 
                   <hr className="border-t border-[#E5E7EB]" />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  <div className="max-w-md">
                     <div className="flex flex-col gap-1">
-                      <label className="text-[11px] font-medium text-[#111827]">
+                      <label className="text-[11px] font-medium text-[#111827] dark:text-white/90">
                         Email
                       </label>
                       <Input
@@ -139,23 +139,6 @@ export default function SettingsPage() {
                         error={errors.email}
                         name="email"
                         placeholder="you@example.com"
-                        label={undefined}
-                        labelClassName="text-[11px]"
-                        inputClassName="py-1.5 text-xs"
-                        containerClassName="gap-1"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[11px] font-medium text-[#111827]">
-                        Password
-                      </label>
-                      <Input
-                        value={""}
-                        onChange={() => {}}
-                        name="password"
-                        type="password"
-                        placeholder="••••••••••"
-                        disabled
                         label={undefined}
                         labelClassName="text-[11px]"
                         inputClassName="py-1.5 text-xs"
@@ -179,72 +162,32 @@ export default function SettingsPage() {
           </Formik>
         </section>
 
-        <section className="flex flex-col gap-6 max-w-xl">
-          <h2 className="font-semibold text-lg text-[#100F14]">
-            Change password
+        <section className="rounded-xl border border-[#DADADA] bg-white px-4 py-5 shadow-[0_8px_16px_rgba(15,23,42,0.03)] sm:px-6 sm:py-7 md:rounded-2xl md:px-10 md:py-8 max-w-xl dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
+          <h2 className="font-semibold text-lg text-[#100F14] dark:text-white/90">
+            Password
           </h2>
-          <Formik
-            initialValues={{
-              oldPassword: "",
-              password: "",
-            }}
-            validationSchema={changePasswordSchema}
-            onSubmit={(values) =>
-              changePassword({
-                oldPassword: values.oldPassword,
-                password: values.password,
-              })
-            }
-          >
-            {({
-              values,
-              handleSubmit,
-              errors,
-              handleChange,
-              handleBlur,
-              isValid,
-            }) => (
-              <form
-                className="flex flex-col gap-6"
-                onSubmit={handleSubmit}
-                noValidate
-              >
-                <Input
-                  value={values.oldPassword}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={errors.oldPassword}
-                  label="Current password"
-                  name="oldPassword"
-                  type="password"
-                  placeholder="Enter current password"
-                  labelClassName="text-[11px]"
-                  inputClassName="py-1.5 text-xs"
-                  containerClassName="gap-1"
-                />
-                <Input
-                  value={values.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={errors.password}
-                  label="New password"
-                  name="password"
-                  type="password"
-                  placeholder="Enter new password"
-                  labelClassName="text-[11px]"
-                  inputClassName="py-1.5 text-xs"
-                  containerClassName="gap-1"
-                />
-                <button
-                  type="submit"
-                  disabled={!isValid || isPasswordLoading}
-                  className="w-fit disabled:bg-primary/50 disabled:cursor-not-allowed bg-primary text-white py-2 px-5 rounded-md font-semibold text-xs hover:bg-primary/85 active:bg-primary transition duration-200"
-                >
-                  {isPasswordLoading ? "Updating..." : "Change password"}
-                </button>
-              </form>
-            )}
-          </Formik>
+          <p className="mt-2 text-sm text-[#6B7280] dark:text-white/55">
+            We&apos;ll email you a link to set a new password. For security,
+            passwords cannot be viewed or edited on this page.
+          </p>
+          <div className="mt-5">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-md! px-5 py-2.5 text-sm font-semibold"
+              disabled={!user?.email || isPasswordResetRequesting}
+              loading={isPasswordResetRequesting}
+              onClick={() => {
+                if (!user?.email) return;
+                void forgotPassword(
+                  { email: user.email },
+                  { redirectOnSuccess: false },
+                );
+              }}
+            >
+              Email me a reset link
+            </Button>
+          </div>
         </section>
       </div>
       {isAvatarModalOpen && (

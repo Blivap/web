@@ -47,8 +47,8 @@ export const forgotPasswordSchema = yup.object({
   email: yup.string().email("Invalid email").required("Email is required"),
 });
 
+/** Form fields only; reset token is supplied from the URL, not shown in the UI. */
 export const resetPasswordSchema = yup.object({
-  resetToken: yup.string().required("Reset token is required"),
   password: passwordRule,
 });
 

@@ -8,13 +8,13 @@ import { Formik } from "formik";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useMemo } from "react";
+import { Suspense } from "react";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
-  const tokenFromUrl = searchParams.get("token") ?? "";
+  const resetToken = searchParams.get("token") ?? "";
   const { resetPassword, isLoading } = useResetPassword();
-  const initialToken = useMemo(() => tokenFromUrl, [tokenFromUrl]);
+  const hasValidLink = Boolean(resetToken);
 
   return (
     <AuthLayout>
@@ -29,22 +29,35 @@ function ResetPasswordForm() {
               Reset password
             </p>
             <p className="text-base text-[#49475A]">
-              Enter the token from your email and your new password.
+              Choose a new password for your account. Use the link from your
+              email; the reset token is applied automatically.
             </p>
           </div>
+          {!hasValidLink && (
+            <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+              This link is missing a valid reset token. Open the reset link from
+              your email, or{" "}
+              <Link
+                href="/forgot-password"
+                className="font-semibold text-primary underline"
+              >
+                request a new one
+              </Link>
+              .
+            </p>
+          )}
           <Formik
             initialValues={{
-              resetToken: initialToken,
               password: "",
             }}
-            enableReinitialize
             validationSchema={resetPasswordSchema}
-            onSubmit={(values) =>
-              resetPassword({
-                resetToken: values.resetToken,
+            onSubmit={(values) => {
+              if (!resetToken) return;
+              void resetPassword({
+                resetToken,
                 password: values.password,
-              })
-            }
+              });
+            }}
           >
             {({
               values,
@@ -55,15 +68,6 @@ function ResetPasswordForm() {
               isValid,
             }) => (
               <form className="grid gap-6" onSubmit={handleSubmit}>
-                <Input
-                  value={values.resetToken}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={errors.resetToken}
-                  label="Reset token"
-                  name="resetToken"
-                  placeholder="Paste token from email"
-                />
                 <Input
                   value={values.password}
                   onChange={handleChange}
@@ -76,7 +80,7 @@ function ResetPasswordForm() {
                 />
                 <button
                   type="submit"
-                  disabled={!isValid || isLoading}
+                  disabled={!isValid || isLoading || !hasValidLink}
                   className="w-full disabled:bg-primary/50 disabled:cursor-not-allowed bg-primary text-white py-[12.5px] rounded-lg font-semibold text-base hover:bg-primary/85 active:bg-primary transition duration-200"
                 >
                   {isLoading ? "Resetting..." : "Reset password"}

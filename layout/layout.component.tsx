@@ -246,21 +246,20 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
         <div className="flex-1 bg-white dark:bg-[#14141a] overflow-y-auto p-4 xl:px-7 rounded border border-[#DADADA] dark:border-white/10 no-scrollbar overflow-scroll transition-colors duration-200">
           {!user?.nationalIdentificationNumberVerified && (
             <div className="mb-10 flex gap-4 border-l-4 border-[#960018] bg-[#FFE2E2] p-4 dark:bg-red-950/35 dark:border-primary">
-              <Info size={16} className="text-primary" />
+              <Info size={16} className="text-primary shrink-0" />
               <div className="flex flex-col gap-0.75">
                 <p className="text-xs font-semibold text-primary uppercase">
-                  Verify your account
+                  Verify Your Identity to Continue
                 </p>
                 <p className="max-w-200 text-xs text-[#5A403F] dark:text-red-100/85">
-                  Please confirm your account to continue. Your information is
-                  securely protected under medical confidentiality laws, and
-                  accurate data helps ensure the safety of both donors and
-                  recipients.{" "}
+                  To ensure safety and trust on our platform, you must verify
+                  your identity using your National Identification Number (NIN)
+                  before you can book donors or receive bookings.{" "}
                   <Link
                     href={routes.verifyId("")}
                     className="underline text-primary"
                   >
-                    to verify your account details.
+                    verify your account details.
                   </Link>
                 </p>
               </div>

@@ -58,7 +58,7 @@ export const Input = (props: InputProps) => {
         >
           <input
             className={classNames(
-              "outline-none py-2 w-full text-sm font-medium placeholder:text-xs",
+              "outline-none py-2.5 w-full text-sm font-medium placeholder:text-xs",
               inputClassName,
             )}
             type={
@@ -81,7 +81,7 @@ export const Input = (props: InputProps) => {
               onClick={() => setTogglePassword((prev) => !prev)}
               className="cursor-pointer"
             >
-              {toggelePassword ? <BsEye size={12} /> : <BsEyeSlash size={12} />}
+              {toggelePassword ? <BsEye size={16} /> : <BsEyeSlash size={16} />}
             </button>
           )}
         </div>
