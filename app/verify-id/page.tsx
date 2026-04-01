@@ -6,7 +6,14 @@ import { Modal } from "@/components/ui/modal/modal.component";
 import { Radio } from "@/components/forms/Radio";
 import classNames from "classnames";
 import { Check, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { routes } from "@/config/routes";
@@ -58,7 +65,7 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function VerifyIdPage() {
+function VerifyIdContent() {
   const [email, setEmail] = useState("");
   const [residency, setResidency] = useState<"nigeria" | "abroad">("nigeria");
   const [isDragging, setIsDragging] = useState(false);
@@ -411,5 +418,23 @@ export default function VerifyIdPage() {
         </Button>
       </Modal>
     </Layout>
+  );
+}
+
+export default function VerifyIdPage() {
+  return (
+    <Suspense
+      fallback={
+        <Layout>
+          <div className="max-w-[720px] mx-auto md:mx-0 px-1 sm:px-0 pb-10 animate-pulse">
+            <div className="h-8 w-48 rounded bg-[#E5E7EB] dark:bg-white/10 mb-4" />
+            <div className="h-20 max-w-[640px] rounded bg-[#E5E7EB] dark:bg-white/10 mb-8" />
+            <div className="h-64 rounded-lg bg-[#E5E7EB] dark:bg-white/10" />
+          </div>
+        </Layout>
+      }
+    >
+      <VerifyIdContent />
+    </Suspense>
   );
 }
