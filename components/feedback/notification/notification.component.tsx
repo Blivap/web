@@ -5,47 +5,9 @@ import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { FiBell } from "react-icons/fi";
 import { Check, CheckCheck } from "lucide-react";
+import { useNotifications } from "@/hooks/notifications/useNotifications.hook";
 
-export interface NotificationItem {
-  id: string;
-  title: string;
-  message: string;
-  read: boolean;
-  createdAt: string; // ISO or display string
-}
-
-const MOCK_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: "1",
-    title: "Donation reminder",
-    message: "You're eligible to donate again. Book your next appointment.",
-    read: false,
-    createdAt: "2024-03-10T14:00:00",
-  },
-  {
-    id: "2",
-    title: "Appointment confirmed",
-    message:
-      "Your donation appointment at Lagos Blood Bank is confirmed for Mar 15.",
-    read: false,
-    createdAt: "2024-03-09T10:30:00",
-  },
-  {
-    id: "3",
-    title: "Profile updated",
-    message: "Your profile picture was updated successfully.",
-    read: true,
-    createdAt: "2024-03-08T09:15:00",
-  },
-  {
-    id: "4",
-    title: "Welcome to Blivap",
-    message:
-      "Thank you for registering as a donor. Complete your profile to get started.",
-    read: true,
-    createdAt: "2024-03-05T12:00:00",
-  },
-];
+export type { NotificationItem } from "@/hooks/notifications/useNotifications.hook";
 
 function formatNotificationTime(createdAt: string): string {
   const date = new Date(createdAt);
@@ -63,23 +25,18 @@ function formatNotificationTime(createdAt: string): string {
 
 export const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(
-    () => MOCK_NOTIFICATIONS,
-  );
   const panelRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const {
+    items: notifications,
+    isLoading,
+    error,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications({ enabled: isOpen });
+
   const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -150,7 +107,10 @@ export const NotificationBell = () => {
           {unreadCount > 0 && (
             <button
               type="button"
-              onClick={markAllAsRead}
+              onClick={(e) => {
+                e.stopPropagation();
+                void markAllAsRead();
+              }}
               className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 dark:hover:text-primary"
             >
               <CheckCheck size={14} />
@@ -158,8 +118,17 @@ export const NotificationBell = () => {
             </button>
           )}
         </div>
+        {error && (
+          <p className="shrink-0 px-3 pb-2 text-center text-xs text-red-600 dark:text-red-400">
+            {error}
+          </p>
+        )}
         <div className="overflow-y-auto flex-1 min-h-0 p-2 custom-scrollbar">
-          {notifications.length === 0 ? (
+          {isLoading && notifications.length === 0 ? (
+            <p className="py-6 text-center text-xs text-[#6B7280] dark:text-white/50">
+              Loading…
+            </p>
+          ) : notifications.length === 0 ? (
             <p className="py-6 text-center text-xs text-[#6B7280] dark:text-white/50">
               No notifications yet.
             </p>
@@ -199,7 +168,7 @@ export const NotificationBell = () => {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          markAsRead(n.id);
+                          void markAsRead(n.id);
                         }}
                         className="shrink-0 rounded-md p-1.5 text-primary hover:bg-[#E5E7EB] dark:hover:bg-white/10"
                         title="Mark as read"

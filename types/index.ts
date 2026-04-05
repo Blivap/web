@@ -117,3 +117,9 @@ export interface ISource {
   url: string;
   country: string;
 }
+
+export type {
+  InAppNotification,
+  InAppNotificationListResponse,
+  NotificationEventType,
+} from "./notifications";
