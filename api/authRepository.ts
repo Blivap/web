@@ -1,4 +1,4 @@
-import { fetcher } from "../app/helpers";
+import { fetcher } from "@/services/http";
 import {
   IRegisterApiPayload,
   ILoginPayload,
@@ -11,19 +11,20 @@ import {
   IChangePasswordPayload,
 } from "../types";
 import { IResponse } from "../types";
+import { endpoints } from "@/services/endpoints";
 
 const url = "/authentication";
 
 export default function authRepository() {
   return {
     login(payload: ILoginPayload): Promise<IResponse<IAuthResponse>> {
-      return fetcher<IAuthResponse>(`${url}/login`, {
+      return fetcher<IAuthResponse>(endpoints.auth.login, {
         method: "POST",
         data: payload,
       });
     },
     register(payload: IRegisterApiPayload): Promise<IResponse<IAuthResponse>> {
-      return fetcher<IAuthResponse>(`${url}/signup`, {
+      return fetcher<IAuthResponse>(endpoints.auth.register, {
         method: "POST",
         data: payload,
       });
@@ -31,7 +32,7 @@ export default function authRepository() {
     verifyEmail(
       payload: IVerifyEmailPayload,
     ): Promise<IResponse<{ message?: string }>> {
-      return fetcher(`${url}/verify-email`, {
+      return fetcher(endpoints.auth.verifyEmail, {
         method: "POST",
         data: payload,
       });
@@ -39,15 +40,19 @@ export default function authRepository() {
     resendEmailVerificationLink(
       query: IResendVerificationQuery,
     ): Promise<IResponse<{ message?: string }>> {
-      const params = new URLSearchParams({ email: query.email });
-      return fetcher(`${url}/resend-email-verification-link?${params}`, {
-        method: "POST",
-      });
+      return fetcher(
+        endpoints.auth.resendEmailVerificationLinkWithParams({
+          email: query.email,
+        }),
+        {
+          method: "POST",
+        },
+      );
     },
     forgotPassword(
       payload: IForgotPasswordPayload,
     ): Promise<IResponse<{ message?: string }>> {
-      return fetcher(`${url}/forgot-password`, {
+      return fetcher(endpoints.auth.forgotPassword, {
         method: "POST",
         data: payload,
       });
@@ -55,20 +60,20 @@ export default function authRepository() {
     resetPassword(
       payload: IResetPasswordPayload,
     ): Promise<IResponse<{ message?: string }>> {
-      return fetcher(`${url}/reset-password`, {
+      return fetcher(endpoints.auth.resetPassword, {
         method: "POST",
         data: payload,
       });
     },
     me(): Promise<IResponse<IAuthResponse["user"]>> {
-      return fetcher<IAuthResponse["user"]>(`${url}/me`, {
+      return fetcher<IAuthResponse["user"]>(endpoints.auth.me, {
         method: "GET",
       });
     },
     updateProfile(
       payload: IEditProfilePayload,
     ): Promise<IResponse<IAuthResponse["user"]>> {
-      return fetcher<IAuthResponse["user"]>(`${url}/me`, {
+      return fetcher<IAuthResponse["user"]>(endpoints.auth.me, {
         method: "PUT",
         data: payload,
       });
@@ -76,13 +81,13 @@ export default function authRepository() {
     changePassword(
       payload: IChangePasswordPayload,
     ): Promise<IResponse<{ message?: string }>> {
-      return fetcher(`${url}/change-password`, {
+      return fetcher(endpoints.auth.changePassword, {
         method: "PUT",
         data: payload,
       });
     },
     logout(): Promise<IResponse<unknown>> {
-      return fetcher(`${url}/logout`, {
+      return fetcher(endpoints.auth.logout, {
         method: "POST",
       });
     },

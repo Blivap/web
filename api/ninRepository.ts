@@ -1,29 +1,20 @@
-import axios, { AxiosResponse } from "axios";
-import Cookies from "js-cookie";
-import { config } from "@/config/env";
+import { fetcher } from "@/services/http";
+import { endpoints } from "@/services/endpoints";
 
 export default function NinRepository() {
   return {
     /**
-     * POST /nin-verification — multipart file upload. Do not set Content-Type;
-     * the browser sets multipart boundaries for FormData.
+     * POST /nin-verification — multipart file upload.
+     * `fetcher` omits `Content-Type: application/json` for FormData so axios
+     * sends `multipart/form-data` with the correct boundary.
      */
-    verifyNinDocument(file: File): Promise<AxiosResponse<unknown>> {
-      const token =
-        typeof window !== "undefined"
-          ? Cookies.get("auth_token") || null
-          : null;
+    verifyNinDocument(file: File) {
       const formData = new FormData();
       formData.append("file", file);
 
-      return axios({
-        url: `${config.apiUrl}/nin-verification`,
+      return fetcher(endpoints.ninVerification, {
         method: "POST",
         data: formData,
-        headers: {
-          Accept: "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
       });
     },
   };
