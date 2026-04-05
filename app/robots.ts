@@ -1,53 +1,38 @@
-import { config } from "@/config/env";
+import { absoluteSiteUrl } from "@/lib/site-origin";
 import { MetadataRoute } from "next";
 
-const { url, env } = config;
-const siteUrl = env === "development" ? "http://localhost:3000" : url;
+/**
+ * Paths that must not be indexed (auth, account, transactional, or thin flows).
+ * Trailing slashes match subpaths in robots.txt (e.g. /donors/ blocks /donors/xyz).
+ */
+const DISALLOWED_PREFIXES = [
+  "/api/",
+  "/dashboard/",
+  "/overview/",
+  "/settings/",
+  "/wallet/",
+  "/history/",
+  "/donors/",
+  "/bookings/",
+  "/booking/",
+  "/schedule-appointment/",
+  "/verify-id/",
+  "/select_avatar/",
+  "/forgot-password/",
+  "/reset-password/",
+  "/verify-email/",
+  "/waitlist/",
+] as const;
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/api/og"],
-        disallow: [
-          "/api/",
-          "/dashboard/",
-          "/settings/",
-          "/wallet/",
-          "/history/",
-          "/donors/",
-          "/waitlist/",
-        ],
-      },
-      {
-        userAgent: "Googlebot",
-        allow: ["/", "/api/og"],
-        disallow: [
-          "/api/",
-          "/dashboard/",
-          "/settings/",
-          "/wallet/",
-          "/history/",
-          "/donors/",
-          "/waitlist/",
-        ],
-      },
-      {
-        userAgent: "Bingbot",
-        allow: ["/", "/api/og"],
-        disallow: [
-          "/api/",
-          "/dashboard/",
-          "/settings/",
-          "/wallet/",
-          "/history/",
-          "/donors/",
-          "/waitlist/",
-        ],
+        allow: ["/api/og"],
+        disallow: [...DISALLOWED_PREFIXES],
       },
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
-    host: siteUrl,
+    sitemap: absoluteSiteUrl("/sitemap.xml"),
   };
 }

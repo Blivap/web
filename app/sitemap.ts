@@ -1,40 +1,47 @@
+import { absoluteSiteUrl } from "@/lib/site-origin";
 import { MetadataRoute } from "next";
-import { config } from "@/config/env";
 
-const { url, env } = config;
-const siteUrl = env === "development" ? "http://localhost:3000" : url;
+/**
+ * Public indexable routes only — aligned with app/robots.ts (no auth, account, or waitlist).
+ * Order: highest business value first, then grouped by theme.
+ */
+const PUBLIC_ROUTES: Array<{
+  path: string;
+  changeFrequency: MetadataRoute.Sitemap[0]["changeFrequency"];
+  priority: number;
+}> = [
+  { path: "/", changeFrequency: "daily", priority: 1 },
+  { path: "/what-we-do", changeFrequency: "weekly", priority: 0.95 },
+  { path: "/giving-blood", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/about-blood", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/about-sperm", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/about-donating", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/about", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/our-expertise", changeFrequency: "weekly", priority: 0.85 },
+  { path: "/healthcare", changeFrequency: "weekly", priority: 0.85 },
+  { path: "/healthcare&professionals", changeFrequency: "weekly", priority: 0.85 },
+  { path: "/education", changeFrequency: "weekly", priority: 0.85 },
+  { path: "/research", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/researchers", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/news", changeFrequency: "daily", priority: 0.8 },
+  { path: "/book-demo", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/contact", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/faq", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/working_at", changeFrequency: "monthly", priority: 0.75 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.5 },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.5 },
+  { path: "/vulnerability-disclosure", changeFrequency: "yearly", priority: 0.45 },
+  { path: "/login", changeFrequency: "monthly", priority: 0.4 },
+  { path: "/register", changeFrequency: "monthly", priority: 0.4 },
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const routes = [
-    { path: "", priority: 1.0, changeFreq: "daily" as const },
-    { path: "/about", priority: 0.9, changeFreq: "weekly" as const },
-    { path: "/about-blood", priority: 0.9, changeFreq: "weekly" as const },
-    { path: "/about-donating", priority: 0.9, changeFreq: "weekly" as const },
-    { path: "/about-sperm", priority: 0.9, changeFreq: "weekly" as const },
-    { path: "/contact", priority: 0.8, changeFreq: "monthly" as const },
-    { path: "/education", priority: 0.8, changeFreq: "weekly" as const },
-    { path: "/faq", priority: 0.8, changeFreq: "weekly" as const },
-    { path: "/giving-blood", priority: 0.9, changeFreq: "weekly" as const },
-    { path: "/healthcare", priority: 0.8, changeFreq: "weekly" as const },
-    {
-      path: "/healthcare&professionals",
-      priority: 0.8,
-      changeFreq: "weekly" as const,
-    },
-    { path: "/news", priority: 0.8, changeFreq: "daily" as const },
-    { path: "/our-expertise", priority: 0.8, changeFreq: "weekly" as const },
-    { path: "/research", priority: 0.8, changeFreq: "weekly" as const },
-    { path: "/researchers", priority: 0.8, changeFreq: "weekly" as const },
-    { path: "/what-we-do", priority: 0.8, changeFreq: "weekly" as const },
-    { path: "/working_at", priority: 0.7, changeFreq: "monthly" as const },
-    { path: "/login", priority: 0.5, changeFreq: "monthly" as const },
-    { path: "/register", priority: 0.5, changeFreq: "monthly" as const },
-  ];
+  const lastModified = new Date();
 
-  return routes.map((route) => ({
-    url: `${siteUrl}${route.path}`,
-    lastModified: new Date(),
-    changeFrequency: route.changeFreq,
+  return PUBLIC_ROUTES.map((route) => ({
+    url: absoluteSiteUrl(route.path),
+    lastModified,
+    changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
 }
