@@ -66,7 +66,7 @@ export default function SignUpPage() {
                         error={errors.firstname}
                         label="First Name"
                         name="firstname"
-                        placeholder="Enter your firstname"
+                        placeholder="First name"
                       />
                       <Input
                         value={values.lastname}
@@ -75,19 +75,20 @@ export default function SignUpPage() {
                         error={errors.lastname}
                         label="Last Name"
                         name="lastname"
-                        placeholder="Enter your lastname"
+                        placeholder="Last name"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4 md:gap-6">
                       <div className="min-w-0">
-                        <Input
-                          value={values.email}
+                        <DatePicker
+                          value={values.dateOfBirth}
                           onChange={handleChange}
                           onBlur={handleBlur}
-                          error={errors.email}
-                          label="Email Address"
-                          name="email"
-                          placeholder="Enter your email address"
+                          error={errors.dateOfBirth}
+                          label="Date Of Birth"
+                          name="dateOfBirth"
+                          placeholder="DD-MM-YYYY"
+                          max={new Date().toISOString().slice(0, 10)}
                         />
                       </div>
                       <div className="min-w-0">
@@ -107,15 +108,14 @@ export default function SignUpPage() {
                         />
                       </div>
                     </div>
-                    <DatePicker
-                      value={values.dateOfBirth}
+                    <Input
+                      value={values.email}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={errors.dateOfBirth}
-                      label="Date Of Birth"
-                      name="dateOfBirth"
-                      placeholder="DD-MM-YYYY"
-                      max={new Date().toISOString().slice(0, 10)}
+                      error={errors.email}
+                      label="Email Address"
+                      name="email"
+                      placeholder="Email address"
                     />
                     <Input
                       value={values.password}
@@ -135,7 +135,7 @@ export default function SignUpPage() {
                       label="Confirm Password"
                       name="confirmPassword"
                       type="password"
-                      placeholder="Enter your password"
+                      placeholder="Password"
                     />
                     <div className="flex flex-col gap-2">
                       <Checkbox

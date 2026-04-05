@@ -127,11 +127,11 @@ export function PhoneInput({
   };
 
   return (
-    <div className={classNames("flex flex-col gap-1", containerClassName)}>
+    <div className={classNames("flex flex-col gap-2", containerClassName)}>
       {label ? (
         <label
           className={classNames(
-            "text-[11px] font-medium text-[#111827] dark:text-white/90",
+            "text-[#9794AA] text-xs font-medium",
             labelClassName,
           )}
           htmlFor={nationalId}

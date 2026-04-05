@@ -52,7 +52,7 @@ export default function LoginPage() {
                       error={errors.email}
                       label="Email Address"
                       name="email"
-                      placeholder="Enter your email address"
+                      placeholder="Email address"
                     />
                     <Input
                       value={values.password}
@@ -62,7 +62,7 @@ export default function LoginPage() {
                       label="Password"
                       name="password"
                       type="password"
-                      placeholder="Enter your password"
+                      placeholder="Password"
                     />
 
                     <div className="flex justify-end">
