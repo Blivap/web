@@ -23,3 +23,15 @@ export type InAppNotificationListResponse = {
   message: string;
   data: InAppNotification[];
 };
+
+export type FcmPushSubscriptionPayload = {
+  fcmToken: string;
+  userAgent?: string;
+};
+
+export type WebPushSubscriptionPayload = {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  userAgent?: string;
+};

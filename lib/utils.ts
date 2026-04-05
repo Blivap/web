@@ -33,6 +33,9 @@ export function normalizeUser(payload: unknown): IUser | null {
         .has_accepted_terms_and_conditions === true,
     isDeleted: obj.isDeleted === true,
     lastActive: (obj.lastActive as string) ?? "",
+    roles: Array.isArray(obj.roles)
+      ? (obj.roles as string[]).filter((r) => typeof r === "string")
+      : undefined,
   };
 }
 

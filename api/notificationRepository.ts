@@ -1,7 +1,11 @@
 import { fetcher } from "@/services/http";
 import { endpoints } from "@/services/endpoints";
 import type { IResponse } from "@/types";
-import type { InAppNotificationListResponse } from "@/types/notifications";
+import type {
+  FcmPushSubscriptionPayload,
+  InAppNotificationListResponse,
+  WebPushSubscriptionPayload,
+} from "@/types/notifications";
 
 export type ListNotificationsParams = {
   skip?: number;
@@ -31,6 +35,24 @@ export default function NotificationRepository() {
     markRead(id: string): Promise<IResponse<unknown>> {
       return fetcher(endpoints.notifications.read(id), {
         method: "PATCH",
+      });
+    },
+
+    registerFcmPush(
+      payload: FcmPushSubscriptionPayload,
+    ): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.notifications.pushSubscriptions.fcm, {
+        method: "POST",
+        data: payload,
+      });
+    },
+
+    registerWebPush(
+      payload: WebPushSubscriptionPayload,
+    ): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.notifications.pushSubscriptions.web, {
+        method: "POST",
+        data: payload,
       });
     },
   };

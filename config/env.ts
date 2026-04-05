@@ -6,6 +6,11 @@ type Env = {
   apiUrl: string;
   appName: string;
   enableNotifications: boolean;
+  /**
+   * VAPID public key (same as backend Web Push) for PushManager.subscribe.
+   * Optional; web push registration is skipped when unset.
+   */
+  webPushVapidPublicKey: string | undefined;
   authTokenKey: string;
   news: {
     url: string;
@@ -61,6 +66,11 @@ const env = (): Env => {
     process.env.NEXT_PUBLIC_ENABLE_NOTIFICATIONS,
   );
 
+  const webPushVapidPublicKey = first(
+    process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY,
+    process.env.WEB_PUSH_VAPID_PUBLIC_KEY,
+  );
+
   const newsUrl = requiredEnv(
     "NEWS_URL (or NEXT_PUBLIC_NEWS_URL)",
     first(process.env.NEWS_URL, process.env.NEXT_PUBLIC_NEWS_URL),
@@ -77,6 +87,7 @@ const env = (): Env => {
     apiUrl: apiBaseUrl,
     appName,
     enableNotifications: enableFlag === "true",
+    webPushVapidPublicKey,
     authTokenKey,
     news: {
       url: newsUrl,

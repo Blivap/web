@@ -5,7 +5,9 @@ import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { FiBell } from "react-icons/fi";
 import { Check, CheckCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useNotifications } from "@/hooks/notifications/useNotifications.hook";
+import { useAppSelector } from "@/store/hooks";
 
 export type { NotificationItem } from "@/hooks/notifications/useNotifications.hook";
 
@@ -24,19 +26,29 @@ function formatNotificationTime(createdAt: string): string {
 }
 
 export const NotificationBell = () => {
+  const router = useRouter();
+  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const {
     items: notifications,
+    unreadCount,
+    hasMore,
     isLoading,
+    isLoadingMore,
     error,
+    refetch,
+    loadMore,
     markAsRead,
     markAllAsRead,
-  } = useNotifications({ enabled: isOpen });
+  } = useNotifications({ enabled: isAuthenticated });
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  useEffect(() => {
+    if (!isOpen) return;
+    void refetch();
+  }, [isOpen, refetch]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -85,7 +97,9 @@ export const NotificationBell = () => {
       className="relative flex cursor-pointer items-center justify-center rounded-full border border-[#9CA3AF] p-2 transition-colors order-1 md:order-2 dark:border-white/25 dark:hover:border-white/40"
     >
       {unreadCount > 0 && (
-        <div className="absolute top-2 right-3 size-1.5 rounded-full border border-white bg-[#FF0000] dark:border-[#111118]" />
+        <span className="absolute -top-0.5 -right-0.5 flex min-w-[18px] items-center justify-center rounded-full bg-[#FF0000] px-1 py-0.5 text-[10px] font-semibold leading-none text-white">
+          {unreadCount > 99 ? "99+" : unreadCount}
+        </span>
       )}
       <FiBell
         size={18}
@@ -137,8 +151,22 @@ export const NotificationBell = () => {
               {notifications.map((n) => (
                 <div
                   key={n.id}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      if (n.href) router.push(n.href);
+                      void markAsRead(n.id);
+                    }
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (n.href) router.push(n.href);
+                    void markAsRead(n.id);
+                  }}
                   className={classNames(
-                    "rounded-lg p-2.5 transition-colors",
+                    "rounded-lg p-2.5 transition-colors text-left w-full cursor-pointer",
                     n.read
                       ? "bg-white dark:bg-transparent"
                       : "bg-[#F9FAFB] dark:bg-white/6",
@@ -180,6 +208,19 @@ export const NotificationBell = () => {
                   </div>
                 </div>
               ))}
+              {hasMore && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void loadMore();
+                  }}
+                  disabled={isLoadingMore}
+                  className="mt-1 w-full rounded-lg py-2 text-xs font-medium text-primary hover:bg-[#F3F4F6] disabled:opacity-50 dark:hover:bg-white/10"
+                >
+                  {isLoadingMore ? "Loading…" : "Load more"}
+                </button>
+              )}
             </div>
           )}
         </div>

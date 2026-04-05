@@ -2,10 +2,36 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Layout } from "../../../../layout/layout.component";
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Formik, useFormikContext } from "formik";
+import axios from "axios";
+import { $api } from "@/api";
+import { useAppDispatch } from "@/store/hooks";
+import { setUser } from "@/store/slices/authSlice";
+import { normalizeUser } from "@/lib/utils";
+import { medicalAnswersToQuestionnairePayload } from "@/lib/donors/questionnairePayload";
+import { parseQuestionnaireResult } from "@/lib/donors/parseQuestionnaireResponse";
+import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
+import {
+  extractQuestionnaireResultFromProfile,
+  isQuestionnaireAnswered,
+} from "@/lib/donors/donorProfileGuards";
+import type { DonorBloodType } from "@/types/donors";
+import type { DonorQuestionnaireResult } from "@/types/donors";
+import type { DonorLocationPoint } from "@/types/donors";
 
-const STEP_PARAM_VALUES = ["medical", "data", "appointment"] as const;
+import { StepOne, type MedicalAnswers } from "../steps/one/step_one.component";
+import {
+  StepThree,
+  type AppointmentDetails,
+} from "../steps/three/step_three.component";
+import {
+  DonorBasicsStep,
+  type DonorBasicsValues,
+} from "../steps/basics/donor-basics-step.component";
+import { NewDonorPageSkeleton } from "./new-donor-page-skeleton";
+
+const STEP_PARAM_VALUES = ["basics", "health", "appointment"] as const;
 type StepParam = (typeof STEP_PARAM_VALUES)[number];
 
 function stepParamToNumber(param: string | null): number {
@@ -17,12 +43,23 @@ function stepNumberToParam(step: number): StepParam {
   const i = Math.max(1, Math.min(step, 3)) - 1;
   return STEP_PARAM_VALUES[i];
 }
-import { StepOne, type MedicalAnswers } from "../steps/one/step_one.component";
-import { StepTwo, type PersonalDetails } from "../steps/two/step_two.component";
-import {
-  StepThree,
-  type AppointmentDetails,
-} from "../steps/three/step_three.component";
+
+function getErrorMessage(e: unknown, fallback: string): string {
+  if (axios.isAxiosError(e)) {
+    const d = e.response?.data;
+    if (
+      d &&
+      typeof d === "object" &&
+      "message" in d &&
+      typeof (d as { message: unknown }).message === "string"
+    ) {
+      return (d as { message: string }).message;
+    }
+    return e.message || fallback;
+  }
+  if (e instanceof Error) return e.message;
+  return fallback;
+}
 
 const REQUIRED_MEDICAL_FIELDS = [
   "gender",
@@ -37,9 +74,9 @@ const REQUIRED_MEDICAL_FIELDS = [
 ] as const;
 
 const STEPS = [
-  { id: 1, label: "Medical questions" },
-  { id: 2, label: "Personal data" },
-  { id: 3, label: "Make an appointment" },
+  { id: 1, label: "Blood type & location" },
+  { id: 2, label: "Health questionnaire" },
+  { id: 3, label: "Next steps" },
 ];
 
 function StepProgress({ currentStep }: { currentStep: number }) {
@@ -91,19 +128,13 @@ function StepProgress({ currentStep }: { currentStep: number }) {
   );
 }
 
-const initialPersonal: PersonalDetails = {
-  gender: "",
-  fullName: "",
-  dateOfBirth: "",
-  correspondenceName: "",
-  email: "",
-  countryResidence: "",
+const initialBasics: DonorBasicsValues = {
+  bloodType: "",
+  country: "",
+  state: "",
   postalCode: "",
-  houseNumber: "",
-  address: "",
-  streetName: "",
-  placeOfResidence: "",
-  phoneNumber: "",
+  longitude: "",
+  latitude: "",
 };
 
 const initialAppointment: AppointmentDetails = {
@@ -115,68 +146,164 @@ const initialAppointment: AppointmentDetails = {
 };
 
 interface NewDonorFormValues {
+  basics: DonorBasicsValues;
   medical: MedicalAnswers;
-  personal: PersonalDetails;
   appointment: AppointmentDetails;
 }
 
 const initialValues: NewDonorFormValues = {
+  basics: initialBasics,
   medical: {},
-  personal: initialPersonal,
   appointment: initialAppointment,
 };
 
 function NewDonorForm() {
+  const dispatch = useAppDispatch();
   const { values, setFieldValue } = useFormikContext<NewDonorFormValues>();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const [basicsComplete, setBasicsComplete] = useState(false);
+  const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
+  const [questionnaireResult, setQuestionnaireResult] =
+    useState<DonorQuestionnaireResult | null>(null);
+
+  const [basicsError, setBasicsError] = useState<string | null>(null);
+  const [healthError, setHealthError] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isSubmittingQuestionnaire, setIsSubmittingQuestionnaire] =
+    useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
   const requestedStep = useMemo(
     () => stepParamToNumber(searchParams.get("step")),
     [searchParams],
   );
 
-  const handleMedicalChange = (name: string, value: string) => {
-    void setFieldValue(`medical.${name}`, value);
-  };
+  const handleBasicsChange = useCallback(
+    (field: keyof DonorBasicsValues, value: string) => {
+      void setFieldValue(`basics.${field}`, value);
+    },
+    [setFieldValue],
+  );
 
-  const handlePersonalChange = (
-    field: keyof PersonalDetails,
-    value: string,
-  ) => {
-    void setFieldValue(`personal.${field}`, value);
-  };
+  const handleMedicalChange = useCallback(
+    (name: string, value: string) => {
+      void setFieldValue(`medical.${name}`, value);
+    },
+    [setFieldValue],
+  );
 
-  const personalRequired = [
-    values.personal.gender,
-    values.personal.fullName,
-    values.personal.dateOfBirth,
-    values.personal.email,
-    values.personal.countryResidence,
-    values.personal.houseNumber,
-    values.personal.streetName,
-    values.personal.placeOfResidence,
-    values.personal.phoneNumber,
-  ];
+  const handleAppointmentChange = useCallback(
+    <K extends keyof AppointmentDetails>(
+      field: K,
+      value: AppointmentDetails[K],
+    ) => {
+      void setFieldValue(`appointment.${field}`, value);
+    },
+    [setFieldValue],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    async function hydrate() {
+      try {
+        const { data, status } = await $api.donors.me();
+        if (cancelled || status < 200 || status >= 300 || !data) return;
+        const raw = unwrapApiRecord(data);
+        if (!raw) return;
+
+        if (typeof raw.bloodType === "string" && raw.bloodType.length > 0) {
+          setBasicsComplete(true);
+          void setFieldValue("basics.bloodType", raw.bloodType);
+          const coords = raw.location as
+            | { coordinates?: [number, number] }
+            | undefined;
+          if (
+            coords?.coordinates &&
+            coords.coordinates.length === 2 &&
+            Number.isFinite(coords.coordinates[0]) &&
+            Number.isFinite(coords.coordinates[1])
+          ) {
+            void setFieldValue(
+              "basics.longitude",
+              String(coords.coordinates[0]),
+            );
+            void setFieldValue(
+              "basics.latitude",
+              String(coords.coordinates[1]),
+            );
+          }
+
+          const country = raw.country ?? raw.countryCode;
+          if (typeof country === "string" && country.length > 0) {
+            void setFieldValue("basics.country", country);
+          }
+          if (typeof raw.state === "string" && raw.state.length > 0) {
+            void setFieldValue("basics.state", raw.state);
+          }
+          const postal =
+            raw.postalCode ?? raw.postal_code ?? raw.postcode;
+          if (typeof postal === "string" && postal.length > 0) {
+            void setFieldValue("basics.postalCode", postal);
+          }
+        }
+
+        if (isQuestionnaireAnswered(raw)) {
+          setQuestionnaireComplete(true);
+          setQuestionnaireResult(extractQuestionnaireResultFromProfile(raw));
+        }
+      } catch {
+        // No donor profile yet — user must complete step 1.
+      } finally {
+        if (!cancelled) setHydrated(true);
+      }
+    }
+    void hydrate();
+    return () => {
+      cancelled = true;
+    };
+  }, [setFieldValue]);
+
   const allMedicalAnswered = REQUIRED_MEDICAL_FIELDS.every((field) =>
     Boolean(values.medical[field]),
   );
-  const allPersonalRequired = personalRequired.every(Boolean);
-  const maxAllowedStep = allMedicalAnswered ? (allPersonalRequired ? 3 : 2) : 1;
-  const step = Math.min(requestedStep, maxAllowedStep);
+
+  const maxAllowedStep = !basicsComplete
+    ? 1
+    : !questionnaireComplete
+      ? 2
+      : 3;
+  const clampedStep = Math.min(requestedStep, maxAllowedStep);
+  /** If the questionnaire is already done (from API), never keep the user on step 1 or 2. */
+  const step =
+    basicsComplete && questionnaireComplete && clampedStep < 3
+      ? 3
+      : clampedStep;
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, [step]);
 
-  const setStepParam = (newStep: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("step", stepNumberToParam(Math.min(newStep, maxAllowedStep)));
-    router.replace(`${pathname}?${params.toString()}`);
-  };
+  /**
+   * Updates the URL step. Do not clamp with maxAllowedStep here — that value is
+   * still stale in the same tick as setBasicsComplete / setQuestionnaireComplete,
+   * which incorrectly kept step 2 after questionnaire submit. Visibility is
+   * still limited by `step = Math.min(requestedStep, maxAllowedStep)`.
+   */
+  const setStepParam = useCallback(
+    (newStep: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("step", stepNumberToParam(newStep));
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams],
+  );
 
   useEffect(() => {
+    if (!hydrated) return;
     const currentParam = searchParams.get("step");
     const normalizedParam = stepNumberToParam(step);
 
@@ -185,33 +312,123 @@ function NewDonorForm() {
       params.set("step", normalizedParam);
       router.replace(`${pathname}?${params.toString()}`);
     }
-  }, [pathname, router, searchParams, step]);
+  }, [hydrated, pathname, router, searchParams, step]);
 
-  const handleAppointmentChange = <K extends keyof AppointmentDetails>(
-    field: K,
-    value: AppointmentDetails[K],
-  ) => {
-    void setFieldValue(`appointment.${field}`, value);
+  function buildLocation(): DonorLocationPoint | undefined | "invalid" {
+    const lngStr = values.basics.longitude.trim();
+    const latStr = values.basics.latitude.trim();
+    if (lngStr === "" && latStr === "") return undefined;
+    if (lngStr === "" || latStr === "") {
+      setBasicsError("Enter both longitude and latitude, or leave both empty.");
+      return "invalid";
+    }
+    const lng = Number.parseFloat(lngStr);
+    const lat = Number.parseFloat(latStr);
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+      setBasicsError("Invalid coordinates.");
+      return "invalid";
+    }
+    if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
+      setBasicsError("Coordinates out of range.");
+      return "invalid";
+    }
+    return { type: "Point", coordinates: [lng, lat] };
+  }
+
+  const handleRegisterBasics = async () => {
+    setBasicsError(null);
+    if (!values.basics.bloodType) {
+      setBasicsError("Select a blood type.");
+      return;
+    }
+    const loc = buildLocation();
+    if (loc === "invalid") return;
+
+    setIsRegistering(true);
+    try {
+      const payload: {
+        bloodType: DonorBloodType;
+        location?: DonorLocationPoint;
+      } = {
+        bloodType: values.basics.bloodType as DonorBloodType,
+        ...(loc ? { location: loc } : {}),
+      };
+
+      const { status } = await $api.donors.register(payload);
+      if (status >= 200 && status < 300) {
+        setBasicsComplete(true);
+        setStepParam(2);
+      } else {
+        setBasicsError("Could not save donor profile. Try again.");
+      }
+    } catch (e) {
+      setBasicsError(
+        getErrorMessage(e, "Could not save donor profile. Try again."),
+      );
+    } finally {
+      setIsRegistering(false);
+    }
   };
 
-  const handleContinue = () => {
-    if (step === 1) setStepParam(2);
-    if (step === 2 && allPersonalRequired) setStepParam(3);
+  const handleSubmitQuestionnaire = async () => {
+    setHealthError(null);
+    if (questionnaireComplete) {
+      setStepParam(3);
+      return;
+    }
+    if (!allMedicalAnswered) return;
+
+    setIsSubmittingQuestionnaire(true);
+    try {
+      const body = medicalAnswersToQuestionnairePayload(values.medical);
+      const { status, data } = await $api.donors.questionnaire(body);
+      if (status >= 200 && status < 300) {
+        const parsed = parseQuestionnaireResult(data);
+        setQuestionnaireResult(parsed);
+        setQuestionnaireComplete(true);
+        setStepParam(3);
+
+        try {
+          const me = await $api.auth.me();
+          if (me.status >= 200 && me.status < 300 && me.data) {
+            const userPayload = normalizeUser(me.data);
+            if (userPayload) dispatch(setUser(userPayload));
+          }
+        } catch {
+          // ignore refresh failure
+        }
+      } else {
+        setHealthError("Questionnaire could not be submitted.");
+      }
+    } catch (e) {
+      setHealthError(
+        getErrorMessage(
+          e,
+          "Questionnaire could not be submitted. It may already have been submitted.",
+        ),
+      );
+    } finally {
+      setIsSubmittingQuestionnaire(false);
+    }
   };
 
   const canConfirmAppointment = Boolean(
     values.appointment.hospitalId &&
-    values.appointment.date &&
-    values.appointment.time &&
-    values.appointment.agreeTerms &&
-    values.appointment.agreePrivacy,
+      values.appointment.date &&
+      values.appointment.time &&
+      values.appointment.agreeTerms &&
+      values.appointment.agreePrivacy,
   );
 
   const handleConfirmAppointment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canConfirmAppointment) return;
-    // TODO: submit full donor registration
+    // Scheduling is separate from donor API; integrate when booking endpoint is wired.
   };
+
+  if (!hydrated) {
+    return <NewDonorPageSkeleton />;
+  }
 
   return (
     <div className="sm:p-6 w-full flex flex-col  flex-1 h-full grow">
@@ -220,18 +437,21 @@ function NewDonorForm() {
         ref={contentRef}
         className="flex-1 min-h-0 overflow-y-auto custom-scrollbar"
       >
-        <StepOne
+        <DonorBasicsStep
           active={step === 1}
-          medical={values.medical}
-          handleContinue={handleContinue}
-          handleMedicalChange={handleMedicalChange}
+          values={values.basics}
+          onChange={handleBasicsChange}
+          onSubmit={handleRegisterBasics}
+          isSubmitting={isRegistering}
+          error={basicsError}
         />
-        <StepTwo
+        <StepOne
           active={step === 2}
-          personal={values.personal}
-          handlePersonalChange={handlePersonalChange}
-          allPersonalRequired={allPersonalRequired}
-          handleContinue={handleContinue}
+          medical={values.medical}
+          handleMedicalChange={handleMedicalChange}
+          onSubmitQuestionnaire={handleSubmitQuestionnaire}
+          isSubmitting={isSubmittingQuestionnaire}
+          submitError={healthError}
         />
         <StepThree
           active={step === 3}
@@ -239,6 +459,7 @@ function NewDonorForm() {
           handleAppointmentChange={handleAppointmentChange}
           canConfirm={canConfirmAppointment}
           onConfirm={handleConfirmAppointment}
+          eligibility={questionnaireResult}
         />
       </div>
     </div>
@@ -259,11 +480,7 @@ function NewDonorContent() {
 export default function NewDonor() {
   return (
     <Layout>
-      <Suspense
-        fallback={
-          <div className="p-6 text-sm text-text-secondary">Loading…</div>
-        }
-      >
+      <Suspense fallback={<NewDonorPageSkeleton />}>
         <NewDonorContent />
       </Suspense>
     </Layout>

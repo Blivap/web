@@ -26,6 +26,8 @@ import { FaBars } from "react-icons/fa";
 import { useLogout } from "@/hooks/auth/useLogout.hook";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 import { NotificationBell } from "../components/feedback/notification/notification.component";
+import { PushNotificationRegistrar } from "../components/feedback/notification/push-registrar.component";
+import { useNotificationNavigationListener } from "@/hooks/notifications/useNotificationNavigationListener.hook";
 import { ChevronDown, Info, LogOut, Settings } from "lucide-react";
 import { routes } from "@/config/routes";
 import {
@@ -44,6 +46,7 @@ interface NavItem {
   inactiveColor?: string;
 }
 export const Layout = (props: PropsWithChildren<unknown>) => {
+  useNotificationNavigationListener();
   const [drawer, setDrawer] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { preference, resolved, setPreference } = useThemePreference();
@@ -97,6 +100,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
 
   return (
     <div className="bg-[#f8f8f8] dark:bg-[#0a0a0a] h-screen grow flex transition-colors duration-200">
+      <PushNotificationRegistrar />
       {/* Overlay for mobile when drawer is open */}
 
       <div

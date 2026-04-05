@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info } from "lucide-react";
+import type { DonorQuestionnaireResult } from "@/types/donors";
 
 export interface AppointmentDetails {
   hospitalId: string;
@@ -21,6 +22,8 @@ export interface StepThreeProps {
   canConfirm: boolean;
   onConfirm: (e: React.FormEvent) => void;
   active: boolean;
+  /** Set after POST /donors/questionnaire succeeds. */
+  eligibility?: DonorQuestionnaireResult | null;
 }
 
 const MOCK_HOSPITALS = [
@@ -96,12 +99,73 @@ function getDiamondRows<T>(items: T[]): T[][] {
   return rows;
 }
 
+function EligibilityBanner({ eligibility }: { eligibility: DonorQuestionnaireResult }) {
+  const status = eligibility.eligibilityStatus ?? "";
+  const isDonorRole =
+    status === "eligible" || status === "pending_review";
+  const isIneligible = status === "ineligible";
+
+  if (isDonorRole) {
+    return (
+      <div className="border-l-4 border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-500 flex gap-3 p-4 rounded-r-lg">
+        <Info className="shrink-0 text-emerald-700 dark:text-emerald-400" size={18} />
+        <div className="text-sm text-emerald-900 dark:text-emerald-100">
+          <p className="font-semibold">Donor status</p>
+          <p className="mt-1 text-xs opacity-90">
+            Your eligibility is <strong>{status}</strong>. When this is{" "}
+            <strong>eligible</strong> or <strong>pending_review</strong>, your
+            account receives the <strong>donor</strong> role for matching. You
+            can complete identity verification and bookings separately if required.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isIneligible) {
+    return (
+      <div className="border-l-4 border-amber-600 bg-amber-50 dark:bg-amber-950/35 dark:border-amber-500 flex gap-3 p-4 rounded-r-lg">
+        <Info className="shrink-0 text-amber-800 dark:text-amber-400" size={18} />
+        <div className="text-sm text-amber-950 dark:text-amber-100">
+          <p className="font-semibold">Not eligible at this time</p>
+          {eligibility.ineligibilityReasons &&
+            eligibility.ineligibilityReasons.length > 0 && (
+              <ul className="mt-2 list-disc pl-4 text-xs space-y-1">
+                {eligibility.ineligibilityReasons.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
+              </ul>
+            )}
+          <p className="mt-2 text-xs">
+            The <strong>donor</strong> role is not added while you are marked
+            ineligible. Your answers are kept on file.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border-l-4 border-[#960018] bg-[#FFE2E2] dark:bg-red-950/25 flex gap-3 p-4 rounded-r-lg">
+      <Info className="shrink-0 text-primary" size={18} />
+      <div className="text-sm text-[#5A403F] dark:text-red-100/90">
+        <p className="font-semibold">Eligibility: {status || "Pending"}</p>
+        <p className="mt-1 text-xs">
+          Follow any instructions from the platform. Additional checks (such as
+          identity verification) may still be required.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function StepThree({
   appointment,
   handleAppointmentChange,
   canConfirm,
   onConfirm,
   active,
+  eligibility = null,
 }: StepThreeProps) {
   const [hospitalCarouselIndex, setHospitalCarouselIndex] = useState(0);
   const hospitalCarouselRef = useRef<HTMLDivElement | null>(null);
@@ -168,12 +232,19 @@ export function StepThree({
         onSubmit={onConfirm}
         className="flex flex-col gap-6 mt-6 xl:mt-10 overflow-hidden"
       >
+        {eligibility &&
+          (eligibility.eligibilityStatus != null ||
+            (eligibility.ineligibilityReasons?.length ?? 0) > 0) && (
+            <EligibilityBanner eligibility={eligibility} />
+          )}
+
         <h2 className="text-lg font-semibold text-text-primary">
           Schedule your inspection appointment
         </h2>
         <p className="text-sm text-text-secondary -mt-2">
-          During your first visit we will take a blood sample for testing and
-          blood typing. Plan about one hour for this screening appointment.
+          Booking a screening is separate from donor registration. During your
+          first visit we may take a blood sample for testing and typing. Plan
+          about one hour for this screening appointment.
         </p>
         <p className="text-sm text-text-secondary">
           <span className="font-medium text-text-primary">Tip:</span> If the

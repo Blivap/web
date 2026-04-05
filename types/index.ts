@@ -55,6 +55,8 @@ export type IUser = {
   hasAcceptedTermsAndConditions: boolean;
   isDeleted: boolean;
   lastActive: string;
+  /** Present when API returns role names (e.g. `donor` after eligibility). */
+  roles?: string[];
 };
 export type IAvatar = {
   id: string;
@@ -119,7 +121,20 @@ export interface ISource {
 }
 
 export type {
+  FcmPushSubscriptionPayload,
   InAppNotification,
   InAppNotificationListResponse,
   NotificationEventType,
+  WebPushSubscriptionPayload,
 } from "./notifications";
+
+export type {
+  DonorBloodType,
+  DonorEligibilityStatus,
+  DonorGender,
+  DonorLocationPoint,
+  DonorMedicalFormAnswers,
+  DonorQuestionnairePayload,
+  DonorQuestionnaireResult,
+  DonorRegisterPayload,
+} from "./donors";

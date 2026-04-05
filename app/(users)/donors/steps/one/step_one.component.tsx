@@ -3,14 +3,17 @@
 import { useState } from "react";
 import { Info } from "lucide-react";
 import { Radio } from "@/components/forms/Radio";
+import type { DonorMedicalFormAnswers } from "@/types/donors";
 
-export type MedicalAnswers = Record<string, string>;
+export type MedicalAnswers = DonorMedicalFormAnswers;
 
 export interface StepOneProps {
   medical: MedicalAnswers;
-  handleContinue: () => void;
   handleMedicalChange: (name: string, value: string) => void;
   active: boolean;
+  onSubmitQuestionnaire: () => void | Promise<void>;
+  isSubmitting?: boolean;
+  submitError?: string | null;
 }
 
 const MEDICAL_QUESTIONS: {
@@ -22,8 +25,10 @@ const MEDICAL_QUESTIONS: {
     name: "gender",
     label: "What is your gender?",
     options: [
-      { value: "man", label: "Man" },
-      { value: "woman", label: "Woman" },
+      { value: "male", label: "Male" },
+      { value: "female", label: "Female" },
+      { value: "other", label: "Other" },
+      { value: "prefer_not_to_say", label: "Prefer not to say" },
     ],
   },
   {
@@ -183,9 +188,11 @@ function FirstStepQuestionRow({
 
 export function StepOne({
   medical,
-  handleContinue,
   handleMedicalChange,
   active,
+  onSubmitQuestionnaire,
+  isSubmitting = false,
+  submitError = null,
 }: StepOneProps) {
   const allMedicalAnswered = MEDICAL_QUESTIONS.every((q) => medical[q.name]);
 
@@ -193,21 +200,26 @@ export function StepOne({
     active && (
       <>
         <h2 className="text-lg font-semibold text-text-primary mb-2 mt-6 xl:mt-15">
-          Medical questions
+          Health questionnaire
         </h2>
         <p className="text-sm text-text-secondary mb-1 max-w-[600px]">
-          Before you can become a blood donor, we&apos;ll ask you a few medical
-          questions. This is to ensure it&apos;s safe for you and the recipient
-          of your blood to donate.
+          Answer each question once. After you submit, your answers cannot be
+          changed. We use them with your date of birth from your account to
+          determine eligibility and whether your account gets the donor role.
         </p>
         <p className="text-sm text-text-secondary mb-1 mt-16">
           Please complete the questions below.
         </p>
 
+        {submitError && (
+          <p className="text-sm text-red-600 dark:text-red-400 mt-4" role="alert">
+            {submitError}
+          </p>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            handleContinue();
+            void onSubmitQuestionnaire();
           }}
           className="flex flex-col gap-6"
         >
@@ -225,10 +237,10 @@ export function StepOne({
 
           <button
             type="submit"
-            disabled={!allMedicalAnswered}
+            disabled={!allMedicalAnswered || isSubmitting}
             className="mt-4 text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
           >
-            Continue
+            {isSubmitting ? "Submitting…" : "Submit questionnaire"}
           </button>
         </form>
         <div className="border-[#960018] border-l-4 bg-[#FFE2E2] flex gap-4 p-4 mt-10 sm:mt-12.5 ">
