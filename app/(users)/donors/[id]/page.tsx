@@ -7,7 +7,7 @@ import { ALL_DONORS } from "../donors.data";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
 import { Button } from "@/components/button/button.component";
 import { Collapsable } from "./components/collapsable.components";
-import { useAppSelector } from "@/app/store/hooks";
+import { useAppSelector } from "@/store/hooks";
 import { routes } from "@/config/routes";
 
 export default function DonorDetailsPage() {

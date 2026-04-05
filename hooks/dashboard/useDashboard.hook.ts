@@ -1,4 +1,4 @@
-import { useAppSelector } from "@/app/store/hooks";
+import { useAppSelector } from "@/store/hooks";
 import { useCheckUser } from "../auth/useCheckUser.hook";
 
 export const useDashboard = () => {

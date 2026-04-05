@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { $api } from "@/api";
 import { IVerifyEmailPayload } from "@/types";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
-import { useAppDispatch } from "@/app/store/hooks";
-import { setUser } from "@/app/store/slices/authSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";
 
 export function useVerifyEmail() {

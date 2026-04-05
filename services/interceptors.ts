@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
-import { logout } from "@/app/store/slices/authSlice";
-import { getClientStore } from "@/app/store/store";
+import { logout } from "@/store/slices/authSlice";
+import { getClientStore } from "@/store/store";
 
 function dispatchLogoutOn401() {
   if (typeof window === "undefined") return;

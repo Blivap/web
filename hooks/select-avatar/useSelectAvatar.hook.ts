@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { $api } from "@/api";
 import { AxiosError } from "axios";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
-import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
-import { setUser } from "@/app/store/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setUser } from "@/store/slices/authSlice";
 import {
   setAvatars,
   setIsLoading,
   setSelectedAvatar,
   toggleSelectedAvatar,
-} from "@/app/store/slices/selectAvatarSlice";
+} from "@/store/slices/selectAvatarSlice";
 import { normalizeUser } from "@/lib/utils";
 
 export function useSelectAvatar() {

@@ -5,7 +5,7 @@ import "@/styles/globals.css";
 import { SnackbarProvider } from "@/components/feedback/snackbar/snackbar.context";
 import { Snackbar } from "@/components/feedback/snackbar/snackbar.component";
 import { config } from "@/config/env";
-import StoreProvider from "./store/provider";
+import StoreProvider from "../store/provider";
 import { StructuredData } from "@/components/seo/structured-data";
 import { AuthChecker } from "@/components/auth/auth-checker";
 

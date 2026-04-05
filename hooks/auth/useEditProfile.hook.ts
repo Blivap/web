@@ -3,8 +3,8 @@ import { AxiosError } from "axios";
 import { $api } from "@/api";
 import { IEditProfilePayload, IUser } from "@/types";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
-import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
-import { setUser } from "@/app/store/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setUser } from "@/store/slices/authSlice";
 
 export function useEditProfile() {
   const [isLoading, setIsLoading] = useState(false);

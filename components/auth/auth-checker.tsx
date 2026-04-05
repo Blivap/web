@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
-import { initializeAuth } from "@/app/store/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { initializeAuth } from "@/store/slices/authSlice";
 import { useCheckUser } from "@/hooks/auth/useCheckUser.hook";
 import { AuthLoader } from "./auth-loader.component";
 

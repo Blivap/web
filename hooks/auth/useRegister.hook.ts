@@ -5,8 +5,8 @@ import { IAuthResponse, IRegisterApiPayload, IRegisterPayload } from "@/types";
 import { buildE164Phone } from "@/lib/phone-country-codes";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
-import { useAppDispatch } from "@/app/store/hooks";
-import { setCredentials } from "@/app/store/slices/authSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { setCredentials } from "@/store/slices/authSlice";
 import { useRouter } from "next/navigation";
 
 export const useRegister = () => {

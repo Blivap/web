@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useAppSelector } from "@/app/store/hooks";
+import { useAppSelector } from "@/store/hooks";
 
 const AUTH_ONLY_PAGES = [
   "/login",

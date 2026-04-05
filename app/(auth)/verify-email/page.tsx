@@ -7,7 +7,7 @@ import { useResendVerificationLink } from "@/hooks/auth/useResendVerificationLin
 import { verifyEmailSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import Image from "next/image";
-import { useAppSelector } from "../../store/hooks";
+import { useAppSelector } from "../../../store/hooks";
 import { useLogout } from "@/hooks/auth/useLogout.hook";
 import { LogOut } from "lucide-react";
 

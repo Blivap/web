@@ -5,8 +5,8 @@ import { $api } from "@/api";
 import { ILoginPayload, IAuthResponse } from "@/types";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
-import { useAppDispatch } from "@/app/store/hooks";
-import { setCredentials } from "@/app/store/slices/authSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { setCredentials } from "@/store/slices/authSlice";
 
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);

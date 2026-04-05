@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import { AxiosError } from "axios";
 import { $api } from "@/api";
-import { useAppDispatch } from "@/app/store/hooks";
-import { setUser } from "@/app/store/slices/authSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";
 
 const GENERIC_ERROR = "Something went wrong. Please try again.";
