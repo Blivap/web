@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { $api } from "@/services";
+import { $api } from "@/api";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { setUser, logout } from "@/app/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";

@@ -3,6 +3,17 @@ export const registerSchema = yup.object({
   firstname: yup.string().required("First name is required"),
   lastname: yup.string().required("Last name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
+  phoneCountryCode: yup
+    .string()
+    .required("Country code is required")
+    .matches(/^\+\d{1,6}$/, "Invalid country code"),
+  phoneNational: yup
+    .string()
+    .required("Phone number is required")
+    .test("phone-national", "Enter 6–15 digits", (v) => {
+      const d = (v ?? "").replace(/\D/g, "");
+      return d.length >= 6 && d.length <= 15;
+    }),
   dateOfBirth: yup.string().required("Date of Birth is required"),
   password: yup
     .string()
@@ -16,14 +27,8 @@ export const registerSchema = yup.object({
     .string()
     .oneOf([yup.ref("password")], "Passwords must match")
     .required("Retype your password"),
-  termsAndCondition: yup
-    .boolean()
-    .oneOf([true], "You must accept the terms and conditions")
-    .required(),
-  privacyStatement: yup
-    .boolean()
-    .oneOf([true], "You must accept the privacy statement")
-    .required(),
+  termsAndCondition: yup.boolean().oneOf([true]).required(),
+  privacyStatement: yup.boolean().oneOf([true]).required(),
 });
 export const loginSchema = yup.object({
   email: yup.string().email("Invalid email").required("Email is required"),
@@ -58,8 +63,30 @@ export const changePasswordSchema = yup.object({
 });
 
 export const editProfileSchema = yup.object({
-  firstname: yup.string().optional(),
-  lastname: yup.string().optional(),
-  phonenumber: yup.string().nullable().optional(),
-  profileImage: yup.string().url("Invalid URL").nullable().optional(),
+  firstname: yup.string().trim().optional().nullable(),
+  lastname: yup.string().trim().optional().nullable(),
+  phoneCountryCode: yup
+    .string()
+    .optional()
+    .nullable()
+    .default("+234")
+    .matches(/^\+\d{1,6}$/, "Invalid country code"),
+  phoneNational: yup
+    .string()
+    .default("")
+    .test("phone-national", "Enter 6–15 digits, or leave empty", (v) => {
+      const d = (v ?? "").replace(/\D/g, "");
+      return d.length === 0 || (d.length >= 6 && d.length <= 15);
+    }),
+  dateOfBirth: yup.string().optional().nullable(),
+  profileImage: yup
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => (v === "" ? null : v))
+    .test(
+      "url-or-empty",
+      "Invalid image URL",
+      (v) => !v || yup.string().url().isValidSync(v),
+    ),
 });

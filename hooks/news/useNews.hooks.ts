@@ -1,7 +1,7 @@
-import { $api } from "@/services";
+import { $api } from "@/api";
 import { INewsItem } from "@/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { GetNewsParams } from "@/services/newsRepository";
+import type { GetNewsParams } from "@/api/newsRepository";
 
 export const useNews = (
   params?: GetNewsParams,

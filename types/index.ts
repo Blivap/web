@@ -5,6 +5,9 @@ export type IRegisterPayload = {
   password: string;
   /** ISO date string `YYYY-MM-DD` from the date picker. */
   dateOfBirth: string;
+  phoneCountryCode: string;
+  /** National number digits only (no country code). */
+  phoneNational: string;
 };
 
 export type IRegisterApiPayload = {
@@ -13,6 +16,8 @@ export type IRegisterApiPayload = {
   email: string;
   password: string;
   dateOfBirth: string;
+  /** E.164-style value, e.g. `+2348012345678`. */
+  phonenumber: string;
 };
 export type IResponse<T> = {
   data?: T;
@@ -85,6 +90,7 @@ export type IEditProfilePayload = {
   firstname?: string;
   lastname?: string;
   phonenumber?: string | null;
+  dateOfBirth?: string | null;
   profileImage?: string | null;
 };
 

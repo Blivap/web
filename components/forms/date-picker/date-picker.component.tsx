@@ -308,7 +308,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
     }, [minDate, maxDate]);
 
     const selectTriggerClass =
-      "w-full cursor-pointer rounded-md border border-[#66666659] bg-white px-2.5 py-2 text-xs font-semibold text-[#100F14] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] outline-none transition-[border-color,box-shadow] hover:border-[#8A8A8A] focus:border-primary focus:ring-2 focus:ring-primary/15";
+      "w-full cursor-pointer rounded-md border border-[#66666659] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#100F14] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] outline-none transition-[border-color,box-shadow] hover:border-[#8A8A8A] focus:border-primary focus:ring-2 focus:ring-primary/15";
 
     return (
       <div
@@ -346,7 +346,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               aria-expanded={open}
               aria-controls={listboxId}
               className={classNames(
-                "outline-none py-2 w-full min-w-0 text-left text-sm font-medium",
+                "outline-none py-2.5 w-full min-w-0 text-left text-sm font-medium",
                 !displayText && "text-[#9794AA]",
                 inputClassName,
                 className,

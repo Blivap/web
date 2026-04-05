@@ -3,6 +3,7 @@ import { Button } from "@/components/button/button.component";
 import { Checkbox } from "@/components/forms/checkbox";
 import { DatePicker } from "@/components/forms/date-picker";
 import { Input } from "@/components/forms/inputs/input.component";
+import { PhoneInput } from "@/components/forms/phone-input";
 import { AuthLayout } from "@/layout/auth.layout.component";
 import { routes } from "@/config/routes";
 import { useRegister } from "@/hooks/auth/useRegister.hook";
@@ -36,6 +37,8 @@ export default function SignUpPage() {
                 lastname: "",
                 dateOfBirth: "",
                 email: "",
+                phoneCountryCode: "+234",
+                phoneNational: "",
                 password: "",
                 confirmPassword: "",
                 termsAndCondition: false,
@@ -75,15 +78,35 @@ export default function SignUpPage() {
                         placeholder="Enter your lastname"
                       />
                     </div>
-                    <Input
-                      value={values.email}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.email}
-                      label="Email Address"
-                      name="email"
-                      placeholder="Enter your email address"
-                    />
+                    <div className="grid grid-cols-2 gap-4 md:gap-6">
+                      <div className="min-w-0">
+                        <Input
+                          value={values.email}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          error={errors.email}
+                          label="Email Address"
+                          name="email"
+                          placeholder="Enter your email address"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <PhoneInput
+                          label="Phone number"
+                          countryCodeName="phoneCountryCode"
+                          nationalFieldName="phoneNational"
+                          countryCode={values.phoneCountryCode}
+                          national={values.phoneNational}
+                          onCountryCodeChange={handleChange}
+                          onNationalDigitsChange={(digits) => {
+                            void setFieldValue("phoneNational", digits);
+                          }}
+                          onBlur={handleBlur}
+                          errorNational={errors.phoneNational}
+                          errorCountryCode={errors.phoneCountryCode}
+                        />
+                      </div>
+                    </div>
                     <DatePicker
                       value={values.dateOfBirth}
                       onChange={handleChange}
@@ -133,7 +156,6 @@ export default function SignUpPage() {
                           void setFieldValue("termsAndCondition", checked);
                         }}
                         onBlur={handleBlur}
-                        error={errors.termsAndCondition}
                       />
 
                       <Checkbox
@@ -154,7 +176,6 @@ export default function SignUpPage() {
                           void setFieldValue("privacyStatement", checked);
                         }}
                         onBlur={handleBlur}
-                        error={errors.privacyStatement}
                       />
                     </div>
 

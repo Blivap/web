@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { $api } from "@/services";
+import { $api } from "@/api";
 import { IResendVerificationQuery } from "@/types";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 

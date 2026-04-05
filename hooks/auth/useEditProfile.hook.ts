@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { $api } from "@/services";
+import { $api } from "@/api";
 import { IEditProfilePayload, IUser } from "@/types";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
@@ -31,6 +31,14 @@ export function useEditProfile() {
           email: apiUser?.email ?? currentUser?.email ?? "",
           emailVerified:
             apiUser?.emailVerified ?? currentUser?.emailVerified ?? false,
+          phonenumber:
+            payload.phonenumber !== undefined
+              ? payload.phonenumber
+              : (apiUser?.phonenumber ?? currentUser?.phonenumber ?? null),
+          dateOfBirth:
+            payload.dateOfBirth !== undefined
+              ? payload.dateOfBirth
+              : (apiUser?.dateOfBirth ?? currentUser?.dateOfBirth ?? null),
           profileImage:
             payload.profileImage !== undefined && payload.profileImage !== null
               ? payload.profileImage

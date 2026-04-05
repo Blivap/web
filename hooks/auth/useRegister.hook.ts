@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { $api } from "@/services";
+import { $api } from "@/api";
 import { IAuthResponse, IRegisterApiPayload, IRegisterPayload } from "@/types";
+import { buildE164Phone } from "@/lib/phone-country-codes";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch } from "@/app/store/hooks";
@@ -31,6 +32,10 @@ export const useRegister = () => {
         email: payload.email,
         password: payload.password,
         dateOfBirth: payload.dateOfBirth,
+        phonenumber: buildE164Phone(
+          payload.phoneCountryCode,
+          payload.phoneNational,
+        ),
       };
       const { data, status, message, error } =
         await $api.auth.register(apiPayload);

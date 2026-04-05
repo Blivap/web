@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { $api } from "@/services";
+import { $api } from "@/api";
 import { ILoginPayload, IAuthResponse } from "@/types";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";

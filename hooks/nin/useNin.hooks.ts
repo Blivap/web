@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { AxiosError } from "axios";
-import { $api } from "@/services";
+import { $api } from "@/api";
 import { useAppDispatch } from "@/app/store/hooks";
 import { setUser } from "@/app/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";
@@ -8,8 +8,7 @@ import { normalizeUser } from "@/lib/utils";
 const GENERIC_ERROR = "Something went wrong. Please try again.";
 
 const isPdfFile = (file: File) =>
-  file.type === "application/pdf" ||
-  file.name.toLowerCase().endsWith(".pdf");
+  file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
 export const useNin = () => {
   const [isLoading, setIsLoading] = useState(false);

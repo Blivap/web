@@ -2,7 +2,7 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/app/store/hooks";
 import { logout } from "@/app/store/slices/authSlice";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
-import { $api } from "@/services";
+import { $api } from "@/api";
 
 export const useLogout = () => {
   const dispatch = useAppDispatch();
