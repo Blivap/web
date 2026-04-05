@@ -1,5 +1,5 @@
+import { generateMetadata } from "@/lib/utils/metadata";
 import { Metadata } from "next";
-import { generateMetadata } from "../../lib/utils/metadata";
 
 export const metadata: Metadata = generateMetadata({
   title: "What We Do",

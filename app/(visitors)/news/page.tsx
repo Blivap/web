@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { HomeLayout } from "../../layout/home.layout.component";
-import { NewsFallbackImage } from "../../components/image/news-fallback-image.component";
+import { HomeLayout } from "@/layout/home.layout.component";
+import { NewsFallbackImage } from "@/components/image/news-fallback-image.component";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -17,7 +17,7 @@ import type {
   NewsCategory,
   NewsCountry,
   NewsLanguage,
-} from "../../services/newsRepository";
+} from "@/api/newsRepository";
 
 const HEALTH_CATEGORY: NewsCategory = "health";
 
