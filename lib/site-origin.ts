@@ -25,6 +25,7 @@ export function absoluteSiteUrl(pathname: string): string {
   }
   const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
   const segments = path.split("/").filter(Boolean);
-  const encodedPath = "/" + segments.map((s) => encodeURIComponent(s)).join("/");
+  const encodedPath =
+    "/" + segments.map((s) => encodeURIComponent(s)).join("/");
   return `${origin}${encodedPath}`;
 }

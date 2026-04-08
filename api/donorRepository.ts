@@ -31,9 +31,7 @@ export default function DonorRepository() {
       return fetcher(endpoints.donors.me, { method: "GET" });
     },
 
-    updateLocation(
-      location: DonorLocationPoint,
-    ): Promise<IResponse<unknown>> {
+    updateLocation(location: DonorLocationPoint): Promise<IResponse<unknown>> {
       return fetcher(endpoints.donors.location, {
         method: "PATCH",
         data: { location },

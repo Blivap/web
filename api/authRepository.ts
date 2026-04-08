@@ -13,8 +13,6 @@ import {
 import { IResponse } from "../types";
 import { endpoints } from "@/services/endpoints";
 
-const url = "/authentication";
-
 export default function authRepository() {
   return {
     login(payload: ILoginPayload): Promise<IResponse<IAuthResponse>> {

@@ -212,7 +212,10 @@ export function StepOne({
         </p>
 
         {submitError && (
-          <p className="text-sm text-red-600 dark:text-red-400 mt-4" role="alert">
+          <p
+            className="text-sm text-red-600 dark:text-red-400 mt-4"
+            role="alert"
+          >
             {submitError}
           </p>
         )}

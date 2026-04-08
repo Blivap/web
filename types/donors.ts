@@ -9,11 +9,7 @@ export type DonorBloodType =
   | "O+"
   | "O-";
 
-export type DonorGender =
-  | "female"
-  | "male"
-  | "other"
-  | "prefer_not_to_say";
+export type DonorGender = "female" | "male" | "other" | "prefer_not_to_say";
 
 /** GeoJSON Point for optional donor location (coordinates: [longitude, latitude]). */
 export type DonorLocationPoint = {

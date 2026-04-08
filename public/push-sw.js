@@ -47,7 +47,9 @@ self.addEventListener("notificationclick", function (event) {
       type === "booking_accepted" ||
       type === "booking_rejected"
     ) {
-      path = d.bookingId ? `/bookings?bookingId=${encodeURIComponent(d.bookingId)}` : "/bookings";
+      path = d.bookingId
+        ? `/bookings?bookingId=${encodeURIComponent(d.bookingId)}`
+        : "/bookings";
     } else if (type === "donor_matched") {
       path = d.donorId
         ? `/donors/${encodeURIComponent(d.donorId)}`
@@ -63,18 +65,23 @@ self.addEventListener("notificationclick", function (event) {
   const targetUrl = new URL(path, self.location.origin).href;
 
   event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (clientList) {
-      for (let i = 0; i < clientList.length; i++) {
-        const c = clientList[i];
-        if (c.url.startsWith(self.location.origin) && "focus" in c) {
-          return c.focus().then(function () {
-            c.postMessage({ type: "blivap-notification-navigate", href: path });
-          });
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then(function (clientList) {
+        for (let i = 0; i < clientList.length; i++) {
+          const c = clientList[i];
+          if (c.url.startsWith(self.location.origin) && "focus" in c) {
+            return c.focus().then(function () {
+              c.postMessage({
+                type: "blivap-notification-navigate",
+                href: path,
+              });
+            });
+          }
         }
-      }
-      if (self.clients.openWindow) {
-        return self.clients.openWindow(targetUrl);
-      }
-    }),
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(targetUrl);
+        }
+      }),
   );
 });

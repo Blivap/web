@@ -3,7 +3,6 @@
 import { Layout } from "@/layout/layout.component";
 import { Button } from "@/components/button/button.component";
 import { Modal } from "@/components/ui/modal/modal.component";
-import { Radio } from "@/components/forms/Radio";
 import classNames from "classnames";
 import { Check, Trash2 } from "lucide-react";
 import {
@@ -66,8 +65,6 @@ function formatFileSize(bytes: number) {
 }
 
 function VerifyIdContent() {
-  const [email, setEmail] = useState("");
-  const [residency, setResidency] = useState<"nigeria" | "abroad">("nigeria");
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [verifySuccessOpen, setVerifySuccessOpen] = useState(false);
@@ -318,56 +315,14 @@ function VerifyIdContent() {
             </div>
           )}
           {ninError ? (
-            <p className="mt-3 text-sm text-red-600 dark:text-red-400" role="alert">
+            <p
+              className="mt-3 text-sm text-red-600 dark:text-red-400"
+              role="alert"
+            >
               {ninError}
             </p>
           ) : null}
         </div>
-
-        <section className="mb-10 rounded-lg bg-[#FCE4EC] px-5 py-6 dark:bg-primary/15">
-          <h2 className="text-base font-bold text-text-primary">
-            Email address
-          </h2>
-          <p className="mt-2 text-sm text-text-primary leading-relaxed mb-4">
-            A valid email address is required to arrange your donation
-            arrangements. Please ensure you enter it correctly.
-          </p>
-          <input
-            type="email"
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email address *"
-            className="w-full rounded-md border border-[#C4C4C4] bg-white px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-tertiary focus:border-primary focus:ring-1 focus:ring-primary/30 dark:border-white/15 dark:bg-[#14141a]"
-            autoComplete="email"
-          />
-        </section>
-
-        <section className="mb-10">
-          <h2 className="text-base font-bold text-text-primary mb-5">
-            Enter your personal details
-          </h2>
-          <div className="flex flex-col gap-4">
-            <Radio
-              name="residency"
-              value="nigeria"
-              checked={residency === "nigeria"}
-              onChange={() => setResidency("nigeria")}
-              labelClassName="text-sm text-text-primary font-normal"
-            >
-              I live in Nigeria
-            </Radio>
-            <Radio
-              name="residency"
-              value="abroad"
-              checked={residency === "abroad"}
-              onChange={() => setResidency("abroad")}
-              labelClassName="text-sm text-text-primary font-normal"
-            >
-              I live abroad
-            </Radio>
-          </div>
-        </section>
 
         <Button
           type="button"

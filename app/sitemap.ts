@@ -19,7 +19,11 @@ const PUBLIC_ROUTES: Array<{
   { path: "/about", changeFrequency: "weekly", priority: 0.9 },
   { path: "/our-expertise", changeFrequency: "weekly", priority: 0.85 },
   { path: "/healthcare", changeFrequency: "weekly", priority: 0.85 },
-  { path: "/healthcare&professionals", changeFrequency: "weekly", priority: 0.85 },
+  {
+    path: "/healthcare&professionals",
+    changeFrequency: "weekly",
+    priority: 0.85,
+  },
   { path: "/education", changeFrequency: "weekly", priority: 0.85 },
   { path: "/research", changeFrequency: "weekly", priority: 0.8 },
   { path: "/researchers", changeFrequency: "weekly", priority: 0.8 },
@@ -30,7 +34,11 @@ const PUBLIC_ROUTES: Array<{
   { path: "/working_at", changeFrequency: "monthly", priority: 0.75 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.5 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.5 },
-  { path: "/vulnerability-disclosure", changeFrequency: "yearly", priority: 0.45 },
+  {
+    path: "/vulnerability-disclosure",
+    changeFrequency: "yearly",
+    priority: 0.45,
+  },
   { path: "/login", changeFrequency: "monthly", priority: 0.4 },
   { path: "/register", changeFrequency: "monthly", priority: 0.4 },
 ];

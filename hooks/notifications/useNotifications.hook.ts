@@ -54,8 +54,11 @@ export function useNotifications({
         setIsLoading(true);
       }
       setError(null);
-      const { data, status, error: apiError } =
-        await $api.notifications.list({ skip: 0, limit: PAGE_SIZE });
+      const {
+        data,
+        status,
+        error: apiError,
+      } = await $api.notifications.list({ skip: 0, limit: PAGE_SIZE });
       const list = data?.data;
       if (status >= 200 && status < 300 && Array.isArray(list)) {
         setRows(list);
@@ -104,11 +107,14 @@ export function useNotifications({
     setIsLoadingMore(true);
     setError(null);
     try {
-      const { data, status, error: apiError } =
-        await $api.notifications.list({
-          skip: rows.length,
-          limit: PAGE_SIZE,
-        });
+      const {
+        data,
+        status,
+        error: apiError,
+      } = await $api.notifications.list({
+        skip: rows.length,
+        limit: PAGE_SIZE,
+      });
       const list = data?.data;
       if (status >= 200 && status < 300 && Array.isArray(list)) {
         setRows((r) => [...r, ...list]);
@@ -130,9 +136,7 @@ export function useNotifications({
       setError(null);
       const prev = rows;
       const now = new Date().toISOString();
-      setRows((r) =>
-        r.map((n) => (n.id === id ? { ...n, readAt: now } : n)),
-      );
+      setRows((r) => r.map((n) => (n.id === id ? { ...n, readAt: now } : n)));
       try {
         const { status, error: apiError } =
           await $api.notifications.markRead(id);

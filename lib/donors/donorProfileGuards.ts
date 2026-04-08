@@ -4,9 +4,7 @@ import type { DonorQuestionnaireResult } from "@/types/donors";
  * Best-effort detection from GET /donors/me (or nested `data`) that the health
  * questionnaire was already submitted. Backend field names vary; we accept several.
  */
-export function isQuestionnaireAnswered(
-  raw: Record<string, unknown>,
-): boolean {
+export function isQuestionnaireAnswered(raw: Record<string, unknown>): boolean {
   const truthy = (v: unknown) => v === true || v === "true";
 
   if (truthy(raw.questionnaireSubmitted)) return true;
@@ -29,7 +27,10 @@ export function isQuestionnaireAnswered(
     if (qo.submittedAt || qo.completedAt || qo.answers != null) return true;
   }
 
-  if (raw.questionnaireAnswers != null && typeof raw.questionnaireAnswers === "object")
+  if (
+    raw.questionnaireAnswers != null &&
+    typeof raw.questionnaireAnswers === "object"
+  )
     return true;
 
   return false;
@@ -42,8 +43,7 @@ export function extractQuestionnaireResultFromProfile(
     (typeof raw.eligibilityStatus === "string" && raw.eligibilityStatus) ||
     (typeof raw.eligibility_status === "string" && raw.eligibility_status) ||
     undefined;
-  const reasons =
-    raw.ineligibilityReasons ?? raw.ineligibility_reasons;
+  const reasons = raw.ineligibilityReasons ?? raw.ineligibility_reasons;
   return {
     eligibilityStatus: status,
     ineligibilityReasons: Array.isArray(reasons)

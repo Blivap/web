@@ -2,7 +2,14 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Layout } from "../../../../layout/layout.component";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Formik, useFormikContext } from "formik";
 import axios from "axios";
 import { $api } from "@/api";
@@ -244,8 +251,7 @@ function NewDonorForm() {
           if (typeof raw.state === "string" && raw.state.length > 0) {
             void setFieldValue("basics.state", raw.state);
           }
-          const postal =
-            raw.postalCode ?? raw.postal_code ?? raw.postcode;
+          const postal = raw.postalCode ?? raw.postal_code ?? raw.postcode;
           if (typeof postal === "string" && postal.length > 0) {
             void setFieldValue("basics.postalCode", postal);
           }
@@ -271,11 +277,7 @@ function NewDonorForm() {
     Boolean(values.medical[field]),
   );
 
-  const maxAllowedStep = !basicsComplete
-    ? 1
-    : !questionnaireComplete
-      ? 2
-      : 3;
+  const maxAllowedStep = !basicsComplete ? 1 : !questionnaireComplete ? 2 : 3;
   const clampedStep = Math.min(requestedStep, maxAllowedStep);
   /** If the questionnaire is already done (from API), never keep the user on step 1 or 2. */
   const step =
@@ -414,10 +416,10 @@ function NewDonorForm() {
 
   const canConfirmAppointment = Boolean(
     values.appointment.hospitalId &&
-      values.appointment.date &&
-      values.appointment.time &&
-      values.appointment.agreeTerms &&
-      values.appointment.agreePrivacy,
+    values.appointment.date &&
+    values.appointment.time &&
+    values.appointment.agreeTerms &&
+    values.appointment.agreePrivacy,
   );
 
   const handleConfirmAppointment = (e: React.FormEvent) => {

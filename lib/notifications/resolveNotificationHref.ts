@@ -26,7 +26,8 @@ export function resolveNotificationHref(
   switch (type) {
     case "donor_matched":
       if (donorId) return donorDetailPath(donorId);
-      if (bloodRequestId) return `${routes.bookings}?bloodRequestId=${encodeURIComponent(bloodRequestId)}`;
+      if (bloodRequestId)
+        return `${routes.bookings}?bloodRequestId=${encodeURIComponent(bloodRequestId)}`;
       return routes.bookings;
 
     case "booking_request_sent":

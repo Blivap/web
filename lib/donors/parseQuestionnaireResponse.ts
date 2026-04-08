@@ -18,9 +18,7 @@ export function parseQuestionnaireResult(
   const reasons = o.ineligibilityReasons;
   return {
     eligibilityStatus:
-      typeof o.eligibilityStatus === "string"
-        ? o.eligibilityStatus
-        : undefined,
+      typeof o.eligibilityStatus === "string" ? o.eligibilityStatus : undefined,
     ineligibilityReasons: Array.isArray(reasons)
       ? reasons.map((x) => String(x))
       : undefined,

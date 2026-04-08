@@ -79,7 +79,10 @@ export function splitStoredPhone(full: string | null | undefined): {
   };
 }
 
-export function buildE164Phone(dialCode: string, nationalDigits: string): string {
+export function buildE164Phone(
+  dialCode: string,
+  nationalDigits: string,
+): string {
   const digits = nationalDigits.replace(/\D/g, "");
   return `${dialCode}${digits}`;
 }

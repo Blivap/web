@@ -6,15 +6,11 @@ const STEPS = [
   { id: 3, label: "Next steps" },
 ];
 
-const pulse =
-  "bg-[#E5E7EB] dark:bg-white/12 animate-pulse rounded-md";
+const pulse = "bg-[#E5E7EB] dark:bg-white/12 animate-pulse rounded-md";
 
 function SkeletonStepProgress({ currentStep }: { currentStep: number }) {
   return (
-    <nav
-      className="flex flex-col relative gap-2 mb-8 w-full"
-      aria-hidden
-    >
+    <nav className="flex flex-col relative gap-2 mb-8 w-full" aria-hidden>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
         {STEPS.map((s) => {
           const isActive = s.id === currentStep;
@@ -122,7 +118,9 @@ export function NewDonorPageSkeleton() {
             </div>
           </div>
 
-          <div className={`h-10 w-36 rounded-md ${pulse} bg-primary/25 dark:bg-primary/20`} />
+          <div
+            className={`h-10 w-36 rounded-md ${pulse} bg-primary/25 dark:bg-primary/20`}
+          />
         </div>
       </div>
 
