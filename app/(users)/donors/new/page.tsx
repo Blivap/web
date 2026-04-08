@@ -28,17 +28,17 @@ import type { DonorQuestionnaireResult } from "@/types/donors";
 import type { DonorLocationPoint } from "@/types/donors";
 
 import { StepOne, type MedicalAnswers } from "../steps/one/step_one.component";
-import {
-  StepThree,
-  type AppointmentDetails,
-} from "../steps/three/step_three.component";
+import { StepThree } from "../steps/three/step_three.component";
 import {
   DonorBasicsStep,
   type DonorBasicsValues,
 } from "../steps/basics/donor-basics-step.component";
 import { NewDonorPageSkeleton } from "./new-donor-page-skeleton";
+import { Modal } from "@/components/ui/modal/modal.component";
+import { Button } from "@/components/button/button.component";
+import { routes } from "@/config/routes";
 
-const STEP_PARAM_VALUES = ["basics", "health", "appointment"] as const;
+const STEP_PARAM_VALUES = ["basics", "health", "activation"] as const;
 type StepParam = (typeof STEP_PARAM_VALUES)[number];
 
 function stepParamToNumber(param: string | null): number {
@@ -144,24 +144,14 @@ const initialBasics: DonorBasicsValues = {
   latitude: "",
 };
 
-const initialAppointment: AppointmentDetails = {
-  hospitalId: "",
-  date: "",
-  time: "",
-  agreeTerms: false,
-  agreePrivacy: false,
-};
-
 interface NewDonorFormValues {
   basics: DonorBasicsValues;
   medical: MedicalAnswers;
-  appointment: AppointmentDetails;
 }
 
 const initialValues: NewDonorFormValues = {
   basics: initialBasics,
   medical: {},
-  appointment: initialAppointment,
 };
 
 function NewDonorForm() {
@@ -203,15 +193,12 @@ function NewDonorForm() {
     [setFieldValue],
   );
 
-  const handleAppointmentChange = useCallback(
-    <K extends keyof AppointmentDetails>(
-      field: K,
-      value: AppointmentDetails[K],
-    ) => {
-      void setFieldValue(`appointment.${field}`, value);
-    },
-    [setFieldValue],
-  );
+  const [isRequestingActivation, setIsRequestingActivation] = useState(false);
+  const [activationRequestError, setActivationRequestError] = useState<
+    string | null
+  >(null);
+  const [isActivationSuccessModalOpen, setIsActivationSuccessModalOpen] =
+    useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -414,18 +401,25 @@ function NewDonorForm() {
     }
   };
 
-  const canConfirmAppointment = Boolean(
-    values.appointment.hospitalId &&
-    values.appointment.date &&
-    values.appointment.time &&
-    values.appointment.agreeTerms &&
-    values.appointment.agreePrivacy,
-  );
-
-  const handleConfirmAppointment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canConfirmAppointment) return;
-    // Scheduling is separate from donor API; integrate when booking endpoint is wired.
+  const handleRequestActivation = async () => {
+    setActivationRequestError(null);
+    setIsRequestingActivation(true);
+    try {
+      const { status, error, message } = await $api.donors.requestActivation();
+      if (status >= 200 && status < 300) {
+        setIsActivationSuccessModalOpen(true);
+        return;
+      }
+      setActivationRequestError(
+        error ?? message ?? "Could not submit activation request.",
+      );
+    } catch (e) {
+      setActivationRequestError(
+        getErrorMessage(e, "Could not submit activation request."),
+      );
+    } finally {
+      setIsRequestingActivation(false);
+    }
   };
 
   if (!hydrated) {
@@ -457,13 +451,37 @@ function NewDonorForm() {
         />
         <StepThree
           active={step === 3}
-          appointment={values.appointment}
-          handleAppointmentChange={handleAppointmentChange}
-          canConfirm={canConfirmAppointment}
-          onConfirm={handleConfirmAppointment}
+          onSendRequest={handleRequestActivation}
+          isSendingRequest={isRequestingActivation}
+          requestError={activationRequestError}
           eligibility={questionnaireResult}
         />
       </div>
+      <Modal
+        open={isActivationSuccessModalOpen}
+        onClose={() => setIsActivationSuccessModalOpen(false)}
+      >
+        <div className="flex w-full flex-col gap-4">
+          <h3 className="text-lg font-semibold text-primary text-center">
+            Verification is processing
+          </h3>
+          <p className="text-sm text-center text-[#4B5563] dark:text-white/70">
+            Your donor activation request has been submitted. We are now
+            processing your verification request.
+          </p>
+          <div className="flex justify-center pt-1">
+            <Button
+              onClick={() => {
+                setIsActivationSuccessModalOpen(false);
+                router.replace(routes.overview);
+              }}
+              className="rounded-md! px-5 py-2"
+            >
+              Continue to overview
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

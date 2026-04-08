@@ -27,6 +27,12 @@ export default function DonorRepository() {
       });
     },
 
+    requestActivation(): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.donors.requestActivation, {
+        method: "POST",
+      });
+    },
+
     me(): Promise<IResponse<unknown>> {
       return fetcher(endpoints.donors.me, { method: "GET" });
     },
