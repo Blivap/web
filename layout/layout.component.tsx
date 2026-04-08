@@ -35,6 +35,7 @@ import {
   useThemePreference,
 } from "@/hooks/theme/useThemePreference.hook";
 import { ProfileThemeCycleRow } from "./theme-profile-submenu.component";
+import { SelectAvatarModal } from "@/components/select-avatar/select-avatar-modal.component";
 
 // Define navigation item structure
 interface NavItem {
@@ -101,6 +102,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
   return (
     <div className="bg-[#f8f8f8] dark:bg-[#0a0a0a] h-screen grow flex transition-colors duration-200">
       <PushNotificationRegistrar />
+      <SelectAvatarModal />
       {/* Overlay for mobile when drawer is open */}
 
       <div

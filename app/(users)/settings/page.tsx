@@ -6,12 +6,11 @@ import { PhoneInput } from "@/components/forms/phone-input";
 import { useSettings } from "@/hooks/settings/useSettings.hook";
 import { editProfileSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
 import { useSelectAvatar } from "@/hooks/select-avatar/useSelectAvatar.hook";
+import { useAvatarModal } from "@/hooks/select-avatar/useAvatarModal.hook";
 import { FaPencilAlt } from "react-icons/fa";
-import Image from "next/image";
-import classNames from "classnames";
 import { Button } from "@/components/button/button.component";
 import { Layout } from "@/layout/layout.component";
 import { buildE164Phone, splitStoredPhone } from "@/lib/phone-country-codes";
@@ -32,19 +31,15 @@ export default function SettingsPage() {
   } = useSettings();
   const {
     avatars,
-    isLoading,
-    selectedAvatar,
     handleSelectAvatar,
     getAvatars,
-    handleContinue,
-    isConfirming,
   } = useSelectAvatar();
+  const { open: openAvatarModal } = useAvatarModal();
   useEffect(() => {
     if (!avatars) {
       void getAvatars();
     }
   }, [avatars, getAvatars]);
-  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const setProfileImageRef = useRef<(field: string, value: string) => void>(
     () => {},
   );
@@ -143,7 +138,7 @@ export default function SettingsPage() {
                             handleSelectAvatar(
                               values.profileImage || user?.profileImage || "",
                             );
-                            setIsAvatarModalOpen(true);
+                            openAvatarModal();
                           }}
                         >
                           <FaPencilAlt size={12} />
@@ -292,66 +287,7 @@ export default function SettingsPage() {
           </div>
         </section>
       </div>
-      {isAvatarModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
-          <div className="flex w-[90%] max-w-md flex-col gap-6 rounded-2xl bg-white px-6 py-7 shadow-xl sm:max-w-lg sm:px-8 dark:bg-[#1a1a22] dark:shadow-[0_24px_48px_rgba(0,0,0,0.5)]">
-            <h2 className="text-lg sm:text-xl font-semibold text-primary text-center mb-5">
-              Select Avatar
-            </h2>
-            <div className="grid grid-cols-4 grid-rows-3 gap-4 rounded-3xl bg-[#00000026] px-5 py-10 md:px-[75px] md:py-[98px]">
-              {isLoading || !avatars
-                ? [...Array(12)].map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-center size-[60px] shrink-0 animate-pulse rounded-full border border-[#FFFFFF00] bg-[#B190B6] "
-                    />
-                  ))
-                : avatars?.map((avatar) => (
-                    <button
-                      key={avatar.id}
-                      type="button"
-                      className={classNames(
-                        "relative size-[60px] shrink-0 overflow-hidden rounded-full border border-[#FFFFFF00] bg-[#B190B6] transition-all duration-150 hover:border-3 hover:border-primary",
-                        {
-                          "border-3 border-primary":
-                            selectedAvatar === avatar.url,
-                        },
-                      )}
-                      onClick={() => handleSelectAvatar(avatar.url)}
-                    >
-                      <Image
-                        src={avatar.url}
-                        alt="Avatar option"
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    </button>
-                  ))}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center sm:justify-end">
-              <button
-                type="button"
-                className="rounded-lg border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB] dark:border-white/10 dark:bg-[#14141a] dark:text-white/85 dark:hover:bg-white/6"
-                onClick={() => setIsAvatarModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <Button
-                disabled={!selectedAvatar || isConfirming}
-                loading={isConfirming}
-                onClick={() => {
-                  void handleContinue(false);
-                  setIsAvatarModalOpen(false);
-                }}
-                className="rounded-md! px-5 py-2"
-              >
-                Confirm
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </Layout>
   );
 }

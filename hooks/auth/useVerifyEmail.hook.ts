@@ -38,7 +38,7 @@ export function useVerifyEmail() {
         }
 
         // After email verification, always go to select avatar (replace so back doesn't return to verify-email)
-        router.replace("/select_avatar");
+        router.replace("/overview");
         return true;
       }
 

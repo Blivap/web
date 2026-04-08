@@ -97,9 +97,7 @@ export const NotificationBell = () => {
       className="relative flex cursor-pointer items-center justify-center rounded-full border border-[#9CA3AF] p-2 transition-colors order-1 md:order-2 dark:border-white/25 dark:hover:border-white/40"
     >
       {unreadCount > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 flex min-w-[18px] items-center justify-center rounded-full bg-[#FF0000] px-1 py-0.5 text-[10px] font-semibold leading-none text-white">
-          {unreadCount > 99 ? "99+" : unreadCount}
-        </span>
+        <span className="absolute top-2 right-2 flex  items-center justify-center rounded-full bg-[#FF0000] size-2 font-semibold leading-none border border-[#FFFFFF] " />
       )}
       <FiBell
         size={18}

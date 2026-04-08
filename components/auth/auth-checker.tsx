@@ -48,11 +48,9 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
       router.replace("/overview");
     }
   }, [user, pathname, router]);
-
-  // On verify-email page: if user is already verified, send to select avatar (next step after verification)
   useEffect(() => {
     if (user?.emailVerified && pathname === VERIFY_EMAIL_PATH) {
-      router.replace("/select_avatar");
+      router.replace("/overview");
     }
   }, [user, pathname, router]);
 
@@ -80,7 +78,7 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     return <AuthLoader />;
   }
 
-  // On verify-email page but already verified: show loader until redirect to select_avatar
+  // On verify-email page but already verified: show loader until redirect to overview
   if (user?.emailVerified && pathname === VERIFY_EMAIL_PATH) {
     return <AuthLoader />;
   }

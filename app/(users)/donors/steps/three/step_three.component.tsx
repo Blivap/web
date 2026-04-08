@@ -269,7 +269,7 @@ export function StepThree({
           favorite or search for a new location.
         </p>
 
-        <div className="flex flex-col flex-1 gap-4 p-4 py-6 bg-[#F7F5F3]">
+        {/* <div className="flex flex-col flex-1 gap-4 p-4 py-6 bg-[#F7F5F3]">
           <p className="text-sm font-semibold text-text-primary text-center mb-3">
             Select a Hospital
           </p>
@@ -494,11 +494,13 @@ export function StepThree({
               .
             </span>
           </label>
-        </div>
+        </div> */}
 
         <button
           type="submit"
-          disabled={!canConfirm}
+          disabled={
+            !canConfirm || eligibility?.eligibilityStatus === "ineligible"
+          }
           className="text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
         >
           Confirm

@@ -121,11 +121,11 @@ export function Modal({
         onClick={handleBackdropClick}
         aria-hidden
       />
-      <div className="pointer-events-none fixed inset-0 z-10 flex items-center justify-center p-4">
+      <div className="pointer-events-none fixed inset-0 z-10 flex items-center justify-center p-4 w-full ">
         <div
           ref={panelRef}
           className={classNames(
-            "pointer-events-auto flex w-full max-w-md flex-col items-center rounded-xl border border-border bg-white px-8 py-10 shadow-[0_24px_48px_-12px_rgba(150,0,24,0.15)] dark:border-white/10 dark:bg-[#1a1a22]",
+            "pointer-events-auto flex w-full flex-col items-center rounded-xl border border-border bg-white px-8 py-10 shadow-[0_24px_48px_-12px_rgba(150,0,24,0.15)] dark:border-white/10 dark:bg-[#1a1a22]",
             className,
           )}
           onClick={(e) => e.stopPropagation()}

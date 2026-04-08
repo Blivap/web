@@ -5,12 +5,14 @@ interface SelectAvatarState {
   avatars: IAvatar[] | null;
   isLoading: boolean;
   selectedAvatar: string | null;
+  isModalOpen: boolean;
 }
 
 const initialState: SelectAvatarState = {
   avatars: null,
   isLoading: false,
   selectedAvatar: null,
+  isModalOpen: false,
 };
 
 const selectAvatarSlice = createSlice({
@@ -30,6 +32,12 @@ const selectAvatarSlice = createSlice({
     setSelectedAvatar: (state, action: PayloadAction<string | null>) => {
       state.selectedAvatar = action.payload;
     },
+    openAvatarModal: (state) => {
+      state.isModalOpen = true;
+    },
+    closeAvatarModal: (state) => {
+      state.isModalOpen = false;
+    },
   },
 });
 
@@ -38,6 +46,8 @@ export const {
   setIsLoading,
   toggleSelectedAvatar,
   setSelectedAvatar,
+  openAvatarModal,
+  closeAvatarModal,
 } = selectAvatarSlice.actions;
 
 export default selectAvatarSlice.reducer;
