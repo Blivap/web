@@ -95,6 +95,10 @@ export function useNotifications({
     if (!enabled || pollIntervalMs <= 0) return;
 
     const id = setInterval(() => {
+      // Avoid unnecessary background polling when the tab is hidden.
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") {
+        return;
+      }
       void loadFirstPage({ silent: true });
     }, pollIntervalMs);
 
@@ -181,6 +185,7 @@ export function useNotifications({
 
   const items = rows.map(toViewItem);
   const unreadCount = rows.filter((n) => n.readAt == null).length;
+  const refetch = useCallback(() => loadFirstPage(), [loadFirstPage]);
 
   return {
     items,
@@ -189,7 +194,7 @@ export function useNotifications({
     isLoading,
     isLoadingMore,
     error,
-    refetch: () => loadFirstPage(),
+    refetch,
     loadMore,
     markAsRead,
     markAllAsRead,

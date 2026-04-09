@@ -6,6 +6,8 @@ import { Button } from "@/components/button/button.component";
 
 export interface StepThreeProps {
   onSendRequest: () => void | Promise<void>;
+  onRequestRetake?: () => void | Promise<void>;
+  onBack?: () => void;
   isSendingRequest?: boolean;
   requestError?: string | null;
   active: boolean;
@@ -53,6 +55,8 @@ function statusSummary(status: string): string {
 
 export function StepThree({
   onSendRequest,
+  onRequestRetake,
+  onBack,
   isSendingRequest = false,
   requestError = null,
   active,
@@ -60,7 +64,7 @@ export function StepThree({
 }: StepThreeProps) {
   const status = eligibility?.eligibilityStatus ?? "pending";
   const tone = statusTone(status);
-  const canRequest = status !== "ineligible";
+  const isIneligible = status === "ineligible";
 
   return (
     active && (
@@ -103,24 +107,41 @@ export function StepThree({
           </div>
 
           {requestError && (
-            <p className="mt-4 text-sm text-red-600 dark:text-red-400" role="alert">
+            <p
+              className="mt-4 text-sm text-red-600 dark:text-red-400"
+              role="alert"
+            >
               {requestError}
             </p>
           )}
 
           <div className="mt-5 flex items-center gap-3">
+            {onBack && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onBack}
+                className="w-fit rounded-md! px-5 py-2"
+              >
+                Back
+              </Button>
+            )}
             <Button
               type="button"
-              disabled={!canRequest || isSendingRequest}
+              disabled={isSendingRequest}
               loading={isSendingRequest}
-              onClick={() => void onSendRequest()}
+              onClick={() =>
+                void (isIneligible && onRequestRetake
+                  ? onRequestRetake()
+                  : onSendRequest())
+              }
               className="w-fit rounded-md! px-5 py-2"
             >
-              Send request
+              {isIneligible ? "Request retake" : "Send request"}
             </Button>
-            {!canRequest && (
+            {isIneligible && (
               <p className="text-xs text-text-secondary">
-                Activation is disabled while eligibility is ineligible.
+                You can request to retake the donor process.
               </p>
             )}
           </div>

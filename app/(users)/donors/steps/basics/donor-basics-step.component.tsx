@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { MapPin } from "lucide-react";
 import { Radio } from "@/components/forms/Radio";
 import type { DonorBloodType } from "@/types/donors";
 import { BLOOD_TYPES } from "../../donors.data";
@@ -19,9 +17,8 @@ export type DonorBasicsValues = {
   bloodType: DonorBloodType | "";
   country: string;
   state: string;
-  postalCode: string;
-  latitude: string;
-  longitude: string;
+  city: string;
+  area: string;
 };
 
 export interface DonorBasicsStepProps {
@@ -30,6 +27,8 @@ export interface DonorBasicsStepProps {
   onSubmit: () => void | Promise<void>;
   isSubmitting?: boolean;
   error?: string | null;
+  editable?: boolean;
+  completed?: boolean;
   active: boolean;
 }
 
@@ -39,49 +38,21 @@ export function DonorBasicsStep({
   onSubmit,
   isSubmitting = false,
   error = null,
+  editable = true,
+  completed = false,
   active,
 }: DonorBasicsStepProps) {
-  const canSubmit = Boolean(values.bloodType);
-
-  const [geoLoading, setGeoLoading] = useState(false);
-  const [geoError, setGeoError] = useState<string | null>(null);
+  const canSubmit = Boolean(
+    values.bloodType &&
+      values.country.trim() &&
+      values.state.trim() &&
+      values.city.trim() &&
+      values.area.trim(),
+  );
+  const isLocked = !editable;
+  const showNextAction = isLocked && completed;
 
   const isNigeria = values.country === "NG";
-
-  const requestPreciseLocation = () => {
-    setGeoError(null);
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setGeoError("Location is not supported in this browser.");
-      return;
-    }
-
-    setGeoLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        onChange("latitude", String(latitude));
-        onChange("longitude", String(longitude));
-        setGeoLoading(false);
-      },
-      (err) => {
-        setGeoLoading(false);
-        const denied = err.code === 1;
-        setGeoError(
-          denied
-            ? "Location permission denied. Enable it in your browser settings to use precise coordinates."
-            : err.message || "Could not read your location.",
-        );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 20_000,
-        maximumAge: 0,
-      },
-    );
-  };
-
-  const hasCoords =
-    values.longitude.trim() !== "" && values.latitude.trim() !== "";
 
   return (
     active && (
@@ -98,9 +69,8 @@ export function DonorBasicsStep({
           </h2>
           <p className="text-sm text-text-secondary max-w-[600px]">
             First we register your donor profile with your blood type. Add where
-            you are based and use precise location for accurate coordinates on
-            the map. Location is optional; you can update it later in your
-            profile.
+            you are based with detailed location information. This is required
+            and used to match recipients with nearby donors.
           </p>
         </div>
 
@@ -126,12 +96,11 @@ export function DonorBasicsStep({
 
         <div className="rounded-lg border border-border p-4 bg-[#F9FAFB] dark:bg-white/5 space-y-4">
           <p className="text-sm font-medium text-text-primary">
-            Optional address & location
+            Address & location (required)
           </p>
           <p className="text-xs text-text-secondary">
-            Country, state, and postal code describe your area. Use{" "}
-            <span className="font-medium">Use my precise location</span> so we
-            can store accurate GPS coordinates for matching (recommended).
+            Enter location details manually. Browser location permissions are not
+            used here.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -140,7 +109,7 @@ export function DonorBasicsStep({
                 htmlFor="donor-country"
                 className="block text-xs font-medium text-text-primary mb-1"
               >
-                Country
+                Country *
               </label>
               <select
                 id="donor-country"
@@ -150,6 +119,7 @@ export function DonorBasicsStep({
                   onChange("state", "");
                 }}
                 className={selectClassName}
+                disabled={isLocked}
               >
                 <option value="">Select country</option>
                 {DONOR_COUNTRIES.map((c) => (
@@ -165,7 +135,7 @@ export function DonorBasicsStep({
                 htmlFor="donor-state"
                 className="block text-xs font-medium text-text-primary mb-1"
               >
-                State / region
+                State / region *
               </label>
               {isNigeria ? (
                 <select
@@ -173,7 +143,7 @@ export function DonorBasicsStep({
                   value={values.state}
                   onChange={(e) => onChange("state", e.target.value)}
                   className={selectClassName}
-                  disabled={!values.country}
+                  disabled={!values.country || isLocked}
                 >
                   <option value="">Select state</option>
                   {NIGERIA_STATES.map((s) => (
@@ -190,6 +160,7 @@ export function DonorBasicsStep({
                   value={values.state}
                   onChange={(e) => onChange("state", e.target.value)}
                   className={selectClassName}
+                  disabled={isLocked}
                 />
               )}
             </div>
@@ -198,52 +169,41 @@ export function DonorBasicsStep({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label
-                htmlFor="donor-postal"
+                htmlFor="donor-city"
                 className="block text-xs font-medium text-text-primary mb-1"
               >
-                Postal code
+                City / town *
               </label>
               <input
-                id="donor-postal"
+                id="donor-city"
                 type="text"
-                inputMode="text"
-                autoComplete="postal-code"
-                placeholder="e.g. 100001"
-                value={values.postalCode}
-                onChange={(e) => onChange("postalCode", e.target.value)}
+                placeholder={isNigeria ? "e.g. Ikeja" : "City or town"}
+                value={values.city}
+                onChange={(e) => onChange("city", e.target.value)}
                 className={selectClassName}
+                disabled={isLocked}
               />
             </div>
 
-            <div className="flex flex-col justify-end gap-2">
-              <button
-                type="button"
-                onClick={requestPreciseLocation}
-                disabled={geoLoading || isSubmitting}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary bg-white px-3 py-2 text-sm font-medium text-primary hover:bg-primary/5 disabled:opacity-50 dark:bg-[#1a1a22]"
+            <div>
+              <label
+                htmlFor="donor-area"
+                className="block text-xs font-medium text-text-primary mb-1"
               >
-                <MapPin size={18} className="shrink-0" />
-                {geoLoading ? "Getting location…" : "Use my precise location"}
-              </button>
+                Area *
+              </label>
+              <input
+                id="donor-area"
+                type="text"
+                placeholder={isNigeria ? "e.g. Allen" : "Area / district"}
+                value={values.area}
+                onChange={(e) => onChange("area", e.target.value)}
+                className={selectClassName}
+                disabled={isLocked}
+              />
             </div>
           </div>
 
-          {geoError && (
-            <p className="text-xs text-red-600 dark:text-red-400" role="alert">
-              {geoError}
-            </p>
-          )}
-
-          {hasCoords && (
-            <p className="text-xs text-text-secondary rounded-md bg-white/80 dark:bg-black/20 px-3 py-2 border border-border/60">
-              <span className="font-medium text-text-primary">
-                Coordinates:{" "}
-              </span>
-              {Number.parseFloat(values.latitude).toFixed(6)},{" "}
-              {Number.parseFloat(values.longitude).toFixed(6)}{" "}
-              <span className="text-[#6B7280]">(lat, lng)</span>
-            </p>
-          )}
         </div>
 
         {error && (
@@ -251,13 +211,19 @@ export function DonorBasicsStep({
             {error}
           </p>
         )}
+        {isLocked && (
+          <p className="text-xs text-text-secondary">
+            Your saved answers are shown. You can edit after your retake is
+            rescheduled.
+          </p>
+        )}
 
         <Button
           type="submit"
-          disabled={!canSubmit || isSubmitting}
+          disabled={isSubmitting || (!showNextAction && !canSubmit)}
           className="text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
         >
-          {isSubmitting ? "Saving…" : "Continue"}
+          {isSubmitting ? "Saving…" : showNextAction ? "Next" : "Continue"}
         </Button>
       </form>
     )

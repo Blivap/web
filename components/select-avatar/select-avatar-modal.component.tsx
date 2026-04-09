@@ -97,8 +97,9 @@ export function SelectAvatarModal() {
         <Button
           disabled={!selectedAvatar || isConfirming}
           loading={isConfirming}
-          onClick={() => {
-            void handleContinue(false);
+          onClick={async () => {
+            const ok = await handleContinue(false);
+            if (!ok) return;
             dispatch(closeAvatarModal());
           }}
           className="rounded-[40px]! px-5 py-2"

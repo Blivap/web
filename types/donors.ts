@@ -17,9 +17,18 @@ export type DonorLocationPoint = {
   coordinates: [number, number];
 };
 
+export type DonorAreaLocation = {
+  country: string;
+  state: string;
+  city: string;
+  area: string;
+};
+
 export type DonorRegisterPayload = {
   bloodType: DonorBloodType;
   location?: DonorLocationPoint;
+  /** Manual coarse location used for donor-recipient matching. */
+  areaLocation?: DonorAreaLocation;
 };
 
 export type DonorQuestionnairePayload = {

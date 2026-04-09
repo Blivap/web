@@ -12,8 +12,11 @@ export interface StepOneProps {
   handleMedicalChange: (name: string, value: string) => void;
   active: boolean;
   onSubmitQuestionnaire: () => void | Promise<void>;
+  onBack?: () => void;
   isSubmitting?: boolean;
   submitError?: string | null;
+  editable?: boolean;
+  completed?: boolean;
 }
 
 const MEDICAL_QUESTIONS: {
@@ -126,6 +129,7 @@ function FirstStepQuestionRow({
   value,
   onChange,
   tooltip,
+  disabled = false,
 }: {
   name: string;
   label: string;
@@ -133,6 +137,7 @@ function FirstStepQuestionRow({
   value: string;
   onChange: (value: string) => void;
   tooltip?: string;
+  disabled?: boolean;
 }) {
   const [showTooltip, setShowTooltip] = useState(false);
   const idBase = `medical-${name}`;
@@ -176,6 +181,7 @@ function FirstStepQuestionRow({
             value={opt.value}
             checked={value === opt.value}
             onChange={() => onChange(opt.value)}
+            disabled={disabled}
             labelClassName="text-xs text-text-primary"
           >
             {opt.label}
@@ -191,10 +197,15 @@ export function StepOne({
   handleMedicalChange,
   active,
   onSubmitQuestionnaire,
+  onBack,
   isSubmitting = false,
   submitError = null,
+  editable = true,
+  completed = false,
 }: StepOneProps) {
   const allMedicalAnswered = MEDICAL_QUESTIONS.every((q) => medical[q.name]);
+  const isLocked = !editable;
+  const showNextAction = isLocked && completed;
 
   return (
     active && (
@@ -235,16 +246,39 @@ export function StepOne({
               value={medical[q.name] ?? ""}
               onChange={(value) => handleMedicalChange(q.name, value)}
               tooltip={QUESTION_TOOLTIPS[q.name]}
+              disabled={isLocked}
             />
           ))}
 
-          <button
-            type="submit"
-            disabled={!allMedicalAnswered || isSubmitting}
-            className="mt-4 text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
-          >
-            {isSubmitting ? "Submitting…" : "Submit questionnaire"}
-          </button>
+          {isLocked && (
+            <p className="text-xs text-text-secondary">
+              Your saved questionnaire answers are shown. You can edit after
+              your retake is rescheduled.
+            </p>
+          )}
+
+          <div className="mt-4 flex items-center gap-3">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="text-sm font-medium py-2.5 px-5 rounded-md border border-border bg-white hover:bg-[#F9FAFB] dark:bg-transparent dark:hover:bg-white/5 transition-colors"
+              >
+                Back
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={isSubmitting || (!showNextAction && !allMedicalAnswered)}
+              className="text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
+            >
+              {isSubmitting
+                ? "Submitting…"
+                : showNextAction
+                  ? "Next"
+                  : "Submit questionnaire"}
+            </button>
+          </div>
         </form>
         <div className="border-[#960018] border-l-4 bg-[#FFE2E2] flex gap-4 p-4 mt-10 sm:mt-12.5 ">
           <Info size={16} className="text-primary" />

@@ -48,9 +48,11 @@ export function useSelectAvatar() {
     dispatch(toggleSelectedAvatar(avatarUrl));
   };
 
-  const handleContinue = async (shouldRedirect: boolean = true) => {
+  const handleContinue = async (
+    shouldRedirect: boolean = true,
+  ): Promise<boolean> => {
     try {
-      if (!selectedAvatar) return;
+      if (!selectedAvatar) return false;
       setIsConfirming(true);
       const { data, status } = await $api.avatar.setAvatar(selectedAvatar);
       if (status >= 200 && status < 300 && data) {
@@ -78,9 +80,11 @@ export function useSelectAvatar() {
 
         if (shouldRedirect) {
           router.replace("/overview");
-          return;
+          return true;
         }
+        return true;
       }
+      return false;
     } catch (err: unknown) {
       const message =
         err instanceof AxiosError
@@ -88,6 +92,7 @@ export function useSelectAvatar() {
             err.message)
           : "Unable to set avatar.";
       showSnackbar(message, "error");
+      return false;
     } finally {
       setIsConfirming(false);
     }

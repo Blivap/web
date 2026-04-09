@@ -25,7 +25,6 @@ import {
 } from "@/lib/donors/donorProfileGuards";
 import type { DonorBloodType } from "@/types/donors";
 import type { DonorQuestionnaireResult } from "@/types/donors";
-import type { DonorLocationPoint } from "@/types/donors";
 
 import { StepOne, type MedicalAnswers } from "../steps/one/step_one.component";
 import { StepThree } from "../steps/three/step_three.component";
@@ -37,6 +36,13 @@ import { NewDonorPageSkeleton } from "./new-donor-page-skeleton";
 import { Modal } from "@/components/ui/modal/modal.component";
 import { Button } from "@/components/button/button.component";
 import { routes } from "@/config/routes";
+
+type AreaLocationPayload = {
+  country: string;
+  state: string;
+  city: string;
+  area: string;
+};
 
 const STEP_PARAM_VALUES = ["basics", "health", "activation"] as const;
 type StepParam = (typeof STEP_PARAM_VALUES)[number];
@@ -68,6 +74,45 @@ function getErrorMessage(e: unknown, fallback: string): string {
   return fallback;
 }
 
+function sanitizeLocationString(v: unknown): string {
+  return typeof v === "string" ? v.trim() : "";
+}
+
+function normalizeAreaLocation(
+  raw: Record<string, unknown>,
+): AreaLocationPayload | null {
+  const source =
+    raw.areaLocation && typeof raw.areaLocation === "object"
+      ? (raw.areaLocation as Record<string, unknown>)
+      : raw;
+
+  const country = sanitizeLocationString(source.country ?? source.countryCode);
+  const state = sanitizeLocationString(source.state);
+  const city = sanitizeLocationString(source.city);
+  const area = sanitizeLocationString(
+    source.area ?? source.district ?? source.neighborhood,
+  );
+
+  if (!country || !state || !city || !area) return null;
+  return {
+    country,
+    state,
+    city,
+    area,
+  };
+}
+
+function normalizeAreaLocationFromBasics(
+  basics: DonorBasicsValues,
+): AreaLocationPayload | null {
+  return normalizeAreaLocation({
+    country: basics.country,
+    state: basics.state,
+    city: basics.city,
+    area: basics.area,
+  });
+}
+
 const REQUIRED_MEDICAL_FIELDS = [
   "gender",
   "age_18_64",
@@ -79,11 +124,126 @@ const REQUIRED_MEDICAL_FIELDS = [
   "chronic_condition",
   "hepatitis_b_vaccine",
 ] as const;
+type RequiredMedicalField = (typeof REQUIRED_MEDICAL_FIELDS)[number];
+
+const MEDICAL_FIELD_SOURCE_KEYS: Record<RequiredMedicalField, string[]> = {
+  gender: ["gender"],
+  age_18_64: ["age18to64", "age_18_64"],
+  weight_under_50kg: ["weightUnder50kg", "weight_under_50kg"],
+  organ_tissue_transplant: [
+    "organOrTissueTransplant",
+    "organ_tissue_transplant",
+    "organOrTissueTransplanted",
+  ],
+  injected_drugs_doping: ["injectedDrugsOrDoping", "injected_drugs_doping"],
+  diabetes: ["diabetes"],
+  blood_transfusion: ["bloodProductsOrTransfusion", "blood_transfusion"],
+  chronic_condition: ["chronicOrSeriousCondition", "chronic_condition"],
+  hepatitis_b_vaccine: [
+    "hepatitisBVaccineLast2Weeks",
+    "hepatitis_b_vaccine",
+    "hepatitis_b_vaccine_last_2_weeks",
+  ],
+};
+
+function boolToYesNo(value: unknown): string {
+  if (value === true || value === "true" || value === "yes") return "yes";
+  if (value === false || value === "false" || value === "no") return "no";
+  return "";
+}
+
+function getNestedRecord(
+  raw: Record<string, unknown>,
+  key: string,
+): Record<string, unknown> | null {
+  const value = raw[key];
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function extractMedicalAnswersFromProfile(
+  raw: Record<string, unknown>,
+): MedicalAnswers {
+  const questionnaire =
+    getNestedRecord(raw, "questionnaire") ?? getNestedRecord(raw, "answers");
+  const questionnaireAnswers =
+    getNestedRecord(raw, "questionnaireAnswers") ??
+    getNestedRecord(raw, "questionnaire_answers");
+
+  const sources: Record<string, unknown>[] = [raw];
+  if (questionnaire) sources.push(questionnaire);
+  if (questionnaireAnswers) sources.push(questionnaireAnswers);
+
+  const result: MedicalAnswers = {};
+  for (const field of REQUIRED_MEDICAL_FIELDS) {
+    const sourceKeys = MEDICAL_FIELD_SOURCE_KEYS[field];
+    if (field === "gender") {
+      let gender = "";
+      for (const source of sources) {
+        for (const key of sourceKeys) {
+          if (typeof source[key] === "string" && source[key]) {
+            gender = String(source[key]);
+            break;
+          }
+        }
+        if (gender) break;
+      }
+      if (gender) result[field] = gender;
+      continue;
+    }
+
+    let normalized = "";
+    for (const source of sources) {
+      for (const key of sourceKeys) {
+        normalized = boolToYesNo(source[key]);
+        if (normalized) break;
+      }
+      if (normalized) break;
+    }
+    if (normalized) result[field] = normalized;
+  }
+
+  return result;
+}
+
+function isRetakeRescheduled(raw: Record<string, unknown>): boolean {
+  const truthy = (v: unknown) => v === true || v === "true";
+  const asLower = (v: unknown) =>
+    typeof v === "string" ? v.trim().toLowerCase() : "";
+
+  if (truthy(raw.retakeRescheduled)) return true;
+  if (truthy(raw.isRetakeRescheduled)) return true;
+  if (truthy(raw.retake_rescheduled)) return true;
+  if (truthy(raw.retakeScheduled)) return true;
+  if (truthy(raw.retake_scheduled)) return true;
+
+  const retakeStatus = asLower(raw.retakeStatus ?? raw.retake_status);
+  if (retakeStatus === "rescheduled" || retakeStatus === "scheduled") {
+    return true;
+  }
+
+  const requestStatus = asLower(
+    raw.retakeRequestStatus ?? raw.retake_request_status,
+  );
+  if (requestStatus === "rescheduled" || requestStatus === "scheduled") {
+    return true;
+  }
+
+  if (typeof raw.retakeScheduledAt === "string" && raw.retakeScheduledAt) {
+    return true;
+  }
+  if (typeof raw.retake_scheduled_at === "string" && raw.retake_scheduled_at) {
+    return true;
+  }
+
+  return false;
+}
 
 const STEPS = [
   { id: 1, label: "Blood type & location" },
   { id: 2, label: "Health questionnaire" },
-  { id: 3, label: "Next steps" },
+  { id: 3, label: "Activation" },
 ];
 
 function StepProgress({ currentStep }: { currentStep: number }) {
@@ -139,9 +299,8 @@ const initialBasics: DonorBasicsValues = {
   bloodType: "",
   country: "",
   state: "",
-  postalCode: "",
-  longitude: "",
-  latitude: "",
+  city: "",
+  area: "",
 };
 
 interface NewDonorFormValues {
@@ -161,6 +320,7 @@ function NewDonorForm() {
   const router = useRouter();
   const pathname = usePathname();
   const contentRef = useRef<HTMLDivElement>(null);
+  const hasAutoRoutedToRequiredStep = useRef(false);
 
   const [basicsComplete, setBasicsComplete] = useState(false);
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -199,6 +359,9 @@ function NewDonorForm() {
   >(null);
   const [isActivationSuccessModalOpen, setIsActivationSuccessModalOpen] =
     useState(false);
+  const [parsedAreaLocation, setParsedAreaLocation] =
+    useState<AreaLocationPayload | null>(null);
+  const [retakeUnlocked, setRetakeUnlocked] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -212,42 +375,26 @@ function NewDonorForm() {
         if (typeof raw.bloodType === "string" && raw.bloodType.length > 0) {
           setBasicsComplete(true);
           void setFieldValue("basics.bloodType", raw.bloodType);
-          const coords = raw.location as
-            | { coordinates?: [number, number] }
-            | undefined;
-          if (
-            coords?.coordinates &&
-            coords.coordinates.length === 2 &&
-            Number.isFinite(coords.coordinates[0]) &&
-            Number.isFinite(coords.coordinates[1])
-          ) {
-            void setFieldValue(
-              "basics.longitude",
-              String(coords.coordinates[0]),
-            );
-            void setFieldValue(
-              "basics.latitude",
-              String(coords.coordinates[1]),
-            );
-          }
-
-          const country = raw.country ?? raw.countryCode;
-          if (typeof country === "string" && country.length > 0) {
-            void setFieldValue("basics.country", country);
-          }
-          if (typeof raw.state === "string" && raw.state.length > 0) {
-            void setFieldValue("basics.state", raw.state);
-          }
-          const postal = raw.postalCode ?? raw.postal_code ?? raw.postcode;
-          if (typeof postal === "string" && postal.length > 0) {
-            void setFieldValue("basics.postalCode", postal);
+          const savedArea = normalizeAreaLocation(raw);
+          if (savedArea) {
+            setParsedAreaLocation(savedArea);
+            void setFieldValue("basics.country", savedArea.country);
+            void setFieldValue("basics.state", savedArea.state);
+            void setFieldValue("basics.city", savedArea.city);
+            void setFieldValue("basics.area", savedArea.area);
           }
         }
 
         if (isQuestionnaireAnswered(raw)) {
           setQuestionnaireComplete(true);
           setQuestionnaireResult(extractQuestionnaireResultFromProfile(raw));
+          const medical = extractMedicalAnswersFromProfile(raw);
+          for (const [name, value] of Object.entries(medical)) {
+            void setFieldValue(`medical.${name}`, value);
+          }
         }
+
+        setRetakeUnlocked(isRetakeRescheduled(raw));
       } catch {
         // No donor profile yet — user must complete step 1.
       } finally {
@@ -264,13 +411,8 @@ function NewDonorForm() {
     Boolean(values.medical[field]),
   );
 
-  const maxAllowedStep = !basicsComplete ? 1 : !questionnaireComplete ? 2 : 3;
-  const clampedStep = Math.min(requestedStep, maxAllowedStep);
-  /** If the questionnaire is already done (from API), never keep the user on step 1 or 2. */
-  const step =
-    basicsComplete && questionnaireComplete && clampedStep < 3
-      ? 3
-      : clampedStep;
+  const requiredStep = !basicsComplete ? 1 : !questionnaireComplete ? 2 : 3;
+  const step = Math.min(requestedStep, 3);
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
@@ -292,59 +434,59 @@ function NewDonorForm() {
   );
 
   useEffect(() => {
-    if (!hydrated) return;
-    const currentParam = searchParams.get("step");
-    const normalizedParam = stepNumberToParam(step);
+    if (!hydrated || hasAutoRoutedToRequiredStep.current) return;
 
-    if (currentParam !== normalizedParam) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("step", normalizedParam);
-      router.replace(`${pathname}?${params.toString()}`);
-    }
-  }, [hydrated, pathname, router, searchParams, step]);
+    hasAutoRoutedToRequiredStep.current = true;
+    if (requestedStep === requiredStep) return;
 
-  function buildLocation(): DonorLocationPoint | undefined | "invalid" {
-    const lngStr = values.basics.longitude.trim();
-    const latStr = values.basics.latitude.trim();
-    if (lngStr === "" && latStr === "") return undefined;
-    if (lngStr === "" || latStr === "") {
-      setBasicsError("Enter both longitude and latitude, or leave both empty.");
-      return "invalid";
-    }
-    const lng = Number.parseFloat(lngStr);
-    const lat = Number.parseFloat(latStr);
-    if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
-      setBasicsError("Invalid coordinates.");
-      return "invalid";
-    }
-    if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
-      setBasicsError("Coordinates out of range.");
-      return "invalid";
-    }
-    return { type: "Point", coordinates: [lng, lat] };
-  }
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("step", stepNumberToParam(requiredStep));
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [hydrated, pathname, requestedStep, requiredStep, router, searchParams]);
 
   const handleRegisterBasics = async () => {
     setBasicsError(null);
+    if (basicsComplete && !retakeUnlocked) {
+      setStepParam(2);
+      return;
+    }
     if (!values.basics.bloodType) {
       setBasicsError("Select a blood type.");
       return;
     }
-    const loc = buildLocation();
-    if (loc === "invalid") return;
+    if (!values.basics.country.trim()) {
+      setBasicsError("Select your country.");
+      return;
+    }
+    if (!values.basics.state.trim()) {
+      setBasicsError("Enter your state/region.");
+      return;
+    }
+    if (!values.basics.area.trim()) {
+      setBasicsError("Enter your area.");
+      return;
+    }
+    if (!values.basics.city.trim()) {
+      setBasicsError("Enter your city/town.");
+      return;
+    }
+    const parsed = normalizeAreaLocationFromBasics(values.basics);
+    if (!parsed) {
+      setBasicsError(
+        "Location details are invalid. Please review country, state, city, and area.",
+      );
+      return;
+    }
 
     setIsRegistering(true);
     try {
-      const payload: {
-        bloodType: DonorBloodType;
-        location?: DonorLocationPoint;
-      } = {
+      const payload = {
         bloodType: values.basics.bloodType as DonorBloodType,
-        ...(loc ? { location: loc } : {}),
       };
 
       const { status } = await $api.donors.register(payload);
       if (status >= 200 && status < 300) {
+        setParsedAreaLocation(parsed);
         setBasicsComplete(true);
         setStepParam(2);
       } else {
@@ -361,7 +503,7 @@ function NewDonorForm() {
 
   const handleSubmitQuestionnaire = async () => {
     setHealthError(null);
-    if (questionnaireComplete) {
+    if (questionnaireComplete && !retakeUnlocked) {
       setStepParam(3);
       return;
     }
@@ -403,9 +545,53 @@ function NewDonorForm() {
 
   const handleRequestActivation = async () => {
     setActivationRequestError(null);
+    if (!basicsComplete) {
+      setActivationRequestError(
+        "Complete step 1 with blood type and location details first.",
+      );
+      setStepParam(1);
+      return;
+    }
+    if (!questionnaireComplete) {
+      setActivationRequestError("Complete the health questionnaire first.");
+      setStepParam(2);
+      return;
+    }
+    let areaLocation: AreaLocationPayload | null =
+      normalizeAreaLocationFromBasics(values.basics) ?? parsedAreaLocation;
+
+    // If current form is missing fields, fallback to saved donor profile location.
+    if (!areaLocation) {
+      try {
+        const me = await $api.donors.me();
+        const raw = me.data ? unwrapApiRecord(me.data) : null;
+        if (me.status >= 200 && me.status < 300 && raw) {
+          areaLocation = normalizeAreaLocation(raw);
+          if (areaLocation) {
+            void setFieldValue("basics.country", areaLocation.country);
+            void setFieldValue("basics.state", areaLocation.state);
+            void setFieldValue("basics.city", areaLocation.city);
+            void setFieldValue("basics.area", areaLocation.area);
+          }
+        }
+      } catch {
+        // handled by validation message below
+      }
+    }
+
+    if (!areaLocation) {
+      setActivationRequestError(
+        "Area location is required for donor matching. Complete step 1 first.",
+      );
+      setStepParam(1);
+      return;
+    }
+
     setIsRequestingActivation(true);
     try {
-      const { status, error, message } = await $api.donors.requestActivation();
+      const { status, error, message } = await $api.donors.requestActivation({
+        areaLocation,
+      });
       if (status >= 200 && status < 300) {
         setIsActivationSuccessModalOpen(true);
         return;
@@ -416,6 +602,27 @@ function NewDonorForm() {
     } catch (e) {
       setActivationRequestError(
         getErrorMessage(e, "Could not submit activation request."),
+      );
+    } finally {
+      setIsRequestingActivation(false);
+    }
+  };
+
+  const handleRequestRetake = async () => {
+    setActivationRequestError(null);
+    setIsRequestingActivation(true);
+    try {
+      const { status, error, message } = await $api.donors.requestRetake();
+      if (status >= 200 && status < 300) {
+        setIsActivationSuccessModalOpen(true);
+        return;
+      }
+      setActivationRequestError(
+        error ?? message ?? "Could not request retake.",
+      );
+    } catch (e) {
+      setActivationRequestError(
+        getErrorMessage(e, "Could not request retake."),
       );
     } finally {
       setIsRequestingActivation(false);
@@ -440,18 +647,25 @@ function NewDonorForm() {
           onSubmit={handleRegisterBasics}
           isSubmitting={isRegistering}
           error={basicsError}
+          editable={!basicsComplete || retakeUnlocked}
+          completed={basicsComplete}
         />
         <StepOne
           active={step === 2}
           medical={values.medical}
           handleMedicalChange={handleMedicalChange}
           onSubmitQuestionnaire={handleSubmitQuestionnaire}
+          onBack={() => setStepParam(1)}
           isSubmitting={isSubmittingQuestionnaire}
           submitError={healthError}
+          editable={!questionnaireComplete || retakeUnlocked}
+          completed={questionnaireComplete}
         />
         <StepThree
           active={step === 3}
           onSendRequest={handleRequestActivation}
+          onRequestRetake={handleRequestRetake}
+          onBack={() => setStepParam(2)}
           isSendingRequest={isRequestingActivation}
           requestError={activationRequestError}
           eligibility={questionnaireResult}

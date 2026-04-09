@@ -2,6 +2,7 @@ import { fetcher } from "@/services/http";
 import { endpoints } from "@/services/endpoints";
 import type { IResponse } from "@/types";
 import type {
+  DonorAreaLocation,
   DonorLocationPoint,
   DonorQuestionnairePayload,
   DonorRegisterPayload,
@@ -27,8 +28,15 @@ export default function DonorRepository() {
       });
     },
 
-    requestActivation(): Promise<IResponse<unknown>> {
+    requestActivation(payload?: { areaLocation?: DonorAreaLocation }): Promise<IResponse<unknown>> {
       return fetcher(endpoints.donors.requestActivation, {
+        method: "POST",
+        ...(payload ? { data: payload } : {}),
+      });
+    },
+
+    requestRetake(): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.donors.requestRetake, {
         method: "POST",
       });
     },

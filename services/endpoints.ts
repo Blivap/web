@@ -19,6 +19,7 @@ export const endpoints = {
     register: "/donors/register",
     questionnaire: "/donors/questionnaire",
     requestActivation: "/donors/request-activation",
+    requestRetake: "/donors/request-retake",
     location: "/donors/location",
     me: "/donors/me",
     public: (userId: string) => `/donors/public/${userId}`,
