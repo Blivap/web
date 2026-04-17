@@ -9,8 +9,8 @@ import {
   IResetPasswordPayload,
   IEditProfilePayload,
   IChangePasswordPayload,
-} from "../types";
-import { IResponse } from "../types";
+} from "../../types";
+import { IResponse } from "../../types";
 import { endpoints } from "@/services/endpoints";
 
 export default function authRepository() {

@@ -1,9 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { $api } from "@/api";
+import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import {
   BookingsShell,
@@ -62,7 +68,11 @@ export function DonorBookingsView() {
         $api.hospitals.list(),
       ]);
 
-      if (mineRes.status < 200 || mineRes.status >= 300 || mineRes.data === undefined) {
+      if (
+        mineRes.status < 200 ||
+        mineRes.status >= 300 ||
+        mineRes.data === undefined
+      ) {
         setBookings([]);
         setLoadState("error");
         setLoadError("Could not load bookings.");
@@ -72,7 +82,11 @@ export function DonorBookingsView() {
       const mine = parsed.filter((b) => b.donorUserId === user.id);
       setBookings(mine);
 
-      if (hospRes.status >= 200 && hospRes.status < 300 && hospRes.data !== undefined) {
+      if (
+        hospRes.status >= 200 &&
+        hospRes.status < 300 &&
+        hospRes.data !== undefined
+      ) {
         const hospitals = parseHospitalsListResponse(hospRes.data);
         const map: Record<string, string> = {};
         for (const h of hospitals) map[h.id] = h.name;
@@ -104,7 +118,8 @@ export function DonorBookingsView() {
   }, [highlightBookingId, loadState, bookings]);
 
   const hospitalLabel = useCallback(
-    (hospitalId: string) => hospitalNames[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
+    (hospitalId: string) =>
+      hospitalNames[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
     [hospitalNames],
   );
 
@@ -214,9 +229,7 @@ export function DonorBookingsView() {
     };
 
     const byTab = (t: DonorTab) =>
-      bookings
-        .filter((b) => tabForBooking(b) === t)
-        .map((b) => mapRow(b, t));
+      bookings.filter((b) => tabForBooking(b) === t).map((b) => mapRow(b, t));
 
     return {
       active: {

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search, Star, Droplet, Loader2 } from "lucide-react";
 import { Layout } from "../../../layout/layout.component";
 import Link from "next/link";
-import { $api } from "@/api";
+import { $api } from "@/app/api";
 import { parseDonorsListResponse } from "@/lib/donors/parseDonorsListResponse";
 import { BLOOD_TYPES, type BloodType, type Donor } from "./donors.data";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";

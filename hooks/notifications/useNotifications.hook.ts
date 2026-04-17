@@ -1,4 +1,4 @@
-import { $api } from "@/api";
+import { $api } from "@/app/api";
 import { resolveNotificationHref } from "@/lib/notifications/resolveNotificationHref";
 import type { InAppNotification } from "@/types/notifications";
 import { useCallback, useEffect, useState } from "react";
@@ -96,7 +96,10 @@ export function useNotifications({
 
     const id = setInterval(() => {
       // Avoid unnecessary background polling when the tab is hidden.
-      if (typeof document !== "undefined" && document.visibilityState !== "visible") {
+      if (
+        typeof document !== "undefined" &&
+        document.visibilityState !== "visible"
+      ) {
         return;
       }
       void loadFirstPage({ silent: true });

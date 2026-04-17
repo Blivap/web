@@ -13,7 +13,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { $api } from "@/api";
+import { $api } from "@/app/api";
 import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import type { HospitalListItem } from "@/lib/hospitals/parseHospitalsListResponse";
@@ -201,9 +201,9 @@ function ScheduleAppointmentPageContent() {
 
   const canConfirmAppointment = Boolean(
     donorUserId &&
-      appointment.hospitalId &&
-      appointment.date &&
-      appointment.time,
+    appointment.hospitalId &&
+    appointment.date &&
+    appointment.time,
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -212,7 +212,10 @@ function ScheduleAppointmentPageContent() {
     setSubmitError(null);
     setIsSendingBooking(true);
     try {
-      const scheduledAt = buildScheduledAtIso(appointment.date, appointment.time);
+      const scheduledAt = buildScheduledAtIso(
+        appointment.date,
+        appointment.time,
+      );
       const payload: {
         donorUserId: string;
         hospitalId: string;
@@ -236,7 +239,10 @@ function ScheduleAppointmentPageContent() {
         const st = e.response?.status;
         if (st === 404) {
           setSubmitError(
-            getAxiosErrorMessage(e, "Hospital not found. Pick another location."),
+            getAxiosErrorMessage(
+              e,
+              "Hospital not found. Pick another location.",
+            ),
           );
           return;
         }
@@ -251,7 +257,10 @@ function ScheduleAppointmentPageContent() {
         }
       }
       setSubmitError(
-        getAxiosErrorMessage(e, "Could not create the booking. Please try again."),
+        getAxiosErrorMessage(
+          e,
+          "Could not create the booking. Please try again.",
+        ),
       );
     } finally {
       setIsSendingBooking(false);

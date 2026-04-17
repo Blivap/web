@@ -12,7 +12,7 @@ import {
 } from "react";
 import { Formik, useFormikContext } from "formik";
 import axios from "axios";
-import { $api } from "@/api";
+import { $api } from "@/app/api";
 import { useAppDispatch } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";

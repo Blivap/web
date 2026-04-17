@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { AxiosError } from "axios";
-import { $api } from "@/api";
+import { $api } from "@/app/api";
 import { useAppDispatch } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";

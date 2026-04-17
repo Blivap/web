@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { $api } from "@/api";
+import { $api } from "@/app/api";
 import { IAuthResponse, IRegisterApiPayload, IRegisterPayload } from "@/types";
 import { buildE164Phone } from "@/lib/phone-country-codes";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";

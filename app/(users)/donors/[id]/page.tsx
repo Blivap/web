@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { ArrowRight, Droplet, Info, Loader2, Star } from "lucide-react";
 import { Layout } from "@/layout/layout.component";
-import { $api } from "@/api";
+import { $api } from "@/app/api";
 import {
   parseDonorDetailResponse,
   type DonorDetail,
@@ -157,9 +157,9 @@ export default function DonorDetailsPage() {
                     Confidentiality Note
                   </p>
                   <p className="max-w-200 text-[10px] text-[#5A403F] dark:text-red-100/85">
-                    Your answers are protected under medical secrecy regulations.
-                    High-integrity data ensures the safety of both donor and
-                    recipient.
+                    Your answers are protected under medical secrecy
+                    regulations. High-integrity data ensures the safety of both
+                    donor and recipient.
                   </p>
                 </div>
               </div>

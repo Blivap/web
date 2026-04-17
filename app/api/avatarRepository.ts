@@ -1,6 +1,6 @@
 import { fetcher } from "@/services/http";
-import { IAvatar } from "../types";
-import { IResponse } from "../types";
+import { IAvatar } from "../../types";
+import { IResponse } from "../../types";
 import { endpoints } from "@/services/endpoints";
 
 export default function avatarRepository() {

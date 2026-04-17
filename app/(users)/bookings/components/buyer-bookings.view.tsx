@@ -1,9 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { $api } from "@/api";
+import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import {
   BookingsShell,
@@ -60,7 +66,11 @@ export function BuyerBookingsView() {
         $api.hospitals.list(),
       ]);
 
-      if (mineRes.status < 200 || mineRes.status >= 300 || mineRes.data === undefined) {
+      if (
+        mineRes.status < 200 ||
+        mineRes.status >= 300 ||
+        mineRes.data === undefined
+      ) {
         setBookings([]);
         setLoadState("error");
         setLoadError("Could not load bookings.");
@@ -70,7 +80,11 @@ export function BuyerBookingsView() {
       const mine = parsed.filter((b) => b.requesterId === user.id);
       setBookings(mine);
 
-      if (hospRes.status >= 200 && hospRes.status < 300 && hospRes.data !== undefined) {
+      if (
+        hospRes.status >= 200 &&
+        hospRes.status < 300 &&
+        hospRes.data !== undefined
+      ) {
         const hospitals = parseHospitalsListResponse(hospRes.data);
         const map: Record<string, string> = {};
         for (const h of hospitals) map[h.id] = h.name;
@@ -102,7 +116,8 @@ export function BuyerBookingsView() {
   }, [highlightBookingId, loadState, bookings]);
 
   const hospitalLabel = useCallback(
-    (hospitalId: string) => hospitalNames[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
+    (hospitalId: string) =>
+      hospitalNames[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
     [hospitalNames],
   );
 
@@ -135,10 +150,12 @@ export function BuyerBookingsView() {
     const activeBookings = bookings.filter(
       (b) => b.status === "pending" || b.status === "accepted",
     );
-    const newOffers = activeBookings.filter((b) => b.status === "pending")
-      .length;
-    const followUps = activeBookings.filter((b) => b.status === "accepted")
-      .length;
+    const newOffers = activeBookings.filter(
+      (b) => b.status === "pending",
+    ).length;
+    const followUps = activeBookings.filter(
+      (b) => b.status === "accepted",
+    ).length;
 
     const mapRow = (b: Booking, tab: RequesterTab): BookingsShellRow => {
       const pill = statusToPill(b.status);
@@ -149,8 +166,7 @@ export function BuyerBookingsView() {
       let actionsSlot: ReactNode;
 
       if (tab === "active") {
-        const canCancel =
-          b.status === "pending" || b.status === "accepted";
+        const canCancel = b.status === "pending" || b.status === "accepted";
         const busy = mutatingId === b.id;
         actionsSlot = (
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -206,9 +222,7 @@ export function BuyerBookingsView() {
     };
 
     const rowsFor = (t: RequesterTab) =>
-      bookings
-        .filter((b) => tabForBooking(b) === t)
-        .map((b) => mapRow(b, t));
+      bookings.filter((b) => tabForBooking(b) === t).map((b) => mapRow(b, t));
 
     const archivedCount = bookings.filter(
       (b) => b.status !== "pending" && b.status !== "accepted",
@@ -262,8 +276,7 @@ export function BuyerBookingsView() {
           },
           {
             title: "Draft requests (0)",
-            description:
-              "Incomplete requests you can finish and send later.",
+            description: "Incomplete requests you can finish and send later.",
           },
         ],
         mainListTitle: "Past requests & bookings",

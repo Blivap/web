@@ -17,7 +17,7 @@ import type {
   NewsCategory,
   NewsCountry,
   NewsLanguage,
-} from "@/api/newsRepository";
+} from "@/app/api/newsRepository";
 
 const HEALTH_CATEGORY: NewsCategory = "health";
 

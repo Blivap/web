@@ -1,4 +1,4 @@
-import { $api } from "@/api";
+import { $api } from "@/app/api";
 import { config } from "@/config/env";
 
 const SW_PATH = "/push-sw.js";
