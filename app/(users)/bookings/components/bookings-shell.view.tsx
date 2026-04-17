@@ -17,6 +17,8 @@ export type BookingsShellRow = {
   pillVariant: BookingPillVariant;
   /** Optional fourth column (e.g. donor actions). */
   actionsSlot?: ReactNode;
+  /** Deep-link highlight (e.g. from notification `?bookingId=`). */
+  highlight?: boolean;
 };
 
 export type BookingsShellSummary = {
@@ -122,7 +124,12 @@ function BookingsTabBody({
                 rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-t border-[#F3F4F6] dark:border-white/10"
+                    id={`booking-row-${row.id}`}
+                    className={`border-t border-[#F3F4F6] dark:border-white/10 ${
+                      row.highlight
+                        ? "bg-primary/5 ring-2 ring-inset ring-primary/40"
+                        : ""
+                    }`}
                   >
                     <td className="whitespace-nowrap py-4 pr-4 align-top text-sm text-text-secondary">
                       {row.dateCol}

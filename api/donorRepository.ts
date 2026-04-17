@@ -10,6 +10,14 @@ import type {
 
 export default function DonorRepository() {
   return {
+    list(): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.donors.list, { method: "GET" });
+    },
+
+    getById(id: string): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.donors.detail(id), { method: "GET" });
+    },
+
     register(
       payload: DonorRegisterPayload,
     ): Promise<IResponse<{ message?: string }>> {

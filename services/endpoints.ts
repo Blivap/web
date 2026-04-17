@@ -16,6 +16,8 @@ export const endpoints = {
   },
 
   donors: {
+    list: "/donors",
+    detail: (id: string) => `/donors/${encodeURIComponent(id)}`,
     register: "/donors/register",
     questionnaire: "/donors/questionnaire",
     requestActivation: "/donors/request-activation",

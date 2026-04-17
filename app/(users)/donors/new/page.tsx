@@ -23,8 +23,11 @@ import {
   extractQuestionnaireResultFromProfile,
   isQuestionnaireAnswered,
 } from "@/lib/donors/donorProfileGuards";
-import type { DonorBloodType } from "@/types/donors";
-import type { DonorQuestionnaireResult } from "@/types/donors";
+import type {
+  DonorBloodType,
+  DonorQuestionnaireResult,
+  DonorRegisterPayload,
+} from "@/types/donors";
 
 import { StepOne, type MedicalAnswers } from "../steps/one/step_one.component";
 import { StepThree } from "../steps/three/step_three.component";
@@ -480,8 +483,9 @@ function NewDonorForm() {
 
     setIsRegistering(true);
     try {
-      const payload = {
+      const payload: DonorRegisterPayload = {
         bloodType: values.basics.bloodType as DonorBloodType,
+        areaLocation: parsed,
       };
 
       const { status } = await $api.donors.register(payload);

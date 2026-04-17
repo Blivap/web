@@ -12,6 +12,7 @@ export type BloodType =
 export interface Donor {
   id: string;
   packs: number;
+  profileImage?: string | null;
   rating: number;
   donations: number;
   location: string;

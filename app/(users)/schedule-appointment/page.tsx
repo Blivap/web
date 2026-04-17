@@ -1,9 +1,22 @@
 "use client";
 import { Layout } from "@/layout/layout.component";
-import { AppointmentBookedModal } from "@/components/ui/modal/appointment-booked-modal.component";
+import { BookingRequestSentModal } from "@/components/ui/modal/booking-request-sent-modal.component";
 
-import { useState, useMemo, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  useCallback,
+  Suspense,
+} from "react";
+import { useSearchParams } from "next/navigation";
+import axios from "axios";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { $api } from "@/api";
+import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
+import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
+import type { HospitalListItem } from "@/lib/hospitals/parseHospitalsListResponse";
 
 export interface AppointmentDetails {
   hospitalId: string;
@@ -23,39 +36,6 @@ export interface StepThreeProps {
   onConfirm: (e: React.FormEvent) => void;
   active: boolean;
 }
-
-const MOCK_HOSPITALS = [
-  {
-    id: "1",
-    name: "Lagos Blood Bank",
-    address: "Ikeja GRA, Lagos",
-    distance: "5 km",
-  },
-  {
-    id: "2",
-    name: "Red Cross Donor Centre",
-    address: "Victoria Island, Lagos",
-    distance: "12 km",
-  },
-  {
-    id: "3",
-    name: "National Blood Service",
-    address: "Yaba, Lagos",
-    distance: "15 km",
-  },
-  {
-    id: "4",
-    name: "Abuja Central Blood Bank",
-    address: "Garki, Abuja",
-    distance: "18 km",
-  },
-  {
-    id: "5",
-    name: "Port Harcourt Donor Centre",
-    address: "GRA, Port Harcourt",
-    distance: "22 km",
-  },
-];
 
 const TIME_SLOTS = [
   "08:00",
@@ -97,12 +77,28 @@ function getDiamondRows<T>(items: T[]): T[][] {
   return rows;
 }
 
-export default function ScheduleAppointmentPage() {
+function buildScheduledAtIso(date: string, time: string): string {
+  // Local wall time (no timezone suffix) parses as local in JS; emit UTC ISO for the API.
+  const d = new Date(`${date}T${time}:00`);
+  return d.toISOString();
+}
+
+function ScheduleAppointmentPageContent() {
+  const searchParams = useSearchParams();
+  const donorUserId = searchParams.get("donorId")?.trim() ?? "";
+  const bloodRequestId = searchParams.get("bloodRequestId")?.trim() ?? "";
+
+  const [hospitals, setHospitals] = useState<HospitalListItem[]>([]);
+  const [hospitalsLoadState, setHospitalsLoadState] = useState<
+    "idle" | "loading" | "ok" | "error"
+  >("idle");
+  const [hospitalsError, setHospitalsError] = useState<string | null>(null);
+
   const [hospitalCarouselIndex, setHospitalCarouselIndex] = useState(0);
   const hospitalCarouselRef = useRef<HTMLDivElement | null>(null);
-  const [appointmentBookedModalOpen, setAppointmentBookedModalOpen] =
-    useState(false);
+  const [bookingRequestSentOpen, setBookingRequestSentOpen] = useState(false);
   const [isSendingBooking, setIsSendingBooking] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [appointment, setAppointment] = useState<AppointmentDetails>({
     hospitalId: "",
     date: "",
@@ -114,6 +110,35 @@ export default function ScheduleAppointmentPage() {
     const d = new Date();
     return { year: d.getFullYear(), month: d.getMonth() };
   });
+
+  const loadHospitals = useCallback(async () => {
+    setHospitalsLoadState("loading");
+    setHospitalsError(null);
+    try {
+      const { data, status } = await $api.hospitals.list();
+      if (status < 200 || status >= 300 || data === undefined) {
+        setHospitals([]);
+        setHospitalsLoadState("error");
+        setHospitalsError("Could not load hospitals. Please try again.");
+        return;
+      }
+      const parsed = parseHospitalsListResponse(data);
+      setHospitals(parsed);
+      setHospitalsLoadState("ok");
+      setHospitalCarouselIndex(0);
+      setAppointment((prev) => ({ ...prev, hospitalId: "" }));
+    } catch (e) {
+      setHospitals([]);
+      setHospitalsLoadState("error");
+      setHospitalsError(
+        getAxiosErrorMessage(e, "Could not load hospitals. Please try again."),
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadHospitals();
+  }, [loadHospitals]);
 
   const calendarDays = useMemo(() => {
     const { year, month } = calendarMonth;
@@ -165,7 +190,7 @@ export default function ScheduleAppointmentPage() {
       left: targetScrollLeft,
       behavior: "smooth",
     });
-  }, [hospitalCarouselIndex]);
+  }, [hospitalCarouselIndex, hospitals.length]);
 
   const handleAppointmentChange = <K extends keyof AppointmentDetails>(
     field: K,
@@ -175,17 +200,59 @@ export default function ScheduleAppointmentPage() {
   };
 
   const canConfirmAppointment = Boolean(
-    appointment.hospitalId && appointment.date && appointment.time,
+    donorUserId &&
+      appointment.hospitalId &&
+      appointment.date &&
+      appointment.time,
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canConfirmAppointment || isSendingBooking) return;
+    setSubmitError(null);
     setIsSendingBooking(true);
     try {
-      // TODO: POST booking request to donor; open modal only after success
-      await Promise.resolve();
-      setAppointmentBookedModalOpen(true);
+      const scheduledAt = buildScheduledAtIso(appointment.date, appointment.time);
+      const payload: {
+        donorUserId: string;
+        hospitalId: string;
+        scheduledAt: string;
+        bloodRequestId?: string;
+      } = {
+        donorUserId,
+        hospitalId: appointment.hospitalId,
+        scheduledAt,
+      };
+      if (bloodRequestId) payload.bloodRequestId = bloodRequestId;
+
+      const { status } = await $api.bookings.create(payload);
+      if (status < 200 || status >= 300) {
+        setSubmitError("Could not create the booking. Please try again.");
+        return;
+      }
+      setBookingRequestSentOpen(true);
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        const st = e.response?.status;
+        if (st === 404) {
+          setSubmitError(
+            getAxiosErrorMessage(e, "Hospital not found. Pick another location."),
+          );
+          return;
+        }
+        if (st === 409) {
+          setSubmitError(
+            getAxiosErrorMessage(
+              e,
+              "The donor already has a booking in this time window.",
+            ),
+          );
+          return;
+        }
+      }
+      setSubmitError(
+        getAxiosErrorMessage(e, "Could not create the booking. Please try again."),
+      );
     } finally {
       setIsSendingBooking(false);
     }
@@ -213,94 +280,124 @@ export default function ScheduleAppointmentPage() {
         <p className="text-sm text-text-primary">
           <span className="font-semibold "> Choose a location and time</span>
           <br />
-          Below you&apos;ll find the 5 locations closest to you. Select your
-          favorite or search for a new location.
+          Below you&apos;ll find locations you can book. Select your favorite.
         </p>
+
+        {!donorUserId ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/40 dark:bg-amber-950/40 dark:text-amber-100">
+            Open this page from a donor profile using &quot;Schedule
+            appointment&quot; so we know which donor to invite.
+          </div>
+        ) : null}
 
         <div className="flex flex-col flex-1 gap-4 p-4 py-6 bg-[#F7F5F3]">
           <p className="text-sm font-semibold text-text-primary text-center mb-3">
             Select a Hospital
           </p>
-          <div className="relative w-full ">
-            <button
-              type="button"
-              onClick={() =>
-                setHospitalCarouselIndex((i) => Math.max(0, i - 1))
-              }
-              disabled={hospitalCarouselIndex === 0}
-              aria-label="Previous hospital"
-              className="absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-md text-text-primary hover:bg-[#F9FAFB] disabled:pointer-events-none disabled:opacity-40 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                setHospitalCarouselIndex((i) =>
-                  Math.min(MOCK_HOSPITALS.length - 1, i + 1),
-                )
-              }
-              disabled={hospitalCarouselIndex === MOCK_HOSPITALS.length - 1}
-              aria-label="Next hospital"
-              className="absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-md text-text-primary hover:bg-[#F9FAFB] disabled:pointer-events-none disabled:opacity-40 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6"
-            >
-              {" "}
-              <ChevronRight size={20} />
-            </button>
-            <div
-              ref={hospitalCarouselRef}
-              className="relative w-full overflow-x-auto no-scrollbar"
-            >
-              <div className="flex gap-4">
-                {MOCK_HOSPITALS.map((h) => (
-                  <label
-                    key={h.id}
-                    className={`shrink-0 w-full max-w-[178px] min-w-0 px-2 sm:px-4 py-4 sm:py-6 rounded-lg border-2 cursor-pointer transition-colors block  ${
-                      appointment.hospitalId === h.id
-                        ? "border-primary bg-primary/5"
-                        : "border-border bg-white hover:border-primary/50 dark:border-white/10 dark:bg-[#1a1a22]"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="text-xs text-text-secondary">
-                        {h.distance}
-                      </span>
-                      <input
-                        type="radio"
-                        name="hospital"
-                        value={h.id}
-                        checked={appointment.hospitalId === h.id}
-                        onChange={() => {
-                          handleAppointmentChange("hospitalId", h.id);
-                          setHospitalCarouselIndex(
-                            MOCK_HOSPITALS.findIndex((x) => x.id === h.id),
-                          );
-                        }}
-                        className="sr-only"
-                      />
-                      <span
-                        className={`shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                          appointment.hospitalId === h.id
-                            ? "border-primary bg-primary"
-                            : "border-border"
-                        }`}
-                      >
-                        {appointment.hospitalId === h.id && (
-                          <span className="w-2 h-2 rounded-full bg-white" />
-                        )}
-                      </span>
-                    </div>
-                    <p className="text-sm font-medium text-text-primary mt-2">
-                      {h.name}
-                    </p>
-                    <p className="text-xs text-text-secondary mt-0.5">
-                      {h.address}
-                    </p>
-                  </label>
-                ))}
+          {hospitalsLoadState === "loading" ? (
+            <div className="flex min-h-[120px] items-center justify-center gap-2 text-sm text-text-secondary">
+              <Loader2 className="size-5 animate-spin text-primary" />
+              Loading hospitals…
+            </div>
+          ) : hospitalsLoadState === "error" ? (
+            <div className="rounded-lg border border-border bg-white px-4 py-4 text-center dark:border-white/10 dark:bg-[#1a1a22]">
+              <p className="text-sm text-text-primary">
+                {hospitalsError ?? "Could not load hospitals."}
+              </p>
+              <button
+                type="button"
+                onClick={() => void loadHospitals()}
+                className="mt-3 text-xs font-medium text-primary hover:underline"
+              >
+                Try again
+              </button>
+            </div>
+          ) : hospitals.length === 0 ? (
+            <p className="text-center text-sm text-text-secondary">
+              No hospitals available yet.
+            </p>
+          ) : (
+            <div className="relative w-full ">
+              <button
+                type="button"
+                onClick={() =>
+                  setHospitalCarouselIndex((i) => Math.max(0, i - 1))
+                }
+                disabled={hospitalCarouselIndex === 0}
+                aria-label="Previous hospital"
+                className="absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-md text-text-primary hover:bg-[#F9FAFB] disabled:pointer-events-none disabled:opacity-40 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setHospitalCarouselIndex((i) =>
+                    Math.min(hospitals.length - 1, i + 1),
+                  )
+                }
+                disabled={hospitalCarouselIndex === hospitals.length - 1}
+                aria-label="Next hospital"
+                className="absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-md text-text-primary hover:bg-[#F9FAFB] disabled:pointer-events-none disabled:opacity-40 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6"
+              >
+                {" "}
+                <ChevronRight size={20} />
+              </button>
+              <div
+                ref={hospitalCarouselRef}
+                className="relative w-full overflow-x-auto no-scrollbar"
+              >
+                <div className="flex gap-4">
+                  {hospitals.map((h) => (
+                    <label
+                      key={h.id}
+                      className={`shrink-0 w-full max-w-[178px] min-w-0 px-2 sm:px-4 py-4 sm:py-6 rounded-lg border-2 cursor-pointer transition-colors block  ${
+                        appointment.hospitalId === h.id
+                          ? "border-primary bg-primary/5"
+                          : "border-border bg-white hover:border-primary/50 dark:border-white/10 dark:bg-[#1a1a22]"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-xs text-text-secondary">
+                          {h.distance ?? "—"}
+                        </span>
+                        <input
+                          type="radio"
+                          name="hospital"
+                          value={h.id}
+                          checked={appointment.hospitalId === h.id}
+                          onChange={() => {
+                            handleAppointmentChange("hospitalId", h.id);
+                            setHospitalCarouselIndex(
+                              hospitals.findIndex((x) => x.id === h.id),
+                            );
+                          }}
+                          className="sr-only"
+                        />
+                        <span
+                          className={`shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                            appointment.hospitalId === h.id
+                              ? "border-primary bg-primary"
+                              : "border-border"
+                          }`}
+                        >
+                          {appointment.hospitalId === h.id && (
+                            <span className="w-2 h-2 rounded-full bg-white" />
+                          )}
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium text-text-primary mt-2">
+                        {h.name}
+                      </p>
+                      <p className="text-xs text-text-secondary mt-0.5">
+                        {h.address}
+                      </p>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div>
@@ -411,6 +508,12 @@ export default function ScheduleAppointmentPage() {
           </div>
         </div>
 
+        {submitError ? (
+          <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+            {submitError}
+          </p>
+        ) : null}
+
         <button
           type="submit"
           disabled={!canConfirmAppointment || isSendingBooking}
@@ -420,15 +523,27 @@ export default function ScheduleAppointmentPage() {
         </button>
       </form>
 
-      <AppointmentBookedModal
-        open={appointmentBookedModalOpen}
-        onClose={() => setAppointmentBookedModalOpen(false)}
-        onSendCode={async (code: string) => {
-          // TODO: confirm booking code with API
-          await Promise.resolve();
-          void code;
-        }}
+      <BookingRequestSentModal
+        open={bookingRequestSentOpen}
+        onClose={() => setBookingRequestSentOpen(false)}
       />
     </Layout>
+  );
+}
+
+export default function ScheduleAppointmentPage() {
+  return (
+    <Suspense
+      fallback={
+        <Layout>
+          <div className="mt-6 flex min-h-[200px] items-center justify-center gap-2 text-sm text-text-secondary xl:mt-10">
+            <Loader2 className="size-5 animate-spin text-primary" />
+            Loading…
+          </div>
+        </Layout>
+      }
+    >
+      <ScheduleAppointmentPageContent />
+    </Suspense>
   );
 }

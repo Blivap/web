@@ -1,166 +1,166 @@
 "use client";
 
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { $api } from "@/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import {
   BookingsShell,
   type BookingsShellRow,
   type BookingsShellTabPanels,
 } from "./bookings-shell.view";
-import type { BookingPillVariant } from "./booking-status-pill";
+import { useAppSelector } from "@/store/hooks";
+import { parseBookingsMineResponse } from "@/lib/bookings/parseBookingsMineResponse";
+import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
+import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
+import {
+  bookingSubtitleRequester,
+  bookingTitleForViewer,
+  formatScheduledLabel,
+  statusToPill,
+} from "@/lib/bookings/formatBookingDisplay";
+import type { Booking } from "@/types/bookings";
 
-/** Non-donor: manages incoming donation/booking requests, referrals, and history. */
 type RequesterTab = "active" | "referrals" | "archived";
 
-type RequesterEntity = {
-  id: string;
-  tab: RequesterTab;
-  date: string;
-  title: string;
-  subtitle: string;
-  pillLabel: string;
-  pillVariant: BookingPillVariant;
-};
-
-const REQUESTER_ENTITIES: RequesterEntity[] = [
-  {
-    id: "r-a1",
-    tab: "active",
-    date: "Mar 28, 2026",
-    title: "Whole blood — O+ · urgent window",
-    subtitle:
-      "Request from: City Medical Center · Estimated collection within 48h",
-    pillLabel: "Awaiting you",
-    pillVariant: "pending",
-  },
-  {
-    id: "r-a2",
-    tab: "active",
-    date: "Mar 22, 2026",
-    title: "Home visit — donor screening & sample",
-    subtitle: "Request from: Lagos Regional Hospital · Proposed Tue morning",
-    pillLabel: "Facility confirming",
-    pillVariant: "profile",
-  },
-  {
-    id: "r-a3",
-    tab: "active",
-    date: "Mar 18, 2026",
-    title: "Matched donor program — follow-up booking",
-    subtitle: "Via Blivap matching · Platelet appointment",
-    pillLabel: "Scheduled",
-    pillVariant: "accepted",
-  },
-  {
-    id: "r-ref1",
-    tab: "referrals",
-    date: "Feb 10, 2026",
-    title: "Family member joined as donor",
-    subtitle: "You referred them · Blood donation · Profile verified",
-    pillLabel: "Active donor",
-    pillVariant: "accepted",
-  },
-  {
-    id: "r-ref2",
-    tab: "referrals",
-    date: "Jan 4, 2026",
-    title: "Friend registered — first visit pending",
-    subtitle: "You referred them · Sperm donation program",
-    pillLabel: "Onboarding",
-    pillVariant: "pending",
-  },
-  {
-    id: "r-z1",
-    tab: "archived",
-    date: "Dec 2, 2025",
-    title: "Blood unit request — general ward",
-    subtitle: "Request closed · No matching slot in time window",
-    pillLabel: "Unfulfilled",
-    pillVariant: "rejected",
-  },
-  {
-    id: "r-z2",
-    tab: "archived",
-    date: "Nov 8, 2025",
-    title: "Donation booking — pop-up drive",
-    subtitle: "You cancelled this request before confirmation",
-    pillLabel: "Cancelled",
-    pillVariant: "profile",
-  },
-  {
-    id: "r-z3",
-    tab: "archived",
-    date: "Oct 14, 2025",
-    title: "Scheduled donation — completed",
-    subtitle: "Facility confirmed receipt · Thank-you note sent",
-    pillLabel: "Completed",
-    pillVariant: "accepted",
-  },
-];
-
 const btnSecondary =
-  "rounded-md border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-xs font-medium text-text-primary transition-colors hover:bg-[#F9FAFB] dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6";
+  "rounded-md border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-xs font-medium text-text-primary transition-colors hover:bg-[#F9FAFB] disabled:opacity-50 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6";
 const btnGhost =
   "rounded-md px-2.5 py-1.5 text-xs font-medium text-[#6B7280] underline-offset-2 hover:text-primary hover:underline";
 
+function tabForBooking(b: Booking): RequesterTab {
+  if (b.status === "pending" || b.status === "accepted") return "active";
+  return "archived";
+}
+
 export function BuyerBookingsView() {
   const { showSnackbar } = useSnackbar();
-  const [cancelledRequestIds, setCancelledRequestIds] = useState<Set<string>>(
-    () => new Set(),
+  const user = useAppSelector((s) => s.auth.user);
+  const searchParams = useSearchParams();
+  const highlightBookingId = searchParams.get("bookingId")?.trim() ?? "";
+
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [hospitalNames, setHospitalNames] = useState<Record<string, string>>(
+    () => ({}),
+  );
+  const [loadState, setLoadState] = useState<
+    "idle" | "loading" | "ok" | "error"
+  >("idle");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [mutatingId, setMutatingId] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
+    if (!user?.id) return;
+    setLoadState("loading");
+    setLoadError(null);
+    try {
+      const [mineRes, hospRes] = await Promise.all([
+        $api.bookings.mine(),
+        $api.hospitals.list(),
+      ]);
+
+      if (mineRes.status < 200 || mineRes.status >= 300 || mineRes.data === undefined) {
+        setBookings([]);
+        setLoadState("error");
+        setLoadError("Could not load bookings.");
+        return;
+      }
+      const parsed = parseBookingsMineResponse(mineRes.data);
+      const mine = parsed.filter((b) => b.requesterId === user.id);
+      setBookings(mine);
+
+      if (hospRes.status >= 200 && hospRes.status < 300 && hospRes.data !== undefined) {
+        const hospitals = parseHospitalsListResponse(hospRes.data);
+        const map: Record<string, string> = {};
+        for (const h of hospitals) map[h.id] = h.name;
+        setHospitalNames(map);
+      }
+
+      setLoadState("ok");
+    } catch (e) {
+      setBookings([]);
+      setLoadState("error");
+      setLoadError(
+        getAxiosErrorMessage(e, "Could not load bookings. Please try again."),
+      );
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    if (!highlightBookingId || loadState !== "ok") return;
+    const t = window.setTimeout(() => {
+      document
+        .getElementById(`booking-row-${highlightBookingId}`)
+        ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }, 300);
+    return () => window.clearTimeout(t);
+  }, [highlightBookingId, loadState, bookings]);
+
+  const hospitalLabel = useCallback(
+    (hospitalId: string) => hospitalNames[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
+    [hospitalNames],
   );
 
-  const cancelRequest = useCallback(
-    (id: string) => {
-      setCancelledRequestIds((prev) => new Set(prev).add(id));
-      showSnackbar("This request was cancelled.");
+  const cancelBooking = useCallback(
+    async (id: string) => {
+      setMutatingId(id);
+      try {
+        const { status } = await $api.bookings.cancel(id);
+        if (status < 200 || status >= 300) {
+          showSnackbar("Could not cancel this booking.");
+          return;
+        }
+        showSnackbar("This booking was cancelled.");
+        await loadData();
+      } catch (e) {
+        showSnackbar(
+          getAxiosErrorMessage(
+            e,
+            "Could not cancel this booking. Please try again.",
+          ),
+        );
+      } finally {
+        setMutatingId(null);
+      }
     },
-    [showSnackbar],
+    [loadData, showSnackbar],
   );
 
   const tabPanels = useMemo((): BookingsShellTabPanels => {
-    const newOffers = 1;
-    const followUps = 1;
+    const activeBookings = bookings.filter(
+      (b) => b.status === "pending" || b.status === "accepted",
+    );
+    const newOffers = activeBookings.filter((b) => b.status === "pending")
+      .length;
+    const followUps = activeBookings.filter((b) => b.status === "accepted")
+      .length;
 
-    const mapRow = (
-      e: RequesterEntity,
-      tab: RequesterTab,
-    ): BookingsShellRow => {
+    const mapRow = (b: Booking, tab: RequesterTab): BookingsShellRow => {
+      const pill = statusToPill(b.status);
+      const title = bookingTitleForViewer(b, "requester");
+      const subtitle = bookingSubtitleRequester(b, hospitalLabel(b.hospitalId));
+      const dateCol = formatScheduledLabel(b.scheduledAt);
+
       let actionsSlot: ReactNode;
 
-      if (cancelledRequestIds.has(e.id)) {
-        return {
-          id: e.id,
-          dateCol: e.date,
-          title: e.title,
-          subtitle: e.subtitle,
-          pillLabel: "Cancelled",
-          pillVariant: "profile",
-          actionsSlot: (
-            <span className="text-xs text-[#6B7280]">Cancelled</span>
-          ),
-        };
-      }
-
       if (tab === "active") {
+        const canCancel =
+          b.status === "pending" || b.status === "accepted";
+        const busy = mutatingId === b.id;
         actionsSlot = (
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <button
               type="button"
               className={btnSecondary}
-              onClick={() =>
-                showSnackbar(
-                  "Full request details will open here when connected to your account.",
-                )
-              }
+              disabled={!canCancel || busy}
+              onClick={() => void cancelBooking(b.id)}
             >
-              View request
-            </button>
-            <button
-              type="button"
-              className={btnGhost}
-              onClick={() => cancelRequest(e.id)}
-            >
-              Cancel request
+              Cancel booking
             </button>
             <button
               type="button"
@@ -176,32 +176,7 @@ export function BuyerBookingsView() {
           </div>
         );
       } else if (tab === "referrals") {
-        actionsSlot = (
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <button
-              type="button"
-              className={btnSecondary}
-              onClick={() =>
-                showSnackbar(
-                  "Referral progress will sync with your wallet and notifications.",
-                )
-              }
-            >
-              View status
-            </button>
-            <button
-              type="button"
-              className={btnGhost}
-              onClick={() =>
-                showSnackbar(
-                  "A gentle reminder will be sent when messaging is enabled.",
-                )
-              }
-            >
-              Remind contact
-            </button>
-          </div>
-        );
+        actionsSlot = <span className="text-xs text-[#9CA3AF]">—</span>;
       } else {
         actionsSlot = (
           <button
@@ -219,24 +194,24 @@ export function BuyerBookingsView() {
       }
 
       return {
-        id: e.id,
-        dateCol: e.date,
-        title: e.title,
-        subtitle: e.subtitle,
-        pillLabel: e.pillLabel,
-        pillVariant: e.pillVariant,
+        id: b.id,
+        dateCol,
+        title,
+        subtitle,
+        pillLabel: pill.label,
+        pillVariant: pill.variant,
         actionsSlot,
+        highlight: Boolean(highlightBookingId && b.id === highlightBookingId),
       };
     };
 
     const rowsFor = (t: RequesterTab) =>
-      REQUESTER_ENTITIES.filter((e) => e.tab === t).map((e) => mapRow(e, t));
+      bookings
+        .filter((b) => tabForBooking(b) === t)
+        .map((b) => mapRow(b, t));
 
-    const referralCount = REQUESTER_ENTITIES.filter(
-      (e) => e.tab === "referrals",
-    ).length;
-    const archivedCount = REQUESTER_ENTITIES.filter(
-      (e) => e.tab === "archived",
+    const archivedCount = bookings.filter(
+      (b) => b.status !== "pending" && b.status !== "accepted",
     ).length;
 
     return {
@@ -262,19 +237,19 @@ export function BuyerBookingsView() {
       referrals: {
         summarySections: [
           {
-            title: `Donors you referred (${referralCount})`,
+            title: "Donors you referred (0)",
             description:
               "People who joined Blivap through your link or invite.",
           },
           {
-            title: `Referral milestones (0)`,
+            title: "Referral milestones (0)",
             description:
               "Credits or benefits may apply when referrals complete verification or a first donation.",
           },
         ],
         mainListTitle: "Referrals",
         columnLabels: ["Started", "Referral", "Status"],
-        rows: rowsFor("referrals"),
+        rows: [],
         actionsColumnLabel: "Actions",
         tableEmptyMessage: "You haven’t referred anyone yet.",
       },
@@ -286,8 +261,9 @@ export function BuyerBookingsView() {
               "Completed donations, cancelled bookings, or requests that could not be matched.",
           },
           {
-            title: `Draft requests (0)`,
-            description: "Incomplete requests you can finish and send later.",
+            title: "Draft requests (0)",
+            description:
+              "Incomplete requests you can finish and send later.",
           },
         ],
         mainListTitle: "Past requests & bookings",
@@ -297,7 +273,48 @@ export function BuyerBookingsView() {
         tableEmptyMessage: "Nothing in your archive yet.",
       },
     };
-  }, [cancelRequest, cancelledRequestIds, showSnackbar]);
+  }, [
+    bookings,
+    cancelBooking,
+    highlightBookingId,
+    mutatingId,
+    showSnackbar,
+    hospitalLabel,
+  ]);
+
+  if (!user?.id) {
+    return (
+      <p className="text-sm text-text-secondary">
+        Sign in to see your bookings.
+      </p>
+    );
+  }
+
+  if (loadState === "loading") {
+    return (
+      <div className="flex min-h-[200px] items-center justify-center gap-2 text-sm text-text-secondary">
+        <Loader2 className="size-5 animate-spin text-primary" />
+        Loading bookings…
+      </div>
+    );
+  }
+
+  if (loadState === "error") {
+    return (
+      <div className="rounded-xl border border-border bg-white p-5 dark:border-white/10 dark:bg-[#1a1a22]">
+        <p className="text-sm font-medium text-text-primary">
+          {loadError ?? "Something went wrong."}
+        </p>
+        <button
+          type="button"
+          onClick={() => void loadData()}
+          className="mt-3 text-xs font-medium text-primary hover:underline"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <BookingsShell

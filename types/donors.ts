@@ -26,9 +26,9 @@ export type DonorAreaLocation = {
 
 export type DonorRegisterPayload = {
   bloodType: DonorBloodType;
+  /** Coarse location for donor-recipient matching (POST /donors/register). */
+  areaLocation: DonorAreaLocation;
   location?: DonorLocationPoint;
-  /** Manual coarse location used for donor-recipient matching. */
-  areaLocation?: DonorAreaLocation;
 };
 
 export type DonorQuestionnairePayload = {

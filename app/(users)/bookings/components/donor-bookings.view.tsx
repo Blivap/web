@@ -1,176 +1,145 @@
 "use client";
 
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { $api } from "@/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import {
   BookingsShell,
   type BookingsShellRow,
   type BookingsShellTabPanels,
 } from "./bookings-shell.view";
-import type { BookingPillVariant } from "./booking-status-pill";
+import { useAppSelector } from "@/store/hooks";
+import { parseBookingsMineResponse } from "@/lib/bookings/parseBookingsMineResponse";
+import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
+import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
+import {
+  bookingSubtitleDonor,
+  bookingTitleForViewer,
+  formatScheduledLabel,
+  statusToPill,
+} from "@/lib/bookings/formatBookingDisplay";
+import type { Booking } from "@/types/bookings";
 
 type DonorTab = "active" | "referrals" | "archived";
 
-type DonorBookingEntity = {
-  id: string;
-  tab: DonorTab;
-  date: string;
-  appointmentTitle: string;
-  facility: string;
-  detailLine: string;
-  /** Base status before user actions */
-  baseStatus:
-    | "action_needed"
-    | "confirmed"
-    | "scheduled_intro"
-    | "completed"
-    | "declined"
-    | "expired";
-  needsConfirmation: boolean;
-};
-
-const DONOR_ENTITIES: DonorBookingEntity[] = [
-  {
-    id: "d-a1",
-    tab: "active",
-    date: "Apr 18, 2026",
-    appointmentTitle: "Follow-up whole blood",
-    facility: "Lagos Regional Hospital",
-    detailLine: "Proposed slot: Tue · 2:30 PM · Est. 45 min",
-    baseStatus: "action_needed",
-    needsConfirmation: true,
-  },
-  {
-    id: "d-a2",
-    tab: "active",
-    date: "Apr 22, 2026",
-    appointmentTitle: "Platelet donation",
-    facility: "Blivap Partner Lab",
-    detailLine: "Facility requests confirmation by Apr 10",
-    baseStatus: "action_needed",
-    needsConfirmation: true,
-  },
-  {
-    id: "d-a3",
-    tab: "active",
-    date: "Apr 2, 2026",
-    appointmentTitle: "Whole blood donation",
-    facility: "City Medical Center",
-    detailLine: "Morning slot · 9:00 AM · Check-in opens 8:30",
-    baseStatus: "confirmed",
-    needsConfirmation: false,
-  },
-  {
-    id: "d-r1",
-    tab: "referrals",
-    date: "Mar 28, 2026",
-    appointmentTitle: "Intro: Regional plasma program",
-    facility: "Referred by City Medical Center",
-    detailLine: "Partner lab: Northside Collection Site",
-    baseStatus: "scheduled_intro",
-    needsConfirmation: false,
-  },
-  {
-    id: "d-r2",
-    tab: "referrals",
-    date: "Mar 15, 2026",
-    appointmentTitle: "Specialist screening pathway",
-    facility: "Referred by Blivap care team",
-    detailLine: "Next step: upload travel history form",
-    baseStatus: "scheduled_intro",
-    needsConfirmation: false,
-  },
-  {
-    id: "d-z1",
-    tab: "archived",
-    date: "Mar 12, 2026",
-    appointmentTitle: "Platelet appointment",
-    facility: "Blivap Partner Lab",
-    detailLine: "Completed · Thank you for donating",
-    baseStatus: "completed",
-    needsConfirmation: false,
-  },
-  {
-    id: "d-z2",
-    tab: "archived",
-    date: "Feb 3, 2026",
-    appointmentTitle: "Screening visit",
-    facility: "City Medical Center",
-    detailLine: "You declined this proposed date",
-    baseStatus: "declined",
-    needsConfirmation: false,
-  },
-  {
-    id: "d-z3",
-    tab: "archived",
-    date: "Jan 8, 2026",
-    appointmentTitle: "Whole blood — pop-up drive",
-    facility: "Community Drive (Ikeja)",
-    detailLine: "Booking expired — no response in 7 days",
-    baseStatus: "expired",
-    needsConfirmation: false,
-  },
-];
-
-function basePill(e: DonorBookingEntity): {
-  label: string;
-  variant: BookingPillVariant;
-} {
-  switch (e.baseStatus) {
-    case "action_needed":
-      return { label: "Action needed", variant: "pending" };
-    case "confirmed":
-      return { label: "Confirmed", variant: "accepted" };
-    case "scheduled_intro":
-      return { label: "Intro scheduled", variant: "profile" };
-    case "completed":
-      return { label: "Completed", variant: "accepted" };
-    case "declined":
-      return { label: "Declined", variant: "rejected" };
-    case "expired":
-      return { label: "Expired", variant: "rejected" };
-    default:
-      return { label: "—", variant: "profile" };
-  }
-}
-
 const actionBtnClass =
-  "rounded-md border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-xs font-medium text-text-primary transition-colors hover:bg-[#F9FAFB] dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6";
+  "rounded-md border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-xs font-medium text-text-primary transition-colors hover:bg-[#F9FAFB] disabled:opacity-50 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6";
 const dangerBtnClass =
-  "rounded-md border border-red-200 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-50 dark:border-red-400/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50";
+  "rounded-md border border-red-200 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-400/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50";
 const ghostBtnClass =
   "rounded-md px-2.5 py-1.5 text-xs font-medium text-[#6B7280] underline-offset-2 hover:text-primary hover:underline";
 
+function tabForBooking(b: Booking): DonorTab {
+  if (b.status === "pending" || b.status === "accepted") return "active";
+  return "archived";
+}
+
 export function DonorBookingsView() {
   const { showSnackbar } = useSnackbar();
-  const [responseById, setResponseById] = useState<
-    Record<string, "accepted" | "declined">
-  >({});
-  const [reportedIds, setReportedIds] = useState<Set<string>>(() => new Set());
+  const user = useAppSelector((s) => s.auth.user);
+  const searchParams = useSearchParams();
+  const highlightBookingId = searchParams.get("bookingId")?.trim() ?? "";
 
-  const accept = useCallback(
-    (id: string) => {
-      setResponseById((prev) => ({ ...prev, [id]: "accepted" }));
-      showSnackbar(
-        "You accepted this appointment. The facility has been notified.",
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [hospitalNames, setHospitalNames] = useState<Record<string, string>>(
+    () => ({}),
+  );
+  const [loadState, setLoadState] = useState<
+    "idle" | "loading" | "ok" | "error"
+  >("idle");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [mutatingId, setMutatingId] = useState<string | null>(null);
+
+  const loadData = useCallback(async () => {
+    if (!user?.id) return;
+    setLoadState("loading");
+    setLoadError(null);
+    try {
+      const [mineRes, hospRes] = await Promise.all([
+        $api.bookings.mine(),
+        $api.hospitals.list(),
+      ]);
+
+      if (mineRes.status < 200 || mineRes.status >= 300 || mineRes.data === undefined) {
+        setBookings([]);
+        setLoadState("error");
+        setLoadError("Could not load bookings.");
+        return;
+      }
+      const parsed = parseBookingsMineResponse(mineRes.data);
+      const mine = parsed.filter((b) => b.donorUserId === user.id);
+      setBookings(mine);
+
+      if (hospRes.status >= 200 && hospRes.status < 300 && hospRes.data !== undefined) {
+        const hospitals = parseHospitalsListResponse(hospRes.data);
+        const map: Record<string, string> = {};
+        for (const h of hospitals) map[h.id] = h.name;
+        setHospitalNames(map);
+      }
+
+      setLoadState("ok");
+    } catch (e) {
+      setBookings([]);
+      setLoadState("error");
+      setLoadError(
+        getAxiosErrorMessage(e, "Could not load bookings. Please try again."),
       );
-    },
-    [showSnackbar],
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    if (!highlightBookingId || loadState !== "ok") return;
+    const t = window.setTimeout(() => {
+      document
+        .getElementById(`booking-row-${highlightBookingId}`)
+        ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }, 300);
+    return () => window.clearTimeout(t);
+  }, [highlightBookingId, loadState, bookings]);
+
+  const hospitalLabel = useCallback(
+    (hospitalId: string) => hospitalNames[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
+    [hospitalNames],
   );
 
-  const decline = useCallback(
-    (id: string) => {
-      setResponseById((prev) => ({ ...prev, [id]: "declined" }));
-      showSnackbar(
-        "You declined this booking. The slot may be offered to others.",
-      );
+  const respond = useCallback(
+    async (id: string, accept: boolean) => {
+      setMutatingId(id);
+      try {
+        const { status } = await $api.bookings.respond(id, { accept });
+        if (status < 200 || status >= 300) {
+          showSnackbar("Could not update this booking.");
+          return;
+        }
+        showSnackbar(
+          accept
+            ? "You accepted this booking. You can share the meeting code when you meet."
+            : "You declined this booking. The slot may be offered to others.",
+        );
+        await loadData();
+      } catch (e) {
+        showSnackbar(
+          getAxiosErrorMessage(
+            e,
+            "Could not update this booking. Please try again.",
+          ),
+        );
+      } finally {
+        setMutatingId(null);
+      }
     },
-    [showSnackbar],
+    [loadData, showSnackbar],
   );
 
   const report = useCallback(
     (id: string) => {
-      setReportedIds((prev) => new Set(prev).add(id));
+      void id;
       showSnackbar(
         "Thanks — we’ve logged your report. Our team may follow up if needed.",
       );
@@ -179,124 +148,75 @@ export function DonorBookingsView() {
   );
 
   const tabPanels = useMemo((): BookingsShellTabPanels => {
-    const pendingCount = DONOR_ENTITIES.filter(
-      (e) =>
-        e.tab === "active" &&
-        e.needsConfirmation &&
-        responseById[e.id] === undefined,
-    ).length;
+    const pendingCount = bookings.filter((b) => b.status === "pending").length;
 
-    const mapEntityToRow = (
-      e: DonorBookingEntity,
-      tab: DonorTab,
-    ): BookingsShellRow => {
-      const response = responseById[e.id];
-      let pillLabel: string;
-      let pillVariant: BookingPillVariant;
-
-      if (e.needsConfirmation && response === "accepted") {
-        pillLabel = "Accepted";
-        pillVariant = "accepted";
-      } else if (e.needsConfirmation && response === "declined") {
-        pillLabel = "Declined";
-        pillVariant = "rejected";
-      } else {
-        const b = basePill(e);
-        pillLabel = b.label;
-        pillVariant = b.variant;
-      }
+    const mapRow = (b: Booking, tab: DonorTab): BookingsShellRow => {
+      const pill = statusToPill(b.status);
+      const title = bookingTitleForViewer(b, "donor");
+      const subtitle = bookingSubtitleDonor(b, hospitalLabel(b.hospitalId));
+      const dateCol = formatScheduledLabel(b.scheduledAt);
 
       let actionsSlot: ReactNode;
-      if (tab === "active" && e.needsConfirmation) {
-        if (response === "accepted") {
-          actionsSlot = (
-            <span className="text-xs text-emerald-700">
-              Confirmed — see email for details.
-            </span>
-          );
-        } else if (response === "declined") {
-          actionsSlot = (
-            <span className="text-xs text-[#6B7280]">Declined</span>
-          );
-        } else {
-          actionsSlot = (
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-              <button
-                type="button"
-                className={actionBtnClass}
-                onClick={() => accept(e.id)}
-              >
-                Accept
-              </button>
-              <button
-                type="button"
-                className={dangerBtnClass}
-                onClick={() => decline(e.id)}
-              >
-                Decline
-              </button>
-              <button
-                type="button"
-                className={ghostBtnClass}
-                onClick={() => report(e.id)}
-                disabled={reportedIds.has(e.id)}
-              >
-                {reportedIds.has(e.id) ? "Report submitted" : "Report issue"}
-              </button>
-            </div>
-          );
-        }
-      } else if (tab === "active" && !e.needsConfirmation) {
+
+      if (tab === "active" && b.status === "pending") {
+        const busy = mutatingId === b.id;
         actionsSlot = (
-          <span className="text-xs text-[#6B7280]">
-            No action required before visit.
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <button
+              type="button"
+              className={actionBtnClass}
+              disabled={busy}
+              onClick={() => void respond(b.id, true)}
+            >
+              Accept
+            </button>
+            <button
+              type="button"
+              className={dangerBtnClass}
+              disabled={busy}
+              onClick={() => void respond(b.id, false)}
+            >
+              Decline
+            </button>
+            <button
+              type="button"
+              className={ghostBtnClass}
+              onClick={() => report(b.id)}
+            >
+              Report issue
+            </button>
+          </div>
+        );
+      } else if (tab === "active" && b.status === "accepted") {
+        actionsSlot = (
+          <span className="text-xs text-emerald-700 dark:text-emerald-400">
+            {b.meetingCode
+              ? `Use meeting code ${b.meetingCode} when you meet in person.`
+              : "Accepted — details in notifications."}
           </span>
         );
       } else if (tab === "referrals") {
-        actionsSlot = (
-          <button
-            type="button"
-            className={actionBtnClass}
-            onClick={() =>
-              showSnackbar("Opening referral details will be available soon.")
-            }
-          >
-            View details
-          </button>
-        );
-      } else if (tab === "archived" && e.baseStatus === "completed") {
-        actionsSlot = (
-          <button
-            type="button"
-            className={ghostBtnClass}
-            onClick={() =>
-              showSnackbar(
-                "Visit summary will be available from your history export.",
-              )
-            }
-          >
-            Visit summary
-          </button>
-        );
+        actionsSlot = <span className="text-xs text-[#9CA3AF]">—</span>;
       } else {
         actionsSlot = <span className="text-xs text-[#9CA3AF]">—</span>;
       }
 
       return {
-        id: e.id,
-        dateCol: e.date,
-        title: e.appointmentTitle,
-        subtitle: `At: ${e.facility} · ${e.detailLine}`,
-        pillLabel,
-        pillVariant,
+        id: b.id,
+        dateCol,
+        title,
+        subtitle,
+        pillLabel: pill.label,
+        pillVariant: pill.variant,
         actionsSlot,
+        highlight: Boolean(highlightBookingId && b.id === highlightBookingId),
       };
     };
 
     const byTab = (t: DonorTab) =>
-      DONOR_ENTITIES.filter((e) => e.tab === t).map((e) =>
-        mapEntityToRow(e, t),
-      );
+      bookings
+        .filter((b) => tabForBooking(b) === t)
+        .map((b) => mapRow(b, t));
 
     return {
       active: {
@@ -323,32 +243,32 @@ export function DonorBookingsView() {
       referrals: {
         summarySections: [
           {
-            title: `Partner referrals (${DONOR_ENTITIES.filter((e) => e.tab === "referrals").length})`,
+            title: "Partner referrals (0)",
             description:
               "Introductions from facilities or Blivap to additional programs and sites.",
           },
           {
-            title: `Cross-facility matches (0)`,
+            title: "Cross-facility matches (0)",
             description:
               "When another site needs your blood type, matches will appear here.",
           },
         ],
         mainListTitle: "Referrals & introductions",
         columnLabels: ["Started", "Referral", "Progress"],
-        rows: byTab("referrals"),
+        rows: [],
         actionsColumnLabel: "Next step",
         tableEmptyMessage: "No referrals yet — your matches will show here.",
       },
       archived: {
         summarySections: [
           {
-            title: `Completed visits (${DONOR_ENTITIES.filter((e) => e.tab === "archived" && e.baseStatus === "completed").length})`,
+            title: `Completed visits (${bookings.filter((b) => b.status === "completed").length})`,
             description: "Past donations that were completed successfully.",
           },
           {
-            title: `Declined or expired (${DONOR_ENTITIES.filter((e) => e.tab === "archived" && e.baseStatus !== "completed").length})`,
+            title: `Declined or expired (${bookings.filter((b) => b.status === "rejected" || b.status === "cancelled" || b.status === "no_show").length})`,
             description:
-              "Bookings you declined or that timed out without a response.",
+              "Bookings you declined or that the requester cancelled.",
           },
         ],
         mainListTitle: "Past activity",
@@ -358,7 +278,48 @@ export function DonorBookingsView() {
         tableEmptyMessage: "No archived bookings yet.",
       },
     };
-  }, [accept, decline, report, reportedIds, responseById, showSnackbar]);
+  }, [
+    bookings,
+    hospitalLabel,
+    highlightBookingId,
+    mutatingId,
+    report,
+    respond,
+  ]);
+
+  if (!user?.id) {
+    return (
+      <p className="text-sm text-text-secondary">
+        Sign in to see your bookings.
+      </p>
+    );
+  }
+
+  if (loadState === "loading") {
+    return (
+      <div className="flex min-h-[200px] items-center justify-center gap-2 text-sm text-text-secondary">
+        <Loader2 className="size-5 animate-spin text-primary" />
+        Loading bookings…
+      </div>
+    );
+  }
+
+  if (loadState === "error") {
+    return (
+      <div className="rounded-xl border border-border bg-white p-5 dark:border-white/10 dark:bg-[#1a1a22]">
+        <p className="text-sm font-medium text-text-primary">
+          {loadError ?? "Something went wrong."}
+        </p>
+        <button
+          type="button"
+          onClick={() => void loadData()}
+          className="mt-3 text-xs font-medium text-primary hover:underline"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <BookingsShell

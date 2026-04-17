@@ -1,24 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Search, Star, Droplet } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Search, Star, Droplet, Loader2 } from "lucide-react";
 import { Layout } from "../../../layout/layout.component";
 import Link from "next/link";
-import {
-  ALL_DONORS,
-  BLOOD_TYPES,
-  type BloodType,
-  type Donor,
-} from "./donors.data";
+import { $api } from "@/api";
+import { parseDonorsListResponse } from "@/lib/donors/parseDonorsListResponse";
+import { BLOOD_TYPES, type BloodType, type Donor } from "./donors.data";
+import { Avatar } from "@/components/ui/Avatar/avatar.component";
 
 const INITIAL_BATCH = 9;
 const BATCH_SIZE = 6;
 
 type DonorsInfiniteGridProps = {
   donors: Donor[];
+  emptyMessage: string;
 };
 
-function DonorsInfiniteGrid({ donors }: DonorsInfiniteGridProps) {
+function DonorsInfiniteGrid({ donors, emptyMessage }: DonorsInfiniteGridProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_BATCH);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -63,10 +62,10 @@ function DonorsInfiniteGrid({ donors }: DonorsInfiniteGridProps) {
     <>
       {visibleDonors.length === 0 ? (
         <div className="flex h-full items-center justify-center text-sm text-text-secondary">
-          No donors match your filters yet.
+          {emptyMessage}
         </div>
       ) : (
-        <div className="grid h-full grow grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:gap-6 xl:grid-cols-3">
+        <div className="grid  grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:gap-6 xl:grid-cols-3">
           {visibleDonors.map((donor) => (
             <article
               key={donor.id}
@@ -74,14 +73,10 @@ function DonorsInfiniteGrid({ donors }: DonorsInfiniteGridProps) {
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="relative flex size-10 items-center justify-center overflow-hidden rounded-full bg-[#F3F4F6] sm:size-11 dark:bg-white/10">
-                    <span className="text-xs font-medium text-text-primary">
-                      {donor.id.slice(0, 2)}
-                    </span>
-                  </div>
+                  <Avatar src={donor.profileImage} />
                   <div className="flex flex-col">
                     <p className="text-xs font-semibold text-text-primary">
-                      {donor.id}
+                      {donor.id.slice(0, 6)}
                     </p>
                     <p className="text-[11px] text-text-secondary">
                       {donor.packs} packs
@@ -147,10 +142,38 @@ function DonorsInfiniteGrid({ donors }: DonorsInfiniteGridProps) {
 export default function DonorsPage() {
   const [search, setSearch] = useState("");
   const [activeBloodType, setActiveBloodType] = useState<BloodType>("All");
+  const [donors, setDonors] = useState<Donor[]>([]);
+  const [loadState, setLoadState] = useState<
+    "idle" | "loading" | "ok" | "error"
+  >("idle");
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  const loadDonors = useCallback(async () => {
+    setLoadState("loading");
+    setFetchError(null);
+    try {
+      const { data, status } = await $api.donors.list();
+      if (status < 200 || status >= 300 || data === undefined) {
+        setLoadState("error");
+        setFetchError("Could not load donors. Please try again.");
+        return;
+      }
+      setDonors(parseDonorsListResponse(data));
+      setLoadState("ok");
+    } catch {
+      setLoadState("error");
+      setFetchError("Could not load donors. Please try again.");
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- GET /donors on mount
+    void loadDonors();
+  }, [loadDonors]);
 
   const filteredDonors = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return ALL_DONORS.filter((donor) => {
+    return donors.filter((donor) => {
       const matchesBloodType =
         activeBloodType === "All" || donor.bloodType === activeBloodType;
 
@@ -163,9 +186,15 @@ export default function DonorsPage() {
 
       return matchesBloodType && haystack.includes(term);
     });
-  }, [activeBloodType, search]);
+  }, [activeBloodType, donors, search]);
 
   const listKey = `${activeBloodType}-${search}`;
+  const showInitialSpinner = loadState === "loading" && donors.length === 0;
+  const showFatalFetchError = loadState === "error" && donors.length === 0;
+  const gridEmptyMessage =
+    donors.length === 0
+      ? "No donors available yet."
+      : "No donors match your filters yet.";
 
   return (
     <Layout>
@@ -215,7 +244,31 @@ export default function DonorsPage() {
         </div>
 
         <div className="h-full grow overflow-scroll">
-          <DonorsInfiniteGrid key={listKey} donors={filteredDonors} />
+          {showInitialSpinner ? (
+            <div className="flex h-48 items-center justify-center gap-2 text-sm text-text-secondary">
+              <Loader2 className="size-5 animate-spin text-primary" />
+              Loading donors…
+            </div>
+          ) : showFatalFetchError ? (
+            <div className="rounded-xl border border-border bg-white px-4 py-5 text-sm dark:border-white/10 dark:bg-[#1a1a22]">
+              <p className="font-medium text-text-primary">
+                {fetchError ?? "Could not load donors. Please try again."}
+              </p>
+              <button
+                type="button"
+                onClick={() => void loadDonors()}
+                className="mt-3 text-xs font-medium text-primary hover:underline"
+              >
+                Try again
+              </button>
+            </div>
+          ) : (
+            <DonorsInfiniteGrid
+              key={listKey}
+              donors={filteredDonors}
+              emptyMessage={gridEmptyMessage}
+            />
+          )}
         </div>
       </section>
     </Layout>
