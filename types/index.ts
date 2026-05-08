@@ -101,24 +101,7 @@ export type IChangePasswordPayload = {
   password: string;
 };
 
-export interface INewsItem {
-  id: string;
-  title: string;
-  description: string;
-  content: string;
-  url: string;
-  image: string;
-  publishedAt: string;
-  lang: string;
-  source: ISource;
-}
-
-export interface ISource {
-  id: string;
-  name: string;
-  url: string;
-  country: string;
-}
+export type { INewsArticleRaw, INewsItem, ISource } from "./news";
 
 export type {
   FcmPushSubscriptionPayload,

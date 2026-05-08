@@ -1,5 +1,6 @@
 "use client";
 
+import { BlivapLogo } from "@/public/svg";
 import classNames from "classnames";
 import { Globe, Menu, X } from "lucide-react";
 import Link from "next/link";
@@ -124,8 +125,8 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
       </div>
 
       {/* Top Navigation Bar */}
-      <div className="fixed top-0 z-40 bg-[#F4F2FF] pb-2 lg:pb-0  pt-4  flex justify-center items-center px-4 sm:px-6 md:px-8 lg:px-20 min-[1441px]:px-36 w-full">
-        <div className="flex items-center justify-between w-full max-w-[1140px] min-[1441px]:max-w-[1440px]">
+      <div className="fixed top-0 z-40 bg-[#F4F2FF] pb-2 lg:pb-0  pt-4  flex justify-center items-center px-4 sm:px-6 md:px-8 lg:px-0  w-full">
+        <div className="flex items-center justify-between w-full max-w-[1440px]">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setDrawerOpen((prev) => !prev)}
@@ -179,11 +180,14 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
         </div>
       </div>
       {props.children}
-      <div className="bg-black px-4 sm:px-6 md:px-8 lg:px-20 min-[1441px]:px-36">
-        <div className="relative mt-6 sm:mt-8 md:mt-12 max-w-[1440px] mx-auto flex flex-col gap-6 sm:gap-8 pt-6 sm:pt-8 px-4 sm:px-6 md:px-12 lg:px-20 pb-6 sm:pb-8 ">
-          <p className="font-bold font-helvetica text-4xl text-primary ">
-            Blivap
-          </p>
+      <div className="bg-black px-4 sm:px-6 md:px-8 ">
+        <div className="relative mt-6 sm:mt-8 md:mt-12 max-w-[1440px] mx-auto flex flex-col gap-6 sm:gap-8 pt-6 sm:pt-8 px-4 sm:px-6 md:px-12 lg:px-0 pb-6 sm:pb-8 ">
+          <Link href="/" className="w-fit">
+            <p className="flex justify-center font-semibold font-helvetica text-primary text-4xl tracking-tight">
+              <BlivapLogo fill="#960018" className="size-10" />
+              <span className="-mt-1 -ml-2">livap</span>
+            </p>
+          </Link>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-0 md:flex md:justify-between">
             {[
               {
@@ -271,7 +275,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
           </div>
         </div>
       </div>
-      <div className="flex bg-[#171717] px-4 sm:px-6 md:px-8 lg:px-20 min-[1441px]:px-36">
+      <div className="flex bg-[#171717] px-4 sm:px-6 md:px-8 lg:px-0">
         <div className=" flex flex-col sm:flex-row py-4 sm:py-5 gap-3 sm:gap-4 px-4 sm:px-6 md:px-12 lg:px-20 w-full max-w-[1440px] mx-auto">
           {[
             {

@@ -1,5 +1,6 @@
 import { config } from "@/config/env";
-import type { INewsItem } from "@/types";
+import { parseNewsPublishedAtToIso } from "@/lib/news-date";
+import type { INewsArticleRaw, INewsItem } from "@/types";
 
 export type NewsCategory =
   | "general"
@@ -28,75 +29,94 @@ export interface GetNewsParams {
   truncate?: NewsTruncate;
 }
 
-type NewsDataArticle = {
-  article_id?: string | null;
-  title?: string | null;
-  description?: string | null;
-  content?: string | null;
-  link?: string | null;
-  image_url?: string | null;
-  pubDate?: string | null;
-  language?: string | null;
-  source_id?: string | null;
-  source_name?: string | null;
-  source_url?: string | null;
-  country?: string[] | null;
-  duplicate?: boolean | null;
-};
-
 type NewsDataResponse = {
   status?: string;
   totalResults?: number;
-  results?: NewsDataArticle[];
+  results?: INewsArticleRaw[];
   nextPage?: string;
   errors?: string[];
 };
 
-const EMPTY_IMAGE = "/images/news_image.jpg";
-
-const toIsoString = (dateValue?: string | null): string => {
-  if (!dateValue) return new Date().toISOString();
-  const normalized = dateValue.includes("T")
-    ? dateValue
-    : dateValue.replace(" ", "T");
-  const withTimezone = /(Z|[+-]\d{2}:\d{2})$/.test(normalized)
-    ? normalized
-    : `${normalized}Z`;
-  const parsed = new Date(withTimezone);
-  return Number.isNaN(parsed.getTime())
-    ? new Date().toISOString()
-    : parsed.toISOString();
+const LANGUAGE_NAME_TO_CODE: Record<string, string> = {
+  english: "en",
+  french: "fr",
+  spanish: "es",
+  german: "de",
+  dutch: "nl",
+  portuguese: "pt",
+  italian: "it",
+  arabic: "ar",
+  hindi: "hi",
 };
 
+function normalizeArticleLang(language?: string | null): {
+  lang: string;
+  languageRaw?: string;
+} {
+  const raw = language?.trim();
+  if (!raw) return { lang: "en" };
+  if (/^[a-z]{2}([-_][a-z]{2,4})?$/i.test(raw)) {
+    return { lang: raw.slice(0, 2).toLowerCase() };
+  }
+  const key = raw.toLowerCase();
+  const mapped = LANGUAGE_NAME_TO_CODE[key];
+  if (mapped) return { lang: mapped, languageRaw: raw };
+  return { lang: "en", languageRaw: raw };
+}
+
+const EMPTY_IMAGE = "/images/news_image.jpg";
+
 const mapNewsDataArticle = (
-  article: NewsDataArticle,
+  article: INewsArticleRaw,
   index: number,
 ): INewsItem | null => {
   const url = article.link?.trim();
   const title = article.title?.trim();
   if (!url || !title) return null;
 
+  const { lang, languageRaw } = normalizeArticleLang(article.language);
+  const countries =
+    article.country?.map((c) => c?.trim()).filter(Boolean) ?? [];
+  const countryLabel = countries[0] ?? "global";
+
   return {
-    id: article.article_id ?? `${url}-${index}`,
+    id: article.article_id?.trim() || `${url}-${index}`,
     title,
     description: article.description?.trim() ?? "",
     content: article.content?.trim() ?? "",
     url,
     image: article.image_url?.trim() || EMPTY_IMAGE,
-    publishedAt: toIsoString(article.pubDate),
-    lang: article.language?.trim() ?? "en",
+    pubDate: article.pubDate?.trim() || undefined,
+    publishedAt: parseNewsPublishedAtToIso(
+      article.pubDate,
+      article.pubDateTZ,
+    ),
+    lang,
+    languageRaw,
     source: {
       id: article.source_id?.trim() ?? "newsdata",
       name: article.source_name?.trim() || "News source",
       url: article.source_url?.trim() || url,
-      country: article.country?.[0]?.trim() ?? "global",
+      country: countryLabel,
+      icon: article.source_icon?.trim() || null,
+      priority: article.source_priority ?? undefined,
     },
+    duplicate: article.duplicate ?? undefined,
+    keywords: article.keywords?.length ? article.keywords : undefined,
+    creators: article.creator?.length ? article.creator : undefined,
+    categories: article.category?.length ? article.category : undefined,
+    countries: countries.length ? countries : undefined,
+    pubDateTZ: article.pubDateTZ?.trim() || undefined,
+    fetchedAt: article.fetched_at?.trim() || undefined,
+    videoUrl: article.video_url?.trim() || null,
+    datatype: article.datatype?.trim() || undefined,
   };
 };
 
 export default function NewsRepository() {
   return {
-    getNews: async () => {
+    /** Params reserved for future query shaping; the current feed URL is fixed in config. */
+    getNews: async (_params?: GetNewsParams) => {
       const { url, apiKey } = config.news;
 
       const response = await fetch(url);
