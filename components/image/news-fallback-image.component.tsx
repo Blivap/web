@@ -11,6 +11,8 @@ interface NewsFallbackImageProps {
   className?: string;
   sizes?: string;
   fill?: boolean;
+  priority?: boolean;
+  loading?: "lazy" | "eager";
 }
 
 export function NewsFallbackImage({
@@ -20,6 +22,8 @@ export function NewsFallbackImage({
   className = "object-cover",
   sizes,
   fill = true,
+  priority = false,
+  loading,
 }: NewsFallbackImageProps) {
   const [useFallback, setUseFallback] = useState(false);
   const [fallbackFailed, setFallbackFailed] = useState(false);
@@ -42,6 +46,8 @@ export function NewsFallbackImage({
         fill={fill}
         className={className}
         sizes={sizes}
+        priority={priority}
+        loading={loading ?? (priority ? "eager" : "lazy")}
         unoptimized
         onError={() => {
           if (useFallback) {

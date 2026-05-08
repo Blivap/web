@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
+import { formatNewsPublishedDate } from "@/lib/news-date";
 import { HomeLayout } from "@/layout/home.layout.component";
 import { NewsFallbackImage } from "@/components/image/news-fallback-image.component";
 import Link from "next/link";
@@ -32,14 +32,6 @@ const NEWS_COUNTRIES: { label: string; value: NewsCountry }[] = [
   { label: "Nigeria", value: "ng" },
   { label: "India", value: "in" },
 ];
-
-function formatNewsDate(date?: string) {
-  if (!date) return "Latest update";
-  const parsed = new Date(date);
-  return Number.isNaN(parsed.getTime())
-    ? "Latest update"
-    : format(parsed, "d MMMM yyyy");
-}
 
 function estimateReadingTime(text?: string) {
   if (!text) return "2 min read";
@@ -415,7 +407,7 @@ export default function News() {
                           {selectedCountry.toUpperCase()}
                         </span>
                         <span>{featured.source?.name || "Healthcare"}</span>
-                        <span>{formatNewsDate(featured.publishedAt)}</span>
+                        <span>{formatNewsPublishedDate(featured.publishedAt)}</span>
                         <span>{estimateReadingTime(featured.content)}</span>
                       </div>
                       <h2 className="text-xl sm:text-2xl font-semibold text-black leading-snug group-hover:text-primary transition-colors">
@@ -452,7 +444,7 @@ export default function News() {
                       >
                         <div className="flex items-center justify-between gap-3 text-[11px] text-[#9CA3AF]">
                           <span>{item.source?.name || "Source"}</span>
-                          <span>{formatNewsDate(item.publishedAt)}</span>
+                          <span>{formatNewsPublishedDate(item.publishedAt)}</span>
                         </div>
                         <h3 className="mt-2 text-sm font-semibold text-black leading-snug group-hover:text-primary transition-colors line-clamp-2">
                           {item.title}
@@ -527,7 +519,7 @@ export default function News() {
                           <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">
                             {item.source?.name || "Source"}
                           </span>
-                          <span>{formatNewsDate(item.publishedAt)}</span>
+                          <span>{formatNewsPublishedDate(item.publishedAt)}</span>
                           <span>
                             {estimateReadingTime(
                               item.content || item.description,

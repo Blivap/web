@@ -5,9 +5,12 @@ import { NewsFallbackImage } from "../image/news-fallback-image.component";
 import Link from "next/link";
 import { ArrowRight, Newspaper } from "lucide-react";
 import Image from "next/image";
-import { format } from "date-fns";
+import { formatNewsPublishedDate } from "@/lib/news-date";
 import { useNews } from "@/hooks/news/useNews.hooks";
 import { gsap } from "gsap";
+import { BlivapLogo } from "@/public/svg";
+import { Button } from "../ui/button";
+import { InViewMount, useInView } from "@/components/in-view";
 
 function NewsFeatureSkeleton() {
   return (
@@ -41,6 +44,11 @@ function NewsCardSkeleton() {
 
 export const HomeComponent = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [newsSectionRef, newsSectionNear] = useInView<HTMLDivElement>({
+    rootMargin: "320px 0px",
+    once: true,
+  });
+
   const homeNewsParams = useMemo(
     () => ({
       query: "blood donation",
@@ -49,9 +57,14 @@ export const HomeComponent = () => {
     }),
     [],
   );
-  const { news, isLoading, isRateLimited } = useNews(homeNewsParams);
+
+  const { news, isLoading, isRateLimited } = useNews(homeNewsParams, {
+    enabled: newsSectionNear,
+  });
+
   const featuredNews = news?.[0];
   const newsItems = news?.slice(1, 4) ?? [];
+  const showNewsPlaceholder = !newsSectionNear || isLoading;
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -62,7 +75,11 @@ export const HomeComponent = () => {
       });
 
       gsap.set(
-        ["[data-section='intro']", "[data-section='impact']", "[data-section='news']"],
+        [
+          "[data-section='intro']",
+          "[data-section='impact']",
+          "[data-section='news']",
+        ],
         { opacity: 0, y: 32 },
       );
 
@@ -103,7 +120,11 @@ export const HomeComponent = () => {
       );
 
       gsap.to(
-        ["[data-section='intro']", "[data-section='impact']", "[data-section='news']"],
+        [
+          "[data-section='intro']",
+          "[data-section='impact']",
+          "[data-section='news']",
+        ],
         {
           opacity: 1,
           y: 0,
@@ -124,44 +145,48 @@ export const HomeComponent = () => {
     <HomeLayout>
       <div
         ref={containerRef}
-        className="flex-1 flex flex-col gap-6 sm:gap-8 md:gap-12 w-full min-[1441px]:max-w-[1440px] min-[1441px]:mx-auto min-[1441px]:px-36"
+        className="flex-1 flex flex-col gap-6 sm:gap-8 md:gap-12 w-full min-[1441px]:max-w-[1440px] mx-auto "
       >
-        <header className="px-3.5 sm:px-6 md:px-8 xl:px-36 w-full max-w-[1440px] mx-auto mt-4 sm:mt-6 min-[1441px]:max-w-none min-[1441px]:px-0">
+        <header className="px-3.5 sm:px-6 md:px-8 lg:px-0 w-full max-w-[1440px] mx-auto mt-4 sm:mt-6 min-[1441px]:max-w-none min-[1441px]:px-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3">
-            <Link href="/" className="flex flex-col gap-0.5 shrink-0">
-              <span className="font-semibold font-helvetica text-primary text-4xl tracking-tight">
-                Blivap
-              </span>
+            <div className="flex flex-col items-start gap-0.5 shrink-0">
+              <Link href="/">
+                <p className="flex justify-center font-semibold font-helvetica text-primary text-4xl tracking-tight">
+                  <BlivapLogo fill="#960018" className="size-10" />
+                  <span className="-mt-1 -ml-2">livap</span>
+                </p>
+              </Link>
               <span className="text-[10px] sm:text-xs text-[#6B7280] font-medium tracking-wide uppercase">
                 Connecting generosity to real impact.
               </span>
-            </Link>
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Link
-                href="https://calendly.com/care-blivap/30min"
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-medium py-2 px-4 rounded-full bg-primary text-white hover:bg-primary/90 transition-colors"
+            </div>
+            <div className="flex items-center gap-px sm:gap-2">
+              <Button
+                variant="link"
+                href="/login"
+                className="text-xs font-medium py-2 px-4 rounded-full bg-primary text-white hover:bg-primary/90 hover:text-white! transition-colors"
               >
-                Book a demo
-              </Link>
+                Login
+              </Button>
+              <Button variant="link" href="/register">
+                Register
+              </Button>
             </div>
           </div>
         </header>
         <div className=" grid grid-cols-1 md:grid-cols-12">
-          <div className="col-span-1 md:col-span-6 flex flex-col px-4 sm:px-8 xl:pl-36 pt-6 sm:pt-8 md:pt-10 gap-4 sm:gap-6 md:gap-8 min-h-80 sm:min-h-96 md:h-112 bg-primary   w-full">
+          <div className="col-span-1 md:col-span-6 flex flex-col px-4 sm:px-8 xl:pl-36 pt-6 sm:pt-8 md:pt-10 gap-4 sm:gap-6 md:gap-8 min-h-80 sm:min-h-96 md:h-112 bg-primary   w-full relative z-1 ">
             <div data-hero-copy className="flex flex-col gap-3 sm:gap-4">
               <p className="text-lg sm:text-xl md:text-2xl text-white leading-snug font-medium">
                 Save lives with your blood or sperm
               </p>
-              <Link
-                className="w-fit bg-black hover:bg-black/80 text-white text-xs font-medium py-2 px-3.5 rounded-md inline-block transition-colors"
-                href="https://calendly.com/care-blivap/30min"
-                target="_blank"
-                rel="noreferrer"
+              <Button
+                variant="link"
+                href="/login"
+                className="w-fit bg-black hover:bg-black/60 hover:text-white! text-white text-xs font-medium   rounded-md transition-colors "
               >
-                Book a demo
-              </Link>
+                Login
+              </Button>
             </div>
             <div
               data-hero-links
@@ -194,16 +219,29 @@ export const HomeComponent = () => {
           </div>
           <div
             data-hero-image
-            className="relative col-span-1 md:col-span-6  min-h-75 sm:min-h-100 "
+            className="relative col-span-1 md:col-span-6 min-h-75 sm:min-h-100 -ml-10 z-0 "
           >
-            <Image
-              src="/images/hero_image.jpg"
-              alt="home illustration"
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute w-[95%] h-2 sm:h-3 bg-[#0005F2] -bottom-2 sm:-bottom-3" />
+            <InViewMount
+              className="absolute inset-0"
+              rootMargin="240px 0px"
+              fallback={
+                <div
+                  className="absolute inset-0 bg-white/10 animate-pulse"
+                  aria-hidden
+                />
+              }
+            >
+              <Image
+                src="/images/hero_image.jpg"
+                alt="home illustration"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                loading="lazy"
+                decoding="async"
+              />
+            </InViewMount>
+            <div className="absolute w-[95%] h-2 sm:h-3 bg-[#0005F2] -bottom-2 sm:-bottom-3 pointer-events-none" />
           </div>
         </div>
 
@@ -222,20 +260,16 @@ export const HomeComponent = () => {
               a better future.
             </p>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <Link
-                href="https://calendly.com/care-blivap/30min"
-                target="_blank"
-                rel="noreferrer"
-                className="w-full sm:w-fit text-white text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 rounded-md inline-block text-center transition-colors"
+              <Button
+                variant="link"
+                href="/login"
+                className="text-xs font-medium py-2 px-4  bg-primary text-white hover:bg-primary/90 hover:text-white! transition-colors"
               >
-                Book a demo
-              </Link>
-              <Link
-                href="/book-demo"
-                className="w-full sm:w-fit border border-[#D1D5DB] py-2 px-3.5 text-[#374151] hover:bg-[#F3F4F6] text-xs font-medium rounded-md transition-colors inline-block text-center"
-              >
+                Login
+              </Button>
+              <Button variant="outline" href="/about">
                 Read more
-              </Link>
+              </Button>
             </div>
           </div>
           <div className="relative col-span-1 md:col-span-2 bg-white md:-translate-x-4 md:translate-y-4 flex flex-col gap-6 px-4 sm:px-6 md:px-5 border border-[#E5E7EB] md:border-r-0 mt-6 md:mt-0  py-6">
@@ -298,19 +332,33 @@ export const HomeComponent = () => {
               <ArrowRight size={14} />
             </Link>
           </div>
-          <div className="col-span-1 md:col-span-7 relative z-0 min-h-75 sm:min-h-100 ">
-            <Image
-              src="/images/africa-humanitarian-aid-doctor-taking-care-patient.png"
-              alt="blood pressure"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 60vw"
-            />
+          <div className="col-span-1 md:col-span-7 relative z-0 min-h-75 sm:min-h-100">
+            <InViewMount
+              className="absolute inset-0"
+              rootMargin="200px 0px"
+              fallback={
+                <div
+                  className="absolute inset-0 bg-[#FCE7E7] animate-pulse"
+                  aria-hidden
+                />
+              }
+            >
+              <Image
+                src="/images/africa-humanitarian-aid-doctor-taking-care-patient.png"
+                alt="Doctor supporting a patient"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 58vw"
+                loading="lazy"
+                decoding="async"
+              />
+            </InViewMount>
           </div>
         </div>
         <div
+          ref={newsSectionRef}
           data-section="news"
-          className="mt-6 sm:mt-8 md:mt-10 flex flex-col gap-4 mx-4 sm:mx-6 md:mx-12 lg:mx-36"
+          className="mt-6 sm:mt-8 md:mt-10 flex flex-col gap-4 mx-4 sm:mx-6 md:mx-12 lg:mx-0"
         >
           <p className="font-semibold text-lg sm:text-xl text-black">News</p>
           <div className="flex flex-col gap-4">
@@ -341,22 +389,35 @@ export const HomeComponent = () => {
             ) : (
               <>
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                  {isLoading ? (
+                  {showNewsPlaceholder ? (
                     <NewsFeatureSkeleton />
                   ) : (
                     <div className="relative w-full min-h-48 sm:min-h-100">
-                      <NewsFallbackImage
-                        src={featuredNews?.image}
-                        alt={featuredNews?.title || "News"}
-                      />
+                      <InViewMount
+                        className="absolute inset-0"
+                        rootMargin="160px 0px"
+                        fallback={
+                          <div
+                            className="absolute inset-0 bg-[#E5E7EB] animate-pulse"
+                            aria-hidden
+                          />
+                        }
+                      >
+                        <NewsFallbackImage
+                          src={featuredNews?.image}
+                          alt={featuredNews?.title || "News"}
+                          sizes="(max-width: 1280px) 100vw, 50vw"
+                        />
+                      </InViewMount>
                       <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm p-3 sm:p-4 max-w-[308px] m-[25px]">
                         <p className="text-[10px] uppercase tracking-wide text-[#6B7280] font-medium">
                           News ·{" "}
-                          {featuredNews?.publishedAt
-                            ? format(featuredNews.publishedAt, "d MMMM yyyy")
-                            : "9 Dec 2025"}
+                          {formatNewsPublishedDate(
+                            featuredNews?.publishedAt,
+                            "9 Dec 2025",
+                          )}
                         </p>
-                        <p className="mt-1 text-sm font-medium text-black leading-snug">
+                        <p className="mt-1 text-sm font-medium text-black leading-snug max-h-20 overflow-y-auto">
                           {featuredNews?.description ||
                             "Nigeria invests in blood initiatives, saving more lives."}
                         </p>
@@ -370,7 +431,7 @@ export const HomeComponent = () => {
                     </div>
                   )}
                   <div className="flex flex-col gap-3 flex-1">
-                    {isLoading
+                    {showNewsPlaceholder
                       ? Array.from({ length: 3 }).map((_, index) => (
                           <NewsCardSkeleton key={index} />
                         ))
@@ -380,20 +441,32 @@ export const HomeComponent = () => {
                             className="flex flex-col sm:flex-row gap-2 sm:gap-3 hover:border-[#D1D5DB] shadow-[0px_4px_20px_#00000026] active:shadow-none transition-shadow duration-200"
                           >
                             <div className="relative w-full sm:w-[266px] h-[135px] shrink-0">
-                              <NewsFallbackImage
-                                src={e.image}
-                                alt={e.title || "News"}
-                                fallbackSrc="/images/news_image.jpg"
-                                className="object-cover"
-                                sizes="96px"
-                              />
+                              <InViewMount
+                                className="absolute inset-0"
+                                rootMargin="120px 0px"
+                                fallback={
+                                  <div
+                                    className="absolute inset-0 bg-[#E5E7EB] animate-pulse"
+                                    aria-hidden
+                                  />
+                                }
+                              >
+                                <NewsFallbackImage
+                                  src={e.image}
+                                  alt={e.title || "News"}
+                                  fallbackSrc="/images/news_image.jpg"
+                                  className="object-cover"
+                                  sizes="(max-width: 640px) 100vw, 266px"
+                                />
+                              </InViewMount>
                             </div>
-                            <div className="flex flex-col min-w-0 flex-1 py-[11px] px-5 md:px-0 gap-2">
+                            <div className="flex flex-col min-w-0 flex-1 py-[11px] px-5 md:px-2 gap-2">
                               <div className="flex flex-col gap-2">
                                 <p className="text-[#6B7280] text-xs">
-                                  {e.publishedAt
-                                    ? format(e.publishedAt, "d MMMM yyyy")
-                                    : "9 December 2025"}
+                                  {formatNewsPublishedDate(
+                                    e.pubDate,
+                                    "9 December 2025",
+                                  )}
                                 </p>
                                 <p className="text-xs font-medium text-black line-clamp-2">
                                   {e.description}
@@ -410,7 +483,7 @@ export const HomeComponent = () => {
                         ))}
                   </div>
                 </div>
-                {isLoading ? (
+                {showNewsPlaceholder ? (
                   <div className="h-8 w-24 bg-[#E5E7EB] rounded-sm animate-pulse" />
                 ) : (
                   <Link
