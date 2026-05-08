@@ -8,10 +8,10 @@ import {
   type ReactNode,
 } from "react";
 import { useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import {
+  BookingsShellSkeleton,
   BookingsShell,
   type BookingsShellRow,
   type BookingsShellTabPanels,
@@ -310,10 +310,13 @@ export function DonorBookingsView() {
 
   if (loadState === "loading") {
     return (
-      <div className="flex min-h-[200px] items-center justify-center gap-2 text-sm text-text-secondary">
-        <Loader2 className="size-5 animate-spin text-primary" />
-        Loading bookings…
-      </div>
+      <BookingsShellSkeleton
+        tabLabels={{
+          active: "Upcoming & confirmations",
+          referrals: "Partner referrals",
+          archived: "Past visits",
+        }}
+      />
     );
   }
 

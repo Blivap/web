@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { Tabs, TabItem } from "@/components/ui/tabs/tabs.component";
+import { useMemo, type ReactNode } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookingSectionCard } from "./booking-section-card";
 import {
   BookingStatusPill,
@@ -170,22 +170,127 @@ type BookingsShellProps = {
   tabLabels: BookingsShellTabLabels;
 };
 
+type BookingsShellSkeletonProps = {
+  tabLabels: BookingsShellTabLabels;
+};
+
+export function BookingsShellSkeleton({ tabLabels }: BookingsShellSkeletonProps) {
+  return (
+    <div className="flex flex-col gap-8 animate-pulse" aria-hidden>
+      <div className="h-9 w-48 rounded-md bg-[#E5E7EB] dark:bg-white/10" />
+
+      <div className="flex flex-col gap-5">
+        <nav className="flex gap-6 border-b border-[#E5E7EB] dark:border-white/10">
+          <div className="border-b-2 border-primary pb-3 text-sm font-medium text-primary dark:text-primary">
+            {tabLabels.active}
+          </div>
+          <div className="pb-3 text-sm font-medium text-text-secondary">
+            {tabLabels.referrals}
+          </div>
+          <div className="pb-3 text-sm font-medium text-text-secondary">
+            {tabLabels.archived}
+          </div>
+        </nav>
+
+        <section className="rounded-lg border border-[#E5E7EB] bg-white px-6 py-5 dark:border-white/10 dark:bg-[#1a1a22]">
+          <div className="h-3.5 w-52 rounded bg-[#E5E7EB] dark:bg-white/10" />
+          <div className="mt-3 h-4 w-full max-w-[520px] rounded bg-[#E5E7EB] dark:bg-white/10" />
+        </section>
+
+        <section className="rounded-lg border border-[#E5E7EB] bg-white px-6 py-5 dark:border-white/10 dark:bg-[#1a1a22]">
+          <div className="h-3.5 w-48 rounded bg-[#E5E7EB] dark:bg-white/10" />
+          <div className="mt-3 h-4 w-full max-w-[460px] rounded bg-[#E5E7EB] dark:bg-white/10" />
+        </section>
+
+        <section className="rounded-lg border border-[#E5E7EB] bg-white px-6 py-5 dark:border-white/10 dark:bg-[#1a1a22]">
+          <div className="h-6 w-64 rounded bg-[#E5E7EB] dark:bg-white/10" />
+          <div className="mt-4 border-t border-[#E5E7EB] pt-4 dark:border-white/10">
+            <div className="grid min-w-[680px] grid-cols-[180px_1fr_140px_170px] gap-4">
+              <div className="h-3 w-20 rounded bg-[#E5E7EB] dark:bg-white/10" />
+              <div className="h-3 w-32 rounded bg-[#E5E7EB] dark:bg-white/10" />
+              <div className="h-3 w-16 rounded bg-[#E5E7EB] dark:bg-white/10" />
+              <div className="h-3 w-20 rounded bg-[#E5E7EB] dark:bg-white/10" />
+
+              <div className="col-span-4 h-px w-full bg-[#F3F4F6] dark:bg-white/10" />
+
+              <div className="h-4 w-24 rounded bg-[#E5E7EB] dark:bg-white/10" />
+              <div className="space-y-2">
+                <div className="h-4 w-48 rounded bg-[#E5E7EB] dark:bg-white/10" />
+                <div className="h-4 w-64 rounded bg-[#E5E7EB] dark:bg-white/10" />
+              </div>
+              <div className="h-6 w-20 rounded-full bg-[#E5E7EB] dark:bg-white/10" />
+              <div className="space-y-2">
+                <div className="h-7 w-28 rounded-md bg-[#E5E7EB] dark:bg-white/10" />
+                <div className="h-6 w-24 rounded bg-[#E5E7EB] dark:bg-white/10" />
+              </div>
+
+              <div className="col-span-4 h-px w-full bg-[#F3F4F6] dark:bg-white/10" />
+
+              <div className="h-4 w-24 rounded bg-[#E5E7EB] dark:bg-white/10" />
+              <div className="space-y-2">
+                <div className="h-4 w-44 rounded bg-[#E5E7EB] dark:bg-white/10" />
+                <div className="h-4 w-60 rounded bg-[#E5E7EB] dark:bg-white/10" />
+              </div>
+              <div className="h-6 w-24 rounded-full bg-[#E5E7EB] dark:bg-white/10" />
+              <div className="h-7 w-32 rounded-md bg-[#E5E7EB] dark:bg-white/10" />
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
 export function BookingsShell({ tabPanels, tabLabels }: BookingsShellProps) {
+  const tabItems = useMemo(
+    () => [
+      {
+        value: tabLabels.active.toLowerCase(),
+        label: tabLabels.active,
+        panel: tabPanels.active,
+      },
+      {
+        value: tabLabels.referrals.toLowerCase(),
+        label: tabLabels.referrals,
+        panel: tabPanels.referrals,
+      },
+      {
+        value: tabLabels.archived.toLowerCase(),
+        label: tabLabels.archived,
+        panel: tabPanels.archived,
+      },
+    ],
+    [tabLabels, tabPanels],
+  );
+  const tabValues = useMemo(
+    () => tabItems.map((item) => item.value),
+    [tabItems],
+  );
+  const defaultTabValue = tabItems[0]?.value;
+
   return (
     <div className="flex flex-col gap-8">
       <h1 className="text-2xl font-bold text-text-primary sm:text-3xl">
         My Bookings
       </h1>
-      <Tabs defaultTabValue={tabLabels.active} className="flex flex-col gap-8">
-        <TabItem label={tabLabels.active}>
-          <BookingsTabBody {...tabPanels.active} />
-        </TabItem>
-        <TabItem label={tabLabels.referrals}>
-          <BookingsTabBody {...tabPanels.referrals} />
-        </TabItem>
-        <TabItem label={tabLabels.archived}>
-          <BookingsTabBody {...tabPanels.archived} />
-        </TabItem>
+      <Tabs
+        defaultValue={defaultTabValue}
+        queryKey="tab"
+        queryValues={tabValues}
+        className="flex flex-col gap-8"
+      >
+        <TabsList>
+          {tabItems.map((item) => (
+            <TabsTrigger key={item.value} value={item.value}>
+              {item.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {tabItems.map((item) => (
+          <TabsContent key={item.value} value={item.value}>
+            <BookingsTabBody {...item.panel} />
+          </TabsContent>
+        ))}
       </Tabs>
     </div>
   );

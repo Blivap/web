@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { HomeLayout } from "../../layout/home.layout.component";
 import { NewsFallbackImage } from "../image/news-fallback-image.component";
 import Link from "next/link";
@@ -7,6 +7,7 @@ import { ArrowRight, Newspaper } from "lucide-react";
 import Image from "next/image";
 import { format } from "date-fns";
 import { useNews } from "@/hooks/news/useNews.hooks";
+import { gsap } from "gsap";
 
 function NewsFeatureSkeleton() {
   return (
@@ -39,6 +40,7 @@ function NewsCardSkeleton() {
 }
 
 export const HomeComponent = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const homeNewsParams = useMemo(
     () => ({
       query: "blood donation",
@@ -51,9 +53,79 @@ export const HomeComponent = () => {
   const featuredNews = news?.[0];
   const newsItems = news?.slice(1, 4) ?? [];
 
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.set(["[data-hero-copy]", "[data-hero-image]", "[data-hero-links]"], {
+        opacity: 0,
+      });
+
+      gsap.set(
+        ["[data-section='intro']", "[data-section='impact']", "[data-section='news']"],
+        { opacity: 0, y: 32 },
+      );
+
+      gsap.fromTo(
+        "[data-hero-copy]",
+        { y: 36 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power2.out",
+        },
+      );
+
+      gsap.fromTo(
+        "[data-hero-links]",
+        { y: 24 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.55,
+          ease: "power2.out",
+          delay: 0.18,
+        },
+      );
+
+      gsap.fromTo(
+        "[data-hero-image]",
+        { x: 36, scale: 1.03 },
+        {
+          opacity: 1,
+          x: 0,
+          scale: 1,
+          duration: 0.8,
+          ease: "power2.out",
+          delay: 0.08,
+        },
+      );
+
+      gsap.to(
+        ["[data-section='intro']", "[data-section='impact']", "[data-section='news']"],
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.75,
+          ease: "power2.out",
+          stagger: 0.14,
+          delay: 0.34,
+        },
+      );
+    }, containerRef);
+
+    return () => {
+      ctx.revert();
+    };
+  }, []);
+
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col gap-6 sm:gap-8 md:gap-12 w-full min-[1441px]:max-w-[1440px] min-[1441px]:mx-auto min-[1441px]:px-36">
+      <div
+        ref={containerRef}
+        className="flex-1 flex flex-col gap-6 sm:gap-8 md:gap-12 w-full min-[1441px]:max-w-[1440px] min-[1441px]:mx-auto min-[1441px]:px-36"
+      >
         <header className="px-3.5 sm:px-6 md:px-8 xl:px-36 w-full max-w-[1440px] mx-auto mt-4 sm:mt-6 min-[1441px]:max-w-none min-[1441px]:px-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3">
             <Link href="/" className="flex flex-col gap-0.5 shrink-0">
@@ -78,7 +150,7 @@ export const HomeComponent = () => {
         </header>
         <div className=" grid grid-cols-1 md:grid-cols-12">
           <div className="col-span-1 md:col-span-6 flex flex-col px-4 sm:px-8 xl:pl-36 pt-6 sm:pt-8 md:pt-10 gap-4 sm:gap-6 md:gap-8 min-h-80 sm:min-h-96 md:h-112 bg-primary   w-full">
-            <div className="flex flex-col gap-3 sm:gap-4">
+            <div data-hero-copy className="flex flex-col gap-3 sm:gap-4">
               <p className="text-lg sm:text-xl md:text-2xl text-white leading-snug font-medium">
                 Save lives with your blood or sperm
               </p>
@@ -91,7 +163,10 @@ export const HomeComponent = () => {
                 Book a demo
               </Link>
             </div>
-            <div className="flex flex-col gap-3 bg-white px-4 sm:px-5 md:px-6 pt-4 sm:pt-5 pb-5 sm:pb-6 shadow-sm max-w-150 relative w-full  z-10 mt-2 sm:mt-0 rounded-lg border border-[#E5E7EB]">
+            <div
+              data-hero-links
+              className="flex flex-col gap-3 bg-white px-4 sm:px-5 md:px-6 pt-4 sm:pt-5 pb-5 sm:pb-6 shadow-sm max-w-150 relative w-full  z-10 mt-2 sm:mt-0 rounded-lg border border-[#E5E7EB]"
+            >
               <p className="font-semibold text-sm text-black mb-1">
                 Quick links
               </p>
@@ -117,7 +192,10 @@ export const HomeComponent = () => {
               </div>
             </div>
           </div>
-          <div className="relative col-span-1 md:col-span-6  min-h-75 sm:min-h-100 ">
+          <div
+            data-hero-image
+            className="relative col-span-1 md:col-span-6  min-h-75 sm:min-h-100 "
+          >
             <Image
               src="/images/hero_image.jpg"
               alt="home illustration"
@@ -129,7 +207,10 @@ export const HomeComponent = () => {
           </div>
         </div>
 
-        <div className="mt-6 sm:mt-12 grid grid-cols-1 md:grid-cols-5">
+        <div
+          data-section="intro"
+          className="mt-6 sm:mt-12 grid grid-cols-1 md:grid-cols-5"
+        >
           <div className="col-span-1 md:col-span-3 flex flex-col px-4 sm:px-8 xl:pl-36 py-20 gap-4 sm:gap-5 pr-4 sm:pr-6 md:pr-16 bg-[#F9FAFB] border border-[#E5E7EB] border-l-0">
             <p className="text-base sm:text-xl font-semibold text-black leading-snug max-w-100">
               Together we help connect people who need blood or sperm with
@@ -193,7 +274,10 @@ export const HomeComponent = () => {
             </Link>
           </div>
         </div>
-        <div className="mt-6 sm:mt-12  grid grid-cols-1 md:grid-cols-12">
+        <div
+          data-section="impact"
+          className="mt-6 sm:mt-12  grid grid-cols-1 md:grid-cols-12"
+        >
           <div className="z-10 col-span-1 md:col-span-5 bg-[#FDF2F4] w-full xl:w-160 md:translate-y-4 flex flex-col gap-4 px-4 sm:px-8 xl:pl-36 pr-20 py-20 border border-[#FCE7E7] ">
             <p className="font-semibold text-base sm:text-lg text-black">
               Save a life
@@ -224,7 +308,10 @@ export const HomeComponent = () => {
             />
           </div>
         </div>
-        <div className="mt-6 sm:mt-8 md:mt-10 flex flex-col gap-4 mx-4 sm:mx-6 md:mx-12 lg:mx-36">
+        <div
+          data-section="news"
+          className="mt-6 sm:mt-8 md:mt-10 flex flex-col gap-4 mx-4 sm:mx-6 md:mx-12 lg:mx-36"
+        >
           <p className="font-semibold text-lg sm:text-xl text-black">News</p>
           <div className="flex flex-col gap-4">
             {isRateLimited ? (
