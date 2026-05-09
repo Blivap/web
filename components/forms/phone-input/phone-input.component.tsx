@@ -34,8 +34,8 @@ export type PhoneInputProps = {
   dialOptions?: PhoneInputDialOption[];
   label?: string;
   labelClassName?: string;
-  errorNational?: string;
-  errorCountryCode?: string;
+  errorNational?: string | boolean;
+  errorCountryCode?: string | boolean;
   placeholderNational?: string;
   disabled?: boolean;
   /** Applied to the country-code trigger (width, etc.). */
@@ -127,7 +127,13 @@ export function PhoneInput({
   };
 
   return (
-    <div className={classNames("flex flex-col gap-2", containerClassName)}>
+    <div
+      className={classNames(
+        "relative flex flex-col gap-2",
+        open && !disabled && "z-100",
+        containerClassName,
+      )}
+    >
       {label ? (
         <label
           className={classNames(
@@ -190,7 +196,7 @@ export function PhoneInput({
               id={listboxId}
               role="listbox"
               aria-label="Country and dial code"
-              className="absolute left-0 top-full z-50 mt-1 max-h-56 w-max min-w-full overflow-y-auto rounded-md border border-[#66666659] bg-white py-1 shadow-lg dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[0_16px_40px_rgba(0,0,0,0.45)]"
+              className="absolute left-0 top-full z-101 mt-1 max-h-56 w-max min-w-full overflow-y-auto rounded-md border border-[#66666659] bg-white py-1 shadow-lg dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[0_16px_40px_rgba(0,0,0,0.45)]"
             >
               {dialOptions.map((o) => (
                 <li key={o.code} role="presentation">

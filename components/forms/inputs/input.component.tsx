@@ -11,7 +11,7 @@ import { BsEye, BsEyeSlash } from "react-icons/bs";
 type InputProps = {
   name: string;
   placeholder?: string;
-  error?: string;
+  error?: string | boolean;
   label?: string;
   value: string;
   type?: string;
