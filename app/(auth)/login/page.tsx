@@ -7,16 +7,19 @@ import { loginSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import Image from "next/image";
 import Link from "next/link";
+import { BlivapLogo } from "@/public/svg";
 
 export default function LoginPage() {
   const { handleLogin, isLoading } = useLogin();
   return (
     <AuthLayout>
       <div className="flex flex-col gap-12 mt-10 max-w-132 w-full">
-        <div className="flex items-center gap-2.5">
-          <Image src="/logo.svg" alt="Logo" width={45} height={45} />
-          <p className="font-semibold text-3xl text-[#19181F]">Blivap</p>
-        </div>
+        <Link href="/" className="w-fit">
+          <p className="flex justify-center font-semibold font-helvetica text-primary text-5xl tracking-tight">
+            <BlivapLogo fill="#960018" className="size-17" />
+            <span className="-mt-1 -ml-4">livap</span>
+          </p>
+        </Link>
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-px">
             <p className="font-semibold text-2xl  text-[#100F14]">
