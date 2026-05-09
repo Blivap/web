@@ -1,6 +1,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
+import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
@@ -68,16 +69,36 @@ function Button({
 }: ButtonProps) {
   if ("href" in props && props.href !== undefined) {
     const { href, ...anchorProps } = props;
+    const linkClassName = cn(
+      buttonVariants({ variant, size, className }),
+      "no-underline! hover:text-primary/80 text-sm transition-colors duration-200",
+    );
+    const isAppRoute = href.startsWith("/") && !href.startsWith("//");
+
+    if (isAppRoute) {
+      return (
+        <Link
+          {...(anchorProps as Omit<
+            React.ComponentProps<typeof Link>,
+            "href" | "prefetch" | "className"
+          >)}
+          data-slot="button"
+          data-variant={variant}
+          data-size={size}
+          href={href}
+          prefetch
+          className={linkClassName}
+        />
+      );
+    }
+
     return (
       <a
         data-slot="button"
         data-variant={variant}
         data-size={size}
         href={href}
-        className={cn(
-          buttonVariants({ variant, size, className }),
-          "no-underline! hover:text-primary/80 text-sm transition-colors duration-200",
-        )}
+        className={linkClassName}
         {...anchorProps}
       />
     );

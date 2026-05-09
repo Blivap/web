@@ -8,6 +8,7 @@ import { config } from "@/config/env";
 import StoreProvider from "../store/provider";
 import { StructuredData } from "@/components/seo/structured-data";
 import { AuthChecker } from "@/components/auth/auth-checker";
+import { AuthRoutesPrefetch } from "@/components/auth/auth-routes-prefetch";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -195,6 +196,7 @@ export default function RootLayout({
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased text-sm min-h-screen w-full`}
       >
         <StoreProvider>
+          <AuthRoutesPrefetch />
           <AuthChecker>
             <SnackbarProvider>
               {children}

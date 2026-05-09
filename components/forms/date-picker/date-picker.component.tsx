@@ -44,7 +44,7 @@ export type DatePickerProps = {
   /** Controlled value as `YYYY-MM-DD` (empty string when unset). */
   value: string;
   label?: string;
-  error?: string;
+  error?: string | boolean;
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   onBlur?: FocusEventHandler<HTMLInputElement>;
   labelClassName?: string;
@@ -315,6 +315,8 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
         ref={containerRef}
         className={classNames(
           "relative flex flex-col gap-2 w-full",
+          /* Lift whole field when popover is open so later form rows paint underneath. */
+          open && !disabled && "z-100",
           containerClassName,
         )}
       >
@@ -373,7 +375,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               role="dialog"
               aria-modal="true"
               aria-label="Choose date"
-              className="absolute left-0 top-full z-50 mt-1 w-[232px] rounded-md border border-[#66666659] bg-white p-2 shadow-[0_6px_16px_rgba(15,23,42,0.1)]"
+              className="absolute left-0 top-full z-101 mt-1 w-[232px] rounded-md border border-[#66666659] bg-white p-2 shadow-[0_6px_16px_rgba(15,23,42,0.1)]"
             >
               <div className="mb-1.5 flex items-center gap-0.5">
                 <button
@@ -417,7 +419,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                     <ul
                       role="listbox"
                       aria-labelledby={`${id}-month-trigger`}
-                      className="absolute left-0 right-0 top-full z-60 mt-0.5 max-h-42 overflow-y-auto rounded-md border border-[#66666659] bg-white py-0.5 shadow-[0_6px_16px_rgba(15,23,42,0.12)]"
+                      className="absolute left-0 right-0 top-full z-110 mt-0.5 max-h-42 overflow-y-auto rounded-md border border-[#66666659] bg-white py-0.5 shadow-[0_6px_16px_rgba(15,23,42,0.12)]"
                     >
                       {MONTHS_SHORT.map((monthLabel, m) => {
                         const disabled = isMonthDisabled(
@@ -487,7 +489,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                     <ul
                       role="listbox"
                       aria-labelledby={`${id}-year-trigger`}
-                      className="absolute left-0 right-0 top-full z-60 mt-0.5 max-h-42 overflow-y-auto rounded-md border border-[#66666659] bg-white py-0.5 pr-2 shadow-[0_6px_16px_rgba(15,23,42,0.12)]"
+                      className="absolute left-0 right-0 top-full z-110 mt-0.5 max-h-42 overflow-y-auto rounded-md border border-[#66666659] bg-white py-0.5 pr-2 shadow-[0_6px_16px_rgba(15,23,42,0.12)]"
                     >
                       {yearOptions.map((y) => {
                         const isActive = cursor.year === y;
