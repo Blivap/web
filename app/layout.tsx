@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono, Inter, Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
@@ -9,6 +10,7 @@ import StoreProvider from "../store/provider";
 import { StructuredData } from "@/components/seo/structured-data";
 import { AuthChecker } from "@/components/auth/auth-checker";
 import { AuthRoutesPrefetch } from "@/components/auth/auth-routes-prefetch";
+import { AuthLoader } from "@/components/auth/auth-loader.component";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -199,7 +201,7 @@ export default function RootLayout({
           <AuthRoutesPrefetch />
           <AuthChecker>
             <SnackbarProvider>
-              {children}
+              <Suspense fallback={<AuthLoader />}>{children}</Suspense>
               <Snackbar />
             </SnackbarProvider>
           </AuthChecker>

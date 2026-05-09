@@ -6,7 +6,7 @@ import { ILoginPayload, IAuthResponse } from "@/types";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch } from "@/store/hooks";
-import { setCredentials } from "@/store/slices/authSlice";
+import { setCredentials, setUser } from "@/store/slices/authSlice";
 
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -36,14 +36,22 @@ export const useLogin = () => {
         );
 
         if (token) {
-          const userPayload =
-            normalizeUser(authData?.user ?? authData) ?? authData?.user;
-          dispatch(
-            setCredentials({
-              token,
-              user: userPayload ?? undefined,
-            }),
-          );
+          dispatch(setCredentials({ token }));
+          let userPayload =
+            normalizeUser(authData?.user ?? authData) ?? null;
+          if (!userPayload) {
+            try {
+              const me = await $api.auth.me();
+              if (me.status >= 200 && me.status < 300 && me.data) {
+                userPayload = normalizeUser(me.data);
+              }
+            } catch {
+              /* session token may lag; routing still uses login envelope below */
+            }
+          }
+          if (userPayload) {
+            dispatch(setUser(userPayload));
+          }
           if (isEmailUnverified(userPayload ?? authData?.user)) {
             router.replace("/verify-email");
           } else {

@@ -6,7 +6,7 @@ import { buildE164Phone } from "@/lib/phone-country-codes";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch } from "@/store/hooks";
-import { setCredentials } from "@/store/slices/authSlice";
+import { setCredentials, setUser } from "@/store/slices/authSlice";
 import { useRouter } from "next/navigation";
 
 export const useRegister = () => {
@@ -55,14 +55,22 @@ export const useRegister = () => {
         );
 
         if (token) {
-          const userPayload = normalizeUser(authData?.user) ?? authData?.user;
-          dispatch(
-            setCredentials({
-              token,
-              user: userPayload ?? undefined,
-            }),
-          );
-          if (isEmailUnverified(authData?.user)) {
+          dispatch(setCredentials({ token }));
+          let userPayload = normalizeUser(authData?.user) ?? null;
+          if (!userPayload) {
+            try {
+              const me = await $api.auth.me();
+              if (me.status >= 200 && me.status < 300 && me.data) {
+                userPayload = normalizeUser(me.data);
+              }
+            } catch {
+              /* token may not be readable by /me yet */
+            }
+          }
+          if (userPayload) {
+            dispatch(setUser(userPayload));
+          }
+          if (isEmailUnverified(userPayload ?? authData?.user)) {
             router.replace("/verify-email");
           } else {
             router.replace("/overview");

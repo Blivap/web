@@ -29,6 +29,12 @@ export function normalizeUser(input: unknown): IUser | null {
 
   const obj = input as LooseRecord
 
+  /* Common envelopes: GET /me and auth responses often wrap the profile in `data`. */
+  if ("data" in obj && obj.data != null && typeof obj.data === "object") {
+    const fromData = normalizeUser(obj.data)
+    if (fromData) return fromData
+  }
+
   if ("user" in obj && obj.user != null && typeof obj.user === "object") {
     return normalizeUser(obj.user)
   }

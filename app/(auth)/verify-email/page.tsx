@@ -8,19 +8,27 @@ import { useVerifyEmail } from "@/hooks/auth/useVerifyEmail.hook";
 import { useResendVerificationLink } from "@/hooks/auth/useResendVerificationLink.hook";
 import { verifyEmailSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
-import Image from "next/image";
+import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppSelector } from "../../../store/hooks";
 import { useLogout } from "@/hooks/auth/useLogout.hook";
 import { LogOut } from "lucide-react";
+import { BlivapLogo } from "@/public/svg";
+import Link from "next/link";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const { verifyEmail, isLoading } = useVerifyEmail();
   const { resendLink, isLoading: isResending } = useResendVerificationLink();
-  const { user } = useAppSelector((state) => state.auth);
+  const token = useAppSelector((state) => state.auth.token);
+  const user = useAppSelector((state) => state.auth.user);
   const { handleLogout } = useLogout();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (user?.emailVerified === true) {
@@ -28,21 +36,26 @@ export default function VerifyEmailPage() {
     }
   }, [user?.emailVerified, router]);
 
-  if (user?.emailVerified === true) {
-    return (
-      <AuthLayout>
-        <AuthLoader />
-      </AuthLayout>
-    );
+  const cookieToken =
+    mounted && typeof window !== "undefined"
+      ? Cookies.get("auth_token")
+      : undefined;
+  const hasSession = Boolean(token || cookieToken);
+  const awaitingUserProfile = hasSession && user === null;
+
+  if (!mounted || awaitingUserProfile) {
+    return <AuthLoader />;
   }
 
   return (
     <AuthLayout>
       <div className="flex flex-col gap-15 max-w-132 w-full">
-        <div className="flex items-center gap-2.5">
-          <Image src="/logo.svg" alt="Logo" width={45} height={45} />
-          <p className="font-semibold text-[20px] text-[#19181F]">Blivap</p>
-        </div>
+        <Link href="/" className="w-fit mt-20">
+          <p className="flex justify-center font-semibold font-helvetica text-primary text-5xl tracking-tight">
+            <BlivapLogo fill="#960018" className="size-17" />
+            <span className="-mt-1 -ml-4">livap</span>
+          </p>
+        </Link>
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-6">
             <p className="font-semibold text-2xl lg:text-[32px] text-[#100F14]">
@@ -69,6 +82,7 @@ export default function VerifyEmailPage() {
               values,
               handleSubmit,
               errors,
+              touched,
               handleChange,
               handleBlur,
               isValid,
@@ -79,7 +93,10 @@ export default function VerifyEmailPage() {
                     value={values.emailValidationToken}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    error={errors.emailValidationToken}
+                    error={
+                      touched.emailValidationToken &&
+                      errors.emailValidationToken
+                    }
                     label="Verification token"
                     name="emailValidationToken"
                     placeholder="Paste token from email"

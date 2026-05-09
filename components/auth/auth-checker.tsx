@@ -2,8 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { initializeAuth } from "@/store/slices/authSlice";
+import { useAppSelector } from "@/store/hooks";
 import { useCheckUser } from "@/hooks/auth/useCheckUser.hook";
 import { routes } from "@/config/routes";
 import { AuthLoader } from "./auth-loader.component";
@@ -11,7 +10,7 @@ import { AuthLoader } from "./auth-loader.component";
 const VERIFY_EMAIL_PATH = routes.verifyEmail;
 
 /**
- * Restores token from cookie into Redux, then runs token validation (GET /me).
+ * Token is restored from the cookie in `StoreProvider`; session user is loaded via `useCheckUser` (GET /me).
  * User is only considered authenticated after we have a valid user from the API.
  * If the token is expired or invalid (401/403), logs out and redirects to /login.
  * Unverified users (emailVerified === false) are only allowed on /verify-email.
@@ -19,15 +18,10 @@ const VERIFY_EMAIL_PATH = routes.verifyEmail;
  * Shows a custom loader while auth status is being checked (token present, /me in flight).
  */
 export function AuthChecker({ children }: { children: React.ReactNode }) {
-  const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();
   const user = useAppSelector((state) => state.auth.user);
   const { isChecking } = useCheckUser();
-
-  useEffect(() => {
-    dispatch(initializeAuth());
-  }, [dispatch]);
 
   // Unverified users may only access the verify-email page — redirect and block content.
   // If user has profileImage they've completed select_avatar, so send to dashboard not verify-email.
