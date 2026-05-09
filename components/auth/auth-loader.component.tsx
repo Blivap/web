@@ -1,5 +1,6 @@
 "use client";
 
+import { BlivapLogo } from "@/public/svg";
 import Image from "next/image";
 
 export function AuthLoader() {
@@ -10,14 +11,7 @@ export function AuthLoader() {
       aria-busy="true"
       role="status"
     >
-      <Image
-        src="/logo.svg"
-        alt="Blivap"
-        width={80}
-        height={80}
-        className="shrink-0"
-        priority
-      />
+      <BlivapLogo fill="#960018" className="size-17" />
       <p className="text-sm font-medium text-[#49475A]">
         Checking authentication
       </p>

@@ -5,15 +5,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { initializeAuth } from "@/store/slices/authSlice";
 import { useCheckUser } from "@/hooks/auth/useCheckUser.hook";
+import { routes } from "@/config/routes";
 import { AuthLoader } from "./auth-loader.component";
 
-const VERIFY_EMAIL_PATH = "/verify-email";
+const VERIFY_EMAIL_PATH = routes.verifyEmail;
 
 /**
  * Restores token from cookie into Redux, then runs token validation (GET /me).
  * User is only considered authenticated after we have a valid user from the API.
  * If the token is expired or invalid (401/403), logs out and redirects to /login.
  * Unverified users (emailVerified === false) are only allowed on /verify-email.
+ * Verified users are redirected away from /verify-email and never see that page’s UI.
  * Shows a custom loader while auth status is being checked (token present, /me in flight).
  */
 export function AuthChecker({ children }: { children: React.ReactNode }) {
@@ -49,10 +51,15 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     }
   }, [user, pathname, router]);
   useEffect(() => {
-    if (user?.emailVerified && pathname === VERIFY_EMAIL_PATH) {
-      router.replace("/overview");
+    if (user?.emailVerified === true && pathname === VERIFY_EMAIL_PATH) {
+      router.replace(routes.overview);
     }
   }, [user, pathname, router]);
+
+  /* `emailVerified === true`: never mount verify-email content (before global auth loading branch). */
+  if (user?.emailVerified === true && pathname === VERIFY_EMAIL_PATH) {
+    return <AuthLoader />;
+  }
 
   if (isChecking) {
     return <AuthLoader />;
@@ -75,11 +82,6 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     pathname !== "/overview" &&
     !pathname.startsWith("/overview/")
   ) {
-    return <AuthLoader />;
-  }
-
-  // On verify-email page but already verified: show loader until redirect to overview
-  if (user?.emailVerified && pathname === VERIFY_EMAIL_PATH) {
     return <AuthLoader />;
   }
 
