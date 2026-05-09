@@ -47,11 +47,15 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             );
           },
         })
-        .to("[data-auth-form-shell]", {
-          opacity: 1,
-          y: 0,
-          duration: 0.52,
-        }, 0)
+        .to(
+          "[data-auth-form-shell]",
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.52,
+          },
+          0,
+        )
         .to(
           "[data-auth-hero-panel]",
           {
@@ -85,7 +89,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     >
       <div
         data-auth-form-shell
-        className="flex justify-center w-full md:px-10 xl:px-23 py-6 px-3 z-[1] relative"
+        className="flex justify-center w-full md:px-10 xl:px-23 py-6 px-3 z-1 relative"
       >
         {children}
       </div>
