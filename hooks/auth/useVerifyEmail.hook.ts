@@ -4,15 +4,17 @@ import { useRouter } from "next/navigation";
 import { $api } from "@/app/api";
 import { IVerifyEmailPayload } from "@/types";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";
+import { routes } from "@/config/routes";
 
 export function useVerifyEmail() {
   const [isLoading, setIsLoading] = useState(false);
   const { showSnackbar } = useSnackbar();
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const existingUser = useAppSelector((s) => s.auth.user);
 
   const verifyEmail = async (
     payload: IVerifyEmailPayload,
@@ -24,21 +26,28 @@ export function useVerifyEmail() {
       if (status >= 200 && status < 300) {
         showSnackbar(message ?? "Email verified successfully.", "success");
 
-        // Refresh user data so emailVerified/profileImage are up to date
+        /* Refresh profile from /me. If the API lags, /me can still return
+         * email_verified: false and AuthChecker will send the user back to
+         * /verify-email — so we always treat verification success as verified. */
+        let userPayload: ReturnType<typeof normalizeUser> = null;
         try {
           const { data, status: meStatus } = await $api.auth.me();
           if (meStatus >= 200 && meStatus < 300 && data) {
-            const userPayload = normalizeUser(data);
-            if (userPayload) {
-              dispatch(setUser(userPayload));
-            }
+            userPayload = normalizeUser(data);
           }
         } catch {
-          // If /me fails, still proceed with navigation
+          // If /me fails, merge below from existing session user
         }
 
-        // After email verification, always go to select avatar (replace so back doesn't return to verify-email)
-        router.replace("/overview");
+        if (userPayload) {
+          dispatch(setUser({ ...userPayload, emailVerified: true }));
+        } else if (existingUser) {
+          dispatch(setUser({ ...existingUser, emailVerified: true }));
+        }
+
+        /* Logged-in users hitting `/` are redirected to overview by middleware;
+         * using home avoids duplicating that rule here. */
+        router.replace(routes.home);
         return true;
       }
 

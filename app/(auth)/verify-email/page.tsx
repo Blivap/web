@@ -1,21 +1,41 @@
 "use client";
 
+import { AuthLoader } from "@/components/auth/auth-loader.component";
 import { Input } from "@/components/forms/inputs/input.component";
 import { AuthLayout } from "@/layout/auth.layout.component";
+import { routes } from "@/config/routes";
 import { useVerifyEmail } from "@/hooks/auth/useVerifyEmail.hook";
 import { useResendVerificationLink } from "@/hooks/auth/useResendVerificationLink.hook";
 import { verifyEmailSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useAppSelector } from "../../../store/hooks";
 import { useLogout } from "@/hooks/auth/useLogout.hook";
 import { LogOut } from "lucide-react";
 
 export default function VerifyEmailPage() {
+  const router = useRouter();
   const { verifyEmail, isLoading } = useVerifyEmail();
   const { resendLink, isLoading: isResending } = useResendVerificationLink();
   const { user } = useAppSelector((state) => state.auth);
   const { handleLogout } = useLogout();
+
+  useEffect(() => {
+    if (user?.emailVerified === true) {
+      router.replace(routes.overview);
+    }
+  }, [user?.emailVerified, router]);
+
+  if (user?.emailVerified === true) {
+    return (
+      <AuthLayout>
+        <AuthLoader />
+      </AuthLayout>
+    );
+  }
+
   return (
     <AuthLayout>
       <div className="flex flex-col gap-15 max-w-132 w-full">
