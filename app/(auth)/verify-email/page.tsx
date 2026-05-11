@@ -3,14 +3,15 @@
 import { AuthLoader } from "@/components/auth/auth-loader.component";
 import { Input } from "@/components/forms/inputs/input.component";
 import { AuthLayout } from "@/layout/auth.layout.component";
-import { routes } from "@/config/routes";
 import { useVerifyEmail } from "@/hooks/auth/useVerifyEmail.hook";
 import { useResendVerificationLink } from "@/hooks/auth/useResendVerificationLink.hook";
+import { getDnRedirect } from "@/lib/navigation/authRedirect";
+import { routes } from "@/config/routes";
 import { verifyEmailSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { startTransition, useEffect, useState } from "react";
 import { useAppSelector } from "../../../store/hooks";
 import { useLogout } from "@/hooks/auth/useLogout.hook";
 import { LogOut } from "lucide-react";
@@ -19,6 +20,8 @@ import Link from "next/link";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const dnRedirect = getDnRedirect(searchParams);
   const [mounted, setMounted] = useState(false);
   const { verifyEmail, isLoading } = useVerifyEmail();
   const { resendLink, isLoading: isResending } = useResendVerificationLink();
@@ -27,14 +30,16 @@ export default function VerifyEmailPage() {
   const { handleLogout } = useLogout();
 
   useEffect(() => {
-    setMounted(true);
+    startTransition(() => {
+      setMounted(true);
+    });
   }, []);
 
   useEffect(() => {
     if (user?.emailVerified === true) {
-      router.replace(routes.overview);
+      router.replace(dnRedirect ?? routes.overview);
     }
-  }, [user?.emailVerified, router]);
+  }, [dnRedirect, router, user?.emailVerified]);
 
   const cookieToken =
     mounted && typeof window !== "undefined"

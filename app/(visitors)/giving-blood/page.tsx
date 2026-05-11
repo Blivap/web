@@ -1,13 +1,13 @@
 "use client";
 
 import { HomeLayout } from "../../../layout/home.layout.component";
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Droplet, CheckCircle, Clock, Shield, Heart } from "lucide-react";
 
 export default function GivingBlood() {
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-6 sm:py-8 xl:px-36 max-w-[1440px] mx-auto">
+      <div className="flex-1 flex flex-col py-6 sm:py-8">
         <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-6">
           Giving blood
         </h1>
@@ -139,14 +139,13 @@ export default function GivingBlood() {
               Join thousands of donors making a difference. The process takes
               less than an hour.
             </p>
-            <Link
-              href="https://calendly.com/care-blivap/30min"
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 text-white rounded-md inline-block transition-colors"
+            <Button
+              variant="link"
+              href="/register"
+              className="text-xs font-medium py-2  px-6 rounded-full bg-primary text-white hover:bg-primary/90 hover:text-white! transition-colors w-fit"
             >
-              Book a demo
-            </Link>
+              Register
+            </Button>
           </div>
         </div>
       </div>

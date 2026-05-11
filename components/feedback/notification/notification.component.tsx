@@ -5,7 +5,6 @@ import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { FiBell } from "react-icons/fi";
 import { Check, CheckCheck } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useNotifications } from "@/hooks/notifications/useNotifications.hook";
 import { useAppSelector } from "@/store/hooks";
 
@@ -26,7 +25,6 @@ function formatNotificationTime(createdAt: string): string {
 }
 
 export const NotificationBell = () => {
-  const router = useRouter();
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLSpanElement>(null);
@@ -149,22 +147,8 @@ export const NotificationBell = () => {
               {notifications.map((n) => (
                 <div
                   key={n.id}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      if (n.href) router.push(n.href);
-                      void markAsRead(n.id);
-                    }
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (n.href) router.push(n.href);
-                    void markAsRead(n.id);
-                  }}
                   className={classNames(
-                    "rounded-lg p-2.5 transition-colors text-left w-full cursor-pointer",
+                    "rounded-lg p-2.5 text-left w-full",
                     n.read
                       ? "bg-white dark:bg-transparent"
                       : "bg-[#F9FAFB] dark:bg-white/6",

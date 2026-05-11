@@ -1,5 +1,8 @@
 "use client";
 
+import { AuthLoader } from "@/components/auth/auth-loader.component";
+import { useDonorsNewPageGate } from "@/hooks/donors/useDonorsNewPageGate.hook";
+import { navigateOutAfterSuccess } from "@/lib/navigation/navigateOutAfterSuccess";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Layout } from "../../../../layout/layout.component";
 import {
@@ -38,7 +41,6 @@ import {
 import { NewDonorPageSkeleton } from "./new-donor-page-skeleton";
 import { Modal } from "@/components/ui/modal/modal.component";
 import { Button } from "@/components/button/button.component";
-import { routes } from "@/config/routes";
 
 type AreaLocationPayload = {
   country: string;
@@ -691,7 +693,7 @@ function NewDonorForm() {
             <Button
               onClick={() => {
                 setIsActivationSuccessModalOpen(false);
-                router.replace(routes.overview);
+                queueMicrotask(() => navigateOutAfterSuccess(router));
               }}
               className="rounded-md! px-5 py-2"
             >
@@ -715,12 +717,34 @@ function NewDonorContent() {
   );
 }
 
-export default function NewDonor() {
+function NewDonorPageWithGate() {
+  const { showGateLoader } = useDonorsNewPageGate();
+
+  if (showGateLoader) {
+    return (
+      <Layout>
+        <AuthLoader />
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <Suspense fallback={<NewDonorPageSkeleton />}>
-        <NewDonorContent />
-      </Suspense>
+      <NewDonorContent />
     </Layout>
+  );
+}
+
+export default function NewDonor() {
+  return (
+    <Suspense
+      fallback={
+        <Layout>
+          <NewDonorPageSkeleton />
+        </Layout>
+      }
+    >
+      <NewDonorPageWithGate />
+    </Suspense>
   );
 }

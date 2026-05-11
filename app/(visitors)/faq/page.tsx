@@ -53,7 +53,7 @@ export default function FAQ() {
 
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-6 sm:py-8 xl:px-36 max-w-[1440px] mx-auto">
+      <div className="flex-1 flex flex-col py-6 sm:py-8">
         <div className="flex flex-col gap-4">
           <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight">
             Frequently asked questions
@@ -63,7 +63,7 @@ export default function FAQ() {
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg border border-[#E5E7EB] overflow-hidden"
+                className="bg-white rounded-lg border border-[#E5E7EB] overflow-hidden lg:max-w-1/2"
               >
                 <button
                   onClick={() =>
@@ -92,7 +92,7 @@ export default function FAQ() {
             ))}
           </div>
 
-          <div className="bg-[#F9FAFB] p-4 rounded-lg mt-4 border border-[#E5E7EB]">
+          <div className="bg-[#F9FAFB] p-4 rounded-lg mt-4 border border-[#E5E7EB] lg:max-w-1/2">
             <h2 className="font-semibold text-base text-black mb-2">
               Still have questions?
             </h2>

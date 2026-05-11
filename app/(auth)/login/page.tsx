@@ -3,17 +3,21 @@ import { Button } from "@/components/button/button.component";
 import { Input } from "@/components/forms/inputs/input.component";
 import { AuthLayout } from "@/layout/auth.layout.component";
 import { useLogin } from "@/hooks/auth/useLogin.hooks";
+import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
 import { loginSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import { gsap } from "gsap";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useLayoutEffect, useRef } from "react";
 import { BlivapLogo } from "@/public/svg";
 
 export default function LoginPage() {
   const { handleLogin, isLoading } = useLogin();
   const rootRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+  const dnRedirect = getDnRedirect(searchParams);
 
   useLayoutEffect(() => {
     if (!rootRef.current) return;
@@ -150,7 +154,7 @@ export default function LoginPage() {
                     <div className="flex flex-col gap-4" data-login-actions>
                       <div className="flex justify-end">
                         <Link
-                          href="/forgot-password"
+                          href={withDn("/forgot-password", dnRedirect)}
                           className="text-sm font-medium text-primary hover:underline"
                         >
                           Forgot password?
@@ -175,7 +179,7 @@ export default function LoginPage() {
               <p className="text-sm text-[#49475A]">
                 Don&apos;t have an account?{" "}
                 <Link
-                  href="/register"
+                  href={withDn("/register", dnRedirect)}
                   className="font-semibold text-primary underline"
                 >
                   Register

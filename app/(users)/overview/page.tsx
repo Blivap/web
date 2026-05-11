@@ -106,7 +106,7 @@ export default function OverviewPage() {
         <div className="flex flex-row sm:items-start sm:justify-between gap-4 mt-4">
           <div className="flex flex-col gap-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
-              Welcome
+              Welcome, {user?.firstname} {user?.lastname}
             </h1>
             <div className="flex flex-col md:flex-row gap-[36px]">
               <p className="flex flex-col gap-px text-sm text-text-secondary">

@@ -8,7 +8,7 @@ import Image from "next/image";
 export default function AboutBlood() {
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-6 sm:py-8 xl:px-36 max-w-[1440px] mx-auto">
+      <div className="flex-1 flex flex-col py-6 sm:py-8">
         <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-6">
           About blood
         </h1>

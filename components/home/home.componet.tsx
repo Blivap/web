@@ -51,9 +51,9 @@ export const HomeComponent = () => {
 
   const homeNewsParams = useMemo(
     () => ({
-      query: "blood donation",
-      lang: "en" as const,
-      max: 4,
+      q: "blood donation",
+      language: "en" as const,
+      size: 4,
     }),
     [],
   );
@@ -147,7 +147,7 @@ export const HomeComponent = () => {
         ref={containerRef}
         className="flex-1 flex flex-col gap-6 sm:gap-8 md:gap-12 w-full min-[1441px]:max-w-[1440px] mx-auto "
       >
-        <header className="px-3.5 sm:px-6 md:px-8 lg:px-0 w-full max-w-[1440px] mx-auto mt-4 sm:mt-6 min-[1441px]:max-w-none min-[1441px]:px-0">
+        <header className="px-3.5 sm:px-6 md:px-8 2xl:px-0 w-full max-w-[1440px] mx-auto mt-4 sm:mt-6 min-[1441px]:max-w-none min-[1440px]:px-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3">
             <div className="flex flex-col items-start gap-0.5 shrink-0">
               <Link href="/">
@@ -164,7 +164,7 @@ export const HomeComponent = () => {
               <Button
                 variant="link"
                 href="/login"
-                className="text-xs font-medium py-2 px-4 rounded-full bg-primary text-white hover:bg-primary/90 hover:text-white! transition-colors"
+                className="text-xs font-medium py-2  px-6 rounded-full bg-primary text-white hover:bg-primary/90 hover:text-white! transition-colors"
               >
                 Login
               </Button>
@@ -183,7 +183,7 @@ export const HomeComponent = () => {
               <Button
                 variant="link"
                 href="/login"
-                className="w-fit bg-black hover:bg-black/60 hover:text-white! text-white text-xs font-medium   rounded-md transition-colors "
+                className="w-fit bg-black hover:bg-black/60 hover:text-white! text-white text-xs font-medium   rounded-md transition-colors px-6 "
               >
                 Login
               </Button>
@@ -358,7 +358,7 @@ export const HomeComponent = () => {
         <div
           ref={newsSectionRef}
           data-section="news"
-          className="mt-6 sm:mt-8 md:mt-10 flex flex-col gap-4 mx-4 sm:mx-6 md:mx-12 lg:mx-0"
+          className="mt-6 sm:mt-8 md:mt-10 flex flex-col gap-4 mx-4 sm:mx-6 md:mx-12 2xl:mx-0"
         >
           <p className="font-semibold text-lg sm:text-xl text-black">News</p>
           <div className="flex flex-col gap-4">

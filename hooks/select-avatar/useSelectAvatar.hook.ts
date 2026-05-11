@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { $api } from "@/app/api";
 import { AxiosError } from "axios";
@@ -24,13 +24,21 @@ export function useSelectAvatar() {
   );
   const user = useAppSelector((state) => state.auth.user);
 
+  /* Keeps getAvatars() stable so useEffects that depend on it don’t loop when snackbar context identity changes. */
+  const showSnackbarRef = useRef(showSnackbar);
+  showSnackbarRef.current = showSnackbar;
+
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
   const getAvatars = useCallback(async () => {
     try {
       dispatch(setIsLoading(true));
       const { data, status } = await $api.avatar.getAvatars();
       if (status >= 200 && status < 300 && data) {
-        dispatch(setAvatars(data.data));
+        const list = Array.isArray(data.data) ? data.data : [];
+        dispatch(setAvatars(list));
+      } else {
+        /* Treat non-OK as finished load so consumers don’t retry forever while avatars stays null. */
+        dispatch(setAvatars([]));
       }
     } catch (err: unknown) {
       const message =
@@ -38,11 +46,13 @@ export function useSelectAvatar() {
           ? ((err.response?.data as { message?: string })?.message ??
             err.message)
           : "Unable to load avatars.";
-      showSnackbar(message, "error");
+      showSnackbarRef.current(message, "error");
+      /* Network/offline: stop infinite refetch — `null` meant “never fetched” and effects kept calling again. */
+      dispatch(setAvatars([]));
     } finally {
       dispatch(setIsLoading(false));
     }
-  }, [dispatch, showSnackbar]);
+  }, [dispatch]);
 
   const handleSelectAvatar = (avatarUrl: string) => {
     dispatch(toggleSelectedAvatar(avatarUrl));

@@ -1,17 +1,26 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { BlivapLogo } from "@/public/svg";
 import classNames from "classnames";
+import { gsap } from "gsap";
 import { Globe, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PropsWithChildren, useState, useEffect } from "react";
+import {
+  PropsWithChildren,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 const randomBetween = (minMs: number, maxMs: number) =>
   Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 
 export const HomeLayout = (props: PropsWithChildren<unknown>) => {
   const pathName = usePathname();
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [bannerVisible, setBannerVisible] = useState(false);
@@ -37,6 +46,65 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
 
   const closeDrawer = () => setDrawerOpen(false);
 
+  useLayoutEffect(() => {
+    if (!contentRef.current || pathName === "/") return;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      const targets = Array.from(contentRef.current?.children ?? [])
+        .flatMap((node) => (node instanceof HTMLElement ? Array.from(node.children) : []))
+        .filter((node): node is HTMLElement => node instanceof HTMLElement);
+
+      if (targets.length === 0) return;
+
+      gsap.set(targets, {
+        opacity: 0,
+        y: 24,
+        willChange: "opacity, transform",
+      });
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visibleTargets = entries
+            .filter((entry) => entry.isIntersecting)
+            .map((entry) => entry.target as HTMLElement);
+
+          if (visibleTargets.length === 0) return;
+
+          visibleTargets.forEach((target) => observer.unobserve(target));
+
+          gsap.to(visibleTargets, {
+            opacity: 1,
+            y: 0,
+            duration: 0.58,
+            ease: "power2.out",
+            stagger: 0.1,
+            clearProps: "opacity,transform,will-change",
+          });
+        },
+        {
+          rootMargin: "0px 0px -10% 0px",
+          threshold: 0.12,
+        },
+      );
+
+      targets.forEach((target) => observer.observe(target));
+
+      return () => {
+        observer.disconnect();
+      };
+    }, contentRef);
+
+    return () => {
+      ctx.revert();
+    };
+  }, [pathName]);
+
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/researchers", label: "Researchers" },
@@ -51,7 +119,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
   ];
 
   return (
-    <div className="flex-1 pt-14 sm:pt-16 lg:pt-12">
+    <div className="flex-1 pt-18 sm:pt-20 lg:pt-19">
       {/* Overlay for tablet/mobile when drawer is open */}
       <div
         onClick={closeDrawer}
@@ -125,7 +193,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
       </div>
 
       {/* Top Navigation Bar */}
-      <div className="fixed top-0 z-40 bg-[#F4F2FF] pb-2 lg:pb-0  pt-4  flex justify-center items-center px-4 sm:px-6 md:px-8 lg:px-0  w-full">
+      <div className="fixed top-0 z-40 flex w-full items-center justify-center bg-[#F4F2FF] px-2 py-2.5 sm:px-6 sm:py-3 md:px-8 3xl:px-0">
         <div className="flex items-center justify-between w-full max-w-[1440px]">
           <div className="flex items-center gap-3">
             <button
@@ -144,7 +212,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                     key={`nav-link-${e.label}`}
                     href={e.href}
                     className={classNames(
-                      "text-sm font-medium pt-2 pb-3 px-3 rounded-t-md transition-colors text-black duration-200",
+                      "px-3.5 pt-2.5 pb-3.5 text-sm font-medium text-black transition-colors duration-200 rounded-t-md",
                       active
                         ? "bg-white  "
                         : "text-[#374151] hover:bg-white/60 ",
@@ -161,7 +229,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
             <Link
               href="/about"
               className={classNames(
-                "text-sm font-medium text-black  transition-colors hidden sm:inline hover:bg-white/60 pt-2 pb-3 px-3 rounded-t-md",
+                "hidden rounded-t-md px-3.5 pt-2.5 pb-3.5 text-sm font-medium text-black transition-colors hover:bg-white/60 sm:inline",
                 {
                   "bg-white": isActive("/about"),
                 },
@@ -179,9 +247,15 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
           </div>
         </div>
       </div>
-      {props.children}
-      <div className="bg-black px-4 sm:px-6 md:px-8 ">
-        <div className="relative mt-6 sm:mt-8 md:mt-12 max-w-[1440px] mx-auto flex flex-col gap-6 sm:gap-8 pt-6 sm:pt-8 px-4 sm:px-6 md:px-12 lg:px-0 pb-6 sm:pb-8 ">
+
+      <div
+        ref={contentRef}
+        className="max-w-[1440px] w-full lg:mx-auto px-2 sm:px-6 md:px-8 lg:px-0  overflow-hidden"
+      >
+        {props.children}
+      </div>
+      <div className="bg-black px-2 sm:px-6 md:px-8 ">
+        <div className="relative mt-6 sm:mt-8 md:mt-12 max-w-[1440px] mx-auto flex flex-col gap-6 sm:gap-8 pt-6 sm:pt-8  lg:px-0 pb-6 sm:pb-8 ">
           <Link href="/" className="w-fit">
             <p className="flex justify-center font-semibold font-helvetica text-primary text-4xl tracking-tight">
               <BlivapLogo fill="#960018" className="size-10" />
@@ -264,18 +338,17 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                 We connect donors with those in need.
               </p>
             </div>
-            <Link
-              href="https://calendly.com/care-blivap/30min"
-              target="_blank"
-              rel="noreferrer"
-              className="w-full sm:w-fit text-white text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 rounded-md inline-block text-center transition-colors mt-1"
+            <Button
+              variant="link"
+              href="/register"
+              className="text-xs font-medium py-2  px-6 rounded-full bg-primary text-white hover:bg-primary/90 hover:text-white! transition-colors mt-1 w-full sm:w-fit"
             >
-              Book a demo
-            </Link>
+              Register
+            </Button>
           </div>
         </div>
       </div>
-      <div className="flex bg-[#171717] px-4 sm:px-6 md:px-8 lg:px-0">
+      <div className="flex bg-[#171717] px-2 sm:px-6 md:px-8 lg:px-0">
         <div className=" flex flex-col sm:flex-row py-4 sm:py-5 gap-3 sm:gap-4 px-4 sm:px-6 md:px-12 lg:px-20 w-full max-w-[1440px] mx-auto">
           {[
             {

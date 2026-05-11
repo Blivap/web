@@ -1,22 +1,16 @@
 "use client";
 
+import { AuthLoader } from "@/components/auth/auth-loader.component";
 import { Layout } from "@/layout/layout.component";
 import { Button } from "@/components/button/button.component";
-import { Modal } from "@/components/ui/modal/modal.component";
 import classNames from "classnames";
-import { Check, Trash2 } from "lucide-react";
-import {
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Trash2 } from "lucide-react";
+import { Suspense } from "react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import { routes } from "@/config/routes";
-import { useNin } from "@/hooks/nin/useNin.hooks";
+import {
+  formatFileSize,
+  useVerifyIdPage,
+} from "@/hooks/verify-id/useVerifyIdPage.hook";
 
 function IdCardGood() {
   return (
@@ -58,72 +52,30 @@ const dontItems = [
   "Not all corners are visible",
 ];
 
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function VerifyIdContent() {
-  const [isDragging, setIsDragging] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [verifySuccessOpen, setVerifySuccessOpen] = useState(false);
   const {
-    isLoading: isNinVerifying,
-    error: ninError,
-    clearError: clearNinError,
-    assertPdfFile,
-    verifyNinDocument,
-  } = useNin();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
-  const searchParams = useSearchParams();
+    showGateLoader,
+    isDragging,
+    setIsDragging,
+    selectedFile,
+    isNinVerifying,
+    ninError,
+    fileInputRef,
+    previewUrl,
+    clearFile,
+    handleFiles,
+    openFilePicker,
+    onDrop,
+    handleConfirmNin,
+  } = useVerifyIdPage();
 
-  const donorId = searchParams.get("donorId") ?? undefined;
-
-  const previewUrl = useMemo(() => {
-    if (!selectedFile) return null;
-    return URL.createObjectURL(selectedFile);
-  }, [selectedFile]);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
-
-  const clearFile = useCallback(() => {
-    clearNinError();
-    setSelectedFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [clearNinError]);
-
-  const handleFiles = useCallback(
-    (files: FileList | null) => {
-      clearNinError();
-      if (!files?.length) return;
-      const file = files[0];
-      if (!assertPdfFile(file)) return;
-      setSelectedFile(file);
-    },
-    [assertPdfFile, clearNinError],
-  );
-
-  const openFilePicker = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    handleFiles(e.dataTransfer.files);
-  };
-
-  const handleConfirmNin = useCallback(async () => {
-    if (!selectedFile) return;
-    const ok = await verifyNinDocument(selectedFile);
-    if (ok) setVerifySuccessOpen(true);
-  }, [selectedFile, verifyNinDocument]);
+  if (showGateLoader) {
+    return (
+      <Layout>
+        <AuthLoader />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -335,43 +287,6 @@ function VerifyIdContent() {
           {isNinVerifying ? "Verifying…" : "Confirm"}
         </Button>
       </div>
-
-      <Modal
-        open={verifySuccessOpen}
-        onClose={() => setVerifySuccessOpen(false)}
-      >
-        <h2 className="mb-3 text-center text-2xl font-bold text-primary">
-          Congratulations
-        </h2>
-        <p className="mb-8 text-center text-sm leading-snug text-text-secondary">
-          You Have Successfully
-          <br />
-          Been Verified
-        </p>
-        <div
-          className="mb-10 flex size-24 shrink-0 items-center justify-center rounded-full border-4 border-green-500 text-green-500"
-          aria-hidden
-        >
-          <Check
-            className="size-12 stroke-3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </div>
-        <Button
-          type="button"
-          variant="primary"
-          className="rounded-sm! min-w-[160px] px-10 py-3.5 font-bold text-base shadow-none"
-          onClick={() => {
-            setVerifySuccessOpen(false);
-            router.push(
-              donorId ? routes.scheduleAppointment(donorId) : routes.overview,
-            );
-          }}
-        >
-          Continue
-        </Button>
-      </Modal>
     </Layout>
   );
 }

@@ -7,13 +7,16 @@ import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials, setUser } from "@/store/slices/authSlice";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { routes } from "@/config/routes";
+import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
 
 export const useRegister = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const handleRegister = async (
     payload: IRegisterPayload & {
       confirmPassword?: string;
@@ -21,6 +24,8 @@ export const useRegister = () => {
       privacyStatement?: boolean;
     },
   ): Promise<boolean> => {
+    const dnRedirect = getDnRedirect(searchParams);
+    const postAuthRedirect = dnRedirect ?? routes.overview;
     setIsLoading(true);
 
     try {
@@ -71,9 +76,9 @@ export const useRegister = () => {
             dispatch(setUser(userPayload));
           }
           if (isEmailUnverified(userPayload ?? authData?.user)) {
-            router.replace("/verify-email");
+            router.replace(withDn(routes.verifyEmail, dnRedirect));
           } else {
-            router.replace("/overview");
+            router.replace(postAuthRedirect);
           }
         }
         return true;

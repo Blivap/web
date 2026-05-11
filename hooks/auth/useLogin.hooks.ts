@@ -1,19 +1,24 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { $api } from "@/app/api";
 import { ILoginPayload, IAuthResponse } from "@/types";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials, setUser } from "@/store/slices/authSlice";
+import { routes } from "@/config/routes";
+import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
 
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const handleLogin = async (payload: ILoginPayload): Promise<boolean> => {
+    const dnRedirect = getDnRedirect(searchParams);
+    const postAuthRedirect = dnRedirect ?? routes.overview;
     setIsLoading(true);
     try {
       const { data, status, message, error } = await $api.auth.login(payload);
@@ -30,15 +35,11 @@ export const useLogin = () => {
           (authData as { access_token?: string })?.access_token ??
           authData?.token;
 
-        showSnackbar(
-          message || envelope.message || "Login successful!",
-          "success",
-        );
+        showSnackbar("Login successful!", "success");
 
         if (token) {
           dispatch(setCredentials({ token }));
-          let userPayload =
-            normalizeUser(authData?.user ?? authData) ?? null;
+          let userPayload = normalizeUser(authData?.user ?? authData) ?? null;
           if (!userPayload) {
             try {
               const me = await $api.auth.me();
@@ -53,9 +54,9 @@ export const useLogin = () => {
             dispatch(setUser(userPayload));
           }
           if (isEmailUnverified(userPayload ?? authData?.user)) {
-            router.replace("/verify-email");
+            router.replace(withDn(routes.verifyEmail, dnRedirect));
           } else {
-            router.replace("/overview");
+            router.replace(postAuthRedirect);
           }
         }
         return true;

@@ -1,6 +1,7 @@
 "use client";
 
 import classNames from "classnames";
+import { Check } from "lucide-react";
 import {
   type ChangeEvent,
   type DetailedHTMLProps,
