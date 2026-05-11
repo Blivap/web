@@ -85,18 +85,18 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       ref={rootRef}
-      className="flex-1 flex justify-center items-center w-full min-h-0"
+      className="flex min-h-0 w-full flex-1 items-center justify-center bg-white dark:bg-[#0B0D12]"
     >
       <div
         data-auth-form-shell
-        className="flex justify-center w-full md:px-10 xl:px-23 py-6 px-3 z-1 relative"
+        className="relative z-1 flex w-full justify-center px-3 py-6 md:px-10 xl:px-23"
       >
         {children}
       </div>
       <div className="w-full hidden lg:block" aria-hidden />
       <div
         data-auth-hero-panel
-        className="fixed hidden lg:flex justify-center items-center w-1/2 right-0 top-0 bg-[#960018] rounded-l-[60px] h-full overflow-hidden self-end"
+        className="fixed top-0 right-0 hidden h-full w-1/2 self-end overflow-hidden rounded-l-[60px] bg-[#960018] lg:flex lg:items-center lg:justify-center"
       >
         <Image
           src="/images/authbg.jpg"
@@ -117,12 +117,12 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         />
         <div
           data-auth-hero-copy
-          className="grid gap-6 bg-[#FFFFFF33] px-11.5 py-[76.5px] relative backdrop-blur-[30px] max-w-139"
+          className="relative grid max-w-139 gap-6 bg-[#FFFFFF33] px-11.5 py-[76.5px] backdrop-blur-[30px] dark:bg-white/12 dark:border dark:border-white/10"
         >
           <p className="text-[48px] text-white font-semibold">
             Connecting People to Donors
           </p>
-          <p className="text-[18px] text-[#F6F6F8]">
+          <p className="text-[18px] text-[#F6F6F8] dark:text-white/80">
             Discover endless opportunities to receive blood and sperm donation.
           </p>
         </div>

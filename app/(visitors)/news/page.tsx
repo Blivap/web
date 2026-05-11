@@ -70,24 +70,24 @@ function getCategoryLabel(category: NewsCategory): string {
 function NewsHeroSkeleton() {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.6fr)] gap-6">
-      <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white animate-pulse">
-        <div className="h-[260px] sm:h-[360px] bg-linear-to-br from-[#E5E7EB] via-[#F3F4F6] to-[#E5E7EB]" />
+      <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white animate-pulse dark:border-white/10 dark:bg-[#111827]">
+        <div className="h-[260px] bg-linear-to-br from-[#E5E7EB] via-[#F3F4F6] to-[#E5E7EB] dark:from-[#1F2937] dark:via-[#111827] dark:to-[#1F2937] sm:h-[360px]" />
         <div className="p-5 sm:p-6 flex flex-col gap-3">
-          <div className="h-3 w-28 rounded-full bg-[#D1D5DB]" />
-          <div className="h-6 w-4/5 rounded-full bg-[#E5E7EB]" />
-          <div className="h-4 w-full rounded-full bg-[#E5E7EB]" />
-          <div className="h-4 w-3/4 rounded-full bg-[#E5E7EB]" />
-          <div className="h-4 w-24 rounded-full bg-[#F3D5DB] mt-2" />
+          <div className="h-3 w-28 rounded-full bg-[#D1D5DB] dark:bg-slate-600" />
+          <div className="h-6 w-4/5 rounded-full bg-[#E5E7EB] dark:bg-slate-700" />
+          <div className="h-4 w-full rounded-full bg-[#E5E7EB] dark:bg-slate-700" />
+          <div className="h-4 w-3/4 rounded-full bg-[#E5E7EB] dark:bg-slate-700" />
+          <div className="mt-2 h-4 w-24 rounded-full bg-[#F3D5DB] dark:bg-primary/30" />
         </div>
       </div>
-      <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 sm:p-6 animate-pulse">
-        <div className="h-4 w-28 rounded-full bg-[#D1D5DB]" />
+      <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5 animate-pulse dark:border-white/10 dark:bg-[#111827] sm:p-6">
+        <div className="h-4 w-28 rounded-full bg-[#D1D5DB] dark:bg-slate-600" />
         <div className="mt-5 space-y-4">
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="space-y-2">
-              <div className="h-3 w-20 rounded-full bg-[#D1D5DB]" />
-              <div className="h-4 w-full rounded-full bg-[#E5E7EB]" />
-              <div className="h-4 w-5/6 rounded-full bg-[#E5E7EB]" />
+              <div className="h-3 w-20 rounded-full bg-[#D1D5DB] dark:bg-slate-600" />
+              <div className="h-4 w-full rounded-full bg-[#E5E7EB] dark:bg-slate-700" />
+              <div className="h-4 w-5/6 rounded-full bg-[#E5E7EB] dark:bg-slate-700" />
             </div>
           ))}
         </div>
@@ -102,14 +102,14 @@ function NewsGridSkeleton() {
       {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={index}
-          className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white animate-pulse"
+          className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white animate-pulse dark:border-white/10 dark:bg-[#111827]"
         >
-          <div className="h-[220px] bg-[#E5E7EB]" />
+          <div className="h-[220px] bg-[#E5E7EB] dark:bg-[#1F2937]" />
           <div className="p-5 space-y-3">
-            <div className="h-3 w-24 rounded-full bg-[#D1D5DB]" />
-            <div className="h-5 w-4/5 rounded-full bg-[#E5E7EB]" />
-            <div className="h-4 w-full rounded-full bg-[#E5E7EB]" />
-            <div className="h-4 w-2/3 rounded-full bg-[#E5E7EB]" />
+            <div className="h-3 w-24 rounded-full bg-[#D1D5DB] dark:bg-slate-600" />
+            <div className="h-5 w-4/5 rounded-full bg-[#E5E7EB] dark:bg-slate-700" />
+            <div className="h-4 w-full rounded-full bg-[#E5E7EB] dark:bg-slate-700" />
+            <div className="h-4 w-2/3 rounded-full bg-[#E5E7EB] dark:bg-slate-700" />
           </div>
         </div>
       ))}
@@ -204,62 +204,62 @@ export default function News() {
             <h1 className="font-semibold text-primary text-2xl sm:text-3xl tracking-tight">
               News and trending updates
             </h1>
-            <p className="text-sm text-[#6B7280] max-w-2xl leading-relaxed">
+            <p className="max-w-2xl text-sm leading-relaxed text-[#6B7280] dark:text-slate-400">
               Explore trusted coverage across health, science, business,
               technology, sports, and more.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4">
-              <p className="text-[11px] uppercase tracking-wide text-[#9CA3AF]">
+            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 dark:border-white/10 dark:bg-[#111827]">
+              <p className="text-[11px] uppercase tracking-wide text-[#9CA3AF] dark:text-slate-500">
                 {selectedCategory
                   ? `${selectedCategoryLabel} stories`
                   : "Stories"}
               </p>
-              <p className="mt-1 text-2xl font-semibold text-black">
+              <p className="mt-1 text-2xl font-semibold text-black dark:text-white">
                 {news.length}
               </p>
             </div>
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4">
-              <p className="text-[11px] uppercase tracking-wide text-[#9CA3AF]">
+            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 dark:border-white/10 dark:bg-[#111827]">
+              <p className="text-[11px] uppercase tracking-wide text-[#9CA3AF] dark:text-slate-500">
                 Sources
               </p>
-              <p className="mt-1 text-2xl font-semibold text-black">
+              <p className="mt-1 text-2xl font-semibold text-black dark:text-white">
                 {sourceCount}
               </p>
             </div>
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4">
-              <p className="text-[11px] uppercase tracking-wide text-[#9CA3AF]">
+            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 dark:border-white/10 dark:bg-[#111827]">
+              <p className="text-[11px] uppercase tracking-wide text-[#9CA3AF] dark:text-slate-500">
                 Showing
               </p>
-              <p className="mt-1 text-2xl font-semibold text-black">
+              <p className="mt-1 text-2xl font-semibold text-black dark:text-white">
                 {news.length}
               </p>
             </div>
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4">
-              <p className="text-[11px] uppercase tracking-wide text-[#9CA3AF]">
+            <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4 dark:border-white/10 dark:bg-[#111827]">
+              <p className="text-[11px] uppercase tracking-wide text-[#9CA3AF] dark:text-slate-500">
                 Page
               </p>
-              <p className="mt-1 text-2xl font-semibold text-black">
+              <p className="mt-1 text-2xl font-semibold text-black dark:text-white">
                 {currentPage}
               </p>
             </div>
           </div>
         </header>
 
-        <section className="overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-[0_12px_32px_rgba(15,23,42,0.05)] ">
-          <div className="border-b border-[#F1F5F9] bg-linear-to-r from-[#FFF7F8] via-white to-[#F8FAFC] px-4 py-4 sm:px-5">
+        <section className="overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-[0_12px_32px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-[#111827] dark:shadow-[0_24px_60px_rgba(0,0,0,0.3)]">
+          <div className="border-b border-[#F1F5F9] bg-linear-to-r from-[#FFF7F8] via-white to-[#F8FAFC] px-4 py-4 dark:border-white/10 dark:from-[#2A1117] dark:via-[#111827] dark:to-[#0F172A] sm:px-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 inline-flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary ">
                   <Filter size={18} />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-black">
+                  <p className="text-sm font-semibold text-black dark:text-white">
                     Refine your news feed
                   </p>
-                  <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#6B7280]">
+                  <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#6B7280] dark:text-slate-400">
                     Search headlines, switch categories, and narrow the feed by
                     language, country, or timeframe.
                   </p>
@@ -270,7 +270,7 @@ export default function News() {
                   <button
                     type="button"
                     onClick={resetFilters}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-3.5 py-2 text-sm font-medium text-[#4B5563] transition-colors hover:border-primary/30 hover:text-primary"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-3.5 py-2 text-sm font-medium text-[#4B5563] transition-colors hover:border-primary/30 hover:text-primary dark:border-white/10 dark:bg-[#0F172A] dark:text-slate-300 dark:hover:border-primary/30 dark:hover:text-primary"
                   >
                     Clear all
                   </button>
@@ -278,7 +278,7 @@ export default function News() {
                 <button
                   type="button"
                   onClick={() => void refetch()}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D1D5DB] bg-white px-4 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:border-primary hover:text-primary"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D1D5DB] bg-white px-4 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:border-primary hover:text-primary dark:border-white/10 dark:bg-[#0F172A] dark:text-slate-300 dark:hover:border-primary dark:hover:text-primary"
                 >
                   <RefreshCw
                     size={15}
@@ -294,7 +294,7 @@ export default function News() {
             <div className="relative w-full">
               <Search
                 size={16}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF]"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] dark:text-slate-500"
               />
               <input
                 type="text"
@@ -309,49 +309,49 @@ export default function News() {
                     ? `Search ${selectedCategoryLabel.toLowerCase()} headlines and summaries`
                     : "Search headlines and summaries"
                 }
-                className="w-full rounded-2xl border border-[#E2E8F0] bg-[#FCFCFD] py-3 pl-11 pr-4 text-sm text-black outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/8"
+                className="w-full rounded-2xl border border-[#E2E8F0] bg-[#FCFCFD] py-3 pl-11 pr-4 text-sm text-black outline-none transition placeholder:text-[#9CA3AF] focus:border-primary focus:ring-4 focus:ring-primary/8 dark:border-white/10 dark:bg-[#0F172A] dark:text-white dark:placeholder:text-slate-500"
               />
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9CA3AF]">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9CA3AF] dark:text-slate-500">
                 Current view
               </span>
-              <span className="rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#475467]">
+              <span className="rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#475467] dark:bg-[#0F172A] dark:text-slate-300">
                 {selectedCategory ? selectedCategoryLabel : "All categories"}
               </span>
-              <span className="rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#475467]">
+              <span className="rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#475467] dark:bg-[#0F172A] dark:text-slate-300">
                 {selectedLanguage
                   ? selectedLanguage.toUpperCase()
                   : "Any language"}
               </span>
-              <span className="rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#475467]">
+              <span className="rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#475467] dark:bg-[#0F172A] dark:text-slate-300">
                 {selectedCountry
                   ? selectedCountry.toUpperCase()
                   : "All countries"}
               </span>
               {selectedTimeframe ? (
-                <span className="rounded-full bg-[#FFF1F3] px-3 py-1.5 text-xs font-medium text-primary">
+                <span className="rounded-full bg-[#FFF1F3] px-3 py-1.5 text-xs font-medium text-primary dark:bg-primary/15">
                   {selectedTimeframe}
                 </span>
               ) : null}
               {debouncedQuery ? (
-                <span className="rounded-full bg-[#EEF2FF] px-3 py-1.5 text-xs font-medium text-[#4338CA]">
+                <span className="rounded-full bg-[#EEF2FF] px-3 py-1.5 text-xs font-medium text-[#4338CA] dark:bg-[#312E81]/30 dark:text-indigo-200">
                   &quot;{debouncedQuery}&quot;
                 </span>
               ) : null}
             </div>
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-              <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4">
+              <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4 dark:border-white/10 dark:bg-[#0F172A]">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-black">Category</p>
-                    <p className="mt-1 text-xs text-[#6B7280]">
+                    <p className="text-sm font-semibold text-black dark:text-white">Category</p>
+                    <p className="mt-1 text-xs text-[#6B7280] dark:text-slate-400">
                       Choose a topic only when you want to narrow the feed.
                     </p>
                   </div>
-                  <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-[#667085]">
+                  <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-[#667085] dark:bg-[#111827] dark:text-slate-400">
                     Optional
                   </span>
                 </div>
@@ -369,7 +369,7 @@ export default function News() {
                       className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                         selectedCategory === category.value
                           ? "bg-primary text-white shadow-[0_6px_18px_rgba(150,0,24,0.18)]"
-                          : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-primary/40 hover:text-primary"
+                          : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-primary/40 hover:text-primary dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-primary/40 dark:hover:text-primary"
                       }`}
                     >
                       {category.label}
@@ -379,10 +379,10 @@ export default function News() {
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-1">
-                <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4">
+                <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4 dark:border-white/10 dark:bg-[#0F172A]">
                   <div className="mb-3 flex items-center gap-2">
-                    <Languages size={15} className="text-[#667085]" />
-                    <p className="text-sm font-semibold text-black">Language</p>
+                    <Languages size={15} className="text-[#667085] dark:text-slate-500" />
+                    <p className="text-sm font-semibold text-black dark:text-white">Language</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {NEWS_LANGUAGES.map((language) => (
@@ -398,7 +398,7 @@ export default function News() {
                         className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                           selectedLanguage === language.value
                             ? "bg-foundation-dark text-white"
-                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-foundation-dark/30 hover:text-foundation-dark"
+                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-foundation-dark/30 hover:text-foundation-dark dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-primary/30 dark:hover:text-white"
                         }`}
                       >
                         {language.label}
@@ -407,10 +407,10 @@ export default function News() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4">
+                <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4 dark:border-white/10 dark:bg-[#0F172A]">
                   <div className="mb-3 flex items-center gap-2">
-                    <Globe2 size={15} className="text-[#667085]" />
-                    <p className="text-sm font-semibold text-black">Country</p>
+                    <Globe2 size={15} className="text-[#667085] dark:text-slate-500" />
+                    <p className="text-sm font-semibold text-black dark:text-white">Country</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {NEWS_COUNTRIES.map((country) => (
@@ -426,7 +426,7 @@ export default function News() {
                         className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                           selectedCountry === country.value
                             ? "bg-secondary text-white"
-                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-secondary/40 hover:text-secondary"
+                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-secondary/40 hover:text-secondary dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-secondary/40 dark:hover:text-secondary"
                         }`}
                       >
                         {country.label}
@@ -435,10 +435,10 @@ export default function News() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4">
+                <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4 dark:border-white/10 dark:bg-[#0F172A]">
                   <div className="mb-3 flex items-center gap-2">
-                    <Clock3 size={15} className="text-[#667085]" />
-                    <p className="text-sm font-semibold text-black">
+                    <Clock3 size={15} className="text-[#667085] dark:text-slate-500" />
+                    <p className="text-sm font-semibold text-black dark:text-white">
                       Timeframe
                     </p>
                   </div>
@@ -456,7 +456,7 @@ export default function News() {
                         className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                           selectedTimeframe === timeframe.value
                             ? "bg-primary text-white"
-                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-primary/40 hover:text-primary"
+                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-primary/40 hover:text-primary dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-primary/40 dark:hover:text-primary"
                         }`}
                       >
                         {timeframe.label}
@@ -470,11 +470,11 @@ export default function News() {
         </section>
 
         {error && news.length === 0 ? (
-          <section className="rounded-2xl border border-[#F5C2C7] bg-[#FFF5F6] p-6 flex flex-col gap-3 ">
-            <p className="text-lg font-semibold text-black">
+          <section className="flex flex-col gap-3 rounded-2xl border border-[#F5C2C7] bg-[#FFF5F6] p-6 dark:border-primary/20 dark:bg-[#241217]">
+            <p className="text-lg font-semibold text-black dark:text-white">
               Could not load news
             </p>
-            <p className="text-sm text-[#6B7280] max-w-xl">{error}</p>
+            <p className="max-w-xl text-sm text-[#6B7280] dark:text-slate-400">{error}</p>
             <button
               type="button"
               onClick={() => void refetch()}
@@ -489,11 +489,11 @@ export default function News() {
             <NewsGridSkeleton />
           </>
         ) : news.length === 0 ? (
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center  ">
-            <p className="text-lg font-semibold text-black">
+          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center dark:border-white/10 dark:bg-[#111827]">
+            <p className="text-lg font-semibold text-black dark:text-white">
               No articles found
             </p>
-            <p className="mt-2 text-sm text-[#6B7280]">
+            <p className="mt-2 text-sm text-[#6B7280] dark:text-slate-400">
               Try a different keyword or adjust the other filters.
             </p>
             <button
@@ -509,7 +509,7 @@ export default function News() {
           <>
             {featured && (
               <section className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.6fr)] gap-6">
-                <article className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">
+                <article className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white dark:border-white/10 dark:bg-[#111827]">
                   <a
                     href={featured.url}
                     target="_blank"
@@ -524,9 +524,9 @@ export default function News() {
                         sizes="(max-width: 1280px) 100vw, 60vw"
                       />
                     </div>
-                    <div className="p-5 sm:p-6 flex flex-col gap-3">
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-wide text-[#6B7280] font-medium">
-                        <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">
+                    <div className="flex flex-col gap-3 p-5 sm:p-6">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-wide text-[#6B7280] dark:text-slate-400">
+                        <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280] dark:bg-[#0F172A] dark:text-slate-400">
                           {debouncedQuery
                             ? selectedCategory
                               ? `${selectedCategoryLabel} search result`
@@ -535,12 +535,12 @@ export default function News() {
                               ? selectedCategoryLabel
                               : "Top story"}
                         </span>
-                        <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">
+                        <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280] dark:bg-[#0F172A] dark:text-slate-400">
                           {selectedLanguage
                             ? selectedLanguage.toUpperCase()
                             : "Any language"}
                         </span>
-                        <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">
+                        <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280] dark:bg-[#0F172A] dark:text-slate-400">
                           {selectedCountry
                             ? selectedCountry.toUpperCase()
                             : "All countries"}
@@ -551,10 +551,10 @@ export default function News() {
                         </span>
                         <span>{estimateReadingTime(featured.content)}</span>
                       </div>
-                      <h2 className="text-xl sm:text-2xl font-semibold text-black leading-snug group-hover:text-primary transition-colors">
+                      <h2 className="text-xl font-semibold leading-snug text-black transition-colors group-hover:text-primary dark:text-white sm:text-2xl">
                         {featured.title}
                       </h2>
-                      <p className="text-sm text-[#6B7280] leading-relaxed line-clamp-3">
+                      <p className="line-clamp-3 text-sm leading-relaxed text-[#6B7280] dark:text-slate-400">
                         {featured.description || featured.content}
                       </p>
                       <span className="inline-flex items-center gap-2 text-sm font-medium text-primary">
@@ -565,12 +565,12 @@ export default function News() {
                   </a>
                 </article>
 
-                <aside className="rounded-2xl border border-[#E5E7EB] bg-white p-5 sm:p-6">
+                <aside className="rounded-2xl border border-[#E5E7EB] bg-white p-5 dark:border-white/10 dark:bg-[#111827] sm:p-6">
                   <div className="flex items-center justify-between gap-3">
-                    <h2 className="text-sm font-semibold uppercase tracking-wide text-[#6B7280]">
+                    <h2 className="text-sm font-semibold uppercase tracking-wide text-[#6B7280] dark:text-slate-400">
                       Quick picks
                     </h2>
-                    <span className="text-xs text-[#9CA3AF]">
+                    <span className="text-xs text-[#9CA3AF] dark:text-slate-500">
                       {Math.min(latest.length, 3)} stories
                     </span>
                   </div>
@@ -581,18 +581,18 @@ export default function News() {
                         href={item.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="group rounded-xl border border-[#F3F4F6] p-4 hover:border-[#D1D5DB] hover:bg-[#FCFCFD] transition-colors"
+                        className="group rounded-xl border border-[#F3F4F6] p-4 transition-colors hover:border-[#D1D5DB] hover:bg-[#FCFCFD] dark:border-white/10 dark:hover:border-white/16 dark:hover:bg-[#0F172A]"
                       >
-                        <div className="flex items-center justify-between gap-3 text-[11px] text-[#9CA3AF]">
+                        <div className="flex items-center justify-between gap-3 text-[11px] text-[#9CA3AF] dark:text-slate-500">
                           <span>{item.source?.name || "Source"}</span>
                           <span>
                             {formatNewsPublishedDate(item.publishedAt)}
                           </span>
                         </div>
-                        <h3 className="mt-2 text-sm font-semibold text-black leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                        <h3 className="mt-2 line-clamp-2 text-sm font-semibold leading-snug text-black transition-colors group-hover:text-primary dark:text-white">
                           {item.title}
                         </h3>
-                        <p className="mt-2 text-xs text-[#6B7280] line-clamp-2">
+                        <p className="mt-2 line-clamp-2 text-xs text-[#6B7280] dark:text-slate-400">
                           {item.description || item.content}
                         </p>
                       </a>
@@ -605,10 +605,10 @@ export default function News() {
             <section className="flex flex-col gap-4 ">
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-black">
+                  <h2 className="text-lg font-semibold text-black dark:text-white">
                     Latest coverage
                   </h2>
-                  <p className="text-sm text-[#6B7280] mt-1">
+                  <p className="mt-1 text-sm text-[#6B7280] dark:text-slate-400">
                     {debouncedQuery
                       ? `${
                           selectedCategory
@@ -627,7 +627,7 @@ export default function News() {
                       setCurrentPage((prev) => Math.max(1, prev - 1))
                     }
                     disabled={currentPage === 1 || isLoading}
-                    className="rounded-lg border border-[#D1D5DB] bg-white px-3 py-2 text-sm font-medium text-[#374151] hover:border-primary hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="rounded-lg border border-[#D1D5DB] bg-white px-3 py-2 text-sm font-medium text-[#374151] transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-primary dark:hover:text-primary"
                   >
                     Previous
                   </button>
@@ -635,7 +635,7 @@ export default function News() {
                     type="button"
                     onClick={() => setCurrentPage((prev) => prev + 1)}
                     disabled={isLoading || news.length < 10}
-                    className="rounded-lg border border-[#D1D5DB] bg-white px-3 py-2 text-sm font-medium text-[#374151] hover:border-primary hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="rounded-lg border border-[#D1D5DB] bg-white px-3 py-2 text-sm font-medium text-[#374151] transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-primary dark:hover:text-primary"
                   >
                     Next
                   </button>
@@ -646,7 +646,7 @@ export default function News() {
                 {latest.map((item) => (
                   <article
                     key={item.id}
-                    className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white"
+                    className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white dark:border-white/10 dark:bg-[#111827]"
                   >
                     <a
                       href={item.url}
@@ -663,9 +663,9 @@ export default function News() {
                           sizes="(max-width: 1024px) 100vw, 50vw"
                         />
                       </div>
-                      <div className="p-5 flex flex-col gap-3">
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#9CA3AF]">
-                          <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">
+                      <div className="flex flex-col gap-3 p-5">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#9CA3AF] dark:text-slate-500">
+                          <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280] dark:bg-[#0F172A] dark:text-slate-400">
                             {item.source?.name || "Source"}
                           </span>
                           <span>
@@ -677,10 +677,10 @@ export default function News() {
                             )}
                           </span>
                         </div>
-                        <h3 className="text-base font-semibold text-black leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                        <h3 className="line-clamp-2 text-base font-semibold leading-snug text-black transition-colors group-hover:text-primary dark:text-white">
                           {item.title}
                         </h3>
-                        <p className="text-sm text-[#6B7280] leading-relaxed line-clamp-3">
+                        <p className="line-clamp-3 text-sm leading-relaxed text-[#6B7280] dark:text-slate-400">
                           {item.description || item.content}
                         </p>
                         <span className="inline-flex items-center gap-2 text-sm font-medium text-primary mt-1">

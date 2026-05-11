@@ -13,17 +13,17 @@ import {
 export default function Research() {
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col py-6 sm:py-8 max-w-4xl mx-auto">
+      <div className="flex-1 flex flex-col py-6 sm:py-8 max-w-4xl mx-auto text-[#111827] dark:text-slate-300">
         <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-6">
           Lifesaving research
         </h1>
 
         <div className="flex flex-col gap-6">
           <div>
-            <h2 className="font-semibold text-base text-black mb-2">
+            <h2 className="font-semibold text-base text-black dark:text-white mb-2">
               Advancing medical science
             </h2>
-            <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#6B7280] dark:text-slate-400 leading-relaxed max-w-2xl">
               Blivap supports research in blood products, therapeutics,
               diagnostics, and healthcare knowledge. We enable researchers to
               access data and collaborate with healthcare professionals to
@@ -37,24 +37,24 @@ export default function Research() {
                 icon: FlaskConical,
                 title: "Blood products",
                 desc: "Improving storage, processing, and transfusion safety. Preservation, compatibility, and quality assurance.",
-                color: "bg-[#F5F3FF]",
+                color: "bg-[#F5F3FF] dark:bg-indigo-500/15",
               },
               {
                 icon: Microscope,
                 title: "Diagnostics",
                 desc: "New diagnostic tools and methods. Early detection and precision medicine.",
-                color: "bg-[#FDF2F4]",
+                color: "bg-[#FDF2F4] dark:bg-primary/15",
               },
               {
                 icon: BookOpen,
                 title: "Healthcare knowledge",
                 desc: "Best practices to improve delivery and patient care. Evidence-based practices.",
-                color: "bg-[#EEF2FF]",
+                color: "bg-[#EEF2FF] dark:bg-sky-500/15",
               },
             ].map((research, i) => (
               <div
                 key={i}
-                className="bg-white p-3 sm:p-4 rounded-lg border border-[#E5E7EB]"
+                className="bg-white text-[#111827] dark:bg-[#111827] dark:text-white p-3 sm:p-4 rounded-lg border border-[#E5E7EB] dark:border-white/10"
               >
                 <div
                   className={`${research.color} p-2 rounded-full w-fit mb-2`}
@@ -64,41 +64,41 @@ export default function Research() {
                 <h3 className="font-semibold text-sm mb-1.5">
                   {research.title}
                 </h3>
-                <p className="text-xs text-[#6B7280] leading-relaxed">
+                <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
                   {research.desc}
                 </p>
               </div>
             ))}
           </div>
 
-          <div className="bg-[#F9FAFB] p-4 rounded-lg border border-[#E5E7EB]">
+          <div className="bg-[#F9FAFB] text-[#111827] dark:bg-[#0F172A] dark:text-white p-4 rounded-lg border border-[#E5E7EB] dark:border-white/10">
             <div className="flex items-center gap-2 mb-3">
               <Database className="text-primary" size={18} />
-              <h2 className="font-semibold text-base text-black">
+              <h2 className="font-semibold text-base text-black dark:text-white">
                 Research opportunities
               </h2>
             </div>
-            <p className="text-xs text-[#6B7280] leading-relaxed mb-4">
+            <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed mb-4">
               Researchers and healthcare professionals can collaborate through
               Blivap—conduct studies, access anonymized data, and use our
               analytics and collaboration tools.
             </p>
             <div className="grid md:grid-cols-2 gap-3 mb-4">
-              <div className="bg-white p-3 rounded-md border border-[#E5E7EB]">
+              <div className="bg-white text-[#111827] dark:bg-[#111827] dark:text-white p-3 rounded-md border border-[#E5E7EB] dark:border-white/10">
                 <h4 className="font-semibold text-xs mb-1 flex items-center gap-1.5">
                   <TrendingUp className="text-primary" size={14} />
                   Data access
                 </h4>
-                <p className="text-xs text-[#6B7280]">
+                <p className="text-xs text-[#6B7280] dark:text-slate-400">
                   Anonymized, aggregated data with privacy standards.
                 </p>
               </div>
-              <div className="bg-white p-3 rounded-md border border-[#E5E7EB]">
+              <div className="bg-white text-[#111827] dark:bg-[#111827] dark:text-white p-3 rounded-md border border-[#E5E7EB] dark:border-white/10">
                 <h4 className="font-semibold text-xs mb-1 flex items-center gap-1.5">
                   <Database className="text-primary" size={14} />
                   Collaboration
                 </h4>
-                <p className="text-xs text-[#6B7280]">
+                <p className="text-xs text-[#6B7280] dark:text-slate-400">
                   Connect with researchers and institutions.
                 </p>
               </div>

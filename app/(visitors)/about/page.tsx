@@ -10,22 +10,22 @@ export default function About() {
   return (
     <HomeLayout>
       <div className="flex-1 flex flex-col py-6 sm:py-8">
-        <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-2">
+        <h1 className="mb-2 text-lg font-semibold tracking-tight text-primary sm:text-xl">
           About Blivap
         </h1>
 
         <div className="flex flex-col gap-6 sm:gap-8">
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6 items-center">
             <div className="flex flex-col gap-3">
-              <h2 className="font-semibold text-base text-black">
+              <h2 className="text-base font-semibold text-black dark:text-white">
                 Our mission
               </h2>
-              <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed">
+              <p className="text-xs leading-relaxed text-[#6B7280] dark:text-slate-400 sm:text-sm">
                 Blivap stands for life. For people. For making a difference when
                 it really matters. We deliver safe blood products and connect
                 those in need with willing donors.
               </p>
-              <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed">
+              <p className="text-xs leading-relaxed text-[#6B7280] dark:text-slate-400 sm:text-sm">
                 Thanks to our donors, patients get a chance at a better future.
                 Together, we connect people who need blood or sperm with people
                 willing to donate—building a sustainable ecosystem that saves
@@ -65,27 +65,27 @@ export default function About() {
             ].map((value, i) => (
               <div
                 key={i}
-                className="bg-white p-3 sm:p-4 rounded-lg border border-[#E5E7EB]"
+                className="rounded-lg border border-[#E5E7EB] bg-white p-3 dark:border-white/10 dark:bg-[#111827] sm:p-4"
               >
-                <div className={`${value.color} p-2 rounded-full w-fit mb-2`}>
+                <div className={`${value.color} mb-2 w-fit rounded-full p-2 dark:bg-white/10`}>
                   <value.icon className="text-primary" size={18} />
                 </div>
-                <h3 className="font-semibold text-sm mb-1.5">{value.title}</h3>
-                <p className="text-xs text-[#6B7280] leading-relaxed">
+                <h3 className="mb-1.5 text-sm font-semibold text-black dark:text-white">{value.title}</h3>
+                <p className="text-xs leading-relaxed text-[#6B7280] dark:text-slate-400">
                   {value.desc}
                 </p>
               </div>
             ))}
           </div>
 
-          <div className="bg-[#F9FAFB] p-4 sm:p-5 rounded-lg border border-[#E5E7EB]">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] p-4 dark:border-white/10 dark:bg-[#0F172A] sm:p-5">
+            <div className="mb-4 flex items-center gap-2">
               <Award className="text-primary" size={20} />
-              <h2 className="font-semibold text-base text-black">
+              <h2 className="text-base font-semibold text-black dark:text-white">
                 Our achievements
               </h2>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
               {[
                 { number: "10,000+", label: "Lives saved" },
                 { number: "5,000+", label: "Active donors" },
@@ -94,16 +94,16 @@ export default function About() {
               ].map((stat, i) => (
                 <div
                   key={i}
-                  className="bg-white p-3 rounded-md text-center border border-[#E5E7EB]"
+                  className="rounded-md border border-[#E5E7EB] bg-white p-3 text-center dark:border-white/10 dark:bg-[#111827]"
                 >
                   <p className="text-base font-semibold text-primary">
                     {stat.number}
                   </p>
-                  <p className="text-xs text-[#6B7280]">{stat.label}</p>
+                  <p className="text-xs text-[#6B7280] dark:text-slate-400">{stat.label}</p>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-[#6B7280] leading-relaxed mb-4">
+            <p className="mb-4 text-xs leading-relaxed text-[#6B7280] dark:text-slate-400">
               Whether you want to donate, need a donation, or support our
               mission, there&apos;s a place for you in the Blivap community.
             </p>

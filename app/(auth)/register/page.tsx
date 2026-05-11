@@ -81,7 +81,7 @@ export default function SignUpPage() {
     <AuthLayout>
       <div
         ref={rootRef}
-        className="flex flex-col gap-12 mt-10 max-w-132 w-full"
+        className="mt-10 flex w-full max-w-132 flex-col gap-12"
       >
         <Link href="/" className="w-fit" data-register-logo>
           <p className="flex justify-center font-semibold font-helvetica text-primary text-5xl tracking-tight">
@@ -91,10 +91,10 @@ export default function SignUpPage() {
         </Link>
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-2" data-register-intro>
-            <p className="font-semibold text-2xl  text-[#100F14]">
+            <p className="text-2xl font-semibold text-[#100F14] dark:text-white">
               Welcome to Blivap👋
             </p>
-            <p className="text-sm text-[#49475A]">
+            <p className="text-sm text-[#49475A] dark:text-slate-400">
               Kindly fill in your details below to create an account{" "}
             </p>
           </div>
@@ -232,7 +232,7 @@ export default function SignUpPage() {
                       <div className="flex flex-col gap-2">
                         <Checkbox
                           label={
-                            <p className="text-[#333333]">
+                            <p className="text-[#333333] dark:text-slate-300">
                               I agree to the{" "}
                               <Link
                                 href={routes.terms}
@@ -252,7 +252,7 @@ export default function SignUpPage() {
 
                         <Checkbox
                           label={
-                            <p className="text-[#333333]">
+                            <p className="text-[#333333] dark:text-slate-300">
                               I agree to the{" "}
                               <Link
                                 href={routes.privacy}
@@ -287,7 +287,7 @@ export default function SignUpPage() {
               className="flex flex-col items-center gap-8"
               data-register-social
             >
-              <p className="text-sm text-[#49475A]">
+              <p className="text-sm text-[#49475A] dark:text-slate-400">
                 Already have an account?{" "}
                 <Link
                   href={withDn("/login", dnRedirect)}
@@ -298,9 +298,9 @@ export default function SignUpPage() {
               </p>
 
               <div className="flex items-center w-full max-w-99.75">
-                <div className="w-full h-px bg-gray-300"></div>
-                <p className="mx-4 text-gray-500">or</p>
-                <div className="w-full h-px bg-gray-300"></div>
+                <div className="h-px w-full bg-gray-300 dark:bg-white/10"></div>
+                <p className="mx-4 text-gray-500 dark:text-slate-500">or</p>
+                <div className="h-px w-full bg-gray-300 dark:bg-white/10"></div>
               </div>
               <div className="flex gap-6 items-center">
                 <Image

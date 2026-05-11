@@ -13,17 +13,19 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthLayout>
-      <div className="flex flex-col gap-15 max-w-132 w-full">
+      <div className="flex w-full max-w-132 flex-col gap-15">
         <div className="flex items-center gap-2.5">
           <Image src="/logo.svg" alt="Logo" width={45} height={45} />
-          <p className="font-semibold text-[20px] text-[#19181F]">Blivap</p>
+          <p className="text-[20px] font-semibold text-[#19181F] dark:text-white">
+            Blivap
+          </p>
         </div>
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-6">
-            <p className="font-semibold text-2xl lg:text-[32px] text-[#100F14]">
+            <p className="text-2xl font-semibold text-[#100F14] dark:text-white lg:text-[32px]">
               Forgot password
             </p>
-            <p className="text-base text-[#49475A]">
+            <p className="text-base text-[#49475A] dark:text-slate-400">
               Enter your email and we&apos;ll send you a link to reset your
               password.
             </p>
@@ -61,7 +63,7 @@ export default function ForgotPasswordPage() {
               </form>
             )}
           </Formik>
-          <p className="text-base text-[#49475A]">
+          <p className="text-base text-[#49475A] dark:text-slate-400">
             <Link
               href="/login"
               className="font-semibold text-primary underline"

@@ -54,7 +54,7 @@ export default function VerifyEmailPage() {
 
   return (
     <AuthLayout>
-      <div className="flex flex-col gap-15 max-w-132 w-full">
+      <div className="flex w-full max-w-132 flex-col gap-15">
         <Link href="/" className="w-fit mt-20">
           <p className="flex justify-center font-semibold font-helvetica text-primary text-5xl tracking-tight">
             <BlivapLogo fill="#960018" className="size-17" />
@@ -63,10 +63,10 @@ export default function VerifyEmailPage() {
         </Link>
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-6">
-            <p className="font-semibold text-2xl lg:text-[32px] text-[#100F14]">
+            <p className="text-2xl font-semibold text-[#100F14] dark:text-white lg:text-[32px]">
               Verify your email
             </p>
-            <p className="text-base text-[#49475A]">
+            <p className="text-base text-[#49475A] dark:text-slate-400">
               Enter the token from your verification email and your email
               address.
             </p>
@@ -114,7 +114,7 @@ export default function VerifyEmailPage() {
                     {isLoading ? "Verifying..." : "Verify email"}
                   </button>
                 </form>
-                <p className="text-base text-[#49475A]">
+                <p className="text-base text-[#49475A] dark:text-slate-400">
                   Didn&apos;t receive the email?{" "}
                   <button
                     type="button"
@@ -130,7 +130,7 @@ export default function VerifyEmailPage() {
                   </button>
                 </p>
                 <button
-                  className="border border-primary rounded-md py-2 px-4 hover:bg-primary/5 active:bg-transparent transition-colors duration-200 w-fit flex items-center gap-2 text-base text-[#49475A] cursor-pointer"
+                  className="flex w-fit items-center gap-2 rounded-md border border-primary px-4 py-2 text-base text-[#49475A] transition-colors duration-200 cursor-pointer hover:bg-primary/5 active:bg-transparent dark:text-slate-300 dark:hover:bg-primary/10"
                   onClick={handleLogout}
                 >
                   <LogOut size={16} />

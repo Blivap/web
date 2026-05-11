@@ -28,7 +28,7 @@ import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 import { NotificationBell } from "../components/feedback/notification/notification.component";
 import { PushNotificationRegistrar } from "../components/feedback/notification/push-registrar.component";
 import { useNotificationNavigationListener } from "@/hooks/notifications/useNotificationNavigationListener.hook";
-import { ChevronDown, Info, LogOut, Settings } from "lucide-react";
+import { ChevronDown, Info, LogOut, Menu, Settings } from "lucide-react";
 import { routes } from "@/config/routes";
 import {
   nextThemePreference,
@@ -36,6 +36,7 @@ import {
 } from "@/hooks/theme/useThemePreference.hook";
 import { ProfileThemeCycleRow } from "./theme-profile-submenu.component";
 import { SelectAvatarModal } from "@/components/select-avatar/select-avatar-modal.component";
+import { Button } from "@/components/ui/button";
 
 // Define navigation item structure
 interface NavItem {
@@ -238,13 +239,15 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
             </div>
             <NotificationBell />
           </div>
-          <button
+
+          <Button
+            variant="ghost"
             onClick={() => setDrawer((prev) => !prev)}
-            className="p-2 sm:p-3 bg-white rounded-md shadow-md h-fit md:hidden"
+            className="h-fit rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-1 text-text-primary transition-colors hover:bg-[#F3F4F6] md:hidden dark:border-white/10 dark:bg-[#1A1A22] dark:text-white dark:hover:bg-white/8"
             aria-label="Toggle menu"
           >
-            <FaBars size={12} />
-          </button>
+            <Menu size={24} className="size-6" />
+          </Button>
         </div>
       </div>
       {/* Main content area */}

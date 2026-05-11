@@ -6,21 +6,21 @@ import Link from "next/link";
 export default function Terms() {
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col py-6 sm:py-8 max-w-3xl mx-auto">
+      <div className="flex-1 flex flex-col py-6 sm:py-8 max-w-3xl mx-auto text-[#111827] dark:text-slate-300">
         <div className="flex flex-col gap-4 max-w-3xl">
           <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight">
             Terms and conditions
           </h1>
 
-          <p className="text-xs text-[#6B7280] leading-relaxed">
+          <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
             Last updated: February 2025
           </p>
 
-          <section className="flex flex-col gap-3 sm:gap-4">
-            <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black">
+          <section className="flex flex-col gap-3 rounded-xl border border-[#E5E7EB] bg-white px-4 py-4 text-[#111827] dark:border-white/10 dark:bg-[#111827] dark:text-white sm:gap-4 sm:px-5 sm:py-5">
+            <h2 className="font-medium text-xl sm:text-2xl md:text-3xl text-black dark:text-white">
               Agreement to terms
             </h2>
-            <p className="text-sm sm:text-base text-[#333333] leading-relaxed">
+            <p className="text-sm sm:text-base text-[#333333] dark:text-slate-300 leading-relaxed">
               By accessing or using Blivap&apos;s platform and services, you
               agree to be bound by these Terms and Conditions. If you do not
               agree, please do not use our services. We may update these terms
@@ -29,9 +29,9 @@ export default function Terms() {
             </p>
           </section>
 
-          <section className="flex flex-col gap-2">
-            <h2 className="font-semibold text-base text-black">Eligibility</h2>
-            <p className="text-xs text-[#6B7280] leading-relaxed">
+          <section className="flex flex-col gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-4 text-[#111827] dark:border-white/10 dark:bg-[#111827] dark:text-white">
+            <h2 className="font-semibold text-base text-black dark:text-white">Eligibility</h2>
+            <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
               Donors must meet the eligibility criteria we publish (including
               age, health, and location requirements for blood and sperm
               donation). You are responsible for providing accurate information
@@ -41,11 +41,11 @@ export default function Terms() {
             </p>
           </section>
 
-          <section className="flex flex-col gap-2">
-            <h2 className="font-semibold text-base text-black">
+          <section className="flex flex-col gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-4 text-[#111827] dark:border-white/10 dark:bg-[#111827] dark:text-white">
+            <h2 className="font-semibold text-base text-black dark:text-white">
               Use of the platform
             </h2>
-            <p className="text-xs text-[#6B7280] leading-relaxed">
+            <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
               You agree to use Blivap only for lawful purposes and in accordance
               with these terms. You must not misuse the platform, provide false
               information, or attempt to harm other users or our systems. We may
@@ -53,11 +53,11 @@ export default function Terms() {
             </p>
           </section>
 
-          <section className="flex flex-col gap-2">
-            <h2 className="font-semibold text-base text-black">
+          <section className="flex flex-col gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-4 text-[#111827] dark:border-white/10 dark:bg-[#111827] dark:text-white">
+            <h2 className="font-semibold text-base text-black dark:text-white">
               Donations and compensation
             </h2>
-            <p className="text-xs text-[#6B7280] leading-relaxed">
+            <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
               Compensation for donations (where applicable) is as described on
               the platform at the time of booking. Payment terms and processing
               are subject to our payment policy. We do not guarantee
@@ -67,11 +67,11 @@ export default function Terms() {
             </p>
           </section>
 
-          <section className="flex flex-col gap-2">
-            <h2 className="font-semibold text-base text-black">
+          <section className="flex flex-col gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-4 text-[#111827] dark:border-white/10 dark:bg-[#111827] dark:text-white">
+            <h2 className="font-semibold text-base text-black dark:text-white">
               Limitation of liability
             </h2>
-            <p className="text-xs text-[#6B7280] leading-relaxed">
+            <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
               Blivap connects donors with those in need and works with
               accredited partners. Our liability is limited to the extent
               permitted by law. We are not liable for indirect, consequential,
@@ -80,9 +80,9 @@ export default function Terms() {
             </p>
           </section>
 
-          <section className="flex flex-col gap-2">
-            <h2 className="font-semibold text-base text-black">Contact</h2>
-            <p className="text-xs text-[#6B7280] leading-relaxed">
+          <section className="flex flex-col gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-4 text-[#111827] dark:border-white/10 dark:bg-[#111827] dark:text-white">
+            <h2 className="font-semibold text-base text-black dark:text-white">Contact</h2>
+            <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
               For questions about these Terms and Conditions, contact us at{" "}
               <a
                 href="mailto:legal@blivap.com"
