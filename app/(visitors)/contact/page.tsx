@@ -1,7 +1,16 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { HomeLayout } from "@/layout/home.layout.component";
-import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
+import {
+  Clock3,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Send,
+  ShieldCheck,
+} from "lucide-react";
 import { useState } from "react";
 
 export default function Contact() {
@@ -22,6 +31,7 @@ export default function Contact() {
       primary: "support@blivap.com",
       secondary: "info@blivap.com",
       href: "mailto:support@blivap.com",
+      accent: "bg-[#FFF1F3]",
     },
     {
       icon: Phone,
@@ -29,6 +39,7 @@ export default function Contact() {
       primary: "+234 XXX XXX XXXX",
       secondary: "Mon–Fri, 9AM–5PM WAT",
       href: "tel:+234XXXXXXXXXX",
+      accent: "bg-[#EEF2FF]",
     },
     {
       icon: MapPin,
@@ -36,166 +47,252 @@ export default function Contact() {
       primary: "Blivap Headquarters",
       secondary: "Lagos, Nigeria",
       href: null,
+      accent: "bg-[#ECFDF3]",
     },
+  ];
+
+  const supportTopics = [
+    "Blood or sperm donation guidance",
+    "Hospital and partnership enquiries",
+    "Platform or account support",
+    "Research and collaboration requests",
   ];
 
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col">
-        {/* Hero section */}
-        <section className="bg-bg-secondary border-b border-border">
-          <div className="px-4 sm:px-6 md:px-8 lg:px-20 xl:px-36 max-w-[1440px] mx-auto py-10 sm:py-14">
-            <h1 className="font-semibold text-text-primary text-xl sm:text-2xl tracking-tight mb-2">
-              Get in touch
+      <div className="flex flex-1 flex-col gap-8 py-6 sm:gap-10 sm:py-8">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+          <div className="overflow-hidden rounded-[28px] border border-[#E9D8DC] bg-linear-to-br from-[#FFF7F8] via-white to-[#FFF3F5] p-6 shadow-[0_14px_38px_rgba(15,23,42,0.06)] sm:p-8">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary shadow-sm">
+              <MessageCircle size={14} />
+              Contact Blivap
+            </span>
+            <h1 className="mt-5 text-2xl font-semibold tracking-tight text-black sm:text-4xl">
+              Let&apos;s help you quickly.
             </h1>
-            <p className="text-sm text-text-secondary max-w-xl leading-relaxed">
-              Have questions about donating, partnerships, or our platform?
-              We’re here to help and usually respond within 24 hours.
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#6B7280] sm:text-[15px]">
+              Reach out for donor support, partnership conversations, platform
+              questions, or research collaboration. We usually reply within 24
+              hours on business days.
             </p>
-          </div>
-        </section>
 
-        <div className="px-4 sm:px-6 md:px-8 lg:px-20 xl:px-36 max-w-[1440px] mx-auto py-8 sm:py-12">
-          <div className="grid lg:grid-cols-5 gap-8 lg:gap-12">
-            {/* Contact methods */}
-            <div className="lg:col-span-2 flex flex-col gap-4">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-1">
-                Contact options
-              </h2>
-              {contactMethods.map((method) => {
-                const cardClass = `flex items-start gap-4 p-4 rounded-xl border border-border bg-white transition-all duration-200 ${
-                  method.href
-                    ? "hover:border-primary hover:shadow-md hover:shadow-primary/5 cursor-pointer"
-                    : ""
-                }`;
-                const content = (
-                  <>
-                    <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <method.icon className="text-primary" size={20} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-text-tertiary mb-0.5">
-                        {method.label}
-                      </p>
-                      <p className="text-sm font-medium text-text-primary">
-                        {method.primary}
-                      </p>
-                      {method.secondary && (
-                        <p className="text-xs text-text-secondary mt-0.5">
-                          {method.secondary}
-                        </p>
-                      )}
-                    </div>
-                  </>
-                );
-                return method.href ? (
-                  <a
-                    key={method.label}
-                    href={method.href}
-                    className={cardClass}
-                  >
-                    {content}
-                  </a>
-                ) : (
-                  <div key={method.label} className={cardClass}>
-                    {content}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Form */}
-            <div className="lg:col-span-3">
-              <div className="sticky top-24">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <MessageCircle className="text-primary" size={18} />
-                  </div>
-                  <div>
-                    <h2 className="font-semibold text-text-primary text-base">
-                      Send a message
-                    </h2>
-                    <p className="text-xs text-text-secondary">
-                      We’ll get back to you as soon as we can.
-                    </p>
-                  </div>
-                </div>
-
-                <form
-                  onSubmit={handleSubmit}
-                  className="bg-white border border-border rounded-xl p-6 sm:p-8 shadow-sm"
-                >
-                  <div className="grid sm:grid-cols-2 gap-5 mb-5">
-                    <div>
-                      <label
-                        htmlFor="contact-name"
-                        className="block text-sm font-medium text-text-primary mb-1.5"
-                      >
-                        Name
-                      </label>
-                      <input
-                        id="contact-name"
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-colors"
-                        placeholder="Your name"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="contact-email"
-                        className="block text-sm font-medium text-text-primary mb-1.5"
-                      >
-                        Email
-                      </label>
-                      <input
-                        id="contact-email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-colors"
-                        placeholder="you@example.com"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="mb-6">
-                    <label
-                      htmlFor="contact-message"
-                      className="block text-sm font-medium text-text-primary mb-1.5"
-                    >
-                      Message
-                    </label>
-                    <textarea
-                      id="contact-message"
-                      rows={4}
-                      value={formData.message}
-                      onChange={(e) =>
-                        setFormData({ ...formData, message: e.target.value })
-                      }
-                      className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-colors resize-none"
-                      placeholder="How can we help?"
-                      required
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full sm:w-auto min-w-[140px] text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 text-white rounded-lg inline-flex items-center justify-center gap-2 transition-colors"
-                  >
-                    <Send size={16} />
-                    Send message
-                  </button>
-                </form>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/80 bg-white/80 p-4 backdrop-blur">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[#9CA3AF]">
+                  Response time
+                </p>
+                <p className="mt-1 text-lg font-semibold text-black">
+                  Within 24 hrs
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/80 bg-white/80 p-4 backdrop-blur">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[#9CA3AF]">
+                  Support window
+                </p>
+                <p className="mt-1 text-lg font-semibold text-black">
+                  Mon-Fri, 9AM-5PM
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/80 bg-white/80 p-4 backdrop-blur">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[#9CA3AF]">
+                  Focus
+                </p>
+                <p className="mt-1 text-lg font-semibold text-black">
+                  Donors and partners
+                </p>
               </div>
             </div>
           </div>
-        </div>
+
+          <div className="rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-[0_12px_32px_rgba(15,23,42,0.05)] sm:p-7">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <ShieldCheck size={18} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-black">
+                  What we can help with
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-[#6B7280]">
+                  Pick the fastest route for your request.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-col gap-3">
+              {supportTopics.map((topic) => (
+                <div
+                  key={topic}
+                  className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] px-4 py-3 text-sm font-medium text-[#374151]"
+                >
+                  {topic}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 rounded-2xl bg-[#FFF7F8] px-4 py-3">
+              <div className="flex items-center gap-2 text-primary">
+                <Clock3 size={16} />
+                <p className="text-sm font-semibold">Need a quick response?</p>
+              </div>
+              <p className="mt-1 text-xs leading-relaxed text-[#6B7280]">
+                Email is the fastest option for detailed requests. Phone support
+                is best for urgent coordination during working hours.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#9CA3AF]">
+                Contact channels
+              </p>
+              <h2 className="mt-2 text-xl font-semibold text-black">
+                Talk to the right team
+              </h2>
+            </div>
+
+            {contactMethods.map((method) => {
+              const cardClass = `group flex items-start gap-4 rounded-[24px] border border-[#E5E7EB] bg-white p-5 transition-all duration-200 ${
+                method.href
+                  ? "cursor-pointer hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[0_14px_32px_rgba(15,23,42,0.06)]"
+                  : ""
+              }`;
+              const content = (
+                <>
+                  <div
+                    className={`shrink-0 flex size-12 items-center justify-center rounded-2xl ${method.accent}`}
+                  >
+                    <method.icon className="text-primary" size={20} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#9CA3AF]">
+                      {method.label}
+                    </p>
+                    <p className="mt-1 text-base font-semibold text-black">
+                      {method.primary}
+                    </p>
+                    {method.secondary ? (
+                      <p className="mt-1 text-sm text-[#6B7280]">
+                        {method.secondary}
+                      </p>
+                    ) : null}
+                  </div>
+                </>
+              );
+
+              return method.href ? (
+                <a key={method.label} href={method.href} className={cardClass}>
+                  {content}
+                </a>
+              ) : (
+                <div key={method.label} className={cardClass}>
+                  {content}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="lg:sticky lg:top-24">
+            <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
+              <div className="border-b border-[#F1F5F9] bg-linear-to-r from-[#FFF7F8] via-white to-[#F8FAFC] px-5 py-5 sm:px-6">
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Send size={18} />
+                  </span>
+                  <div>
+                    <h2 className="text-lg font-semibold text-black">
+                      Send a message
+                    </h2>
+                    <p className="mt-1 text-sm leading-relaxed text-[#6B7280]">
+                      Share a few details and our team will follow up with the
+                      right next step.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="px-5 py-6 sm:px-6 sm:py-7">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="contact-name"
+                      className="mb-1.5 block text-sm font-medium text-black"
+                    >
+                      Name
+                    </label>
+                    <input
+                      id="contact-name"
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full rounded-2xl border border-[#E2E8F0] bg-[#FCFCFD] px-4 py-3 text-sm text-black outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/8"
+                      placeholder="Your full name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="contact-email"
+                      className="mb-1.5 block text-sm font-medium text-black"
+                    >
+                      Email
+                    </label>
+                    <input
+                      id="contact-email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      className="w-full rounded-2xl border border-[#E2E8F0] bg-[#FCFCFD] px-4 py-3 text-sm text-black outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/8"
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-5">
+                  <label
+                    htmlFor="contact-message"
+                    className="mb-1.5 block text-sm font-medium text-black"
+                  >
+                    Message
+                  </label>
+                  <textarea
+                    id="contact-message"
+                    rows={5}
+                    value={formData.message}
+                    onChange={(e) =>
+                      setFormData({ ...formData, message: e.target.value })
+                    }
+                    className="w-full resize-none rounded-2xl border border-[#E2E8F0] bg-[#FCFCFD] px-4 py-3 text-sm text-black outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/8"
+                    placeholder="Tell us how we can help."
+                    required
+                  />
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs leading-relaxed text-[#6B7280]">
+                    By sending a message, you agree that our team may contact
+                    you using the details you provided.
+                  </p>
+                  <Button
+                    type="submit"
+                    className="min-w-[150px] rounded-full bg-primary px-5 py-3 text-sm font-medium text-white hover:bg-primary/90"
+                  >
+                    <Send size={16} />
+                    Send message
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
       </div>
     </HomeLayout>
   );

@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { $api } from "@/app/api";
 import { IVerifyEmailPayload } from "@/types";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";
-import { routes } from "@/config/routes";
+import { getPostAuthRedirect } from "@/lib/navigation/authRedirect";
 
 export function useVerifyEmail() {
   const [isLoading, setIsLoading] = useState(false);
   const { showSnackbar } = useSnackbar();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const existingUser = useAppSelector((s) => s.auth.user);
 
@@ -45,9 +46,7 @@ export function useVerifyEmail() {
           dispatch(setUser({ ...existingUser, emailVerified: true }));
         }
 
-        /* Logged-in users hitting `/` are redirected to overview by middleware;
-         * using home avoids duplicating that rule here. */
-        router.replace(routes.home);
+        router.replace(getPostAuthRedirect(searchParams));
         return true;
       }
 

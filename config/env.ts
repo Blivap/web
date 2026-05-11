@@ -12,10 +12,6 @@ type Env = {
    */
   webPushVapidPublicKey: string | undefined;
   authTokenKey: string;
-  news: {
-    url: string;
-    apiKey: string;
-  };
 };
 
 /** Prefer server env, then Next.js public env (matches typical `.env.local` layouts). */
@@ -71,16 +67,6 @@ const env = (): Env => {
     process.env.WEB_PUSH_VAPID_PUBLIC_KEY,
   );
 
-  const newsUrl = requiredEnv(
-    "NEWS_URL (or NEXT_PUBLIC_NEWS_URL)",
-    first(process.env.NEWS_URL, process.env.NEXT_PUBLIC_NEWS_URL),
-  );
-
-  const newsApiKey = requiredEnv(
-    "NEWS_API_KEY (or NEXT_PUBLIC_NEWS_API_KEY)",
-    first(process.env.NEWS_API_KEY, process.env.NEXT_PUBLIC_NEWS_API_KEY),
-  );
-
   return {
     env: nodeEnv,
     url: siteUrl,
@@ -89,10 +75,6 @@ const env = (): Env => {
     enableNotifications: enableFlag === "true",
     webPushVapidPublicKey,
     authTokenKey,
-    news: {
-      url: newsUrl,
-      apiKey: newsApiKey,
-    },
   };
 };
 

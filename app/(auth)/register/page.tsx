@@ -7,17 +7,21 @@ import { PhoneInput } from "@/components/forms/phone-input";
 import { AuthLayout } from "@/layout/auth.layout.component";
 import { routes } from "@/config/routes";
 import { useRegister } from "@/hooks/auth/useRegister.hook";
+import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
 import { registerSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import { gsap } from "gsap";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useLayoutEffect, useRef } from "react";
 import { BlivapLogo } from "@/public/svg";
 
 export default function SignUpPage() {
   const { handleRegister, isLoading } = useRegister();
   const rootRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+  const dnRedirect = getDnRedirect(searchParams);
 
   useLayoutEffect(() => {
     if (!rootRef.current) return;
@@ -120,7 +124,6 @@ export default function SignUpPage() {
                 handleBlur,
                 setFieldValue,
                 isValid,
-                submitCount,
               }) => {
                 return (
                   <form
@@ -287,7 +290,7 @@ export default function SignUpPage() {
               <p className="text-sm text-[#49475A]">
                 Already have an account?{" "}
                 <Link
-                  href="/login"
+                  href={withDn("/login", dnRedirect)}
                   className="font-semibold text-primary underline"
                 >
                   Login

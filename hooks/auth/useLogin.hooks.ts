@@ -1,18 +1,25 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { $api } from "@/app/api";
 import { ILoginPayload, IAuthResponse } from "@/types";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials, setUser } from "@/store/slices/authSlice";
+import { routes } from "@/config/routes";
+import {
+  getDnRedirect,
+  getPostAuthRedirect,
+  withDn,
+} from "@/lib/navigation/authRedirect";
 
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const handleLogin = async (payload: ILoginPayload): Promise<boolean> => {
     setIsLoading(true);
     try {
@@ -37,8 +44,8 @@ export const useLogin = () => {
 
         if (token) {
           dispatch(setCredentials({ token }));
-          let userPayload =
-            normalizeUser(authData?.user ?? authData) ?? null;
+          const dnRedirect = await getDnRedirect(searchParams);
+          let userPayload = normalizeUser(authData?.user ?? authData) ?? null;
           if (!userPayload) {
             try {
               const me = await $api.auth.me();
@@ -53,9 +60,9 @@ export const useLogin = () => {
             dispatch(setUser(userPayload));
           }
           if (isEmailUnverified(userPayload ?? authData?.user)) {
-            router.replace("/verify-email");
+            router.replace(withDn(routes.verifyEmail, dnRedirect));
           } else {
-            router.replace("/overview");
+            router.replace(getPostAuthRedirect(searchParams));
           }
         }
         return true;

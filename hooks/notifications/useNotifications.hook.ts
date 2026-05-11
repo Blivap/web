@@ -17,6 +17,24 @@ export type NotificationItem = {
   href: string | null;
 };
 
+/** Silent poll replaces the first page from the server; preserve optimistic readAt and tail rows from loadMore. */
+function mergePollResult(
+  current: InAppNotification[],
+  freshFirstPage: InAppNotification[],
+): InAppNotification[] {
+  const mergedHead = freshFirstPage.map((inc) => {
+    const existing = current.find((n) => n.id === inc.id);
+    if (existing?.readAt != null && inc.readAt == null) {
+      return { ...inc, readAt: existing.readAt };
+    }
+    return inc;
+  });
+
+  const headIds = new Set(mergedHead.map((n) => n.id));
+  const tail = current.filter((n) => !headIds.has(n.id));
+  return [...mergedHead, ...tail];
+}
+
 function toViewItem(n: InAppNotification): NotificationItem {
   return {
     id: n.id,
@@ -61,7 +79,14 @@ export function useNotifications({
       } = await $api.notifications.list({ skip: 0, limit: PAGE_SIZE });
       const list = data?.data;
       if (status >= 200 && status < 300 && Array.isArray(list)) {
-        setRows(list);
+        if (list.length === 0) {
+          setRows([]);
+          setHasMore(false);
+          return;
+        }
+        setRows((current) =>
+          silent ? mergePollResult(current, list) : list,
+        );
         setHasMore(list.length === PAGE_SIZE);
         return;
       }
@@ -138,36 +163,41 @@ export function useNotifications({
     }
   }, [hasMore, isLoadingMore, isLoading, rows.length]);
 
-  const markAsRead = useCallback(
-    async (id: string) => {
-      setError(null);
-      const prev = rows;
+  const markAsRead = useCallback(async (id: string) => {
+    setError(null);
+    let previous: InAppNotification[] = [];
+
+    setRows((r) => {
+      previous = r;
       const now = new Date().toISOString();
-      setRows((r) => r.map((n) => (n.id === id ? { ...n, readAt: now } : n)));
-      try {
-        const { status, error: apiError } =
-          await $api.notifications.markRead(id);
-        if (status < 200 || status >= 300) {
-          setRows(prev);
-          setError(apiError ?? "Could not mark notification as read.");
-        }
-      } catch {
-        setRows(prev);
-        setError("Could not mark notification as read.");
+      return r.map((n) => (n.id === id ? { ...n, readAt: now } : n));
+    });
+
+    try {
+      const { status, error: apiError } =
+        await $api.notifications.markRead(id);
+      if (status < 200 || status >= 300) {
+        setRows(previous);
+        setError(apiError ?? "Could not mark notification as read.");
       }
-    },
-    [rows],
-  );
+    } catch {
+      setRows(previous);
+      setError("Could not mark notification as read.");
+    }
+  }, []);
 
   const markAllAsRead = useCallback(async () => {
-    const unreadIds = rows.filter((n) => n.readAt == null).map((n) => n.id);
-    if (unreadIds.length === 0) return;
-
     setError(null);
-    const now = new Date().toISOString();
-    setRows((r) =>
-      r.map((n) => (n.readAt == null ? { ...n, readAt: now } : n)),
-    );
+    let unreadIds: string[] = [];
+
+    setRows((r) => {
+      unreadIds = r.filter((n) => n.readAt == null).map((n) => n.id);
+      if (unreadIds.length === 0) return r;
+      const now = new Date().toISOString();
+      return r.map((n) => (n.readAt == null ? { ...n, readAt: now } : n));
+    });
+
+    if (unreadIds.length === 0) return;
 
     try {
       const results = await Promise.all(
@@ -184,7 +214,7 @@ export function useNotifications({
       await loadFirstPage();
       setError("Could not mark all notifications as read.");
     }
-  }, [rows, loadFirstPage]);
+  }, [loadFirstPage]);
 
   const items = rows.map(toViewItem);
   const unreadCount = rows.filter((n) => n.readAt == null).length;

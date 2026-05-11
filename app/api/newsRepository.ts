@@ -1,6 +1,7 @@
-import { config } from "@/config/env";
+import { fetcher } from "@/services/http";
+import { endpoints } from "@/services/endpoints";
 import { parseNewsPublishedAtToIso } from "@/lib/news-date";
-import type { INewsArticleRaw, INewsItem } from "@/types";
+import type { IResponse, INewsArticleRaw, INewsItem } from "@/types";
 
 export type NewsCategory =
   | "general"
@@ -15,18 +16,31 @@ export type NewsCategory =
 
 export type NewsLanguage = "en" | "fr" | "es";
 export type NewsCountry = "us" | "ng" | "in";
-export type NewsTruncate = "content";
+export type NewsTimeframe = "24h" | "7d" | "30d";
+export type NewsBinaryFlag = 0 | 1;
 
 export interface GetNewsParams {
-  category?: NewsCategory;
-  query?: string;
-  max?: number;
-  page?: number;
-  lang?: NewsLanguage;
+  q?: string;
+  qInTitle?: string;
+  qInMeta?: string;
+  timeframe?: NewsTimeframe;
   country?: NewsCountry;
-  from?: string;
-  to?: string;
-  truncate?: NewsTruncate;
+  excludecountry?: string;
+  category?: NewsCategory;
+  excludecategory?: string;
+  language?: NewsLanguage;
+  excludelanguage?: string;
+  domain?: string;
+  domainurl?: string;
+  excludedomain?: string;
+  region?: string;
+  datatype?: string;
+  prioritydomain?: string;
+  image?: NewsBinaryFlag;
+  video?: NewsBinaryFlag;
+  removeduplicate?: NewsBinaryFlag;
+  size?: number;
+  page?: number;
 }
 
 type NewsDataResponse = {
@@ -35,6 +49,10 @@ type NewsDataResponse = {
   results?: INewsArticleRaw[];
   nextPage?: string;
   errors?: string[];
+};
+
+type NewsRepositoryResponse = NewsDataResponse & {
+  articles?: INewsItem[];
 };
 
 const LANGUAGE_NAME_TO_CODE: Record<string, string> = {
@@ -66,6 +84,26 @@ function normalizeArticleLang(language?: string | null): {
 
 const EMPTY_IMAGE = "/images/news_image.jpg";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function extractNewsPayload(payload: unknown): NewsRepositoryResponse {
+  if (!isRecord(payload)) return {};
+
+  const nested = payload.data;
+  if (
+    isRecord(nested) &&
+    !("results" in payload) &&
+    !("articles" in payload) &&
+    ("results" in nested || "articles" in nested)
+  ) {
+    return nested as NewsRepositoryResponse;
+  }
+
+  return payload as NewsRepositoryResponse;
+}
+
 const mapNewsDataArticle = (
   article: INewsArticleRaw,
   index: number,
@@ -87,10 +125,7 @@ const mapNewsDataArticle = (
     url,
     image: article.image_url?.trim() || EMPTY_IMAGE,
     pubDate: article.pubDate?.trim() || undefined,
-    publishedAt: parseNewsPublishedAtToIso(
-      article.pubDate,
-      article.pubDateTZ,
-    ),
+    publishedAt: parseNewsPublishedAtToIso(article.pubDate, article.pubDateTZ),
     lang,
     languageRaw,
     source: {
@@ -115,40 +150,57 @@ const mapNewsDataArticle = (
 
 export default function NewsRepository() {
   return {
-    /** Params reserved for future query shaping; the current feed URL is fixed in config. */
-    getNews: async (_params?: GetNewsParams) => {
-      const { url, apiKey } = config.news;
+    getNews: async (
+      params: GetNewsParams = {},
+    ): Promise<IResponse<NewsRepositoryResponse>> => {
+      const query = new URLSearchParams();
+      for (const [key, value] of Object.entries(params)) {
+        if (value === undefined || value === null || value === "") continue;
+        query.set(key, String(value));
+      }
 
-      const response = await fetch(url);
+      const url = query.size
+        ? `${endpoints.news}?${query.toString()}`
+        : endpoints.news;
 
-      const rawData = (await response.json()) as NewsDataResponse;
-      const errors = Array.isArray(rawData?.errors)
-        ? rawData.errors
-        : undefined;
+      const {
+        data,
+        status,
+        message,
+        error: apiError,
+      } = await fetcher<
+        NewsRepositoryResponse | { data?: NewsRepositoryResponse }
+      >(url, { method: "GET" });
 
-      const normalizedArticles = (rawData.results ?? [])
-        .filter((article) => !article.duplicate)
-        .map(mapNewsDataArticle)
-        .filter((article): article is INewsItem => article !== null)
-        .sort(
-          (a, b) =>
-            new Date(b.publishedAt).getTime() -
-            new Date(a.publishedAt).getTime(),
-        );
+      const rawData = extractNewsPayload(data);
+      const errors = Array.isArray(rawData.errors) ? rawData.errors : undefined;
+
+      const normalizedArticles = Array.isArray(rawData.articles)
+        ? [...rawData.articles].sort(
+            (a, b) =>
+              new Date(b.publishedAt).getTime() -
+              new Date(a.publishedAt).getTime(),
+          )
+        : (rawData.results ?? [])
+            .filter((article) => !article.duplicate)
+            .map(mapNewsDataArticle)
+            .filter((article): article is INewsItem => article !== null)
+            .sort(
+              (a, b) =>
+                new Date(b.publishedAt).getTime() -
+                new Date(a.publishedAt).getTime(),
+            );
 
       return {
         data: {
           ...rawData,
           articles: normalizedArticles,
         },
-        status: response.status,
-        message: response.statusText,
-        error: errors?.[0] ?? null,
-        errors,
-        meta: {
-          totalResults: rawData.totalResults,
-          nextPage: rawData.nextPage,
-        },
+        status,
+        message,
+        error: apiError ?? errors?.[0] ?? null,
+        errors: errors?.length ? { news: errors } : undefined,
+        meta: undefined,
       };
     },
   };

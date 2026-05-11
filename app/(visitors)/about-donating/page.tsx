@@ -1,6 +1,7 @@
 "use client";
 
 import { HomeLayout } from "../../../layout/home.layout.component";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CheckCircle, Clock, Shield, Heart, Users } from "lucide-react";
 import Image from "next/image";
@@ -8,7 +9,7 @@ import Image from "next/image";
 export default function AboutDonating() {
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-6 sm:py-8 xl:px-36 max-w-[1440px] mx-auto">
+      <div className="flex-1 flex flex-col py-6 sm:py-8">
         <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-6">
           About donating
         </h1>
@@ -25,14 +26,13 @@ export default function AboutDonating() {
                 register online, book appointments, and track your history in
                 one place.
               </p>
-              <Link
-                href="https://calendly.com/care-blivap/30min"
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 text-white rounded-md inline-block w-fit transition-colors"
+              <Button
+                variant="link"
+                href="/register"
+                className="text-xs font-medium py-2  px-6 rounded-full bg-primary text-white hover:bg-primary/90 hover:text-white! transition-colors w-fit"
               >
-                Book a demo
-              </Link>
+                Register
+              </Button>
             </div>
             <div className="relative h-40 sm:h-52 rounded-lg overflow-hidden">
               <Image

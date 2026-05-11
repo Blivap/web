@@ -11,6 +11,7 @@ import { StructuredData } from "@/components/seo/structured-data";
 import { AuthChecker } from "@/components/auth/auth-checker";
 import { AuthRoutesPrefetch } from "@/components/auth/auth-routes-prefetch";
 import { AuthLoader } from "@/components/auth/auth-loader.component";
+import { BlivapLogo } from "@/public/svg";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -201,7 +202,15 @@ export default function RootLayout({
           <AuthRoutesPrefetch />
           <AuthChecker>
             <SnackbarProvider>
-              <Suspense fallback={<AuthLoader />}>{children}</Suspense>
+              <Suspense
+                fallback={
+                  <div className="flex justify-center items-center h-screen bg-white">
+                    <BlivapLogo />
+                  </div>
+                }
+              >
+                {children}
+              </Suspense>
               <Snackbar />
             </SnackbarProvider>
           </AuthChecker>

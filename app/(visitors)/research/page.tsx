@@ -13,7 +13,7 @@ import {
 export default function Research() {
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-6 sm:py-8 max-w-4xl mx-auto">
+      <div className="flex-1 flex flex-col py-6 sm:py-8 max-w-4xl mx-auto">
         <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-6">
           Lifesaving research
         </h1>

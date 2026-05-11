@@ -1,6 +1,7 @@
 "use client";
 
 import { HomeLayout } from "../../../layout/home.layout.component";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Heart, Target, Users, Award } from "lucide-react";
 import Image from "next/image";
@@ -8,7 +9,7 @@ import Image from "next/image";
 export default function About() {
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-6 sm:py-8 xl:px-36 max-w-[1440px] mx-auto">
+      <div className="flex-1 flex flex-col py-6 sm:py-8">
         <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-2">
           About Blivap
         </h1>
@@ -107,14 +108,13 @@ export default function About() {
               mission, there&apos;s a place for you in the Blivap community.
             </p>
             <div className="flex flex-wrap gap-2">
-              <Link
-                href="https://calendly.com/care-blivap/30min"
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors inline-block"
+              <Button
+                variant="link"
+                href="/register"
+                className="text-xs font-medium py-2  px-6 rounded-full bg-primary text-white hover:bg-primary/90 hover:text-white! transition-colors"
               >
-                Book Demo
-              </Link>
+                Register
+              </Button>
               <Link
                 href="/contact"
                 className="text-xs font-medium py-2 px-3.5 border border-primary text-primary hover:bg-primary/10 rounded-md transition-colors inline-block"

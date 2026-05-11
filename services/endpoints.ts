@@ -39,9 +39,11 @@ export const endpoints = {
     mine: "/bookings/mine",
   },
 
+  news: "/news",
+
   notifications: {
     list: "/notifications",
-    read: (id: string) => `/notifications/${id}/read`,
+    read: (id: string) => `/notifications/${encodeURIComponent(id)}/read`,
     pushSubscriptions: {
       fcm: "/notifications/push-subscriptions/fcm",
       web: "/notifications/push-subscriptions/web",

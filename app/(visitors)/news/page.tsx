@@ -4,10 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { formatNewsPublishedDate } from "@/lib/news-date";
 import { HomeLayout } from "@/layout/home.layout.component";
 import { NewsFallbackImage } from "@/components/image/news-fallback-image.component";
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
+  Clock3,
   ExternalLink,
+  Filter,
+  Globe2,
+  Languages,
   Newspaper,
   RefreshCw,
   Search,
@@ -17,9 +21,20 @@ import type {
   NewsCategory,
   NewsCountry,
   NewsLanguage,
+  NewsTimeframe,
 } from "@/app/api/newsRepository";
 
-const HEALTH_CATEGORY: NewsCategory = "health";
+const NEWS_CATEGORIES: { label: string; value: NewsCategory }[] = [
+  { label: "General", value: "general" },
+  { label: "World", value: "world" },
+  { label: "Nation", value: "nation" },
+  { label: "Business", value: "business" },
+  { label: "Technology", value: "technology" },
+  { label: "Entertainment", value: "entertainment" },
+  { label: "Sports", value: "sports" },
+  { label: "Science", value: "science" },
+  { label: "Health", value: "health" },
+];
 
 const NEWS_LANGUAGES: { label: string; value: NewsLanguage }[] = [
   { label: "English", value: "en" },
@@ -33,10 +48,23 @@ const NEWS_COUNTRIES: { label: string; value: NewsCountry }[] = [
   { label: "India", value: "in" },
 ];
 
+const NEWS_TIMEFRAMES: { label: string; value: NewsTimeframe | "" }[] = [
+  { label: "Default", value: "" },
+  { label: "24h", value: "24h" },
+  { label: "7d", value: "7d" },
+  { label: "30d", value: "30d" },
+];
+
 function estimateReadingTime(text?: string) {
   if (!text) return "2 min read";
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   return `${Math.max(2, Math.ceil(words / 180))} min read`;
+}
+
+function getCategoryLabel(category: NewsCategory): string {
+  return (
+    NEWS_CATEGORIES.find((item) => item.value === category)?.label ?? "Health"
+  );
 }
 
 function NewsHeroSkeleton() {
@@ -89,15 +117,43 @@ function NewsGridSkeleton() {
   );
 }
 
+const DEFAULT_NEWS_QUERY = "blood donation";
+
 export default function News() {
-  const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [query, setQuery] = useState(DEFAULT_NEWS_QUERY);
+  const [debouncedQuery, setDebouncedQuery] = useState(DEFAULT_NEWS_QUERY);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedLanguage, setSelectedLanguage] = useState<NewsLanguage>("en");
-  const [selectedCountry, setSelectedCountry] = useState<NewsCountry>("us");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-  const hasInvalidDateRange = Boolean(fromDate && toDate && fromDate > toDate);
+  const [selectedCategory, setSelectedCategory] = useState<NewsCategory | "">(
+    "",
+  );
+  const [selectedLanguage, setSelectedLanguage] = useState<NewsLanguage | "">(
+    "",
+  );
+  const [selectedCountry, setSelectedCountry] = useState<NewsCountry | "">("");
+  const [selectedTimeframe, setSelectedTimeframe] = useState<
+    NewsTimeframe | ""
+  >("");
+  const selectedCategoryLabel = selectedCategory
+    ? getCategoryLabel(selectedCategory)
+    : "All";
+  const hasFilterOverrides = Boolean(
+    query.trim() !== DEFAULT_NEWS_QUERY ||
+    selectedCategory ||
+    selectedTimeframe ||
+    selectedLanguage ||
+    selectedCountry ||
+    currentPage !== 1,
+  );
+
+  const resetFilters = () => {
+    setQuery(DEFAULT_NEWS_QUERY);
+    setDebouncedQuery(DEFAULT_NEWS_QUERY);
+    setCurrentPage(1);
+    setSelectedCategory("");
+    setSelectedLanguage("");
+    setSelectedCountry("");
+    setSelectedTimeframe("");
+  };
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -109,32 +165,24 @@ export default function News() {
 
   const newsParams = useMemo(
     () => ({
-      category: HEALTH_CATEGORY,
-      query: debouncedQuery ? `health AND ${debouncedQuery}` : undefined,
-      max: 10,
-      page: currentPage,
-      lang: selectedLanguage,
-      country: selectedCountry,
-      from: fromDate
-        ? new Date(`${fromDate}T00:00:00.000Z`).toISOString()
-        : undefined,
-      to: toDate
-        ? new Date(`${toDate}T23:59:59.999Z`).toISOString()
-        : undefined,
+      category: selectedCategory || undefined,
+      q: debouncedQuery || undefined,
+      page: currentPage > 1 ? currentPage : undefined,
+      language: selectedLanguage || undefined,
+      country: selectedCountry || undefined,
+      timeframe: selectedTimeframe || undefined,
     }),
     [
       debouncedQuery,
       currentPage,
+      selectedCategory,
       selectedLanguage,
       selectedCountry,
-      fromDate,
-      toDate,
+      selectedTimeframe,
     ],
   );
 
-  const { news, isLoading, error, refetch } = useNews(newsParams, {
-    enabled: !hasInvalidDateRange,
-  });
+  const { news, isLoading, error, refetch } = useNews(newsParams);
 
   const sourceCount = useMemo(
     () => new Set(news.map((item) => item.source?.name).filter(Boolean)).size,
@@ -146,26 +194,28 @@ export default function News() {
 
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 lg:px-20 py-6 sm:py-8 xl:px-36 max-w-[1440px] mx-auto gap-8">
-        <header className="flex flex-col gap-5">
+      <div className="flex-1 flex flex-col py-6 sm:py-8 gap-8 ">
+        <header className="flex flex-col gap-5 ">
           <div className="flex flex-col gap-2">
             <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               <Newspaper size={14} />
               Blivap news room
             </span>
             <h1 className="font-semibold text-primary text-2xl sm:text-3xl tracking-tight">
-              News and healthcare updates
+              News and trending updates
             </h1>
             <p className="text-sm text-[#6B7280] max-w-2xl leading-relaxed">
-              Follow the latest stories around blood donation, medical research,
-              and healthcare progress from trusted sources.
+              Explore trusted coverage across health, science, business,
+              technology, sports, and more.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4">
               <p className="text-[11px] uppercase tracking-wide text-[#9CA3AF]">
-                Health stories
+                {selectedCategory
+                  ? `${selectedCategoryLabel} stories`
+                  : "Stories"}
               </p>
               <p className="mt-1 text-2xl font-semibold text-black">
                 {news.length}
@@ -198,142 +248,229 @@ export default function News() {
           </div>
         </header>
 
-        <section className="rounded-2xl border border-[#E5E7EB] bg-[#FCFCFD] p-4 sm:p-5">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
-              <div className="relative w-full lg:max-w-md">
-                <Search
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]"
-                />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => {
-                    setCurrentPage(1);
-                    setQuery(e.target.value);
-                  }}
-                  maxLength={200}
-                  placeholder="Search health headlines and summaries"
-                  className="w-full rounded-xl border border-[#D1D5DB] bg-white py-2.5 pl-9 pr-3 text-sm text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-                />
+        <section className="overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-[0_12px_32px_rgba(15,23,42,0.05)] ">
+          <div className="border-b border-[#F1F5F9] bg-linear-to-r from-[#FFF7F8] via-white to-[#F8FAFC] px-4 py-4 sm:px-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 inline-flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary ">
+                  <Filter size={18} />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-black">
+                    Refine your news feed
+                  </p>
+                  <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#6B7280]">
+                    Search headlines, switch categories, and narrow the feed by
+                    language, country, or timeframe.
+                  </p>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => void refetch()}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D1D5DB] bg-white px-4 py-2.5 text-sm font-medium text-[#374151] hover:border-primary hover:text-primary transition-colors"
-              >
-                <RefreshCw
-                  size={15}
-                  className={isLoading ? "animate-spin" : ""}
-                />
-                Refresh
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                {hasFilterOverrides ? (
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-3.5 py-2 text-sm font-medium text-[#4B5563] transition-colors hover:border-primary/30 hover:text-primary"
+                  >
+                    Clear all
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => void refetch()}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D1D5DB] bg-white px-4 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:border-primary hover:text-primary"
+                >
+                  <RefreshCw
+                    size={15}
+                    className={isLoading ? "animate-spin" : ""}
+                  />
+                  Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-5 px-4 py-4 sm:px-5 sm:py-5">
+            <div className="relative w-full">
+              <Search
+                size={16}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF]"
+              />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => {
+                  setCurrentPage(1);
+                  setQuery(e.target.value);
+                }}
+                maxLength={200}
+                placeholder={
+                  selectedCategory
+                    ? `Search ${selectedCategoryLabel.toLowerCase()} headlines and summaries`
+                    : "Search headlines and summaries"
+                }
+                className="w-full rounded-2xl border border-[#E2E8F0] bg-[#FCFCFD] py-3 pl-11 pr-4 text-sm text-black outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/8"
+              />
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full px-3 py-1.5 text-xs font-medium bg-primary text-white">
-                Health only
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9CA3AF]">
+                Current view
               </span>
+              <span className="rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#475467]">
+                {selectedCategory ? selectedCategoryLabel : "All categories"}
+              </span>
+              <span className="rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#475467]">
+                {selectedLanguage
+                  ? selectedLanguage.toUpperCase()
+                  : "Any language"}
+              </span>
+              <span className="rounded-full bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#475467]">
+                {selectedCountry
+                  ? selectedCountry.toUpperCase()
+                  : "All countries"}
+              </span>
+              {selectedTimeframe ? (
+                <span className="rounded-full bg-[#FFF1F3] px-3 py-1.5 text-xs font-medium text-primary">
+                  {selectedTimeframe}
+                </span>
+              ) : null}
+              {debouncedQuery ? (
+                <span className="rounded-full bg-[#EEF2FF] px-3 py-1.5 text-xs font-medium text-[#4338CA]">
+                  &quot;{debouncedQuery}&quot;
+                </span>
+              ) : null}
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {NEWS_LANGUAGES.map((language) => (
-                <button
-                  key={language.value}
-                  type="button"
-                  onClick={() => {
-                    setCurrentPage(1);
-                    setSelectedLanguage(language.value);
-                  }}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                    selectedLanguage === language.value
-                      ? "bg-foundation-dark text-white"
-                      : "bg-white text-[#4B5563] border border-[#E5E7EB] hover:border-foundation-dark/30 hover:text-foundation-dark"
-                  }`}
-                >
-                  {language.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {NEWS_COUNTRIES.map((country) => (
-                <button
-                  key={country.value}
-                  type="button"
-                  onClick={() => {
-                    setCurrentPage(1);
-                    setSelectedCountry(country.value);
-                  }}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                    selectedCountry === country.value
-                      ? "bg-secondary text-white"
-                      : "bg-white text-[#4B5563] border border-[#E5E7EB] hover:border-secondary/40 hover:text-secondary"
-                  }`}
-                >
-                  {country.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="news-from-date"
-                  className="text-xs font-medium text-[#6B7280]"
-                >
-                  From
-                </label>
-                <input
-                  id="news-from-date"
-                  type="date"
-                  value={fromDate}
-                  onChange={(e) => {
-                    setCurrentPage(1);
-                    setFromDate(e.target.value);
-                  }}
-                  className="w-full rounded-xl border border-[#D1D5DB] bg-white py-2.5 px-3 text-sm text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-                />
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+              <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-black">Category</p>
+                    <p className="mt-1 text-xs text-[#6B7280]">
+                      Choose a topic only when you want to narrow the feed.
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-[#667085]">
+                    Optional
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {NEWS_CATEGORIES.map((category) => (
+                    <button
+                      key={category.value}
+                      type="button"
+                      onClick={() => {
+                        setCurrentPage(1);
+                        setSelectedCategory((current) =>
+                          current === category.value ? "" : category.value,
+                        );
+                      }}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                        selectedCategory === category.value
+                          ? "bg-primary text-white shadow-[0_6px_18px_rgba(150,0,24,0.18)]"
+                          : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-primary/40 hover:text-primary"
+                      }`}
+                    >
+                      {category.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="news-to-date"
-                  className="text-xs font-medium text-[#6B7280]"
-                >
-                  To
-                </label>
-                <input
-                  id="news-to-date"
-                  type="date"
-                  value={toDate}
-                  onChange={(e) => {
-                    setCurrentPage(1);
-                    setToDate(e.target.value);
-                  }}
-                  className="w-full rounded-xl border border-[#D1D5DB] bg-white py-2.5 px-3 text-sm text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-                />
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-1">
+                <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <Languages size={15} className="text-[#667085]" />
+                    <p className="text-sm font-semibold text-black">Language</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {NEWS_LANGUAGES.map((language) => (
+                      <button
+                        key={language.value}
+                        type="button"
+                        onClick={() => {
+                          setCurrentPage(1);
+                          setSelectedLanguage((current) =>
+                            current === language.value ? "" : language.value,
+                          );
+                        }}
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                          selectedLanguage === language.value
+                            ? "bg-foundation-dark text-white"
+                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-foundation-dark/30 hover:text-foundation-dark"
+                        }`}
+                      >
+                        {language.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <Globe2 size={15} className="text-[#667085]" />
+                    <p className="text-sm font-semibold text-black">Country</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {NEWS_COUNTRIES.map((country) => (
+                      <button
+                        key={country.value}
+                        type="button"
+                        onClick={() => {
+                          setCurrentPage(1);
+                          setSelectedCountry((current) =>
+                            current === country.value ? "" : country.value,
+                          );
+                        }}
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                          selectedCountry === country.value
+                            ? "bg-secondary text-white"
+                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-secondary/40 hover:text-secondary"
+                        }`}
+                      >
+                        {country.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <Clock3 size={15} className="text-[#667085]" />
+                    <p className="text-sm font-semibold text-black">
+                      Timeframe
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {NEWS_TIMEFRAMES.map((timeframe) => (
+                      <button
+                        key={timeframe.label}
+                        type="button"
+                        onClick={() => {
+                          setCurrentPage(1);
+                          setSelectedTimeframe((current) =>
+                            current === timeframe.value ? "" : timeframe.value,
+                          );
+                        }}
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                          selectedTimeframe === timeframe.value
+                            ? "bg-primary text-white"
+                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-primary/40 hover:text-primary"
+                        }`}
+                      >
+                        {timeframe.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-            {hasInvalidDateRange && (
-              <p className="text-sm text-[#B42318]">
-                The `From` date must be earlier than or equal to the `To` date.
-              </p>
-            )}
           </div>
         </section>
 
-        {hasInvalidDateRange ? (
-          <section className="rounded-2xl border border-[#F5C2C7] bg-[#FFF5F6] p-6 flex flex-col gap-3">
-            <p className="text-lg font-semibold text-black">
-              Invalid date range
-            </p>
-            <p className="text-sm text-[#6B7280] max-w-xl">
-              Update your `From` and `To` filters so the range is valid.
-            </p>
-          </section>
-        ) : error && news.length === 0 ? (
-          <section className="rounded-2xl border border-[#F5C2C7] bg-[#FFF5F6] p-6 flex flex-col gap-3">
+        {error && news.length === 0 ? (
+          <section className="rounded-2xl border border-[#F5C2C7] bg-[#FFF5F6] p-6 flex flex-col gap-3 ">
             <p className="text-lg font-semibold text-black">
               Could not load news
             </p>
@@ -352,7 +489,7 @@ export default function News() {
             <NewsGridSkeleton />
           </>
         ) : news.length === 0 ? (
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center">
+          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-8 text-center  ">
             <p className="text-lg font-semibold text-black">
               No articles found
             </p>
@@ -361,15 +498,7 @@ export default function News() {
             </p>
             <button
               type="button"
-              onClick={() => {
-                setQuery("");
-                setDebouncedQuery("");
-                setCurrentPage(1);
-                setSelectedLanguage("en");
-                setSelectedCountry("us");
-                setFromDate("");
-                setToDate("");
-              }}
+              onClick={resetFilters}
               className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
             >
               Clear filters
@@ -398,16 +527,28 @@ export default function News() {
                     <div className="p-5 sm:p-6 flex flex-col gap-3">
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-wide text-[#6B7280] font-medium">
                         <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">
-                          {debouncedQuery ? "Health search result" : "Health"}
+                          {debouncedQuery
+                            ? selectedCategory
+                              ? `${selectedCategoryLabel} search result`
+                              : "Search result"
+                            : selectedCategory
+                              ? selectedCategoryLabel
+                              : "Top story"}
                         </span>
                         <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">
-                          {selectedLanguage.toUpperCase()}
+                          {selectedLanguage
+                            ? selectedLanguage.toUpperCase()
+                            : "Any language"}
                         </span>
                         <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">
-                          {selectedCountry.toUpperCase()}
+                          {selectedCountry
+                            ? selectedCountry.toUpperCase()
+                            : "All countries"}
                         </span>
-                        <span>{featured.source?.name || "Healthcare"}</span>
-                        <span>{formatNewsPublishedDate(featured.publishedAt)}</span>
+                        <span>{featured.source?.name || "News source"}</span>
+                        <span>
+                          {formatNewsPublishedDate(featured.publishedAt)}
+                        </span>
                         <span>{estimateReadingTime(featured.content)}</span>
                       </div>
                       <h2 className="text-xl sm:text-2xl font-semibold text-black leading-snug group-hover:text-primary transition-colors">
@@ -444,7 +585,9 @@ export default function News() {
                       >
                         <div className="flex items-center justify-between gap-3 text-[11px] text-[#9CA3AF]">
                           <span>{item.source?.name || "Source"}</span>
-                          <span>{formatNewsPublishedDate(item.publishedAt)}</span>
+                          <span>
+                            {formatNewsPublishedDate(item.publishedAt)}
+                          </span>
                         </div>
                         <h3 className="mt-2 text-sm font-semibold text-black leading-snug group-hover:text-primary transition-colors line-clamp-2">
                           {item.title}
@@ -459,7 +602,7 @@ export default function News() {
               </section>
             )}
 
-            <section className="flex flex-col gap-4">
+            <section className="flex flex-col gap-4 ">
               <div className="flex items-end justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold text-black">
@@ -467,8 +610,14 @@ export default function News() {
                   </h2>
                   <p className="text-sm text-[#6B7280] mt-1">
                     {debouncedQuery
-                      ? `Health-related results for "${debouncedQuery}"`
-                      : "Top health headlines from trusted media sources."}
+                      ? `${
+                          selectedCategory
+                            ? `${selectedCategoryLabel}-related `
+                            : ""
+                        }results for "${debouncedQuery}"`
+                      : selectedCategory
+                        ? `Top ${selectedCategoryLabel.toLowerCase()} headlines from trusted media sources.`
+                        : "Top headlines from trusted media sources."}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -519,7 +668,9 @@ export default function News() {
                           <span className="rounded-full bg-[#F9FAFB] px-2.5 py-1 text-[#6B7280]">
                             {item.source?.name || "Source"}
                           </span>
-                          <span>{formatNewsPublishedDate(item.publishedAt)}</span>
+                          <span>
+                            {formatNewsPublishedDate(item.publishedAt)}
+                          </span>
                           <span>
                             {estimateReadingTime(
                               item.content || item.description,
@@ -543,7 +694,7 @@ export default function News() {
               </div>
             </section>
 
-            <section className="rounded-2xl bg-primary text-white px-5 sm:px-7 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <section className="rounded-2xl bg-primary text-white px-5 sm:px-7 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 3xl:max-w-1/2">
               <div className="max-w-2xl">
                 <h2 className="text-lg sm:text-xl font-semibold">
                   Want to see how Blivap turns awareness into action?
@@ -553,15 +704,13 @@ export default function News() {
                   and people in need across Nigeria.
                 </p>
               </div>
-              <Link
-                href="https://calendly.com/care-blivap/30min"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-primary hover:bg白/90 transition-colors"
+              <Button
+                variant="link"
+                href="/register"
+                className="text-xs font-medium py-2  px-6 rounded-full bg-white text-primary hover:bg-white/90 hover:text-primary! transition-colors shrink-0"
               >
-                Book a demo
-                <ArrowRight size={14} />
-              </Link>
+                Register
+              </Button>
             </section>
           </>
         )}
