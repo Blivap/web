@@ -18,17 +18,19 @@ function ResetPasswordForm() {
 
   return (
     <AuthLayout>
-      <div className="flex flex-col gap-15 max-w-132 w-full">
+      <div className="flex w-full max-w-132 flex-col gap-15">
         <div className="flex items-center gap-2.5">
           <Image src="/logo.svg" alt="Logo" width={45} height={45} />
-          <p className="font-semibold text-[20px] text-[#19181F]">Blivap</p>
+          <p className="text-[20px] font-semibold text-[#19181F] dark:text-white">
+            Blivap
+          </p>
         </div>
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-6">
-            <p className="font-semibold text-2xl lg:text-[32px] text-[#100F14]">
+            <p className="text-2xl font-semibold text-[#100F14] dark:text-white lg:text-[32px]">
               Reset password
             </p>
-            <p className="text-base text-[#49475A]">
+            <p className="text-base text-[#49475A] dark:text-slate-400">
               Choose a new password for your account. Use the link from your
               email; the reset token is applied automatically.
             </p>
@@ -88,7 +90,7 @@ function ResetPasswordForm() {
               </form>
             )}
           </Formik>
-          <p className="text-base text-[#49475A]">
+          <p className="text-base text-[#49475A] dark:text-slate-400">
             <Link
               href="/login"
               className="font-semibold text-primary underline"
@@ -107,10 +109,10 @@ export default function ResetPasswordPage() {
     <Suspense
       fallback={
         <AuthLayout>
-          <div className="flex flex-col gap-15 max-w-132 w-full">
-            <div className="h-12 bg-[#66666620] rounded w-32" />
-            <div className="h-8 bg-[#66666620] rounded w-3/4" />
-            <div className="h-10 bg-[#66666620] rounded w-full" />
+          <div className="flex w-full max-w-132 flex-col gap-15">
+            <div className="h-12 w-32 rounded bg-[#66666620] dark:bg-white/10" />
+            <div className="h-8 w-3/4 rounded bg-[#66666620] dark:bg-white/10" />
+            <div className="h-10 w-full rounded bg-[#66666620] dark:bg-white/10" />
           </div>
         </AuthLayout>
       }

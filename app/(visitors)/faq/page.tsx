@@ -63,15 +63,15 @@ export default function FAQ() {
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg border border-[#E5E7EB] overflow-hidden lg:max-w-1/2"
+                className="overflow-hidden rounded-lg border border-[#E5E7EB] bg-white dark:border-white/10 dark:bg-[#111827] lg:max-w-1/2"
               >
                 <button
                   onClick={() =>
                     setOpenIndex(openIndex === index ? null : index)
                   }
-                  className="w-full flex items-center justify-between p-3 sm:p-4 text-left hover:bg-[#FAFAFA] transition-colors"
+                  className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-[#FAFAFA] dark:hover:bg-white/6 sm:p-4"
                 >
-                  <h3 className="font-semibold text-sm text-black pr-3 text-left">
+                  <h3 className="pr-3 text-left text-sm font-semibold text-black dark:text-white">
                     {faq.question}
                   </h3>
                   <ChevronDown
@@ -82,7 +82,7 @@ export default function FAQ() {
                 {openIndex === index && (
                   <div className="overflow-hidden">
                     <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-0">
-                      <p className="text-xs text-[#6B7280] leading-relaxed">
+                      <p className="text-xs leading-relaxed text-[#6B7280] dark:text-slate-400">
                         {faq.answer}
                       </p>
                     </div>
@@ -92,11 +92,11 @@ export default function FAQ() {
             ))}
           </div>
 
-          <div className="bg-[#F9FAFB] p-4 rounded-lg mt-4 border border-[#E5E7EB] lg:max-w-1/2">
-            <h2 className="font-semibold text-base text-black mb-2">
+          <div className="mt-4 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] p-4 dark:border-white/10 dark:bg-[#0F172A] lg:max-w-1/2">
+            <h2 className="mb-2 text-base font-semibold text-black dark:text-white">
               Still have questions?
             </h2>
-            <p className="text-xs text-[#6B7280] leading-relaxed mb-4">
+            <p className="mb-4 text-xs leading-relaxed text-[#6B7280] dark:text-slate-400">
               Contact us and we&apos;ll get back to you as soon as possible.
             </p>
             <Link

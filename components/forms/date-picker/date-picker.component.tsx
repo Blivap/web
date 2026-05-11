@@ -308,7 +308,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
     }, [minDate, maxDate]);
 
     const selectTriggerClass =
-      "w-full cursor-pointer rounded-md border border-[#66666659] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#100F14] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] outline-none transition-[border-color,box-shadow] hover:border-[#8A8A8A] focus:border-primary focus:ring-2 focus:ring-primary/15";
+      "w-full cursor-pointer rounded-md border border-[#66666659] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#100F14] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] outline-none transition-[border-color,box-shadow] hover:border-[#8A8A8A] focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/12 dark:bg-[#111827] dark:text-white dark:shadow-none dark:hover:border-white/25";
 
     return (
       <div
@@ -323,7 +323,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
         {label ? (
           <p
             className={classNames(
-              "text-[#9794AA] text-xs font-medium",
+              "text-xs font-medium text-[#9794AA] dark:text-slate-400",
               labelClassName,
             )}
           >
@@ -333,7 +333,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
         <div className="grid gap-px">
           <div
             className={classNames(
-              "flex items-center border border-[#66666659] rounded-md w-full px-4 gap-2",
+              "flex w-full items-center gap-2 rounded-md border border-[#66666659] bg-white px-4 dark:border-white/12 dark:bg-[#111827]",
               { "border-red-500": error },
               { "opacity-60 pointer-events-none": disabled },
               fieldClassName,
@@ -348,8 +348,8 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               aria-expanded={open}
               aria-controls={listboxId}
               className={classNames(
-                "outline-none py-2.5 w-full min-w-0 text-left text-sm font-medium",
-                !displayText && "text-[#9794AA]",
+                "w-full min-w-0 bg-transparent py-2.5 text-left text-sm font-medium text-[#100F14] outline-none dark:text-white",
+                !displayText && "text-[#9794AA] dark:text-slate-500",
                 inputClassName,
                 className,
               )}
@@ -362,7 +362,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               {...rest}
             >
               {displayText || (
-                <span className="text-[#9794AA] text-xs font-medium">
+                <span className="text-xs font-medium text-[#9794AA] dark:text-slate-500">
                   {placeholder}
                 </span>
               )}
@@ -375,12 +375,12 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               role="dialog"
               aria-modal="true"
               aria-label="Choose date"
-              className="absolute left-0 top-full z-101 mt-1 w-[232px] rounded-md border border-[#66666659] bg-white p-2 shadow-[0_6px_16px_rgba(15,23,42,0.1)]"
+              className="absolute left-0 top-full z-101 mt-1 w-[232px] rounded-md border border-[#66666659] bg-white p-2 shadow-[0_6px_16px_rgba(15,23,42,0.1)] dark:border-white/12 dark:bg-[#111827] dark:shadow-[0_16px_40px_rgba(0,0,0,0.45)]"
             >
               <div className="mb-1.5 flex items-center gap-0.5">
                 <button
                   type="button"
-                  className="shrink-0 rounded p-0.5 text-[#100F14] hover:bg-[#F3F4F6] disabled:opacity-30"
+                  className="shrink-0 rounded p-0.5 text-[#100F14] hover:bg-[#F3F4F6] disabled:opacity-30 dark:text-white dark:hover:bg-white/8"
                   aria-label="Previous month"
                   disabled={!canPrevMonth}
                   onClick={() => canPrevMonth && goMonth(-1)}
@@ -408,7 +408,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                     </span>
                     <ChevronDown
                       className={classNames(
-                        "size-3.5 shrink-0 text-[#9794AA] transition-transform duration-150",
+                        "size-3.5 shrink-0 text-[#9794AA] transition-transform duration-150 dark:text-slate-500",
                         monthMenuOpen && "rotate-180",
                       )}
                       strokeWidth={2}
@@ -419,7 +419,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                     <ul
                       role="listbox"
                       aria-labelledby={`${id}-month-trigger`}
-                      className="absolute left-0 right-0 top-full z-110 mt-0.5 max-h-42 overflow-y-auto rounded-md border border-[#66666659] bg-white py-0.5 shadow-[0_6px_16px_rgba(15,23,42,0.12)]"
+                      className="absolute left-0 right-0 top-full z-110 mt-0.5 max-h-42 overflow-y-auto rounded-md border border-[#66666659] bg-white py-0.5 shadow-[0_6px_16px_rgba(15,23,42,0.12)] dark:border-white/12 dark:bg-[#111827] dark:shadow-[0_16px_40px_rgba(0,0,0,0.45)]"
                     >
                       {MONTHS_SHORT.map((monthLabel, m) => {
                         const disabled = isMonthDisabled(
@@ -439,11 +439,12 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                               className={classNames(
                                 "flex w-full px-2.5 py-1.5 text-left text-xs font-medium transition-colors",
                                 isActive &&
-                                  "bg-[#FDF2F4] font-semibold text-primary",
+                                  "bg-[#FDF2F4] font-semibold text-primary dark:bg-primary/15 dark:text-white",
                                 !disabled &&
                                   !isActive &&
-                                  "text-[#100F14] hover:bg-[#F9FAFB]",
-                                disabled && "cursor-not-allowed text-[#D1D5DB]",
+                                  "text-[#100F14] hover:bg-[#F9FAFB] dark:text-white dark:hover:bg-white/6",
+                                disabled &&
+                                  "cursor-not-allowed text-[#D1D5DB] dark:text-slate-600",
                               )}
                               onClick={() => {
                                 if (disabled) return;
@@ -478,7 +479,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                     <span className="min-w-0">{cursor.year}</span>
                     <ChevronDown
                       className={classNames(
-                        "size-3.5 shrink-0 text-[#9794AA] transition-transform duration-150",
+                        "size-3.5 shrink-0 text-[#9794AA] transition-transform duration-150 dark:text-slate-500",
                         yearMenuOpen && "rotate-180",
                       )}
                       strokeWidth={2}
@@ -489,7 +490,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                     <ul
                       role="listbox"
                       aria-labelledby={`${id}-year-trigger`}
-                      className="absolute left-0 right-0 top-full z-110 mt-0.5 max-h-42 overflow-y-auto rounded-md border border-[#66666659] bg-white py-0.5 pr-2 shadow-[0_6px_16px_rgba(15,23,42,0.12)]"
+                      className="absolute left-0 right-0 top-full z-110 mt-0.5 max-h-42 overflow-y-auto rounded-md border border-[#66666659] bg-white py-0.5 pr-2 shadow-[0_6px_16px_rgba(15,23,42,0.12)] dark:border-white/12 dark:bg-[#111827] dark:shadow-[0_16px_40px_rgba(0,0,0,0.45)]"
                     >
                       {yearOptions.map((y) => {
                         const isActive = cursor.year === y;
@@ -502,9 +503,9 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                               className={classNames(
                                 "flex w-full justify-end px-2.5 py-1.5 text-right text-xs font-medium tabular-nums tracking-tight transition-colors",
                                 isActive &&
-                                  "bg-[#FDF2F4] font-semibold text-primary",
+                                  "bg-[#FDF2F4] font-semibold text-primary dark:bg-primary/15 dark:text-white",
                                 !isActive &&
-                                  "text-[#100F14] hover:bg-[#F9FAFB]",
+                                  "text-[#100F14] hover:bg-[#F9FAFB] dark:text-white dark:hover:bg-white/6",
                               )}
                               onClick={() => {
                                 setCursor(clampCursor(y, cursor.month));
@@ -521,7 +522,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                 </div>
                 <button
                   type="button"
-                  className="shrink-0 rounded p-0.5 text-[#100F14] hover:bg-[#F3F4F6] disabled:opacity-30"
+                  className="shrink-0 rounded p-0.5 text-[#100F14] hover:bg-[#F3F4F6] disabled:opacity-30 dark:text-white dark:hover:bg-white/8"
                   aria-label="Next month"
                   disabled={!canNextMonth}
                   onClick={() => canNextMonth && goMonth(1)}
@@ -534,7 +535,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                 {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
                   <span
                     key={d}
-                    className="text-[8px] font-semibold leading-none text-[#9794AA]"
+                    className="text-[8px] font-semibold leading-none text-[#9794AA] dark:text-slate-500"
                   >
                     {d}
                   </span>
@@ -559,9 +560,9 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                       className={classNames(
                         "flex h-7 w-7 items-center justify-center rounded text-[11px] font-medium transition-colors",
                         dimmed &&
-                          "cursor-not-allowed text-[#D1D5DB] line-through decoration-[#D1D5DB]",
+                          "cursor-not-allowed text-[#D1D5DB] line-through decoration-[#D1D5DB] dark:text-slate-600 dark:decoration-slate-600",
                         !dimmed &&
-                          "text-[#100F14] hover:bg-[#FCE7E7] hover:text-primary",
+                          "text-[#100F14] hover:bg-[#FCE7E7] hover:text-primary dark:text-white dark:hover:bg-primary/12 dark:hover:text-white",
                         isSelected &&
                           !dimmed &&
                           "bg-primary text-white hover:bg-primary hover:text-white",

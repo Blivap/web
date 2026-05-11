@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import "@/styles/globals.css";
 import { SnackbarProvider } from "@/components/feedback/snackbar/snackbar.context";
 import { Snackbar } from "@/components/feedback/snackbar/snackbar.component";
+import { ThemePreferenceProvider } from "@/hooks/theme/useThemePreference.hook";
 import { config } from "@/config/env";
 import StoreProvider from "../store/provider";
 import { StructuredData } from "@/components/seo/structured-data";
@@ -50,6 +51,42 @@ const helvetica = localFont({
   display: "swap",
 });
 const { url, env } = config;
+const themeBootstrapScript = `
+(() => {
+  const preferenceKey = "blivap-theme";
+  const systemKey = "blivap-theme-system-scheme";
+  const currentSystem = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  let preference = "system";
+
+  try {
+    const storedPreference = localStorage.getItem(preferenceKey);
+    const storedSystem = localStorage.getItem(systemKey);
+
+    if (
+      (storedPreference === "light" || storedPreference === "dark" || storedPreference === "system")
+    ) {
+      preference = storedPreference;
+    }
+
+    if (
+      preference !== "system" &&
+      (storedSystem === "light" || storedSystem === "dark") &&
+      storedSystem !== currentSystem
+    ) {
+      preference = "system";
+      localStorage.setItem(preferenceKey, "system");
+    }
+
+    localStorage.setItem(systemKey, currentSystem);
+  } catch {}
+
+  const resolved =
+    preference === "dark" ? "dark" : preference === "light" ? "light" : currentSystem;
+
+  document.documentElement.classList.toggle("dark", resolved === "dark");
+  document.documentElement.style.colorScheme = resolved;
+})();
+`;
 
 const siteUrl = env === "development" ? "http://localhost:3000" : url;
 // Ensure OG image URL is absolute
@@ -190,31 +227,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <StructuredData />
         <meta name="apple-mobile-web-app-title" content="Blivap" />
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
       <body
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased text-sm min-h-screen w-full`}
       >
-        <StoreProvider>
-          <AuthRoutesPrefetch />
-          <AuthChecker>
-            <SnackbarProvider>
-              <Suspense
-                fallback={
-                  <div className="flex justify-center items-center h-screen bg-white">
-                    <BlivapLogo />
-                  </div>
-                }
-              >
-                {children}
-              </Suspense>
-              <Snackbar />
-            </SnackbarProvider>
-          </AuthChecker>
-        </StoreProvider>
+        <ThemePreferenceProvider>
+          <StoreProvider>
+            <AuthRoutesPrefetch />
+            <AuthChecker>
+              <SnackbarProvider>
+                <Suspense
+                  fallback={
+                    <div className="flex justify-center items-center h-screen bg-white dark:bg-[#0B0D12]">
+                      <BlivapLogo />
+                    </div>
+                  }
+                >
+                  {children}
+                </Suspense>
+                <Snackbar />
+              </SnackbarProvider>
+            </AuthChecker>
+          </StoreProvider>
+        </ThemePreferenceProvider>
       </body>
     </html>
   );

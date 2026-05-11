@@ -137,7 +137,7 @@ export function PhoneInput({
       {label ? (
         <label
           className={classNames(
-            "text-[#9794AA] text-xs font-medium",
+            "text-xs font-medium text-[#9794AA] dark:text-slate-400",
             labelClassName,
           )}
           htmlFor={nationalId}
@@ -148,7 +148,7 @@ export function PhoneInput({
 
       <div
         className={classNames(
-          "flex w-full items-stretch gap-0 rounded-md border border-[#66666659]",
+          "flex w-full items-stretch gap-0 rounded-md border border-[#66666659] bg-white dark:border-white/12 dark:bg-[#111827]",
           hasError && "border-red-500",
           rowClassName,
         )}
@@ -226,7 +226,7 @@ export function PhoneInput({
           ) : null}
         </div>
         <div
-          className="my-1.5 w-px shrink-0 self-stretch bg-[#66666659]"
+          className="my-1.5 w-px shrink-0 self-stretch bg-[#66666659] dark:bg-white/10"
           aria-hidden
         />
         <input

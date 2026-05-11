@@ -43,7 +43,7 @@ export const Input = (props: InputProps) => {
     >
       <p
         className={classNames(
-          "text-[#9794AA] text-xs font-medium",
+          "text-xs font-medium text-[#9794AA] dark:text-slate-400",
           labelClassName,
         )}
       >
@@ -52,13 +52,13 @@ export const Input = (props: InputProps) => {
       <div className="grid gap-px">
         <div
           className={classNames(
-            "flex items-center border border-[#66666659] rounded-md w-full px-4 gap-2",
+            "flex w-full items-center gap-2 rounded-md border border-[#66666659] bg-white px-4 dark:border-white/12 dark:bg-[#111827]",
             { "border-red-500": error },
           )}
         >
           <input
             className={classNames(
-              "outline-none py-2.5 w-full text-sm font-medium placeholder:text-xs",
+              "w-full bg-transparent py-2.5 text-sm font-medium text-[#100F14] outline-none placeholder:text-xs placeholder:text-[#9794AA] dark:text-white dark:placeholder:text-slate-500",
               inputClassName,
             )}
             type={
@@ -79,7 +79,7 @@ export const Input = (props: InputProps) => {
             <button
               type="button"
               onClick={() => setTogglePassword((prev) => !prev)}
-              className="cursor-pointer"
+              className="cursor-pointer text-[#6B7280] transition-colors dark:text-slate-400"
             >
               {toggelePassword ? <BsEye size={16} /> : <BsEyeSlash size={16} />}
             </button>

@@ -24,8 +24,11 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [bannerVisible, setBannerVisible] = useState(false);
+  const [isBannerHovered, setIsBannerHovered] = useState(false);
 
   useEffect(() => {
+    if (bannerVisible && isBannerHovered) return;
+
     let timeoutId: ReturnType<typeof setTimeout>;
     const scheduleToggle = () => {
       const duration = bannerVisible
@@ -37,6 +40,12 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
     };
     scheduleToggle();
     return () => clearTimeout(timeoutId);
+  }, [bannerVisible, isBannerHovered]);
+
+  useEffect(() => {
+    if (!bannerVisible) {
+      setIsBannerHovered(false);
+    }
   }, [bannerVisible]);
 
   const isActive = (href: string) => {
@@ -57,7 +66,9 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
 
     const ctx = gsap.context(() => {
       const targets = Array.from(contentRef.current?.children ?? [])
-        .flatMap((node) => (node instanceof HTMLElement ? Array.from(node.children) : []))
+        .flatMap((node) =>
+          node instanceof HTMLElement ? Array.from(node.children) : [],
+        )
         .filter((node): node is HTMLElement => node instanceof HTMLElement);
 
       if (targets.length === 0) return;
@@ -135,7 +146,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
       {/* Drawer/Sidebar */}
       <div
         className={classNames(
-          "flex flex-col gap-4 w-full max-w-64 bg-white fixed left-0 top-0 z-50 h-full pt-6 px-5 transition-transform duration-200 ease-out lg:hidden shadow-lg border-r border-[#E5E7EB]",
+          "fixed left-0 top-0 z-50 flex h-full w-full max-w-64 flex-col gap-4 border-r border-[#E5E7EB] bg-white px-5 pt-6 shadow-lg transition-transform duration-200 ease-out dark:border-white/10 dark:bg-[#0F1117] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)] lg:hidden",
           {
             "-translate-x-full": !drawerOpen,
             "translate-x-0": drawerOpen,
@@ -143,12 +154,15 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
         )}
       >
         <div className="flex items-center justify-between mb-2">
-          <p className="font-semibold font-helvetica text-primary text-lg">
-            Blivap
-          </p>
+          <div>
+            <p className="flex justify-center font-semibold font-helvetica text-primary text-4xl tracking-tight">
+              <BlivapLogo fill="#960018" className="size-10" />
+              <span className="-mt-1 -ml-2">livap</span>
+            </p>
+          </div>
           <button
             onClick={closeDrawer}
-            className="p-1.5 hover:bg-[#F3F4F6] rounded-md transition-colors"
+            className="rounded-md p-1.5 text-text-primary transition-colors hover:bg-[#F3F4F6] dark:text-white dark:hover:bg-white/8"
             aria-label="Close menu"
           >
             <X size={18} />
@@ -163,10 +177,10 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                 href={e.href}
                 onClick={closeDrawer}
                 className={classNames(
-                  "text-sm text-[#374151] py-2.5 px-3 rounded-md font-medium",
+                  "rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
                   active
-                    ? "bg-[#F5F3FF] text-primary"
-                    : "hover:bg-[#F9FAFB] hover:text-primary",
+                    ? "bg-[#F5F3FF] text-primary dark:bg-white/10 dark:text-white"
+                    : "text-[#374151] hover:bg-[#F9FAFB] hover:text-primary dark:text-slate-300 dark:hover:bg-white/6 dark:hover:text-white",
                 )}
               >
                 {e.label}
@@ -174,15 +188,15 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
             );
           })}
         </div>
-        <div className="flex flex-col gap-3 mt-2 pt-4 border-t border-[#E5E7EB]">
+        <div className="mt-2 flex flex-col gap-3 border-t border-[#E5E7EB] pt-4 dark:border-white/10">
           <Link
             href="/about"
             onClick={closeDrawer}
-            className="text-sm font-medium text-[#374151] hover:text-primary transition-colors"
+            className="text-sm font-medium text-[#374151] transition-colors hover:text-primary dark:text-slate-300 dark:hover:text-white"
           >
             About Blivap
           </Link>
-          <div className="flex items-center gap-2 text-xs font-medium text-[#6B7280]">
+          <div className="flex items-center gap-2 text-xs font-medium text-[#6B7280] dark:text-slate-400">
             <span className="flex items-center gap-1">
               <Globe size={14} strokeWidth={1.5} /> NL
             </span>
@@ -193,16 +207,17 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
       </div>
 
       {/* Top Navigation Bar */}
-      <div className="fixed top-0 z-40 flex w-full items-center justify-center bg-[#F4F2FF] px-2 py-2.5 sm:px-6 sm:py-3 md:px-8 3xl:px-0">
+      <div className="fixed top-0 z-40 flex w-full items-center justify-center border-b border-transparent bg-[#F4F2FF] px-2 sm:pb-0 py-2.5 dark:border-white/8 dark:bg-[#0F1117]/95 sm:px-6 sm:py-3 md:px-8 3xl:px-0">
         <div className="flex items-center justify-between w-full max-w-[1440px]">
           <div className="flex items-center gap-3">
-            <button
+            <Button
+              variant="ghost"
               onClick={() => setDrawerOpen((prev) => !prev)}
-              className="p-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-md h-fit lg:hidden hover:bg-[#F3F4F6] transition-colors"
+              className="h-fit rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-1 text-text-primary transition-colors hover:bg-[#F3F4F6] lg:hidden dark:border-white/10 dark:bg-[#1A1A22] dark:text-white dark:hover:bg-white/8"
               aria-label="Toggle menu"
             >
-              <Menu size={16} />
-            </button>
+              <Menu size={24} className="size-6" />
+            </Button>
 
             <div className="hidden lg:flex gap-1">
               {navItems.map((e) => {
@@ -212,10 +227,10 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                     key={`nav-link-${e.label}`}
                     href={e.href}
                     className={classNames(
-                      "px-3.5 pt-2.5 pb-3.5 text-sm font-medium text-black transition-colors duration-200 rounded-t-md",
+                      "rounded-t-md px-3.5 pt-2.5 pb-3.5 text-sm font-medium transition-colors duration-200",
                       active
-                        ? "bg-white  "
-                        : "text-[#374151] hover:bg-white/60 ",
+                        ? "bg-white text-black dark:bg-white/10 dark:text-white"
+                        : "text-[#374151] hover:bg-white/60 dark:text-slate-300 dark:hover:bg-white/6 dark:hover:text-white",
                     )}
                   >
                     {e.label}
@@ -229,15 +244,16 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
             <Link
               href="/about"
               className={classNames(
-                "hidden rounded-t-md px-3.5 pt-2.5 pb-3.5 text-sm font-medium text-black transition-colors hover:bg-white/60 sm:inline",
+                "hidden rounded-t-md px-3.5 pt-2.5 pb-3.5 text-sm font-medium text-black transition-colors hover:bg-white/60 sm:inline dark:text-slate-300 dark:hover:bg-white/6 dark:hover:text-white",
                 {
-                  "bg-white": isActive("/about"),
+                  "bg-white dark:bg-white/10 dark:text-white":
+                    isActive("/about"),
                 },
               )}
             >
               About
             </Link>
-            <div className="flex items-center gap-2 text-xs font-medium text-[#6B7280]">
+            <div className="flex items-center gap-2 text-base font-medium text-[#6B7280] dark:text-slate-400">
               <span className="flex items-center gap-1">
                 <Globe size={14} strokeWidth={1.5} /> NL
               </span>
@@ -250,12 +266,12 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
 
       <div
         ref={contentRef}
-        className="max-w-[1440px] w-full lg:mx-auto px-2 sm:px-6 md:px-8 lg:px-0  overflow-hidden"
+        className="max-w-[1440px] w-full lg:mx-auto px-2 sm:px-6 sm:py-3 md:px-8 3xl:px-0 overflow-hidden"
       >
         {props.children}
       </div>
-      <div className="bg-black px-2 sm:px-6 md:px-8 ">
-        <div className="relative mt-6 sm:mt-8 md:mt-12 max-w-[1440px] mx-auto flex flex-col gap-6 sm:gap-8 pt-6 sm:pt-8  lg:px-0 pb-6 sm:pb-8 ">
+      <div className="bg-black px-2 sm:px-6 sm:py-3 md:px-8 3xl:px-0 dark:bg-[#05070C]">
+        <div className="relative mx-auto mt-6 flex max-w-[1440px] flex-col gap-6 pt-6 pb-6 sm:mt-8 sm:gap-8 sm:pt-8 sm:pb-8 md:mt-12 lg:px-0">
           <Link href="/" className="w-fit">
             <p className="flex justify-center font-semibold font-helvetica text-primary text-4xl tracking-tight">
               <BlivapLogo fill="#960018" className="size-10" />
@@ -312,8 +328,10 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
             ))}
           </div>
           <div
+            onMouseEnter={() => setIsBannerHovered(true)}
+            onMouseLeave={() => setIsBannerHovered(false)}
             className={classNames(
-              "absolute hidden sm:flex flex-col gap-3 -top-16 sm:-top-20 right-4 sm:right-6 md:right-12 lg:right-20 bg-white border border-[#E5E7EB] rounded-lg shadow-lg max-w-[20rem] px-4 py-3 transition-opacity duration-500 ease-in-out",
+              "absolute -top-16 right-4 hidden max-w-[20rem] flex-col gap-3 rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 shadow-lg transition-opacity duration-500 ease-in-out sm:-top-20 sm:right-6 sm:flex md:right-12 lg:right-20 dark:border-white/10 dark:bg-[#111827] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)]",
               bannerVisible
                 ? "opacity-100 pointer-events-auto"
                 : "opacity-0 pointer-events-none",
@@ -325,16 +343,16 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                 e.preventDefault();
                 setBannerVisible(false);
               }}
-              className="absolute top-2 right-2 p-1 rounded-full text-[#6B7280] hover:bg-[#E5E7EB] hover:text-black transition-colors"
+              className="absolute top-2 right-2 rounded-full p-1 text-[#6B7280] transition-colors hover:bg-[#E5E7EB] hover:text-black dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
               aria-label="Close banner"
             >
               <X size={16} />
             </button>
             <div className="flex flex-col gap-1.5">
-              <p className="font-semibold text-sm text-black leading-snug">
+              <p className="text-sm font-semibold leading-snug text-black dark:text-white">
                 Save lives and earn with your blood or sperm
               </p>
-              <p className="text-xs text-[#6B7280] leading-relaxed">
+              <p className="text-xs leading-relaxed text-[#6B7280] dark:text-slate-400">
                 We connect donors with those in need.
               </p>
             </div>

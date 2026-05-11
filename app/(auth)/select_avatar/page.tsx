@@ -22,18 +22,18 @@ export default function SelectAvatarPage() {
     }
   }, [avatars, getAvatars]);
   return (
-    <div className="flex flex-1 items-center justify-center p-5">
+    <div className="flex flex-1 items-center justify-center bg-white p-5 dark:bg-[#0B0D12]">
       <div className="flex flex-col gap-[56px]">
-        <p className="text-center text-[32px] font-medium text-primary">
+        <p className="text-center text-[32px] font-medium text-primary dark:text-white">
           Select Avatar
         </p>
         <div className="flex flex-col gap-[54px]">
-          <div className="grid grid-cols-4 grid-rows-3 gap-4 rounded-3xl bg-[#00000026] px-5 py-10 md:px-[75px] md:py-[98px]">
+          <div className="grid grid-cols-4 grid-rows-3 gap-4 rounded-3xl border border-black/5 bg-[#00000026] px-5 py-10 dark:border-white/10 dark:bg-white/6 md:px-[75px] md:py-[98px]">
             {isLoading || !avatars
               ? [...Array(12)].map((_, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-center size-[60px] shrink-0 animate-pulse rounded-full border border-[#FFFFFF00] bg-[#B190B6] "
+                    className="flex size-[60px] shrink-0 items-center justify-center rounded-full border border-[#FFFFFF00] bg-[#B190B6] animate-pulse dark:bg-[#4B5563]"
                   />
                 ))
               : avatars?.map((avatar) => (
@@ -41,7 +41,7 @@ export default function SelectAvatarPage() {
                     key={avatar.id}
                     type="button"
                     className={classNames(
-                      "relative size-[60px] shrink-0 overflow-hidden rounded-full border border-[#FFFFFF00] bg-[#B190B6] transition-all duration-150 hover:border-3 hover:border-primary",
+                      "relative size-[60px] shrink-0 overflow-hidden rounded-full border border-transparent bg-[#B190B6] transition-all duration-150 hover:border-3 hover:border-primary dark:bg-[#374151]",
                       {
                         "border-3 border-primary":
                           selectedAvatar === avatar.url,

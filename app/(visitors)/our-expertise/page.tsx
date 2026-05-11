@@ -7,17 +7,17 @@ import { Award, Shield, Users, Target, CheckCircle } from "lucide-react";
 export default function OurExpertise() {
   return (
     <HomeLayout>
-      <div className="flex-1 flex flex-col py-6 sm:py-8">
+      <div className="flex-1 flex flex-col py-6 sm:py-8 text-[#111827] dark:text-slate-300">
         <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-6">
           Our expertise
         </h1>
 
         <div className="flex flex-col gap-6">
           <div>
-            <h2 className="font-semibold text-base text-black mb-2">
+            <h2 className="font-semibold text-base text-black dark:text-white mb-2">
               Leading the way in donation services
             </h2>
-            <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#6B7280] dark:text-slate-400 leading-relaxed max-w-2xl">
               Blivap combines healthcare, technology, and community building to
               make donation services accessible, safe, and effective. Medical
               knowledge, innovation, and compassionate service.
@@ -30,24 +30,24 @@ export default function OurExpertise() {
                 icon: Shield,
                 title: "Safety first",
                 desc: "Highest standards of safety and quality. Partner facilities are certified and regularly audited.",
-                color: "bg-[#FDF2F4]",
+                color: "bg-[#FDF2F4] dark:bg-primary/15",
               },
               {
                 icon: Award,
                 title: "Quality assurance",
                 desc: "Rigorous screening and matching. We follow international best practices and local regulations.",
-                color: "bg-[#EEF2FF]",
+                color: "bg-[#EEF2FF] dark:bg-sky-500/15",
               },
               {
                 icon: Users,
                 title: "Community focus",
                 desc: "We understand community needs and work to improve access to life-saving donations.",
-                color: "bg-[#F5F3FF]",
+                color: "bg-[#F5F3FF] dark:bg-indigo-500/15",
               },
             ].map((expertise, i) => (
               <div
                 key={i}
-                className="bg-white p-3 sm:p-4 rounded-lg border border-[#E5E7EB]"
+                className="bg-white text-[#111827] dark:bg-[#111827] dark:text-white p-3 sm:p-4 rounded-lg border border-[#E5E7EB] dark:border-white/10"
               >
                 <div
                   className={`${expertise.color} p-2 rounded-full w-fit mb-2`}
@@ -57,26 +57,26 @@ export default function OurExpertise() {
                 <h3 className="font-semibold text-sm mb-1.5">
                   {expertise.title}
                 </h3>
-                <p className="text-xs text-[#6B7280] leading-relaxed">
+                <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
                   {expertise.desc}
                 </p>
               </div>
             ))}
           </div>
 
-          <div className="bg-white p-4 rounded-lg border border-[#E5E7EB]">
+          <div className="bg-white text-[#111827] dark:bg-[#111827] dark:text-white p-4 rounded-lg border border-[#E5E7EB] dark:border-white/10">
             <div className="flex items-center gap-2 mb-4">
               <Target className="text-primary" size={18} />
-              <h2 className="font-semibold text-base text-black">
+              <h2 className="font-semibold text-base text-black dark:text-white">
                 Our core competencies
               </h2>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <h4 className="font-semibold text-xs mb-2 text-black">
+                <h4 className="font-semibold text-xs mb-2 text-black dark:text-white">
                   Medical expertise
                 </h4>
-                <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280]">
+                <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280] dark:text-slate-400">
                   {[
                     "Certified medical facility partnerships",
                     "Qualified healthcare professionals",
@@ -94,10 +94,10 @@ export default function OurExpertise() {
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold text-xs mb-2 text-black">
+                <h4 className="font-semibold text-xs mb-2 text-black dark:text-white">
                   Technology
                 </h4>
-                <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280]">
+                <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280] dark:text-slate-400">
                   {[
                     "Advanced matching algorithms",
                     "Secure platform and data",
@@ -117,11 +117,11 @@ export default function OurExpertise() {
             </div>
           </div>
 
-          <div className="bg-[#F9FAFB] p-4 rounded-lg border border-[#E5E7EB]">
-            <h2 className="font-semibold text-base text-black mb-2">
+          <div className="bg-[#F9FAFB] text-[#111827] dark:bg-[#0F172A] dark:text-white p-4 rounded-lg border border-[#E5E7EB] dark:border-white/10">
+            <h2 className="font-semibold text-base text-black dark:text-white mb-2">
               Trusted by thousands
             </h2>
-            <p className="text-xs text-[#6B7280] leading-relaxed mb-4">
+            <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed mb-4">
               Our expertise has helped thousands connect safely. We&apos;re
               committed to improving and expanding, always putting safety and
               quality first.
