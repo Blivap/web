@@ -94,7 +94,14 @@ export const Snackbar = () => {
     const accent = accentRef.current;
     const content = contentRef.current;
     const closeButton = closeButtonRef.current;
-    if (!displayedSnackbar || !shell || !panel || !accent || !content || !closeButton) {
+    if (
+      !displayedSnackbar ||
+      !shell ||
+      !panel ||
+      !accent ||
+      !content ||
+      !closeButton
+    ) {
       return;
     }
 
@@ -116,12 +123,12 @@ export const Snackbar = () => {
       gsap.set(panel, {
         x: 0,
         y: 0,
+        opacity: 1,
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
         rotateX: 0,
         skewY: 0,
-        filter: "blur(0px)",
       });
       gsap.set(accent, { scaleY: 1, transformOrigin: "top center" });
       gsap.set(content, { opacity: 1, x: 0, y: 0, filter: "blur(0px)" });
@@ -146,12 +153,12 @@ export const Snackbar = () => {
       gsap.set(panel, {
         x: 0,
         y: 0,
+        opacity: 0,
         scaleX: 0.84,
         scaleY: 0.78,
         rotate: -6,
         rotateX: -18,
         skewY: -4,
-        filter: "blur(10px) brightness(1.08)",
         transformOrigin: "top right",
         transformPerspective: 1400,
       });
@@ -181,7 +188,7 @@ export const Snackbar = () => {
         defaults: { overwrite: "auto" },
         onComplete: () => {
           gsap.set([shell, panel, accent, content, closeButton], {
-            clearProps: "will-change,filter",
+            clearProps: "will-change,opacity",
           });
           idleTweenRef.current = gsap.to(panel, {
             y: "-=1.8",
@@ -195,50 +202,50 @@ export const Snackbar = () => {
       });
 
       gsap.set([shell, panel, accent, content, closeButton], {
-        willChange: "transform, opacity, filter",
+        willChange: "transform, opacity",
       });
 
       tl.set(shell, { autoAlpha: 1 }, 0)
         .to(
-        shell,
-        {
-          keyframes: [
-            {
-              x: -20,
-              y: 18,
-              rotate: 2.4,
-              duration: 0.22,
-              ease: "power3.out",
-            },
-            {
-              x: 7,
-              y: -6,
-              rotate: -0.9,
-              duration: 0.18,
-              ease: "sine.inOut",
-            },
-            {
-              x: 0,
-              y: 0,
-              rotate: 0,
-              duration: 0.2,
-              ease: "power2.out",
-            },
-          ],
-        },
-        0,
-      )
+          shell,
+          {
+            keyframes: [
+              {
+                x: -20,
+                y: 18,
+                rotate: 2.4,
+                duration: 0.22,
+                ease: "power3.out",
+              },
+              {
+                x: 7,
+                y: -6,
+                rotate: -0.9,
+                duration: 0.18,
+                ease: "sine.inOut",
+              },
+              {
+                x: 0,
+                y: 0,
+                rotate: 0,
+                duration: 0.2,
+                ease: "power2.out",
+              },
+            ],
+          },
+          0,
+        )
         .to(
           panel,
           {
             keyframes: [
               {
+                opacity: 1,
                 scaleX: 1.05,
                 scaleY: 0.97,
                 rotate: 1.8,
                 rotateX: 8,
                 skewY: 1.4,
-                filter: "blur(0px) brightness(1)",
                 duration: 0.28,
                 ease: "power4.out",
               },
@@ -363,7 +370,7 @@ export const Snackbar = () => {
     const tl = gsap.timeline({ defaults: { overwrite: "auto" } });
 
     gsap.set([shell, panel, accent, content, closeButton], {
-      willChange: "transform, opacity, filter",
+      willChange: "transform, opacity",
     });
 
     tl.to(
@@ -378,35 +385,36 @@ export const Snackbar = () => {
       0,
     )
       .to(
-      panel,
-      {
-        keyframes: [
-          {
-            x: -8,
-            y: 5,
-            scaleX: 0.988,
-            scaleY: 1.02,
-            rotate: -0.8,
-            skewY: 0.6,
-            duration: 0.09,
-            ease: "power1.out",
-          },
-          {
-            x: 18,
-            y: -18,
-            scaleX: 0.9,
-            scaleY: 0.84,
-            rotate: 5.5,
-            rotateX: 10,
-            skewY: 2,
-            filter: "blur(6px) brightness(1.03)",
-            duration: EXIT_MS / 1000 - 0.09,
-            ease: "power3.in",
-          },
-        ],
-      },
-      0,
-    )
+        panel,
+        {
+          keyframes: [
+            {
+              x: -8,
+              y: 5,
+              opacity: 1,
+              scaleX: 0.988,
+              scaleY: 1.02,
+              rotate: -0.8,
+              skewY: 0.6,
+              duration: 0.09,
+              ease: "power1.out",
+            },
+            {
+              x: 18,
+              y: -18,
+              opacity: 0,
+              scaleX: 0.9,
+              scaleY: 0.84,
+              rotate: 5.5,
+              rotateX: 10,
+              skewY: 2,
+              duration: EXIT_MS / 1000 - 0.09,
+              ease: "power3.in",
+            },
+          ],
+        },
+        0,
+      )
       .to(
         shell,
         {
