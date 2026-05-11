@@ -9,11 +9,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { setCredentials, setUser } from "@/store/slices/authSlice";
 import { useRouter, useSearchParams } from "next/navigation";
 import { routes } from "@/config/routes";
-import {
-  getDnRedirect,
-  getPostAuthRedirect,
-  withDn,
-} from "@/lib/navigation/authRedirect";
+import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
 
 export const useRegister = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -28,6 +24,8 @@ export const useRegister = () => {
       privacyStatement?: boolean;
     },
   ): Promise<boolean> => {
+    const dnRedirect = getDnRedirect(searchParams);
+    const postAuthRedirect = dnRedirect ?? routes.overview;
     setIsLoading(true);
 
     try {
@@ -63,7 +61,6 @@ export const useRegister = () => {
 
         if (token) {
           dispatch(setCredentials({ token }));
-          const dnRedirect = getDnRedirect(searchParams);
           let userPayload = normalizeUser(authData?.user) ?? null;
           if (!userPayload) {
             try {
@@ -81,7 +78,7 @@ export const useRegister = () => {
           if (isEmailUnverified(userPayload ?? authData?.user)) {
             router.replace(withDn(routes.verifyEmail, dnRedirect));
           } else {
-            router.replace(getPostAuthRedirect(searchParams));
+            router.replace(postAuthRedirect);
           }
         }
         return true;

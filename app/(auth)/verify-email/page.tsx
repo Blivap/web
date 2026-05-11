@@ -5,7 +5,8 @@ import { Input } from "@/components/forms/inputs/input.component";
 import { AuthLayout } from "@/layout/auth.layout.component";
 import { useVerifyEmail } from "@/hooks/auth/useVerifyEmail.hook";
 import { useResendVerificationLink } from "@/hooks/auth/useResendVerificationLink.hook";
-import { getPostAuthRedirect } from "@/lib/navigation/authRedirect";
+import { getDnRedirect } from "@/lib/navigation/authRedirect";
+import { routes } from "@/config/routes";
 import { verifyEmailSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import Cookies from "js-cookie";
@@ -20,6 +21,7 @@ import Link from "next/link";
 export default function VerifyEmailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dnRedirect = getDnRedirect(searchParams);
   const [mounted, setMounted] = useState(false);
   const { verifyEmail, isLoading } = useVerifyEmail();
   const { resendLink, isLoading: isResending } = useResendVerificationLink();
@@ -35,9 +37,9 @@ export default function VerifyEmailPage() {
 
   useEffect(() => {
     if (user?.emailVerified === true) {
-      router.replace(getPostAuthRedirect(searchParams));
+      router.replace(dnRedirect ?? routes.overview);
     }
-  }, [user?.emailVerified, router, searchParams]);
+  }, [dnRedirect, router, user?.emailVerified]);
 
   const cookieToken =
     mounted && typeof window !== "undefined"

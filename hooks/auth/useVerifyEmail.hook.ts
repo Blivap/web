@@ -7,7 +7,8 @@ import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";
-import { getPostAuthRedirect } from "@/lib/navigation/authRedirect";
+import { getDnRedirect } from "@/lib/navigation/authRedirect";
+import { routes } from "@/config/routes";
 
 export function useVerifyEmail() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +21,8 @@ export function useVerifyEmail() {
   const verifyEmail = async (
     payload: IVerifyEmailPayload,
   ): Promise<boolean> => {
+    const dnRedirect = getDnRedirect(searchParams);
+    const postAuthRedirect = dnRedirect ?? routes.overview;
     setIsLoading(true);
     try {
       const { status, message, error } = await $api.auth.verifyEmail(payload);
@@ -46,7 +49,7 @@ export function useVerifyEmail() {
           dispatch(setUser({ ...existingUser, emailVerified: true }));
         }
 
-        router.replace(getPostAuthRedirect(searchParams));
+        router.replace(postAuthRedirect);
         return true;
       }
 

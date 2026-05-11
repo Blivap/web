@@ -1,8 +1,17 @@
 "use client";
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { SnackbarSeverity } from "./snackbar.component";
 
-interface SnackbarState {
+export interface SnackbarState {
+  id: number;
   message: string;
   severity?: SnackbarSeverity;
   duration?: number;
@@ -24,21 +33,32 @@ const SnackbarContext = createContext<SnackbarContextType | undefined>(
 
 export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
   const [snackbar, setSnackbar] = useState<SnackbarState | null>(null);
+  const nextIdRef = useRef(1);
 
-  const showSnackbar = (
+  const showSnackbar = useCallback((
     message: string,
     severity: SnackbarSeverity = "info",
     duration: number = 3000,
   ) => {
-    setSnackbar({ message, severity, duration });
-  };
+    setSnackbar({
+      id: nextIdRef.current++,
+      message,
+      severity,
+      duration,
+    });
+  }, []);
 
-  const hideSnackbar = () => {
+  const hideSnackbar = useCallback(() => {
     setSnackbar(null);
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({ snackbar, showSnackbar, hideSnackbar }),
+    [snackbar, showSnackbar, hideSnackbar],
+  );
 
   return (
-    <SnackbarContext.Provider value={{ snackbar, showSnackbar, hideSnackbar }}>
+    <SnackbarContext.Provider value={value}>
       {children}
     </SnackbarContext.Provider>
   );
