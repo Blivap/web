@@ -14,6 +14,21 @@ import {
   toggleSelectedAvatar,
 } from "@/store/slices/selectAvatarSlice";
 import { normalizeUser } from "@/lib/utils";
+import { IUser } from "@/types";
+
+function mergeUserWithAvatar(
+  currentUser: IUser | null,
+  nextUser: IUser | null,
+  profileImage: string,
+): IUser | null {
+  if (!currentUser && !nextUser) return null;
+
+  return {
+    ...(currentUser ?? {}),
+    ...(nextUser ?? {}),
+    profileImage,
+  } as IUser;
+}
 
 export function useSelectAvatar() {
   const router = useRouter();
@@ -70,8 +85,9 @@ export function useSelectAvatar() {
         dispatch(setSelectedAvatar(newProfileImage));
 
         // Update UI immediately from setAvatar response (avoids me() cache / "have to do it twice")
-        if (user) {
-          dispatch(setUser({ ...user, profileImage: newProfileImage }));
+        const optimisticUser = mergeUserWithAvatar(user, null, newProfileImage);
+        if (optimisticUser) {
+          dispatch(setUser(optimisticUser));
         }
         if (typeof window !== "undefined" && newProfileImage) {
           window.dispatchEvent(
@@ -85,7 +101,14 @@ export function useSelectAvatar() {
         const { data: meData, status: meStatus } = await $api.auth.me();
         if (meStatus >= 200 && meStatus < 300 && meData) {
           const userPayload = normalizeUser(meData);
-          if (userPayload) dispatch(setUser(userPayload));
+          const mergedUser = mergeUserWithAvatar(
+            optimisticUser,
+            userPayload,
+            newProfileImage,
+          );
+          if (mergedUser) {
+            dispatch(setUser(mergedUser));
+          }
         }
 
         if (shouldRedirect) {

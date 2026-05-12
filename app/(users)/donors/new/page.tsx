@@ -38,9 +38,10 @@ import {
   DonorBasicsStep,
   type DonorBasicsValues,
 } from "../steps/basics/donor-basics-step.component";
+import { DonorRegistrationSuccessModal } from "./donor-registration-success-modal.component";
 import { NewDonorPageSkeleton } from "./new-donor-page-skeleton";
-import { Modal } from "@/components/ui/modal/modal.component";
-import { Button } from "@/components/button/button.component";
+import { normalizeDonorRegistrationType } from "./donor-registration-type";
+import { ReproductiveDonorFlow } from "./reproductive-donor-flow.component";
 
 type AreaLocationPayload = {
   country: string;
@@ -677,36 +678,47 @@ function NewDonorForm() {
           eligibility={questionnaireResult}
         />
       </div>
-      <Modal
+      <DonorRegistrationSuccessModal
         open={isActivationSuccessModalOpen}
         onClose={() => setIsActivationSuccessModalOpen(false)}
-      >
-        <div className="flex w-full flex-col gap-4">
-          <h3 className="text-lg font-semibold text-primary text-center">
-            Verification is processing
-          </h3>
-          <p className="text-sm text-center text-[#4B5563] dark:text-white/70">
-            Your donor activation request has been submitted. We are now
-            processing your verification request.
-          </p>
-          <div className="flex justify-center pt-1">
-            <Button
-              onClick={() => {
-                setIsActivationSuccessModalOpen(false);
-                queueMicrotask(() => navigateOutAfterSuccess(router));
-              }}
-              className="rounded-md! px-5 py-2"
-            >
-              Continue to overview
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        onContinue={() => {
+          setIsActivationSuccessModalOpen(false);
+          queueMicrotask(() => navigateOutAfterSuccess(router));
+        }}
+        eyebrow="Blood donor registration"
+        title="Your activation request is now in review"
+        description="Your blood donor profile, health questionnaire, and activation request have been captured. Our team can now continue the verification process from here."
+        highlights={[
+          {
+            title: "Medical review",
+            description:
+              "Your questionnaire answers and donor details will be checked for eligibility and completeness.",
+          },
+          {
+            title: "Verification progress",
+            description:
+              "If anything else is needed, the next instruction will come through your account flow.",
+          },
+          {
+            title: "Overview updates",
+            description:
+              "Return to overview to keep using your account while this donor request is being processed.",
+          },
+        ]}
+        footerNote="You do not need to stay on this page while the activation request is being reviewed."
+      />
     </div>
   );
 }
 
 function NewDonorContent() {
+  const searchParams = useSearchParams();
+  const donorType = normalizeDonorRegistrationType(searchParams.get("type"));
+
+  if (donorType !== "blood") {
+    return <ReproductiveDonorFlow donorType={donorType} />;
+  }
+
   return (
     <Formik<NewDonorFormValues>
       initialValues={initialValues}
