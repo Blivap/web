@@ -54,6 +54,35 @@ export const endpoints = {
       `/bookings/${encodeURIComponent(id)}/remind`,
   },
 
+  meetups: {
+    ensureSession: (bookingId: string) =>
+      `/meetups/bookings/${encodeURIComponent(bookingId)}/session`,
+    session: (sessionId: string) =>
+      `/meetups/${encodeURIComponent(sessionId)}`,
+    verifyCode: (sessionId: string) =>
+      `/meetups/${encodeURIComponent(sessionId)}/verify-code`,
+    verifyQr: (sessionId: string) =>
+      `/meetups/${encodeURIComponent(sessionId)}/verify-qr`,
+    requesterConfirm: (sessionId: string) =>
+      `/meetups/${encodeURIComponent(sessionId)}/requester-confirm`,
+    donorConfirm: (sessionId: string) =>
+      `/meetups/${encodeURIComponent(sessionId)}/donor-confirm`,
+    complete: (sessionId: string) =>
+      `/meetups/${encodeURIComponent(sessionId)}/complete`,
+    report: (sessionId: string) =>
+      `/meetups/${encodeURIComponent(sessionId)}/report`,
+  },
+
+  /** Donation coordination chat (`donationId` = booking id). Live traffic uses Socket.IO `/chat`. */
+  chat: {
+    messages: (donationId: string) =>
+      `/chat/${encodeURIComponent(donationId)}/messages`,
+    arrived: (donationId: string) =>
+      `/chat/${encodeURIComponent(donationId)}/arrived`,
+    media: (donationId: string) =>
+      `/chat/${encodeURIComponent(donationId)}/media`,
+  },
+
   news: "/news",
 
   notifications: {

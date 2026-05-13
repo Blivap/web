@@ -1,6 +1,8 @@
 import AuthRepository from "./authRepository";
 import AvatarRepository from "./avatarRepository";
 import BookingRepository from "./bookingRepository";
+import ChatRepository from "./chatRepository";
+import MeetupRepository from "./meetupRepository";
 import DonorRepository from "./donorRepository";
 import HospitalRepository from "./hospitalRepository";
 import NewsRepository from "./newsRepository";
@@ -10,6 +12,8 @@ export const $api = {
   auth: AuthRepository(),
   avatar: AvatarRepository(),
   bookings: BookingRepository(),
+  chat: ChatRepository(),
+  meetups: MeetupRepository(),
   donors: DonorRepository(),
   hospitals: HospitalRepository(),
   news: NewsRepository(),

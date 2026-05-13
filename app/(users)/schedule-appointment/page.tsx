@@ -17,6 +17,8 @@ import { $api } from "@/app/api";
 import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
 import { getApiMessageFromData, getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import type { HospitalListItem } from "@/lib/hospitals/parseHospitalsListResponse";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { loadSentBookings } from "@/store/slices/bookingsSlice";
 
 export interface AppointmentDetails {
   hospitalId: string;
@@ -85,6 +87,8 @@ function buildScheduledAtIso(date: string, time: string): string {
 
 function ScheduleAppointmentPageContent() {
   const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((s) => s.auth.user);
   const donorUserId = searchParams.get("donorId")?.trim() ?? "";
   const bloodRequestId = searchParams.get("bloodRequestId")?.trim() ?? "";
 
@@ -209,6 +213,12 @@ function ScheduleAppointmentPageContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canConfirmAppointment || isSendingBooking) return;
+    if (user?.nationalIdentificationNumberVerified !== true) {
+      setSubmitError(
+        "Verify your National Identification Number before creating a booking.",
+      );
+      return;
+    }
     setSubmitError(null);
     setIsSendingBooking(true);
     try {
@@ -236,6 +246,7 @@ function ScheduleAppointmentPageContent() {
         );
         return;
       }
+      void dispatch(loadSentBookings());
       setBookingRequestSentOpen(true);
     } catch (e) {
       if (axios.isAxiosError(e)) {

@@ -1,107 +1,59 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Bell, Send } from "lucide-react";
 import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import type {
-  BookingsShellRow,
   BookingsShellTabItem,
-  BookingsTabPanel,
 } from "@/app/(users)/bookings/components/bookings-shell.view";
-import { useAppSelector } from "@/store/hooks";
-import { fetchAllBookingListPages } from "@/lib/bookings/fetchAllBookingListPages";
-import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { loadSentBookings } from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import {
-  bookingSubtitleRequester,
-  bookingTitleForViewer,
-  formatScheduledLabel,
-  statusToPill,
-} from "@/lib/bookings/formatBookingDisplay";
-import {
-  buyerBtnGhost,
-  buyerBtnReminder,
-  buyerBtnSecondary,
-} from "@/lib/bookings/bookingsActionButtonClassNames";
-import type { Booking } from "@/types/bookings";
+  buildBuyerBookingsTabPanels,
+  BUYER_TAB_ORDER,
+  type BuyerPanelKey,
+} from "@/lib/bookings/buyerBookingsTabPanels";
 import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook";
 
-export type BuyerPanelKey = "sent" | "confirmed" | "past";
-
-export const BUYER_TAB_ORDER: readonly BuyerPanelKey[] = [
-  "sent",
-  "confirmed",
-  "past",
-];
+export type { BuyerPanelKey } from "@/lib/bookings/buyerBookingsTabPanels";
+export { BUYER_TAB_ORDER } from "@/lib/bookings/buyerBookingsTabPanels";
 
 export function useBuyerBookings() {
   const { showSnackbar } = useSnackbar();
+  const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
+  const bookings = useAppSelector((s) => s.bookings.sent.items);
+  const hospitalNamesById = useAppSelector((s) => s.bookings.hospitalNamesById);
+  const loadState = useAppSelector((s) => s.bookings.sent.status);
+  const loadError = useAppSelector((s) => s.bookings.sent.error);
+
   const searchParams = useSearchParams();
   const highlightBookingId = searchParams.get("bookingId")?.trim() ?? "";
 
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [hospitalNames, setHospitalNames] = useState<Record<string, string>>(
-    () => ({}),
-  );
-  const [loadState, setLoadState] = useState<
-    "idle" | "loading" | "ok" | "error"
-  >("idle");
-  const [loadError, setLoadError] = useState<string | null>(null);
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [remindingId, setRemindingId] = useState<string | null>(null);
   const [reportBookingId, setReportBookingId] = useState<string | null>(null);
 
-  const loadData = useCallback(async () => {
-    if (!user?.id) return;
-    setLoadState("loading");
-    setLoadError(null);
-    try {
-      const [listRes, hospRes] = await Promise.all([
-        fetchAllBookingListPages((params) => $api.bookings.sent(params)),
-        $api.hospitals.list(),
-      ]);
-
-      if (!listRes.ok) {
-        setBookings([]);
-        setLoadState("error");
-        setLoadError(listRes.error);
-        return;
-      }
-      setBookings(listRes.bookings);
-
-      if (
-        hospRes.status >= 200 &&
-        hospRes.status < 300 &&
-        hospRes.data !== undefined
-      ) {
-        const hospitals = parseHospitalsListResponse(hospRes.data);
-        const map: Record<string, string> = {};
-        for (const h of hospitals) map[h.id] = h.name;
-        setHospitalNames(map);
-      }
-
-      setLoadState("ok");
-    } catch (e) {
-      setBookings([]);
-      setLoadState("error");
-      setLoadError(
-        getAxiosErrorMessage(e, "Could not load bookings. Please try again."),
-      );
-    }
-  }, [user?.id]);
+  const loadData = useCallback(() => {
+    if (!user?.id) return Promise.resolve();
+    return dispatch(loadSentBookings()).unwrap();
+  }, [dispatch, user?.id]);
 
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === "visible" && user?.id) {
+        void dispatch(loadSentBookings());
+      }
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [dispatch, user?.id]);
 
   const rowIdsFingerprint = useMemo(
     () => bookings.map((b) => b.id).join(","),
@@ -111,9 +63,14 @@ export function useBuyerBookings() {
 
   const hospitalLabel = useCallback(
     (hospitalId: string) =>
-      hospitalNames[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
-    [hospitalNames],
+      hospitalNamesById[hospitalId] ??
+      `Hospital ${hospitalId.slice(0, 8)}…`,
+    [hospitalNamesById],
   );
+
+  const refreshSent = useCallback(() => {
+    void dispatch(loadSentBookings());
+  }, [dispatch]);
 
   const withdrawBooking = useCallback(
     async (id: string) => {
@@ -125,7 +82,7 @@ export function useBuyerBookings() {
           return;
         }
         showSnackbar("Request withdrawn — booking cancelled.");
-        await loadData();
+        refreshSent();
       } catch (e) {
         showSnackbar(
           getAxiosErrorMessage(
@@ -137,7 +94,7 @@ export function useBuyerBookings() {
         setMutatingId(null);
       }
     },
-    [loadData, showSnackbar],
+    [refreshSent, showSnackbar],
   );
 
   const remindDonor = useCallback(
@@ -150,212 +107,56 @@ export function useBuyerBookings() {
           return;
         }
         showSnackbar("Reminder sent to the donor.");
+        refreshSent();
       } catch (e) {
         showSnackbar(
-          getAxiosErrorMessage(
-            e,
-            "Reminder could not be sent. If this keeps happening, reminders may not be enabled on the server yet.",
-          ),
+          getAxiosErrorMessage(e, "Reminder didnt go through"),
+          "error",
         );
       } finally {
         setRemindingId(null);
       }
     },
-    [showSnackbar],
+    [refreshSent, showSnackbar],
   );
 
   const submitReport = useCallback(
     async (payload: { reason: string; details?: string }) => {
       if (!reportBookingId) return;
-      const { status } = await $api.bookings.report(
-        reportBookingId,
-        payload,
-      );
+      const { status } = await $api.bookings.report(reportBookingId, payload);
       if (status < 200 || status >= 300) {
         throw new Error("Could not send the report.");
       }
       showSnackbar("Thanks — your report was submitted.");
-      await loadData();
+      refreshSent();
     },
-    [reportBookingId, loadData, showSnackbar],
+    [reportBookingId, refreshSent, showSnackbar],
   );
 
-  const sentBanner = useMemo(
-    () => (
-      <div className="flex items-center gap-3 rounded-lg border border-primary/25 bg-primary/6 px-3 py-2.5 dark:border-primary/35 dark:bg-primary/10">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary dark:bg-primary/20">
-          <Send className="size-4" aria-hidden />
-        </div>
-        <p className="text-xs text-text-secondary sm:text-sm">
-          <span className="font-medium text-text-primary">Sent</span>
-          {" · "}
-          Every request you made, every status.
-        </p>
-      </div>
-    ),
-    [],
+  const tabPanels = useMemo(
+    () =>
+      buildBuyerBookingsTabPanels({
+        bookings,
+        hospitalLabel,
+        user,
+        highlightBookingId,
+        mutatingId,
+        remindingId,
+        withdrawBooking: (id) => void withdrawBooking(id),
+        remindDonor: (id) => void remindDonor(id),
+        setReportBookingId,
+      }),
+    [
+      bookings,
+      hospitalLabel,
+      user,
+      highlightBookingId,
+      mutatingId,
+      remindingId,
+      withdrawBooking,
+      remindDonor,
+    ],
   );
-
-  const tabPanels = useMemo((): Record<BuyerPanelKey, BookingsTabPanel> => {
-    const mapRow = (b: Booking, ctx: BuyerPanelKey): BookingsShellRow => {
-      const pill = statusToPill(b.status);
-      const title = bookingTitleForViewer(b, "requester");
-      const subtitle = bookingSubtitleRequester(
-        b,
-        hospitalLabel(b.hospitalId),
-      );
-      const dateCol = formatScheduledLabel(b.scheduledAt);
-      const reported = (b.reportsCount ?? 0) > 0;
-
-      let actionsSlot: ReactNode;
-
-      const pendingActions = () => {
-        const busyWithdraw = mutatingId === b.id;
-        const busyRemind = remindingId === b.id;
-        return (
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <button
-              type="button"
-              className={buyerBtnSecondary}
-              disabled={busyWithdraw || busyRemind}
-              onClick={() => void withdrawBooking(b.id)}
-            >
-              {busyWithdraw ? "Withdrawing…" : "Withdraw"}
-            </button>
-            <button
-              type="button"
-              className={buyerBtnReminder}
-              disabled={busyWithdraw || busyRemind}
-              onClick={() => void remindDonor(b.id)}
-            >
-              <Bell className="size-3.5 shrink-0" aria-hidden />
-              {busyRemind ? "Sending…" : "Send reminder"}
-            </button>
-            <button
-              type="button"
-              className={buyerBtnGhost}
-              disabled={busyWithdraw || busyRemind}
-              onClick={() => setReportBookingId(b.id)}
-            >
-              Report issue
-            </button>
-          </div>
-        );
-      };
-
-      const confirmedActions = () => {
-        const busy = mutatingId === b.id;
-        return (
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <button
-              type="button"
-              className={buyerBtnSecondary}
-              disabled={busy}
-              onClick={() => void withdrawBooking(b.id)}
-            >
-              {busy ? "Cancelling…" : "Cancel booking"}
-            </button>
-            <button
-              type="button"
-              className={buyerBtnGhost}
-              disabled={busy}
-              onClick={() => setReportBookingId(b.id)}
-            >
-              Report issue
-            </button>
-          </div>
-        );
-      };
-
-      if (ctx === "sent") {
-        if (b.status === "pending") actionsSlot = pendingActions();
-        else if (b.status === "accepted") actionsSlot = confirmedActions();
-        else
-          actionsSlot = (
-            <button
-              type="button"
-              className={buyerBtnGhost}
-              onClick={() => setReportBookingId(b.id)}
-            >
-              Report issue
-            </button>
-          );
-      } else if (ctx === "confirmed" && b.status === "accepted") {
-        actionsSlot = confirmedActions();
-      } else {
-        actionsSlot = (
-          <button
-            type="button"
-            className={buyerBtnGhost}
-            onClick={() => setReportBookingId(b.id)}
-          >
-            Report issue
-          </button>
-        );
-      }
-
-      return {
-        id: b.id,
-        dateCol,
-        title,
-        subtitle,
-        pillLabel: pill.label,
-        pillVariant: pill.variant,
-        reported,
-        avatarUrl: b.donorProfileImage ?? undefined,
-        actionsSlot,
-        highlight: Boolean(highlightBookingId && b.id === highlightBookingId),
-      };
-    };
-
-    const rowsFor = (t: Exclude<BuyerPanelKey, "sent">) =>
-      bookings
-        .filter((b) => {
-          if (t === "confirmed") return b.status === "accepted";
-          return b.status !== "pending" && b.status !== "accepted";
-        })
-        .map((b) => mapRow(b, t));
-
-    const rowsSent = () => bookings.map((b) => mapRow(b, "sent"));
-
-    return {
-      sent: {
-        panelBanner: sentBanner,
-        bannerInListCard: true,
-        summarySections: [],
-        mainListTitle: "Sent",
-        columnLabels: ["Scheduled", "Booking", "Status"],
-        rows: rowsSent(),
-        actionsColumnLabel: "Actions",
-        tableEmptyMessage: "No outbound requests yet.",
-      },
-      confirmed: {
-        summarySections: [],
-        mainListTitle: "Confirmed",
-        columnLabels: ["Scheduled", "Booking", "Status"],
-        rows: rowsFor("confirmed"),
-        actionsColumnLabel: "Actions",
-        tableEmptyMessage: "No confirmed bookings yet.",
-      },
-      past: {
-        summarySections: [],
-        mainListTitle: "Past",
-        columnLabels: ["Date", "Booking", "Outcome"],
-        rows: rowsFor("past"),
-        actionsColumnLabel: "Record",
-        tableEmptyMessage: "No past bookings.",
-      },
-    };
-  }, [
-    bookings,
-    sentBanner,
-    withdrawBooking,
-    remindDonor,
-    highlightBookingId,
-    mutatingId,
-    remindingId,
-    hospitalLabel,
-  ]);
 
   const tabLabels = useMemo(
     () =>
