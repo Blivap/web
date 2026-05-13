@@ -5,7 +5,12 @@ import { Droplet, Star, Gem, DropletIcon } from "lucide-react";
 import Link from "next/link";
 import { Layout } from "../../../layout/layout.component";
 import { Avatar } from "../../../components/ui/Avatar/avatar.component";
-import { Tabs, TabItem } from "../../../components/ui/tabs/tabs.component";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 
 const BECOME_DONOR_CARDS = [
@@ -131,13 +136,40 @@ export default function OverviewPage() {
           </div>
         </div>
 
-        {/* Tabs: switch by index, no route — TabItem children are the panels */}
+        {/* Tabs: shadcn-style Radix tabs + ?tab= sync */}
         <div className="flex flex-col gap-10">
           <Suspense
-            fallback={<div className="flex flex-col gap-10 min-h-[200px]" />}
+            fallback={<div className="flex min-h-[200px] flex-col gap-10" />}
           >
-            <Tabs defaultTabValue="overview" className="flex flex-col gap-10">
-              <TabItem label="Overview">
+            <Tabs
+              defaultValue="overview"
+              queryKey="tab"
+              queryValues={["overview", "payment", "notifications"]}
+              omitSearchParamWhenValue="overview"
+              className="flex flex-col gap-10"
+            >
+              <TabsList className="h-auto w-full justify-start gap-6 rounded-none border-0 border-b border-border bg-transparent p-0 text-text-secondary dark:border-white/10">
+                <TabsTrigger
+                  value="overview"
+                  className="max-w-none flex-none rounded-none border-0 border-b-2 border-transparent bg-transparent px-0 py-3 text-sm font-medium shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none dark:data-[state=active]:text-primary"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="payment"
+                  className="max-w-none flex-none rounded-none border-0 border-b-2 border-transparent bg-transparent px-0 py-3 text-sm font-medium shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none dark:data-[state=active]:text-primary"
+                >
+                  Payment
+                </TabsTrigger>
+                <TabsTrigger
+                  value="notifications"
+                  className="max-w-none flex-none rounded-none border-0 border-b-2 border-transparent bg-transparent px-0 py-3 text-sm font-medium shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none dark:data-[state=active]:text-primary"
+                >
+                  Notifications
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview" className="mt-0">
                 <div className="flex flex-col gap-10">
                   <section className="flex flex-col gap-3">
                     <h2 className="text-base font-medium text-text-primary">
@@ -184,8 +216,8 @@ export default function OverviewPage() {
                           }`}
                         >
                           <Avatar className="size-10!" />
-                          <div className="flex flex-col min-w-0">
-                            <p className="font-medium text-text-primary text-xs">
+                          <div className="flex min-w-0 flex-col">
+                            <p className="text-xs font-medium text-text-primary">
                               {donor.id}
                             </p>
                             <p className="text-xs text-text-secondary">
@@ -206,7 +238,7 @@ export default function OverviewPage() {
                           <p className="text-sm text-text-secondary">
                             {donor.location}
                           </p>
-                          <button className="ml-auto rounded-lg bg-primary px-6 py-[8.5px] text-xs font-medium text-white hover:bg-primary/90 transition-colors">
+                          <button className="ml-auto rounded-lg bg-primary px-6 py-[8.5px] text-xs font-medium text-white transition-colors hover:bg-primary/90">
                             Book Appointment
                           </button>
                         </div>
@@ -214,8 +246,9 @@ export default function OverviewPage() {
                     </div>
                   </section>
                 </div>
-              </TabItem>
-              <TabItem label="Payment">
+              </TabsContent>
+
+              <TabsContent value="payment" className="mt-0">
                 <section className="flex flex-col gap-4">
                   <h2 className="text-lg font-bold text-text-primary">
                     Payment
@@ -224,8 +257,9 @@ export default function OverviewPage() {
                     Payment settings and history will appear here.
                   </p>
                 </section>
-              </TabItem>
-              <TabItem label="Notifications">
+              </TabsContent>
+
+              <TabsContent value="notifications" className="mt-0">
                 <section className="flex flex-col gap-4">
                   <h2 className="text-lg font-bold text-text-primary">
                     Notifications
@@ -234,7 +268,7 @@ export default function OverviewPage() {
                     Your notifications will appear here.
                   </p>
                 </section>
-              </TabItem>
+              </TabsContent>
             </Tabs>
           </Suspense>
         </div>

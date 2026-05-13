@@ -31,6 +31,8 @@ export function statusToPill(status: BookingStatus): {
       return { label: "Declined", variant: "rejected" };
     case "cancelled":
       return { label: "Cancelled", variant: "profile" };
+    case "expired":
+      return { label: "Expired", variant: "profile" };
     case "completed":
       return { label: "Completed", variant: "accepted" };
     case "no_show":
@@ -44,16 +46,26 @@ export function bookingTitleForViewer(
   b: Booking,
   role: "donor" | "requester",
 ): string {
-  if (role === "donor") return "Donation booking";
+  if (role === "donor") {
+    const name = b.requesterDisplayName?.trim();
+    if (name) return `Request · ${name}`;
+    return "Donation booking";
+  }
+  const donor = b.donorDisplayName?.trim();
+  if (donor) return `Booking · ${donor}`;
   return "Booking request";
 }
 
 export function bookingSubtitleDonor(
   b: Booking,
-  hospitalName: string,
+  hospitalFallback: string,
 ): string {
   const when = formatScheduledLabel(b.scheduledAt);
-  const base = `${hospitalName} · ${when}`;
+  const hospital = b.hospitalName?.trim() || hospitalFallback;
+  const who =
+    b.requesterDisplayName?.trim() ||
+    `Requester ${b.requesterId.slice(0, 8)}…`;
+  const base = `${who} · ${hospital} · ${when}`;
   if (b.status === "accepted" && b.meetingCode) {
     return `${base} · Meeting code: ${b.meetingCode}`;
   }
@@ -62,11 +74,14 @@ export function bookingSubtitleDonor(
 
 export function bookingSubtitleRequester(
   b: Booking,
-  hospitalName: string,
+  hospitalFallback: string,
 ): string {
   const when = formatScheduledLabel(b.scheduledAt);
-  const donorRef = `Donor ${b.donorUserId.slice(0, 8)}…`;
-  const base = `${donorRef} · ${hospitalName} · ${when}`;
+  const hospital = b.hospitalName?.trim() || hospitalFallback;
+  const donor =
+    b.donorDisplayName?.trim() ||
+    `Donor ${b.donorUserId.slice(0, 8)}…`;
+  const base = `${donor} · ${hospital} · ${when}`;
   if (b.status === "accepted" && b.meetingCode) {
     return `${base} · Meeting code: ${b.meetingCode}`;
   }

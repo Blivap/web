@@ -11,7 +11,7 @@ export const DONOR_COUNTRIES = [
 
 export type DonorCountryCode = (typeof DONOR_COUNTRIES)[number]["value"];
 
-/** Nigerian states + FCT for dependent state `<select>`. */
+/** Nigerian states + FCT for dependent state field (shadcn Select). */
 export const NIGERIA_STATES: readonly string[] = [
   "Abia",
   "Adamawa",

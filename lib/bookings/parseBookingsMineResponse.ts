@@ -1,4 +1,4 @@
-import type { Booking, BookingStatus } from "@/types/bookings";
+import type { Booking, BookingStatus, BookingsListMeta } from "@/types/bookings";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 
 const VALID_STATUS = new Set<BookingStatus>([
@@ -6,6 +6,7 @@ const VALID_STATUS = new Set<BookingStatus>([
   "accepted",
   "rejected",
   "cancelled",
+  "expired",
   "completed",
   "no_show",
 ]);
@@ -14,6 +15,42 @@ function pickString(v: unknown): string | null {
   if (typeof v === "string" && v.trim().length > 0) return v.trim();
   if (typeof v === "number" && Number.isFinite(v)) return String(v);
   return null;
+}
+
+/** Mongo id string, or `id` / `_id` from a populated relation object. */
+function pickRefId(raw: unknown): string | null {
+  if (raw == null) return null;
+  if (typeof raw === "string" || typeof raw === "number") {
+    return pickString(raw);
+  }
+  if (typeof raw === "object") {
+    const o = raw as Record<string, unknown>;
+    return pickString(o.id ?? o._id);
+  }
+  return null;
+}
+
+function pickPersonFromRef(raw: unknown): {
+  displayName?: string;
+  profileImage?: string;
+} {
+  if (!raw || typeof raw !== "object") return {};
+  const o = raw as Record<string, unknown>;
+  const first =
+    typeof o.firstname === "string" ? o.firstname.trim() : "";
+  const last = typeof o.lastname === "string" ? o.lastname.trim() : "";
+  const displayName = [first, last].filter(Boolean).join(" ").trim();
+  const profileImage = pickString(o.profileImage ?? o.profile_image);
+  return {
+    ...(displayName ? { displayName } : {}),
+    ...(profileImage ? { profileImage } : {}),
+  };
+}
+
+function pickHospitalNameFromRef(raw: unknown): string | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const n = pickString((raw as Record<string, unknown>).name);
+  return n ?? undefined;
 }
 
 function coerceArray(raw: unknown): unknown[] {
@@ -47,6 +84,10 @@ export function parseBookingRecord(raw: unknown): Booking | null {
   const r = raw as Record<string, unknown>;
   const unwrapped = unwrapApiRecord(raw) ?? r;
 
+  if (unwrapped.isDeleted === true || r.isDeleted === true) {
+    return null;
+  }
+
   const id =
     pickString(unwrapped.id ?? unwrapped._id ?? r.id ?? r._id) ??
     pickString(
@@ -54,15 +95,16 @@ export function parseBookingRecord(raw: unknown): Booking | null {
     );
   if (!id) return null;
 
-  const donorUserId = pickString(
-    unwrapped.donorUserId ?? r.donorUserId ?? unwrapped.donor_user_id,
-  );
-  const requesterId = pickString(
-    unwrapped.requesterId ?? r.requesterId ?? unwrapped.requester_id,
-  );
-  const hospitalId = pickString(
-    unwrapped.hospitalId ?? r.hospitalId ?? unwrapped.hospital_id,
-  );
+  const donorRaw =
+    unwrapped.donorUserId ?? r.donorUserId ?? unwrapped.donor_user_id;
+  const requesterRaw =
+    unwrapped.requesterId ?? r.requesterId ?? unwrapped.requester_id;
+  const hospitalRaw =
+    unwrapped.hospitalId ?? r.hospitalId ?? unwrapped.hospital_id;
+
+  const donorUserId = pickRefId(donorRaw);
+  const requesterId = pickRefId(requesterRaw);
+  const hospitalId = pickRefId(hospitalRaw);
   const scheduledAt = pickString(
     unwrapped.scheduledAt ?? r.scheduledAt ?? unwrapped.scheduled_at,
   );
@@ -72,6 +114,10 @@ export function parseBookingRecord(raw: unknown): Booking | null {
   if (!donorUserId || !requesterId || !hospitalId || !scheduledAt || !status) {
     return null;
   }
+
+  const donorPerson = pickPersonFromRef(donorRaw);
+  const requesterPerson = pickPersonFromRef(requesterRaw);
+  const hospitalDisplayName = pickHospitalNameFromRef(hospitalRaw);
 
   const slotEndAt = pickString(
     unwrapped.slotEndAt ?? r.slotEndAt ?? unwrapped.slot_end_at,
@@ -92,6 +138,9 @@ export function parseBookingRecord(raw: unknown): Booking | null {
     unwrapped.respondedAt ?? r.respondedAt ?? unwrapped.responded_at,
   );
 
+  const reportsRaw = unwrapped.reports ?? r.reports;
+  const reportsCount = Array.isArray(reportsRaw) ? reportsRaw.length : 0;
+
   return {
     id,
     donorUserId,
@@ -103,10 +152,24 @@ export function parseBookingRecord(raw: unknown): Booking | null {
     ...(meetingCode ? { meetingCode } : { meetingCode: null }),
     ...(bloodRequestId ? { bloodRequestId } : { bloodRequestId: null }),
     ...(respondedAt ? { respondedAt } : {}),
+    ...(donorPerson.displayName
+      ? { donorDisplayName: donorPerson.displayName }
+      : {}),
+    ...(donorPerson.profileImage
+      ? { donorProfileImage: donorPerson.profileImage }
+      : {}),
+    ...(requesterPerson.displayName
+      ? { requesterDisplayName: requesterPerson.displayName }
+      : {}),
+    ...(requesterPerson.profileImage
+      ? { requesterProfileImage: requesterPerson.profileImage }
+      : {}),
+    ...(hospitalDisplayName ? { hospitalName: hospitalDisplayName } : {}),
+    ...(reportsCount > 0 ? { reportsCount } : {}),
   };
 }
 
-/** Normalizes GET /bookings/mine (and common wrappers) into a sorted list (newest scheduledAt first — server already sorts; we preserve order). */
+/** Normalizes list bodies: legacy GET /bookings/mine, GET /bookings/sent, GET /bookings/received, and common `{ data: [...] }` wrappers. */
 export function parseBookingsMineResponse(body: unknown): Booking[] {
   const items = coerceArray(body);
   const out: Booking[] = [];
@@ -115,4 +178,29 @@ export function parseBookingsMineResponse(body: unknown): Booking[] {
     if (b) out.push(b);
   }
   return out;
+}
+
+function parseListMeta(body: unknown): BookingsListMeta | undefined {
+  if (!body || typeof body !== "object") return undefined;
+  const root = body as Record<string, unknown>;
+  const meta = root.meta;
+  if (!meta || typeof meta !== "object") return undefined;
+  const m = meta as Record<string, unknown>;
+  const page = Number(m.page);
+  const limit = Number(m.limit);
+  const total = Number(m.total);
+  if (!Number.isFinite(page) || !Number.isFinite(limit) || !Number.isFinite(total))
+    return undefined;
+  return { page, limit, total };
+}
+
+/** Parses paginated `{ message, data, meta }` list responses (sent / received). */
+export function parseBookingsPaginatedResponse(body: unknown): {
+  bookings: Booking[];
+  meta?: BookingsListMeta;
+} {
+  return {
+    bookings: parseBookingsMineResponse(body),
+    meta: parseListMeta(body),
+  };
 }

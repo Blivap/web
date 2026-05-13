@@ -15,7 +15,7 @@ import axios from "axios";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { $api } from "@/app/api";
 import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
-import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
+import { getApiMessageFromData, getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import type { HospitalListItem } from "@/lib/hospitals/parseHospitalsListResponse";
 
 export interface AppointmentDetails {
@@ -228,9 +228,12 @@ function ScheduleAppointmentPageContent() {
       };
       if (bloodRequestId) payload.bloodRequestId = bloodRequestId;
 
-      const { status } = await $api.bookings.create(payload);
+      const { status, data } = await $api.bookings.request(payload);
       if (status < 200 || status >= 300) {
-        setSubmitError("Could not create the booking. Please try again.");
+        setSubmitError(
+          getApiMessageFromData(data) ??
+            "Could not create the booking. Please try again.",
+        );
         return;
       }
       setBookingRequestSentOpen(true);

@@ -5,6 +5,13 @@ import type { DonorBloodType } from "@/types/donors";
 import { BLOOD_TYPES } from "../../donors.data";
 import { DONOR_COUNTRIES, NIGERIA_STATES } from "@/lib/donors/location-options";
 import { Button } from "@/components/button/button.component";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const REGISTER_BLOOD_TYPES = BLOOD_TYPES.filter(
   (t): t is DonorBloodType => t !== "All",
@@ -111,23 +118,25 @@ export function DonorBasicsStep({
               >
                 Country *
               </label>
-              <select
-                id="donor-country"
-                value={values.country}
-                onChange={(e) => {
-                  onChange("country", e.target.value);
+              <Select
+                value={values.country || undefined}
+                onValueChange={(v) => {
+                  onChange("country", v);
                   onChange("state", "");
                 }}
-                className={selectClassName}
                 disabled={isLocked}
               >
-                <option value="">Select country</option>
-                {DONOR_COUNTRIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="donor-country" className="w-full">
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DONOR_COUNTRIES.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>
+                      {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -138,20 +147,22 @@ export function DonorBasicsStep({
                 State / region *
               </label>
               {isNigeria ? (
-                <select
-                  id="donor-state"
-                  value={values.state}
-                  onChange={(e) => onChange("state", e.target.value)}
-                  className={selectClassName}
+                <Select
+                  value={values.state || undefined}
+                  onValueChange={(v) => onChange("state", v)}
                   disabled={!values.country || isLocked}
                 >
-                  <option value="">Select state</option>
-                  {NIGERIA_STATES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="donor-state" className="w-full">
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NIGERIA_STATES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
                 <input
                   id="donor-state"

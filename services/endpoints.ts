@@ -33,10 +33,25 @@ export const endpoints = {
   },
 
   bookings: {
+    /** Preferred: same body as legacy POST /bookings */
+    request: "/bookings/request",
     create: "/bookings",
-    respond: (id: string) => `/bookings/${id}/respond`,
-    cancel: (id: string) => `/bookings/${id}/cancel`,
+    sent: "/bookings/sent",
+    received: "/bookings/received",
     mine: "/bookings/mine",
+    respond: (id: string) =>
+      `/bookings/${encodeURIComponent(id)}/respond`,
+    accept: (id: string) =>
+      `/bookings/${encodeURIComponent(id)}/accept`,
+    decline: (id: string) =>
+      `/bookings/${encodeURIComponent(id)}/decline`,
+    cancel: (id: string) =>
+      `/bookings/${encodeURIComponent(id)}/cancel`,
+    report: (id: string) =>
+      `/bookings/${encodeURIComponent(id)}/report`,
+    /** Optional: notify donor again (rebuzz / reminder). Backend must implement. */
+    remind: (id: string) =>
+      `/bookings/${encodeURIComponent(id)}/remind`,
   },
 
   news: "/news",

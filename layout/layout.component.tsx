@@ -37,6 +37,7 @@ import {
 import { ProfileThemeCycleRow } from "./theme-profile-submenu.component";
 import { SelectAvatarModal } from "@/components/select-avatar/select-avatar-modal.component";
 import { Button } from "@/components/ui/button";
+import { BlivapLogo } from "@/public/svg";
 
 // Define navigation item structure
 interface NavItem {
@@ -129,9 +130,102 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           },
         )}
       >
-        <p className="font-bold text-primary text-3xl font-helvetica dark:text-[#e8e8ea]">
-          Blivap
-        </p>
+        <div className="flex items-center md:w-full justify-between gap-4">
+          <div
+            ref={profileContainerRef}
+            className="relative flex items-center gap-3 order-2 md:order-1"
+          >
+            <button
+              type="button"
+              onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+              className="flex items-center gap-3 cursor-pointer rounded-full border border-transparent hover:border-[#E5E7EB] dark:hover:border-white/15 pr-2 transition-colors"
+            >
+              <div
+                className="flex items-center gap-2"
+                key={user?.id || "no-user"}
+              >
+                <Avatar
+                  className="sm:size-10! size-9!"
+                  src={user?.profileImage}
+                />
+                <div className="flex flex-col text-left">
+                  <p className="text-[#000000] dark:text-white font-medium text-sm">
+                    {user?.id?.slice(0, 6) ?? "User"}
+                  </p>
+                  <p className="text-xs text-[#6B7280] dark:text-white/55">
+                    Donor
+                  </p>
+                </div>
+              </div>
+              <ChevronDown
+                size={16}
+                className={classNames(
+                  "text-[#374151] dark:text-white/80 transition-transform duration-200",
+                  {
+                    "rotate-180": isProfileMenuOpen,
+                  },
+                )}
+              />
+            </button>
+            <div
+              className={classNames(
+                "absolute top-full left-0 z-90 mt-3 origin-top-right md:left-auto md:right-auto",
+                // When closed the menu is invisible but still has layout; without
+                // this the wrapper sits above NavLinks and eats clicks.
+                isProfileMenuOpen ? "pointer-events-auto" : "pointer-events-none",
+              )}
+            >
+              <div
+                ref={profileMenuRef}
+                className={classNames(
+                  "relative w-55 bg-white dark:bg-[#1a1a22] rounded-xl border border-[#DADADA] dark:border-white/10 shadow-[2px_4px_10px_#00000014] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)] p-2 transition-colors duration-200",
+                  isProfileMenuOpen
+                    ? "pointer-events-auto"
+                    : "pointer-events-none",
+                )}
+                style={{
+                  visibility: "hidden",
+                  opacity: 0,
+                  transform: "translateY(-6px) scale(0.96)",
+                }}
+              >
+                <div className="px-3 py-2 border-b border-[#F3F4F6] dark:border-white/10">
+                  <p className="text-sm font-medium text-black dark:text-white">
+                    {user?.id?.slice(0, 6) ?? "User"}
+                  </p>
+                  <p className="text-xs text-[#6B7280] dark:text-white/55">
+                    Donor account
+                  </p>
+                </div>
+                <div className="flex flex-col pt-2">
+                  <ProfileThemeCycleRow
+                    preference={preference}
+                    onCycle={() =>
+                      setPreference(nextThemePreference(preference))
+                    }
+                  />
+                  <Link
+                    href="/settings"
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/6 hover:text-primary transition-colors"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <Settings size={16} />
+                    Settings
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/6 hover:text-primary transition-colors text-left"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <NavLinks onLinkClick={closeDrawer} darkShell={resolved === "dark"} />
         <div className="flex flex-col gap-5">
           <p className="font-bold text-xs uppercase text-foundation-dark dark:text-white/70">
@@ -146,99 +240,15 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
             />
           </div>
         </div>
+        <p className="flex font-semibold font-helvetica text-primary text-6xl tracking-tight mt-auto mb-4">
+          <BlivapLogo fill="#960018" className="size-18 -ml-2" />
+          <span className="-mt-1 -ml-2">livap</span>
+        </p>
       </div>
       {/* Topbar */}
       <div className="fixed top-0 left-0 right-0 md:left-63 z-60 bg-white dark:bg-[#111118] border-b border-[#DADADA] dark:border-white/10 transition-colors duration-200">
-        <div className="w-full py-3.5 px-5 md:px-9 flex items-center justify-between ">
-          <div className="flex items-center md:w-full justify-between gap-4">
-            <div
-              ref={profileContainerRef}
-              className="relative flex items-center gap-3 order-2 md:order-1"
-            >
-              <button
-                type="button"
-                onClick={() => setIsProfileMenuOpen((prev) => !prev)}
-                className="flex items-center gap-3 cursor-pointer rounded-full border border-transparent hover:border-[#E5E7EB] dark:hover:border-white/15 pr-2 transition-colors"
-              >
-                <div
-                  className="flex items-center gap-2"
-                  key={user?.id || "no-user"}
-                >
-                  <Avatar
-                    className="sm:size-10! size-9!"
-                    src={user?.profileImage}
-                  />
-                  <div className="flex flex-col text-left">
-                    <p className="text-[#000000] dark:text-white font-medium text-sm">
-                      {user?.id?.slice(0, 6) ?? "User"}
-                    </p>
-                    <p className="text-xs text-[#6B7280] dark:text-white/55">
-                      Donor
-                    </p>
-                  </div>
-                </div>
-                <ChevronDown
-                  size={16}
-                  className={classNames(
-                    "text-[#374151] dark:text-white/80 transition-transform duration-200",
-                    {
-                      "rotate-180": isProfileMenuOpen,
-                    },
-                  )}
-                />
-              </button>
-              <div className="absolute top-full left-0 z-70 mt-3 origin-top-right md:left-auto md:right-auto">
-                <div
-                  ref={profileMenuRef}
-                  className={classNames(
-                    "relative w-55 bg-white dark:bg-[#1a1a22] rounded-xl border border-[#DADADA] dark:border-white/10 shadow-[2px_4px_10px_#00000014] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)] p-2 transition-colors duration-200",
-                    isProfileMenuOpen
-                      ? "pointer-events-auto"
-                      : "pointer-events-none",
-                  )}
-                  style={{
-                    visibility: "hidden",
-                    opacity: 0,
-                    transform: "translateY(-6px) scale(0.96)",
-                  }}
-                >
-                  <div className="px-3 py-2 border-b border-[#F3F4F6] dark:border-white/10">
-                    <p className="text-sm font-medium text-black dark:text-white">
-                      {user?.id?.slice(0, 6) ?? "User"}
-                    </p>
-                    <p className="text-xs text-[#6B7280] dark:text-white/55">
-                      Donor account
-                    </p>
-                  </div>
-                  <div className="flex flex-col pt-2">
-                    <ProfileThemeCycleRow
-                      preference={preference}
-                      onCycle={() =>
-                        setPreference(nextThemePreference(preference))
-                      }
-                    />
-                    <Link
-                      href="/settings"
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/6 hover:text-primary transition-colors"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
-                      <Settings size={16} />
-                      Settings
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/6 hover:text-primary transition-colors text-left"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <NotificationBell />
-          </div>
+        <div className="w-full py-3.5 px-5 md:px-9 flex items-center  justify-between md:justify-end ">
+          <NotificationBell />
 
           <Button
             variant="ghost"
