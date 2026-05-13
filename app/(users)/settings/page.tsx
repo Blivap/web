@@ -14,6 +14,8 @@ import { FaPencilAlt } from "react-icons/fa";
 import { Button } from "@/components/button/button.component";
 import { Layout } from "@/layout/layout.component";
 import { buildE164Phone, splitStoredPhone } from "@/lib/phone-country-codes";
+import { useAppDispatch } from "@/store/hooks";
+import { setSelectedAvatar } from "@/store/slices/selectAvatarSlice";
 
 function toDateInputValue(iso: string | null | undefined): string {
   if (!iso) return "";
@@ -22,6 +24,7 @@ function toDateInputValue(iso: string | null | undefined): string {
 }
 
 export default function SettingsPage() {
+  const dispatch = useAppDispatch();
   const {
     user,
     updateProfile,
@@ -31,7 +34,6 @@ export default function SettingsPage() {
   } = useSettings();
   const {
     avatars,
-    handleSelectAvatar,
     getAvatars,
   } = useSelectAvatar();
   const { open: openAvatarModal } = useAvatarModal();
@@ -135,8 +137,10 @@ export default function SettingsPage() {
                           className="absolute right-3 bottom-3 translate-x-1/4 translate-y-1/4 flex items-center justify-center size-7 rounded-full bg-black text-white border-2 border-white shadow-md"
                           aria-label="Change profile picture"
                           onClick={() => {
-                            handleSelectAvatar(
-                              values.profileImage || user?.profileImage || "",
+                            dispatch(
+                              setSelectedAvatar(
+                                values.profileImage || user?.profileImage || null,
+                              ),
                             );
                             openAvatarModal();
                           }}

@@ -15,8 +15,10 @@ import axios from "axios";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { $api } from "@/app/api";
 import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
-import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
+import { getApiMessageFromData, getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import type { HospitalListItem } from "@/lib/hospitals/parseHospitalsListResponse";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { loadSentBookings } from "@/store/slices/bookingsSlice";
 
 export interface AppointmentDetails {
   hospitalId: string;
@@ -85,6 +87,8 @@ function buildScheduledAtIso(date: string, time: string): string {
 
 function ScheduleAppointmentPageContent() {
   const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((s) => s.auth.user);
   const donorUserId = searchParams.get("donorId")?.trim() ?? "";
   const bloodRequestId = searchParams.get("bloodRequestId")?.trim() ?? "";
 
@@ -209,6 +213,12 @@ function ScheduleAppointmentPageContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canConfirmAppointment || isSendingBooking) return;
+    if (user?.nationalIdentificationNumberVerified !== true) {
+      setSubmitError(
+        "Verify your National Identification Number before creating a booking.",
+      );
+      return;
+    }
     setSubmitError(null);
     setIsSendingBooking(true);
     try {
@@ -228,11 +238,15 @@ function ScheduleAppointmentPageContent() {
       };
       if (bloodRequestId) payload.bloodRequestId = bloodRequestId;
 
-      const { status } = await $api.bookings.create(payload);
+      const { status, data } = await $api.bookings.request(payload);
       if (status < 200 || status >= 300) {
-        setSubmitError("Could not create the booking. Please try again.");
+        setSubmitError(
+          getApiMessageFromData(data) ??
+            "Could not create the booking. Please try again.",
+        );
         return;
       }
+      void dispatch(loadSentBookings());
       setBookingRequestSentOpen(true);
     } catch (e) {
       if (axios.isAxiosError(e)) {
