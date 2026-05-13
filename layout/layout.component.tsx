@@ -38,6 +38,7 @@ import { ProfileThemeCycleRow } from "./theme-profile-submenu.component";
 import { SelectAvatarModal } from "@/components/select-avatar/select-avatar-modal.component";
 import { Button } from "@/components/ui/button";
 import { BlivapLogo } from "@/public/svg";
+import { LayoutBreadcrumbs } from "./layout-breadcrumbs.component";
 
 // Define navigation item structure
 interface NavItem {
@@ -121,7 +122,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       {/* Sidebar */}
       <div
         className={classNames(
-          "flex flex-col gap-10 w-full max-w-57.5 md:max-w-63 bg-white dark:bg-[#111118] border-r border-[#DADADA] dark:border-white/10 fixed left-0 h-full pt-8 px-4 md:pl-8 transition-transform duration-200 ease-out z-50",
+          "flex flex-col gap-10 w-full max-w-57.5 md:max-w-63 bg-white dark:bg-[#111118] border-r border-[#DADADA] dark:border-white/10 fixed left-0 h-full pt-4 px-4 md:pl-8 transition-transform duration-200 ease-out z-50",
           {
             // On mobile: completely hidden when closed (-translate-x-full), visible when open (translate-x-0)
             // On desktop: always visible (md:translate-x-0 overrides)
@@ -130,15 +131,15 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           },
         )}
       >
-        <div className="flex items-center md:w-full justify-between gap-4">
+        <div className="relative z-100 flex items-center justify-between gap-4 md:w-full">
           <div
             ref={profileContainerRef}
-            className="relative flex items-center gap-3 order-2 md:order-1"
+            className="relative flex items-center gap-3 order-2 md:order-1 w-full"
           >
             <button
               type="button"
               onClick={() => setIsProfileMenuOpen((prev) => !prev)}
-              className="flex items-center gap-3 cursor-pointer rounded-full border border-transparent hover:border-[#E5E7EB] dark:hover:border-white/15 pr-2 transition-colors"
+              className="flex items-center justify-between w-full gap-3 cursor-pointer rounded-full border border-transparent hover:border-[#E5E7EB] dark:hover:border-white/15 pr-2 transition-colors"
             >
               <div
                 className="flex items-center gap-2"
@@ -169,16 +170,18 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
             </button>
             <div
               className={classNames(
-                "absolute top-full left-0 z-90 mt-3 origin-top-right md:left-auto md:right-auto",
+                "absolute top-full left-0 mt-3 origin-top-right md:left-auto md:right-auto",
                 // When closed the menu is invisible but still has layout; without
                 // this the wrapper sits above NavLinks and eats clicks.
-                isProfileMenuOpen ? "pointer-events-auto" : "pointer-events-none",
+                isProfileMenuOpen
+                  ? "pointer-events-auto"
+                  : "pointer-events-none",
               )}
             >
               <div
                 ref={profileMenuRef}
                 className={classNames(
-                  "relative w-55 bg-white dark:bg-[#1a1a22] rounded-xl border border-[#DADADA] dark:border-white/10 shadow-[2px_4px_10px_#00000014] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)] p-2 transition-colors duration-200",
+                  "relative w-65 bg-white dark:bg-[#1a1a22] rounded-xl border border-[#DADADA] dark:border-white/10 shadow-[2px_4px_10px_#00000014] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)] p-2 transition-colors duration-200",
                   isProfileMenuOpen
                     ? "pointer-events-auto"
                     : "pointer-events-none",
@@ -247,17 +250,19 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       </div>
       {/* Topbar */}
       <div className="fixed top-0 left-0 right-0 md:left-63 z-60 bg-white dark:bg-[#111118] border-b border-[#DADADA] dark:border-white/10 transition-colors duration-200">
-        <div className="w-full py-3.5 px-5 md:px-9 flex items-center  justify-between md:justify-end ">
-          <NotificationBell />
-
-          <Button
-            variant="ghost"
-            onClick={() => setDrawer((prev) => !prev)}
-            className="h-fit rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-1 text-text-primary transition-colors hover:bg-[#F3F4F6] md:hidden dark:border-white/10 dark:bg-[#1A1A22] dark:text-white dark:hover:bg-white/8"
-            aria-label="Toggle menu"
-          >
-            <Menu size={24} className="size-6" />
-          </Button>
+        <div className="flex w-full min-w-0 items-center justify-between gap-3 py-3.5 px-5 md:gap-4 md:px-9">
+          <LayoutBreadcrumbs className="min-w-0 flex-1" />
+          <div className="flex shrink-0 items-center gap-3">
+            <NotificationBell />
+            <Button
+              variant="ghost"
+              onClick={() => setDrawer((prev) => !prev)}
+              className="h-fit rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-1 text-text-primary transition-colors hover:bg-[#F3F4F6] md:hidden dark:border-white/10 dark:bg-[#1A1A22] dark:text-white dark:hover:bg-white/8"
+              aria-label="Toggle menu"
+            >
+              <Menu size={24} className="size-6" />
+            </Button>
+          </div>
         </div>
       </div>
       {/* Main content area */}

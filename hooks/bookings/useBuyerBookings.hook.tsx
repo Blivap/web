@@ -34,22 +34,13 @@ import {
 import type { Booking } from "@/types/bookings";
 import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook";
 
-export type BuyerPanelKey = "sent" | "pending" | "confirmed" | "past";
+export type BuyerPanelKey = "sent" | "confirmed" | "past";
 
 export const BUYER_TAB_ORDER: readonly BuyerPanelKey[] = [
   "sent",
-  "pending",
   "confirmed",
   "past",
 ];
-
-export function buyerTabForBooking(
-  b: Booking,
-): Exclude<BuyerPanelKey, "sent"> {
-  if (b.status === "pending") return "pending";
-  if (b.status === "accepted") return "confirmed";
-  return "past";
-}
 
 export function useBuyerBookings() {
   const { showSnackbar } = useSnackbar();
@@ -289,8 +280,6 @@ export function useBuyerBookings() {
               Report issue
             </button>
           );
-      } else if (ctx === "pending" && b.status === "pending") {
-        actionsSlot = pendingActions();
       } else if (ctx === "confirmed" && b.status === "accepted") {
         actionsSlot = confirmedActions();
       } else {
@@ -321,7 +310,10 @@ export function useBuyerBookings() {
 
     const rowsFor = (t: Exclude<BuyerPanelKey, "sent">) =>
       bookings
-        .filter((b) => buyerTabForBooking(b) === t)
+        .filter((b) => {
+          if (t === "confirmed") return b.status === "accepted";
+          return b.status !== "pending" && b.status !== "accepted";
+        })
         .map((b) => mapRow(b, t));
 
     const rowsSent = () => bookings.map((b) => mapRow(b, "sent"));
@@ -336,14 +328,6 @@ export function useBuyerBookings() {
         rows: rowsSent(),
         actionsColumnLabel: "Actions",
         tableEmptyMessage: "No outbound requests yet.",
-      },
-      pending: {
-        summarySections: [],
-        mainListTitle: "Waiting",
-        columnLabels: ["Scheduled", "Booking", "Status"],
-        rows: rowsFor("pending"),
-        actionsColumnLabel: "Actions",
-        tableEmptyMessage: "Nothing pending.",
       },
       confirmed: {
         summarySections: [],
@@ -377,7 +361,6 @@ export function useBuyerBookings() {
     () =>
       ({
         sent: "Sent",
-        pending: "Waiting",
         confirmed: "Confirmed",
         past: "Past",
       }) satisfies Record<BuyerPanelKey, string>,

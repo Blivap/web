@@ -1,9 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { BookingSectionCard } from "./booking-section-card";
 import {
   BookingStatusPill,
@@ -63,6 +77,36 @@ const LEGACY_TAB_QUERY: Record<string, string> = {
   archived: "past",
 };
 
+/** Rows per page; pagination footer still shows for shorter lists (single page). */
+const BOOKINGS_TABLE_PAGE_SIZE = 8;
+
+/** Page numbers + ellipsis for shadcn-style pagination controls. */
+function bookingPaginationPages(
+  current: number,
+  total: number,
+): (number | "ellipsis")[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const set = new Set<number>();
+  set.add(1);
+  set.add(total);
+  for (let p = current - 1; p <= current + 1; p++) {
+    if (p >= 1 && p <= total) set.add(p);
+  }
+  const sorted = [...set].sort((a, b) => a - b);
+  const out: (number | "ellipsis")[] = [];
+  let prev = 0;
+  for (const p of sorted) {
+    if (prev > 0 && p - prev > 1) {
+      out.push("ellipsis");
+    }
+    out.push(p);
+    prev = p;
+  }
+  return out;
+}
+
 const tabTriggerClass =
   "min-h-10 min-w-0 flex-1 basis-0 rounded-lg border-0 px-2 py-2.5 text-center text-xs font-medium transition-colors sm:px-3 sm:text-sm " +
   "border-b-0 data-[state=active]:border-b-0 " +
@@ -72,6 +116,222 @@ const tabTriggerClass =
   "truncate";
 
 type BookingsTabBodyProps = BookingsTabPanel;
+
+type BookingsRowsTableProps = {
+  rows: readonly BookingsShellRow[];
+  colA: string;
+  colB: string;
+  colC: string;
+  colCount: number;
+  actionsColumnLabel?: string;
+  tableEmptyMessage: string;
+};
+
+function BookingsRowsTable({
+  rows,
+  colA,
+  colB,
+  colC,
+  colCount,
+  actionsColumnLabel,
+  tableEmptyMessage,
+}: BookingsRowsTableProps) {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(rows.length / BOOKINGS_TABLE_PAGE_SIZE),
+  );
+  const safePage = Math.min(Math.max(1, page), totalPages);
+
+  const paginatedRows = useMemo(() => {
+    if (rows.length <= BOOKINGS_TABLE_PAGE_SIZE) {
+      return rows;
+    }
+    const start = (safePage - 1) * BOOKINGS_TABLE_PAGE_SIZE;
+    return rows.slice(start, start + BOOKINGS_TABLE_PAGE_SIZE);
+  }, [rows, safePage]);
+
+  const pageItems = useMemo(
+    () => bookingPaginationPages(safePage, totalPages),
+    [safePage, totalPages],
+  );
+
+  const hasRows = rows.length > 0;
+  const rangeFrom =
+    rows.length === 0 ? 0 : (safePage - 1) * BOOKINGS_TABLE_PAGE_SIZE + 1;
+  const rangeTo = Math.min(
+    safePage * BOOKINGS_TABLE_PAGE_SIZE,
+    rows.length,
+  );
+
+  return (
+    <>
+      <div className="mt-3 overflow-x-auto border-t border-border pt-3 dark:border-white/10">
+        <table
+          className={`w-full border-collapse text-left ${actionsColumnLabel ? "min-w-[720px]" : "min-w-[560px]"}`}
+        >
+          <thead>
+            <tr>
+              <th
+                scope="col"
+                className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+              >
+                {colA}
+              </th>
+              <th
+                scope="col"
+                className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+              >
+                {colB}
+              </th>
+              <th
+                scope="col"
+                className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+              >
+                {colC}
+              </th>
+              {actionsColumnLabel ? (
+                <th
+                  scope="col"
+                  className="pb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+                >
+                  {actionsColumnLabel}
+                </th>
+              ) : null}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={colCount}
+                  className="py-10 text-center text-sm text-text-secondary"
+                >
+                  {tableEmptyMessage}
+                </td>
+              </tr>
+            ) : (
+              paginatedRows.map((row) => (
+                <tr
+                  key={row.id}
+                  id={`booking-row-${row.id}`}
+                  className={`border-t border-[#F3F4F6] dark:border-white/10 ${
+                    row.highlight
+                      ? "bg-primary/5 ring-2 ring-inset ring-primary/40"
+                      : ""
+                  }`}
+                >
+                  <td className="whitespace-nowrap py-4 pr-4 align-top text-sm text-text-secondary">
+                    {row.dateCol}
+                  </td>
+                  <td className="py-4 pr-4 align-top">
+                    <div className="flex gap-3">
+                      {row.avatarUrl ? (
+                        <Image
+                          src={row.avatarUrl}
+                          alt=""
+                          width={40}
+                          height={40}
+                          className="size-10 shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
+                        />
+                      ) : null}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-text-primary">
+                          {row.title}
+                        </p>
+                        <p className="mt-1 text-sm leading-snug text-text-secondary">
+                          {row.subtitle}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 pr-4 align-top">
+                    <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center">
+                      <BookingStatusPill variant={row.pillVariant}>
+                        {row.pillLabel}
+                      </BookingStatusPill>
+                      {row.reported ? (
+                        <span className="inline-flex w-fit items-center rounded-full bg-[#374151] px-2 py-0.5 text-[11px] font-medium text-white dark:bg-white/15 dark:text-white">
+                          Reported
+                        </span>
+                      ) : null}
+                    </div>
+                  </td>
+                  {actionsColumnLabel ? (
+                    <td className="py-4 align-top">
+                      {row.actionsSlot ?? (
+                        <span className="text-xs text-text-tertiary">—</span>
+                      )}
+                    </td>
+                  ) : null}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+      {hasRows ? (
+        <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-[#F9FAFB] px-3 py-3 dark:border-white/10 dark:bg-white/6 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+          <p className="text-center text-xs text-text-secondary sm:text-left">
+            Showing{" "}
+            <span className="font-semibold text-text-primary">
+              {rangeFrom}–{rangeTo}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-text-primary">
+              {rows.length}
+            </span>
+            {totalPages > 1 ? (
+              <span className="text-text-tertiary">
+                {" "}
+                · Page {safePage} of {totalPages}
+              </span>
+            ) : null}
+          </p>
+          <Pagination className="mx-0 w-full min-w-0 shrink-0 sm:ms-auto sm:w-auto sm:justify-end">
+            <PaginationContent className="flex-wrap justify-center gap-1.5 sm:justify-end">
+              <PaginationItem>
+                <PaginationPrevious
+                  aria-label="Previous page"
+                  disabled={safePage <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                />
+              </PaginationItem>
+              {totalPages > 1
+                ? pageItems.map((item, idx) =>
+                    item === "ellipsis" ? (
+                      <PaginationItem key={`e-${idx}`}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    ) : (
+                      <PaginationItem key={`page-${item}`}>
+                        <PaginationLink
+                          aria-label={`Page ${item}`}
+                          isActive={item === safePage}
+                          onClick={() => setPage(item)}
+                        >
+                          {item}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ),
+                  )
+                : null}
+              <PaginationItem>
+                <PaginationNext
+                  aria-label="Next page"
+                  disabled={safePage >= totalPages}
+                  onClick={() =>
+                    setPage((p) => Math.min(totalPages, p + 1))
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      ) : null}
+    </>
+  );
+}
 
 function BookingsTabBody({
   panelBanner,
@@ -87,6 +347,8 @@ function BookingsTabBody({
   const [colA, colB, colC] = columnLabels;
   const colCount = actionsColumnLabel ? 4 : 3;
   const mainListCount = rows.length;
+
+  const rowIdsKey = useMemo(() => rows.map((r) => r.id).join("|"), [rows]);
 
   const bannerBeforeSummaries =
     panelBanner && !bannerInListCard ? panelBanner : null;
@@ -126,110 +388,16 @@ function BookingsTabBody({
           {mainListTitle}{" "}
           <span className="font-medium text-text-tertiary">({mainListCount})</span>
         </h2>
-        <div className="mt-3 overflow-x-auto border-t border-border pt-3 dark:border-white/10">
-          <table
-            className={`w-full border-collapse text-left ${actionsColumnLabel ? "min-w-[720px]" : "min-w-[560px]"}`}
-          >
-            <thead>
-              <tr>
-                <th
-                  scope="col"
-                  className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
-                >
-                  {colA}
-                </th>
-                <th
-                  scope="col"
-                  className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
-                >
-                  {colB}
-                </th>
-                <th
-                  scope="col"
-                  className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
-                >
-                  {colC}
-                </th>
-                {actionsColumnLabel ? (
-                  <th
-                    scope="col"
-                    className="pb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary"
-                  >
-                    {actionsColumnLabel}
-                  </th>
-                ) : null}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={colCount}
-                    className="py-10 text-center text-sm text-text-secondary"
-                  >
-                    {tableEmptyMessage}
-                  </td>
-                </tr>
-              ) : (
-                rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    id={`booking-row-${row.id}`}
-                    className={`border-t border-[#F3F4F6] dark:border-white/10 ${
-                      row.highlight
-                        ? "bg-primary/5 ring-2 ring-inset ring-primary/40"
-                        : ""
-                    }`}
-                  >
-                    <td className="whitespace-nowrap py-4 pr-4 align-top text-sm text-text-secondary">
-                      {row.dateCol}
-                    </td>
-                    <td className="py-4 pr-4 align-top">
-                      <div className="flex gap-3">
-                        {row.avatarUrl ? (
-                          <Image
-                            src={row.avatarUrl}
-                            alt=""
-                            width={40}
-                            height={40}
-                            className="size-10 shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
-                          />
-                        ) : null}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-text-primary">
-                            {row.title}
-                          </p>
-                          <p className="mt-1 text-sm leading-snug text-text-secondary">
-                            {row.subtitle}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 pr-4 align-top">
-                      <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center">
-                        <BookingStatusPill variant={row.pillVariant}>
-                          {row.pillLabel}
-                        </BookingStatusPill>
-                        {row.reported ? (
-                          <span className="inline-flex w-fit items-center rounded-full bg-[#374151] px-2 py-0.5 text-[11px] font-medium text-white dark:bg-white/15 dark:text-white">
-                            Reported
-                          </span>
-                        ) : null}
-                      </div>
-                    </td>
-                    {actionsColumnLabel ? (
-                      <td className="py-4 align-top">
-                        {row.actionsSlot ?? (
-                          <span className="text-xs text-text-tertiary">—</span>
-                        )}
-                      </td>
-                    ) : null}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <BookingsRowsTable
+          key={rowIdsKey}
+          rows={rows}
+          colA={colA}
+          colB={colB}
+          colC={colC}
+          colCount={colCount}
+          actionsColumnLabel={actionsColumnLabel}
+          tableEmptyMessage={tableEmptyMessage}
+        />
       </section>
     </div>
   );
