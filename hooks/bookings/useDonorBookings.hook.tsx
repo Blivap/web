@@ -8,7 +8,7 @@ import type {
   BookingsShellTabItem,
 } from "@/app/(users)/bookings/components/bookings-shell.view";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { loadReceivedBookings } from "@/store/slices/bookingsSlice";
+import { loadReceivedBookings, patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import {
   buildDonorBookingsTabPanels,
@@ -47,7 +47,7 @@ export function useDonorBookings() {
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState === "visible" && user?.id) {
-        void dispatch(loadReceivedBookings());
+        void dispatch(loadReceivedBookings({ silent: true }));
       }
     };
     document.addEventListener("visibilitychange", onVis);
@@ -68,7 +68,7 @@ export function useDonorBookings() {
   );
 
   const refreshReceived = useCallback(() => {
-    void dispatch(loadReceivedBookings());
+    void dispatch(loadReceivedBookings({ silent: true }));
   }, [dispatch]);
 
   const acceptBooking = useCallback(
@@ -83,7 +83,8 @@ export function useDonorBookings() {
         showSnackbar(
           "You accepted this booking. You can share the meeting code when you meet.",
         );
-        refreshReceived();
+        dispatch(patchBookingInLists({ id, status: "accepted" }));
+        void dispatch(loadReceivedBookings({ silent: true }));
       } catch (e) {
         showSnackbar(
           getAxiosErrorMessage(
@@ -95,7 +96,7 @@ export function useDonorBookings() {
         setMutatingId(null);
       }
     },
-    [refreshReceived, showSnackbar],
+    [dispatch, showSnackbar],
   );
 
   const declineBooking = useCallback(
@@ -110,7 +111,8 @@ export function useDonorBookings() {
         showSnackbar(
           "You declined this booking. The requester may choose another time or donor.",
         );
-        refreshReceived();
+        dispatch(patchBookingInLists({ id, status: "rejected" }));
+        void dispatch(loadReceivedBookings({ silent: true }));
       } catch (e) {
         showSnackbar(
           getAxiosErrorMessage(
@@ -122,7 +124,7 @@ export function useDonorBookings() {
         setMutatingId(null);
       }
     },
-    [refreshReceived, showSnackbar],
+    [dispatch, showSnackbar],
   );
 
   const submitReport = useCallback(

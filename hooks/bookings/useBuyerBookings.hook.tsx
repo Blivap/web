@@ -8,7 +8,7 @@ import type {
   BookingsShellTabItem,
 } from "@/app/(users)/bookings/components/bookings-shell.view";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { loadSentBookings } from "@/store/slices/bookingsSlice";
+import { loadSentBookings, patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import {
   buildBuyerBookingsTabPanels,
@@ -48,7 +48,7 @@ export function useBuyerBookings() {
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState === "visible" && user?.id) {
-        void dispatch(loadSentBookings());
+        void dispatch(loadSentBookings({ silent: true }));
       }
     };
     document.addEventListener("visibilitychange", onVis);
@@ -69,7 +69,7 @@ export function useBuyerBookings() {
   );
 
   const refreshSent = useCallback(() => {
-    void dispatch(loadSentBookings());
+    void dispatch(loadSentBookings({ silent: true }));
   }, [dispatch]);
 
   const withdrawBooking = useCallback(
@@ -82,7 +82,8 @@ export function useBuyerBookings() {
           return;
         }
         showSnackbar("Request withdrawn — booking cancelled.");
-        refreshSent();
+        dispatch(patchBookingInLists({ id, status: "cancelled" }));
+        void dispatch(loadSentBookings({ silent: true }));
       } catch (e) {
         showSnackbar(
           getAxiosErrorMessage(
@@ -94,7 +95,7 @@ export function useBuyerBookings() {
         setMutatingId(null);
       }
     },
-    [refreshSent, showSnackbar],
+    [dispatch, showSnackbar],
   );
 
   const remindDonor = useCallback(

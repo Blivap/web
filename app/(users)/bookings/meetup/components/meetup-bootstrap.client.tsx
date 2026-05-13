@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { $api } from "@/app/api";
 import {
   getApiMessageFromData,
@@ -15,6 +14,7 @@ import {
   meetupCodeHintStorageKey,
   meetupOtqrStorageKey,
 } from "@/lib/meetups/meetupSessionStorageKeys";
+import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
 
 export function MeetupBootstrapClient() {
   const router = useRouter();
@@ -115,10 +115,5 @@ export function MeetupBootstrapClient() {
     );
   }
 
-  return (
-    <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 text-text-secondary">
-      <Loader2 className="size-8 animate-spin text-primary" aria-hidden />
-      <p className="text-sm">Opening meetup…</p>
-    </div>
-  );
+  return <MeetupPageSkeleton />;
 }

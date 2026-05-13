@@ -246,7 +246,7 @@ function ScheduleAppointmentPageContent() {
         );
         return;
       }
-      void dispatch(loadSentBookings());
+      void dispatch(loadSentBookings({ silent: true }));
       setBookingRequestSentOpen(true);
     } catch (e) {
       if (axios.isAxiosError(e)) {

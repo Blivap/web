@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import axios from "axios";
 import { io, type Socket } from "socket.io-client";
 import { config } from "@/config/env";
 import { $api } from "@/app/api";
@@ -24,10 +25,57 @@ function sortMessages(a: DonationChatMessage, b: DonationChatMessage): number {
 function getChatErrorText(raw: unknown): string {
   if (typeof raw === "string" && raw.trim()) return raw.trim();
   if (raw && typeof raw === "object") {
-    const m = (raw as { message?: unknown }).message;
+    const o = raw as Record<string, unknown>;
+    const m = o.message;
     if (typeof m === "string" && m.trim()) return m.trim();
+    const err = o.error;
+    if (typeof err === "string" && err.trim()) return err.trim();
   }
   return "Something went wrong with chat.";
+}
+
+/** Parsed `chat:error` payload (Nest often sends `{ status, message }`). */
+function parseSocketChatErrorMeta(payload: unknown): {
+  status?: number;
+  message: string;
+} {
+  if (typeof payload === "string") {
+    const message = payload.trim() || "Something went wrong with chat.";
+    return { message };
+  }
+  if (!payload || typeof payload !== "object") {
+    return { message: "Something went wrong with chat." };
+  }
+  const o = payload as Record<string, unknown>;
+  const status = typeof o.status === "number" ? o.status : undefined;
+  const message = getChatErrorText(payload);
+  return { status, message };
+}
+
+function isChatClosedSocketMeta(meta: {
+  status?: number;
+  message: string;
+}): boolean {
+  if (meta.status === 403) return true;
+  const m = meta.message.toLowerCase();
+  return (
+    m.includes("chat is closed") ||
+    m.includes("room is closed") ||
+    m.includes("room closed")
+  );
+}
+
+/**
+ * Socket `chat:error` sometimes returns auth-shaped copy for forbidden / closed
+ * room; treat as closed so the UI matches GET /chat/.../messages 403.
+ */
+function isForbiddenChatSocketNoise(meta: { message: string }): boolean {
+  const m = meta.message.toLowerCase();
+  return (
+    m.includes("not authenticated") ||
+    m === "unauthorized" ||
+    m.includes("forbidden")
+  );
 }
 
 export type UseDonationChatArgs = {
@@ -75,7 +123,10 @@ export function useDonationChat({
         setRoomCloseReason(
           getApiMessageFromData(data) ?? "This chat is closed.",
         );
-        if (!opts?.before) setMessages([]);
+        if (!opts?.before) {
+          setMessages([]);
+          setNextCursor(null);
+        }
         return;
       }
       if (status < 200 || status >= 300) {
@@ -84,6 +135,8 @@ export function useDonationChat({
         if (!opts?.before) setHistoryError(msg);
         return;
       }
+      setRoomClosed(false);
+      setRoomCloseReason(null);
       const { messages: chunk, nextCursor: cursor } =
         parseChatMessagesResponse(data);
       if (opts?.before) {
@@ -97,6 +150,19 @@ export function useDonationChat({
       }
       setNextCursor(cursor);
     } catch (e) {
+      /** GET /chat/.../messages returns 403 when the room is closed; axios rejects non-2xx so this never hits `status === 403` above. */
+      if (axios.isAxiosError(e) && e.response?.status === 403) {
+        setRoomClosed(true);
+        setRoomCloseReason(
+          getApiMessageFromData(e.response.data) ?? "Chat is closed.",
+        );
+        if (!opts?.before) {
+          setHistoryError(null);
+          setMessages([]);
+          setNextCursor(null);
+        }
+        return;
+      }
       if (!opts?.before) {
         setHistoryError(
           getAxiosErrorMessage(e, "Could not load chat history."),
@@ -160,7 +226,26 @@ export function useDonationChat({
 
     const onChatError = (payload: unknown) => {
       setSendBusy(false);
-      setSendError(getChatErrorText(payload));
+      const meta = parseSocketChatErrorMeta(payload);
+      if (isChatClosedSocketMeta(meta)) {
+        setRoomClosed(true);
+        const reason =
+          meta.status === 403 && isForbiddenChatSocketNoise(meta)
+            ? "Chat is closed."
+            : meta.message;
+        setRoomCloseReason(reason);
+        setSendError(null);
+        setTypingLabel(null);
+        return;
+      }
+      if (isForbiddenChatSocketNoise(meta)) {
+        setRoomClosed(true);
+        setRoomCloseReason("Chat is closed.");
+        setSendError(null);
+        setTypingLabel(null);
+        return;
+      }
+      setSendError(meta.message);
     };
 
     const onTyping = (payload: unknown) => {
@@ -293,6 +378,14 @@ export function useDonationChat({
       void fetchHistory();
       return { ok: true as const };
     } catch (e) {
+      if (axios.isAxiosError(e) && e.response?.status === 403) {
+        const msg =
+          getApiMessageFromData(e.response.data) ??
+          "Chat is closed — arrival could not be recorded.";
+        setRoomClosed(true);
+        setRoomCloseReason(msg);
+        return { ok: false as const, message: msg };
+      }
       return {
         ok: false as const,
         message: getAxiosErrorMessage(e, "Could not record your arrival."),

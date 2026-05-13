@@ -1,13 +1,18 @@
 import {
   createAsyncThunk,
   createSlice,
+  type PayloadAction,
 } from "@reduxjs/toolkit";
 import { $api } from "@/app/api";
 import { fetchAllBookingListPages } from "@/lib/bookings/fetchAllBookingListPages";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
 import type { IResponse } from "@/types";
-import type { Booking, BookingListQuery } from "@/types/bookings";
+import type {
+  Booking,
+  BookingListQuery,
+  BookingStatus,
+} from "@/types/bookings";
 import { logout } from "./authSlice";
 
 export type BookingListLoadState = "idle" | "loading" | "ok" | "error";
@@ -66,9 +71,12 @@ async function loadBookingsWithHospitals(
   return { bookings: listRes.bookings, hospitalNamesById };
 }
 
+/** Optional `silent` refetch keeps list on screen (no loading skeleton). */
+type LoadBookingsArg = { silent?: boolean } | undefined;
+
 export const loadSentBookings = createAsyncThunk(
   "bookings/loadSent",
-  async (_, { rejectWithValue }) => {
+  async (_arg: LoadBookingsArg, { rejectWithValue }) => {
     try {
       return await loadBookingsWithHospitals((params) =>
         $api.bookings.sent(params),
@@ -85,7 +93,7 @@ export const loadSentBookings = createAsyncThunk(
 
 export const loadReceivedBookings = createAsyncThunk(
   "bookings/loadReceived",
-  async (_, { rejectWithValue }) => {
+  async (_arg: LoadBookingsArg, { rejectWithValue }) => {
     try {
       return await loadBookingsWithHospitals((params) =>
         $api.bookings.received(params),
@@ -103,11 +111,26 @@ export const loadReceivedBookings = createAsyncThunk(
 const bookingsSlice = createSlice({
   name: "bookings",
   initialState,
-  reducers: {},
+  reducers: {
+    patchBookingInLists: (
+      state,
+      action: PayloadAction<{ id: string; status: BookingStatus }>,
+    ) => {
+      const { id, status } = action.payload;
+      for (const key of ["sent", "received"] as const) {
+        const row = state[key].items.find((b) => b.id === id);
+        if (row) {
+          row.status = status;
+        }
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(loadSentBookings.pending, (state) => {
-        state.sent.status = "loading";
+      .addCase(loadSentBookings.pending, (state, action) => {
+        if (!action.meta.arg?.silent) {
+          state.sent.status = "loading";
+        }
         state.sent.error = null;
       })
       .addCase(loadSentBookings.fulfilled, (state, action) => {
@@ -123,10 +146,14 @@ const bookingsSlice = createSlice({
         state.sent.error =
           (action.payload as string | undefined) ??
           "Could not load bookings.";
-        state.sent.items = [];
+        if (!action.meta.arg?.silent) {
+          state.sent.items = [];
+        }
       })
-      .addCase(loadReceivedBookings.pending, (state) => {
-        state.received.status = "loading";
+      .addCase(loadReceivedBookings.pending, (state, action) => {
+        if (!action.meta.arg?.silent) {
+          state.received.status = "loading";
+        }
         state.received.error = null;
       })
       .addCase(loadReceivedBookings.fulfilled, (state, action) => {
@@ -142,10 +169,13 @@ const bookingsSlice = createSlice({
         state.received.error =
           (action.payload as string | undefined) ??
           "Could not load bookings.";
-        state.received.items = [];
+        if (!action.meta.arg?.silent) {
+          state.received.items = [];
+        }
       })
       .addCase(logout, () => ({ ...initialState }));
   },
 });
 
+export const { patchBookingInLists } = bookingsSlice.actions;
 export default bookingsSlice.reducer;
