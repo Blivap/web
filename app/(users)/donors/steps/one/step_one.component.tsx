@@ -211,12 +211,17 @@ export function StepOne({
     active && (
       <>
         <h2 className="text-lg font-semibold text-text-primary mb-2 mt-6 xl:mt-15">
-          Health questionnaire
+          Legacy blood health questionnaire
         </h2>
         <p className="text-sm text-text-secondary mb-1 max-w-[600px]">
-          Answer each question once. After you submit, your answers cannot be
-          changed. We use them with your date of birth from your account to
-          determine eligibility and whether your account gets the donor role.
+          This is the fixed yes/no flow required for{" "}
+          <span className="font-medium text-text-primary">
+            active donor activation
+          </span>{" "}
+          (POST <span className="font-mono text-[11px]">/donors/questionnaire</span>
+          ). It is separate from biological sex and donation-type intent on your
+          screening profile. Answer each question once — after submit, answers
+          stay locked until a retake is scheduled.
         </p>
         <p className="text-sm text-text-secondary mb-1 mt-16">
           Please complete the questions below.

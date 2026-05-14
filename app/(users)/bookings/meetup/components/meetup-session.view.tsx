@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -23,6 +30,7 @@ import {
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import type { MeetupParticipant, MeetupReportPayload } from "@/types/meetups";
 import {
+  meetupChatBookingStashKey,
   meetupCodeHintStorageKey,
   meetupOtqrStorageKey,
 } from "@/lib/meetups/meetupSessionStorageKeys";
@@ -249,6 +257,21 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const [chatDraft, setChatDraft] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  /** Booking Mongo id stashed in bootstrap when opening from a booking row (fallback if GET session omits `bookingId`). */
+  const [stashedChatBookingId, setStashedChatBookingId] = useState<
+    string | null
+  >(null);
+
+  useEffect(() => {
+    try {
+      const v = sessionStorage
+        .getItem(meetupChatBookingStashKey(sessionId))
+        ?.trim();
+      setStashedChatBookingId(v && v.length > 0 ? v : null);
+    } catch {
+      setStashedChatBookingId(null);
+    }
+  }, [sessionId]);
 
   const {
     session,
@@ -267,14 +290,23 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     reportBusy,
   } = useMeetupSession(sessionId);
 
-  const donationId = session?.bookingId;
+  /**
+   * Booking `_id` from the API — this is `donationId` for `/chat` (Socket.IO + REST).
+   * It must never be the meetup session id.
+   */
+  const donationChatBookingId =
+    session?.bookingId ?? stashedChatBookingId ?? undefined;
   const donationChatEnabled =
-    sessionLoad === "ok" && Boolean(donationId) && Boolean(token);
+    sessionLoad === "ok" &&
+    session?.chatEnabled !== false &&
+    Boolean(donationChatBookingId) &&
+    Boolean(token);
 
   const donationChat = useDonationChat({
-    donationId,
+    donationId: donationChatBookingId,
     accessToken: token,
     enabled: donationChatEnabled,
+    viewerUserId: user?.id,
   });
 
   const isRequester = useMemo(
@@ -290,6 +322,25 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       return a.id.localeCompare(b.id);
     });
   }, [donationChat.messages]);
+
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+  const lastChatMessageIdRef = useRef<string | null>(null);
+  const newestChatMessageId =
+    sortedChatMessages.length > 0
+      ? sortedChatMessages[sortedChatMessages.length - 1]!.id
+      : null;
+
+  useLayoutEffect(() => {
+    const el = chatScrollRef.current;
+    if (!newestChatMessageId) {
+      lastChatMessageIdRef.current = null;
+      return;
+    }
+    if (lastChatMessageIdRef.current === newestChatMessageId) return;
+    lastChatMessageIdRef.current = newestChatMessageId;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [newestChatMessageId]);
 
   const displayMeetingCode = useMemo(() => {
     return (
@@ -406,8 +457,11 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
   const chatStatusLine = useMemo(() => {
     if (sessionLoad !== "ok") return null;
-    if (!donationId) {
-      return "Chat will appear when this meetup is linked to your booking (refresh if this persists).";
+    if (session?.chatEnabled === false) {
+      return "Donation chat opens after this booking is accepted. Meetup verify / confirm flows use /meetups only — they do not carry chat messages.";
+    }
+    if (!donationChatBookingId) {
+      return "Chat needs your booking id (same value as in /chat/:donationId). Refresh or open meetup again from the booking row if this stays empty.";
     }
     if (!token) return "Sign in again to use donation chat.";
     if (donationChat.roomClosed) {
@@ -423,7 +477,8 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     return null;
   }, [
     sessionLoad,
-    donationId,
+    session?.chatEnabled,
+    donationChatBookingId,
     token,
     donationChat.roomClosed,
     donationChat.roomCloseReason,
@@ -433,7 +488,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   ]);
 
   const donationChatStatusBadge = useMemo(() => {
-    if (sessionLoad !== "ok" || !donationId || !token) return null;
+    if (sessionLoad !== "ok" || !donationChatBookingId || !token) return null;
     if (donationChat.roomClosed) {
       return {
         label: "Closed",
@@ -465,7 +520,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     return null;
   }, [
     sessionLoad,
-    donationId,
+    donationChatBookingId,
     token,
     donationChat.roomClosed,
     donationChat.historyError,
@@ -565,16 +620,13 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       {ninOk && displayMeetingCode && !readOnly ? (
         <section className={cardClass}>
           <h2 className="text-sm font-semibold text-text-primary">
-            Share the code as a QR
+            Share as QR (optional)
           </h2>
           <p className="mt-1 text-xs text-text-secondary">
-            The other person can scan this to read the six digits, then both of
-            you use &quot;Verify code&quot; with the same number. (This is only
-            the meeting digits — not the rare one-time server token used under
-            &quot;Verify from QR&quot;.)
-          </p>
-          <p className="mt-3 text-center font-mono text-xl font-semibold tracking-[0.35em] text-text-primary">
-            {displayMeetingCode}
+            The six-digit meeting code is sent in your Blivap notifications
+            only, not shown here. The other person can scan this QR to read the
+            same digits on their device, or you can both open your notifications
+            and enter the code under &quot;Verify code&quot; below.
           </p>
           <div className="mt-4 flex justify-center rounded-lg bg-white p-4 dark:bg-white">
             <QRCode value={displayMeetingCode} size={180} level="M" />
@@ -739,7 +791,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             ) : null}
           </div>
           {ninOk &&
-          donationId &&
+          donationChatBookingId &&
           !readOnly &&
           !donationChat.roomClosed &&
           !donationChat.arrivedRecorded ? (
@@ -759,8 +811,11 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
           ) : null}
         </div>
         <p className="mt-1 text-xs text-text-secondary">
-          Live messages use the server chat channel (not meetup REST). Pending
-          bookings have no room until the donor accepts.
+          Live messages use Socket.IO{" "}
+          <span className="font-mono text-[11px]">/chat</span> with your{" "}
+          <strong className="font-medium text-text-primary">booking id</strong>{" "}
+          (not the session id in this page URL). There is no meetup HTTP API for
+          chat; verify code / QR / complete stay on /meetups.
         </p>
         {chatStatusLine ? (
           <p className="mt-2 text-xs text-text-secondary">{chatStatusLine}</p>
@@ -778,7 +833,10 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             {donationChat.typingLabel} is typing…
           </p>
         ) : null}
-        <div className="mt-3 max-h-64 space-y-2 overflow-y-auto rounded-lg border border-border bg-[#FAFAFB] p-3 dark:border-white/10 dark:bg-black/20">
+        <div
+          ref={chatScrollRef}
+          className="mt-3 max-h-64 space-y-2 overflow-y-auto rounded-lg border border-border bg-[#FAFAFB] p-3 dark:border-white/10 dark:bg-black/20"
+        >
           {donationChat.historyLoading && sortedChatMessages.length === 0 ? (
             <p className="text-xs text-text-secondary">Loading messages…</p>
           ) : sortedChatMessages.length === 0 ? (
@@ -789,11 +847,13 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             </p>
           ) : (
             sortedChatMessages.map((m) => {
-              const mine = Boolean(user?.id && m.senderUserId === user.id);
+              const mine = Boolean(
+                m.senderUserId === user?.id || m.roleLabel === "VerifiedDonor",
+              );
               return (
                 <div
                   key={m.id}
-                  className={`max-w-[95%] rounded-lg px-2.5 py-1.5 text-xs ${
+                  className={`max-w-[50%] rounded-lg px-2.5 py-1.5 text-xs ${
                     mine
                       ? "ml-auto bg-primary text-white"
                       : "mr-auto bg-white text-text-primary dark:bg-[#252530]"
@@ -841,7 +901,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         ) : null}
         <div className="mt-3 flex flex-col gap-2 sm:flex-row">
           <textarea
-            className={`${inputClass} min-h-[72px] flex-1 resize-y sm:min-h-[44px]`}
+            className={`${inputClass} min-h-[72px] flex-1 sm:min-h-[44px] resize-none`}
             placeholder={
               chatComposerDisabled
                 ? donationChat.roomClosed

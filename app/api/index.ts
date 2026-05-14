@@ -4,6 +4,7 @@ import BookingRepository from "./bookingRepository";
 import ChatRepository from "./chatRepository";
 import MeetupRepository from "./meetupRepository";
 import DonorRepository from "./donorRepository";
+import QuestionnaireRepository from "./questionnaireRepository";
 import HospitalRepository from "./hospitalRepository";
 import NewsRepository from "./newsRepository";
 import NinRepository from "./ninRepository";
@@ -15,6 +16,7 @@ export const $api = {
   chat: ChatRepository(),
   meetups: MeetupRepository(),
   donors: DonorRepository(),
+  questionnaire: QuestionnaireRepository(),
   hospitals: HospitalRepository(),
   news: NewsRepository(),
   nin: NinRepository(),

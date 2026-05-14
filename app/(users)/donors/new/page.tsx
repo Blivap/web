@@ -30,10 +30,18 @@ import type {
   DonorBloodType,
   DonorQuestionnaireResult,
   DonorRegisterPayload,
+  DonorScreeningProfilePayload,
 } from "@/types/donors";
+import {
+  extractScreeningProfileFromDonor,
+  hasScreeningProfileOnRecord,
+} from "@/lib/donors/extractScreeningProfileFromDonor";
+import { normalizeDonationTypeForApi } from "@/lib/donors/screeningDonationTypes";
 
 import { StepOne, type MedicalAnswers } from "../steps/one/step_one.component";
 import { StepThree } from "../steps/three/step_three.component";
+import { DonorScreeningProfileStep } from "../steps/screening/donor-screening-profile-step.component";
+import { DonorAiQuestionnairePanel } from "../steps/screening/donor-ai-questionnaire-panel.component";
 import {
   DonorBasicsStep,
   type DonorBasicsValues,
@@ -50,16 +58,26 @@ type AreaLocationPayload = {
   area: string;
 };
 
-const STEP_PARAM_VALUES = ["basics", "health", "activation"] as const;
+const STEP_PARAM_VALUES = [
+  "basics",
+  "screening",
+  "health",
+  "activation",
+] as const;
 type StepParam = (typeof STEP_PARAM_VALUES)[number];
 
 function stepParamToNumber(param: string | null): number {
+  if (!param) return 1;
   const i = STEP_PARAM_VALUES.indexOf(param as StepParam);
-  return i >= 0 ? i + 1 : 1;
+  if (i >= 0) return i + 1;
+  /** Legacy URLs only had three steps — map old “health” to legacy questionnaire (now step 3). */
+  if (param === "health") return 3;
+  if (param === "activation") return 4;
+  return 1;
 }
 
 function stepNumberToParam(step: number): StepParam {
-  const i = Math.max(1, Math.min(step, 3)) - 1;
+  const i = Math.max(1, Math.min(step, 4)) - 1;
   return STEP_PARAM_VALUES[i];
 }
 
@@ -248,8 +266,9 @@ function isRetakeRescheduled(raw: Record<string, unknown>): boolean {
 
 const STEPS = [
   { id: 1, label: "Blood type & location" },
-  { id: 2, label: "Health questionnaire" },
-  { id: 3, label: "Activation" },
+  { id: 2, label: "Screening profile" },
+  { id: 3, label: "Legacy health questionnaire" },
+  { id: 4, label: "Activation" },
 ];
 
 function StepProgress({ currentStep }: { currentStep: number }) {
@@ -258,7 +277,7 @@ function StepProgress({ currentStep }: { currentStep: number }) {
       className="flex flex-col relative gap-2 mb-8 w-full "
       aria-label="Progress"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 w-full">
         {STEPS.map((step) => {
           const isActive = step.id === currentStep;
           const isPast = step.id < currentStep;
@@ -328,6 +347,11 @@ function NewDonorForm() {
   const contentRef = useRef<HTMLDivElement>(null);
   const hasAutoRoutedToRequiredStep = useRef(false);
 
+  const donationTypeFromQuery = useMemo(
+    () => searchParams.get("donationType")?.trim() || null,
+    [searchParams],
+  );
+
   const [basicsComplete, setBasicsComplete] = useState(false);
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
   const [questionnaireResult, setQuestionnaireResult] =
@@ -368,6 +392,15 @@ function NewDonorForm() {
   const [parsedAreaLocation, setParsedAreaLocation] =
     useState<AreaLocationPayload | null>(null);
   const [retakeUnlocked, setRetakeUnlocked] = useState(false);
+  const [screeningStepResolved, setScreeningStepResolved] = useState(false);
+  const [screeningServerDefaults, setScreeningServerDefaults] =
+    useState<DonorScreeningProfilePayload>({});
+  const [screeningSaveError, setScreeningSaveError] = useState<string | null>(
+    null,
+  );
+  const [isSavingScreening, setIsSavingScreening] = useState(false);
+  const [primaryDonationTypeForAi, setPrimaryDonationTypeForAi] =
+    useState("whole_blood");
 
   useEffect(() => {
     let cancelled = false;
@@ -398,6 +431,21 @@ function NewDonorForm() {
           for (const [name, value] of Object.entries(medical)) {
             void setFieldValue(`medical.${name}`, value);
           }
+          setScreeningStepResolved(true);
+        }
+
+        const screeningPayload = extractScreeningProfileFromDonor(raw);
+        setScreeningServerDefaults(screeningPayload);
+        if (hasScreeningProfileOnRecord(raw)) {
+          setScreeningStepResolved(true);
+        }
+        const types = screeningPayload.activeDonationTypes;
+        if (types && types.length > 0) {
+          setPrimaryDonationTypeForAi(normalizeDonationTypeForApi(types[0]));
+        } else if (donationTypeFromQuery) {
+          setPrimaryDonationTypeForAi(
+            normalizeDonationTypeForApi(donationTypeFromQuery),
+          );
         }
 
         setRetakeUnlocked(isRetakeRescheduled(raw));
@@ -411,14 +459,21 @@ function NewDonorForm() {
     return () => {
       cancelled = true;
     };
-  }, [setFieldValue]);
+  }, [donationTypeFromQuery, setFieldValue]);
 
   const allMedicalAnswered = REQUIRED_MEDICAL_FIELDS.every((field) =>
     Boolean(values.medical[field]),
   );
 
-  const requiredStep = !basicsComplete ? 1 : !questionnaireComplete ? 2 : 3;
-  const step = Math.min(requestedStep, 3);
+  const requiredStep = !basicsComplete
+    ? 1
+    : !screeningStepResolved
+      ? 2
+      : !questionnaireComplete
+        ? 3
+        : 4;
+  const maxAllowedStep = requiredStep;
+  const step = Math.min(requestedStep, maxAllowedStep);
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
@@ -508,10 +563,39 @@ function NewDonorForm() {
     }
   };
 
+  const handleScreeningSave = async (payload: DonorScreeningProfilePayload) => {
+    setScreeningSaveError(null);
+    setIsSavingScreening(true);
+    try {
+      const { status } = await $api.donors.patchScreeningProfile(payload);
+      if (status >= 200 && status < 300) {
+        setScreeningServerDefaults((prev) => ({ ...prev, ...payload }));
+        setScreeningStepResolved(true);
+        const primary = payload.activeDonationTypes?.[0];
+        if (primary) setPrimaryDonationTypeForAi(normalizeDonationTypeForApi(primary));
+        setStepParam(3);
+      } else {
+        setScreeningSaveError("Could not save screening profile.");
+      }
+    } catch (e) {
+      setScreeningSaveError(
+        getErrorMessage(e, "Could not save screening profile."),
+      );
+    } finally {
+      setIsSavingScreening(false);
+    }
+  };
+
+  const handleScreeningSkip = () => {
+    setScreeningSaveError(null);
+    setScreeningStepResolved(true);
+    setStepParam(3);
+  };
+
   const handleSubmitQuestionnaire = async () => {
     setHealthError(null);
     if (questionnaireComplete && !retakeUnlocked) {
-      setStepParam(3);
+      setStepParam(4);
       return;
     }
     if (!allMedicalAnswered) return;
@@ -524,7 +608,7 @@ function NewDonorForm() {
         const parsed = parseQuestionnaireResult(data);
         setQuestionnaireResult(parsed);
         setQuestionnaireComplete(true);
-        setStepParam(3);
+        setStepParam(4);
 
         try {
           const me = await $api.auth.me();
@@ -560,8 +644,10 @@ function NewDonorForm() {
       return;
     }
     if (!questionnaireComplete) {
-      setActivationRequestError("Complete the health questionnaire first.");
-      setStepParam(2);
+      setActivationRequestError(
+        "Complete the legacy health questionnaire first.",
+      );
+      setStepParam(3);
       return;
     }
     let areaLocation: AreaLocationPayload | null =
@@ -641,7 +727,7 @@ function NewDonorForm() {
   }
 
   return (
-    <div className="sm:p-6 w-full flex flex-col  flex-1 h-full grow">
+    <div className="flex h-full min-h-0 w-full flex-1 flex-col px-4 pb-6 pt-4 sm:p-6">
       <StepProgress currentStep={step} />
       <div
         ref={contentRef}
@@ -657,25 +743,40 @@ function NewDonorForm() {
           editable={!basicsComplete || retakeUnlocked}
           completed={basicsComplete}
         />
-        <StepOne
+        <DonorScreeningProfileStep
           active={step === 2}
+          serverDefaults={screeningServerDefaults}
+          urlPrimaryDonationTypeHint={donationTypeFromQuery}
+          onSave={handleScreeningSave}
+          onSkip={handleScreeningSkip}
+          onBack={() => setStepParam(1)}
+          isSaving={isSavingScreening}
+          error={screeningSaveError}
+        />
+        <StepOne
+          active={step === 3}
           medical={values.medical}
           handleMedicalChange={handleMedicalChange}
           onSubmitQuestionnaire={handleSubmitQuestionnaire}
-          onBack={() => setStepParam(1)}
+          onBack={() => setStepParam(2)}
           isSubmitting={isSubmittingQuestionnaire}
           submitError={healthError}
           editable={!questionnaireComplete || retakeUnlocked}
           completed={questionnaireComplete}
         />
         <StepThree
-          active={step === 3}
+          active={step === 4}
           onSendRequest={handleRequestActivation}
           onRequestRetake={handleRequestRetake}
-          onBack={() => setStepParam(2)}
+          onBack={() => setStepParam(3)}
           isSendingRequest={isRequestingActivation}
           requestError={activationRequestError}
           eligibility={questionnaireResult}
+          optionalContent={
+            <DonorAiQuestionnairePanel
+              primaryDonationType={primaryDonationTypeForAi}
+            />
+          }
         />
       </div>
       <DonorRegistrationSuccessModal
@@ -687,17 +788,17 @@ function NewDonorForm() {
         }}
         eyebrow="Blood donor registration"
         title="Your activation request is now in review"
-        description="Your blood donor profile, health questionnaire, and activation request have been captured. Our team can now continue the verification process from here."
+        description="Your blood donor profile, screening preferences, legacy health questionnaire, and activation request are on file. Typed screening does not replace the activation gate — our team continues verification from the legacy path."
         highlights={[
           {
             title: "Medical review",
             description:
-              "Your questionnaire answers and donor details will be checked for eligibility and completeness.",
+              "Legacy questionnaire answers and donor details are checked for blood booking eligibility and completeness.",
           },
           {
             title: "Verification progress",
             description:
-              "If anything else is needed, the next instruction will come through your account flow.",
+              "Optional screening profile and typed questionnaires improve matching and your public card; they do not replace activation rules.",
           },
           {
             title: "Overview updates",

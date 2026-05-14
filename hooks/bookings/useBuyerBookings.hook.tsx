@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useStore } from "react-redux";
 import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import type {
   BookingsShellTabItem,
 } from "@/app/(users)/bookings/components/bookings-shell.view";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import type { AppDispatch, RootState } from "@/store/store";
 import { loadSentBookings, patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import {
@@ -20,9 +22,16 @@ import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook"
 export type { BuyerPanelKey } from "@/lib/bookings/buyerBookingsTabPanels";
 export { BUYER_TAB_ORDER } from "@/lib/bookings/buyerBookingsTabPanels";
 
+function scheduleSentBookingsResync(dispatch: AppDispatch) {
+  window.setTimeout(() => {
+    void dispatch(loadSentBookings({ silent: true }));
+  }, 450);
+}
+
 export function useBuyerBookings() {
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
+  const store = useStore<RootState>();
   const user = useAppSelector((s) => s.auth.user);
   const bookings = useAppSelector((s) => s.bookings.sent.items);
   const hospitalNamesById = useAppSelector((s) => s.bookings.hospitalNamesById);
@@ -74,17 +83,22 @@ export function useBuyerBookings() {
 
   const withdrawBooking = useCallback(
     async (id: string) => {
+      const prev =
+        store.getState().bookings.sent.items.find((b) => b.id === id)?.status ??
+        "pending";
       setMutatingId(id);
+      dispatch(patchBookingInLists({ id, status: "cancelled" }));
       try {
         const { status } = await $api.bookings.cancel(id);
         if (status < 200 || status >= 300) {
+          dispatch(patchBookingInLists({ id, status: prev }));
           showSnackbar("Could not withdraw this request.");
           return;
         }
         showSnackbar("Request withdrawn — booking cancelled.");
-        dispatch(patchBookingInLists({ id, status: "cancelled" }));
-        void dispatch(loadSentBookings({ silent: true }));
+        scheduleSentBookingsResync(dispatch);
       } catch (e) {
+        dispatch(patchBookingInLists({ id, status: prev }));
         showSnackbar(
           getAxiosErrorMessage(
             e,
@@ -95,7 +109,7 @@ export function useBuyerBookings() {
         setMutatingId(null);
       }
     },
-    [dispatch, showSnackbar],
+    [dispatch, showSnackbar, store],
   );
 
   const remindDonor = useCallback(
@@ -124,14 +138,20 @@ export function useBuyerBookings() {
   const submitReport = useCallback(
     async (payload: { reason: string; details?: string }) => {
       if (!reportBookingId) return;
-      const { status } = await $api.bookings.report(reportBookingId, payload);
+      const id = reportBookingId;
+      const row =
+        store.getState().bookings.sent.items.find((b) => b.id === id) ??
+        store.getState().bookings.received.items.find((b) => b.id === id);
+      const prevCount = row?.reportsCount ?? 0;
+      const { status } = await $api.bookings.report(id, payload);
       if (status < 200 || status >= 300) {
         throw new Error("Could not send the report.");
       }
+      dispatch(patchBookingInLists({ id, reportsCount: prevCount + 1 }));
       showSnackbar("Thanks — your report was submitted.");
-      refreshSent();
+      scheduleSentBookingsResync(dispatch);
     },
-    [reportBookingId, refreshSent, showSnackbar],
+    [dispatch, reportBookingId, showSnackbar, store],
   );
 
   const tabPanels = useMemo(
@@ -156,6 +176,7 @@ export function useBuyerBookings() {
       remindingId,
       withdrawBooking,
       remindDonor,
+      setReportBookingId,
     ],
   );
 

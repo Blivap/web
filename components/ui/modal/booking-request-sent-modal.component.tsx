@@ -39,9 +39,9 @@ export function BookingRequestSentModal({
         />
       </div>
       <p className="mb-8 max-w-md text-center text-sm leading-relaxed text-text-primary">
-        When they accept, you&apos;ll both see the same meeting verification code
-        in Bookings and in your notifications. No code is set until they
-        respond.
+        When they accept, you&apos;ll both receive the same meeting verification
+        code in your Blivap notifications. It won&apos;t appear on this bookings
+        screen.
       </p>
       <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
         <Button

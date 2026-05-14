@@ -8,11 +8,7 @@ import { fetchAllBookingListPages } from "@/lib/bookings/fetchAllBookingListPage
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
 import type { IResponse } from "@/types";
-import type {
-  Booking,
-  BookingListQuery,
-  BookingStatus,
-} from "@/types/bookings";
+import type { Booking, BookingListQuery } from "@/types/bookings";
 import { logout } from "./authSlice";
 
 export type BookingListLoadState = "idle" | "loading" | "ok" | "error";
@@ -112,16 +108,39 @@ const bookingsSlice = createSlice({
   name: "bookings",
   initialState,
   reducers: {
+    /**
+     * Merges fields into a booking in both sent and received lists (if present).
+     * Rebuilds the `items` array so subscribers always see a new reference.
+     */
     patchBookingInLists: (
       state,
-      action: PayloadAction<{ id: string; status: BookingStatus }>,
+      action: PayloadAction<
+        { id: string } & Partial<
+          Pick<
+            Booking,
+            | "status"
+            | "respondedAt"
+            | "meetingCode"
+            | "slotEndAt"
+            | "reportsCount"
+          >
+        >
+      >,
     ) => {
-      const { id, status } = action.payload;
-      for (const key of ["sent", "received"] as const) {
-        const row = state[key].items.find((b) => b.id === id);
-        if (row) {
-          row.status = status;
-        }
+      const { id, ...patch } = action.payload;
+      if (Object.keys(patch).length === 0) return;
+
+      for (const branch of ["sent", "received"] as const) {
+        const items = state[branch].items;
+        const idx = items.findIndex((b) => b.id === id);
+        if (idx === -1) continue;
+        const row = items[idx];
+        const merged = { ...row, ...patch };
+        state[branch].items = [
+          ...items.slice(0, idx),
+          merged,
+          ...items.slice(idx + 1),
+        ];
       }
     },
   },

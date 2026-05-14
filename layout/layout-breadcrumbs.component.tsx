@@ -15,6 +15,7 @@ const SEGMENT_LABEL: Record<string, string> = {
   donors: "Donors",
   bookings: "Bookings",
   booking: "Booking",
+  meetup: "Meetup",
   wallet: "Wallet",
   history: "History",
   settings: "Settings",
@@ -22,6 +23,14 @@ const SEGMENT_LABEL: Record<string, string> = {
   "verify-id": "Verify ID",
   "schedule-appointment": "Schedule appointment",
   select_avatar: "Select avatar",
+};
+
+/** Label for the final crumb when the URL ends with a dynamic id (not the raw id). */
+const TRAILING_ID_LABEL: Record<string, string> = {
+  meetup: "Meetup session",
+  donors: "Donor profile",
+  bookings: "Booking",
+  booking: "Booking",
 };
 
 function humanize(segment: string): string {
@@ -32,11 +41,30 @@ function humanize(segment: string): string {
     .join(" ");
 }
 
-function labelForSegment(segment: string, prev?: string): string {
+function isUuidSegment(segment: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    segment,
+  );
+}
+
+/** Route params that should never appear as breadcrumb text (UUID, ObjectId, long opaque ids). */
+function isDynamicRouteParamId(segment: string): boolean {
+  if (isUuidSegment(segment)) return true;
+  if (/^[a-f0-9]{24}$/i.test(segment) || /^[a-f0-9]{32}$/i.test(segment))
+    return true;
+  if (segment.length >= 20 && /^[a-z0-9_-]+$/i.test(segment)) return true;
+  if (/^\d{8,}$/.test(segment)) return true;
+  return false;
+}
+
+function labelForTrailingDynamicId(parentSegment: string | undefined): string {
+  if (parentSegment && TRAILING_ID_LABEL[parentSegment])
+    return TRAILING_ID_LABEL[parentSegment];
+  return "Details";
+}
+
+function labelForSegment(segment: string): string {
   if (SEGMENT_LABEL[segment]) return SEGMENT_LABEL[segment];
-  if (prev === "donors" && segment.length >= 20 && /^[\w-]+$/.test(segment)) {
-    return "Donor profile";
-  }
   return humanize(segment);
 }
 
@@ -47,11 +75,33 @@ function crumbsForPath(pathname: string): Crumb[] {
     return [{ href: routes.overview, label: "Overview", current: true }];
   }
 
-  return segments.map((segment, i) => ({
-    href: `/${segments.slice(0, i + 1).join("/")}`,
-    label: labelForSegment(segment, i > 0 ? segments[i - 1] : undefined),
-    current: i === segments.length - 1,
-  }));
+  const crumbs: Crumb[] = [];
+
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i];
+    const isLast = i === segments.length - 1;
+
+    if (isDynamicRouteParamId(segment)) {
+      if (isLast) {
+        const parent = segments[i - 1];
+        crumbs.push({
+          href: pathname,
+          label: labelForTrailingDynamicId(parent),
+          current: true,
+        });
+        return crumbs;
+      }
+      continue;
+    }
+
+    crumbs.push({
+      href: `/${segments.slice(0, i + 1).join("/")}`,
+      label: labelForSegment(segment),
+      current: isLast,
+    });
+  }
+
+  return crumbs;
 }
 
 export function LayoutBreadcrumbs({ className }: { className?: string }) {

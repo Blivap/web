@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useStore } from "react-redux";
 import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import type {
   BookingsShellTabItem,
 } from "@/app/(users)/bookings/components/bookings-shell.view";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import type { RootState, AppDispatch } from "@/store/store";
 import { loadReceivedBookings, patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import {
@@ -20,9 +22,16 @@ import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook"
 export type { DonorPanelKey } from "@/lib/bookings/donorBookingsTabPanels";
 export { DONOR_TAB_ORDER, donorTabForBooking } from "@/lib/bookings/donorBookingsTabPanels";
 
+function scheduleReceivedBookingsResync(dispatch: AppDispatch) {
+  window.setTimeout(() => {
+    void dispatch(loadReceivedBookings({ silent: true }));
+  }, 450);
+}
+
 export function useDonorBookings() {
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
+  const store = useStore<RootState>();
   const user = useAppSelector((s) => s.auth.user);
   const bookings = useAppSelector((s) => s.bookings.received.items);
   const hospitalNamesById = useAppSelector((s) => s.bookings.hospitalNamesById);
@@ -73,19 +82,30 @@ export function useDonorBookings() {
 
   const acceptBooking = useCallback(
     async (id: string) => {
+      const prev =
+        store.getState().bookings.received.items.find((b) => b.id === id)
+          ?.status ?? "pending";
       setMutatingId(id);
+      dispatch(
+        patchBookingInLists({
+          id,
+          status: "accepted",
+          respondedAt: new Date().toISOString(),
+        }),
+      );
       try {
         const { status } = await $api.bookings.accept(id);
         if (status < 200 || status >= 300) {
+          dispatch(patchBookingInLists({ id, status: prev }));
           showSnackbar("Could not accept this booking.");
           return;
         }
         showSnackbar(
           "You accepted this booking. You can share the meeting code when you meet.",
         );
-        dispatch(patchBookingInLists({ id, status: "accepted" }));
-        void dispatch(loadReceivedBookings({ silent: true }));
+        scheduleReceivedBookingsResync(dispatch);
       } catch (e) {
+        dispatch(patchBookingInLists({ id, status: prev }));
         showSnackbar(
           getAxiosErrorMessage(
             e,
@@ -96,24 +116,35 @@ export function useDonorBookings() {
         setMutatingId(null);
       }
     },
-    [dispatch, showSnackbar],
+    [dispatch, showSnackbar, store],
   );
 
   const declineBooking = useCallback(
     async (id: string) => {
+      const prev =
+        store.getState().bookings.received.items.find((b) => b.id === id)
+          ?.status ?? "pending";
       setMutatingId(id);
+      dispatch(
+        patchBookingInLists({
+          id,
+          status: "rejected",
+          respondedAt: new Date().toISOString(),
+        }),
+      );
       try {
         const { status } = await $api.bookings.decline(id);
         if (status < 200 || status >= 300) {
+          dispatch(patchBookingInLists({ id, status: prev }));
           showSnackbar("Could not decline this booking.");
           return;
         }
         showSnackbar(
           "You declined this booking. The requester may choose another time or donor.",
         );
-        dispatch(patchBookingInLists({ id, status: "rejected" }));
-        void dispatch(loadReceivedBookings({ silent: true }));
+        scheduleReceivedBookingsResync(dispatch);
       } catch (e) {
+        dispatch(patchBookingInLists({ id, status: prev }));
         showSnackbar(
           getAxiosErrorMessage(
             e,
@@ -124,23 +155,28 @@ export function useDonorBookings() {
         setMutatingId(null);
       }
     },
-    [dispatch, showSnackbar],
+    [dispatch, showSnackbar, store],
   );
 
   const submitReport = useCallback(
     async (payload: { reason: string; details?: string }) => {
       if (!reportBookingId) return;
-      const { status } = await $api.bookings.report(
-        reportBookingId,
-        payload,
-      );
+      const id = reportBookingId;
+      const row =
+        store.getState().bookings.received.items.find((b) => b.id === id) ??
+        store.getState().bookings.sent.items.find((b) => b.id === id);
+      const prevCount = row?.reportsCount ?? 0;
+      const { status } = await $api.bookings.report(id, payload);
       if (status < 200 || status >= 300) {
         throw new Error("Could not send the report.");
       }
+      dispatch(
+        patchBookingInLists({ id, reportsCount: prevCount + 1 }),
+      );
       showSnackbar("Thanks — your report was submitted.");
-      refreshReceived();
+      scheduleReceivedBookingsResync(dispatch);
     },
-    [reportBookingId, refreshReceived, showSnackbar],
+    [dispatch, reportBookingId, showSnackbar, store],
   );
 
   const tabPanels = useMemo(
@@ -163,6 +199,7 @@ export function useDonorBookings() {
       mutatingId,
       acceptBooking,
       declineBooking,
+      setReportBookingId,
     ],
   );
 

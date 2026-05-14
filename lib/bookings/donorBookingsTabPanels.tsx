@@ -3,11 +3,12 @@ import Link from "next/link";
 import type { BookingsShellRow, BookingsTabPanel } from "@/app/(users)/bookings/components/bookings-shell.view";
 import { stashMeetupCodeFromBookingRow } from "@/lib/meetups/meetupSessionStorageKeys";
 import {
-  bookingSubtitleDonor,
+  bookingRowDetailPartsForViewer,
   bookingTitleForViewer,
   formatScheduledLabel,
   statusToPill,
 } from "@/lib/bookings/formatBookingDisplay";
+import { BookingRowSubtitle } from "@/app/(users)/bookings/components/booking-row-subtitle.component";
 import {
   donorActionBtnClass,
   donorDangerBtnClass,
@@ -58,7 +59,15 @@ export function buildDonorBookingsTabPanels(
   const mapRow = (b: Booking, tab: DonorPanelKey): BookingsShellRow => {
     const pill = statusToPill(b.status);
     const title = bookingTitleForViewer(b, "donor");
-    const subtitle = bookingSubtitleDonor(b, hospitalLabel(b.hospitalId));
+    const subtitle = (
+      <BookingRowSubtitle
+        {...bookingRowDetailPartsForViewer(
+          b,
+          "donor",
+          hospitalLabel(b.hospitalId),
+        )}
+      />
+    );
     const dateCol = formatScheduledLabel(b.scheduledAt);
 
     let actionsSlot: ReactNode;
@@ -103,7 +112,7 @@ export function buildDonorBookingsTabPanels(
       actionsSlot = (
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <span className="text-xs text-emerald-700 dark:text-emerald-400">
-            {b.meetingCode ? `Code: ${b.meetingCode}` : "Accepted"}
+            Accepted
           </span>
           {ninOk ? (
             <Link

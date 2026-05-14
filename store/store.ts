@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
 import bookingsReducer from "./slices/bookingsSlice";
+import donationChatReducer from "./slices/donationChatSlice";
 import selectAvatarReducer from "./slices/selectAvatarSlice";
 
 export const makeStore = () => {
@@ -8,6 +9,7 @@ export const makeStore = () => {
     reducer: {
       auth: authReducer,
       bookings: bookingsReducer,
+      donationChat: donationChatReducer,
       selectAvatar: selectAvatarReducer,
     },
   });
