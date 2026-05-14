@@ -31,6 +31,13 @@ export type DonorRegisterPayload = {
   location?: DonorLocationPoint;
 };
 
+/** POST /donors/request-activation — area + donation program (matches `?donationType=` when present). */
+export type DonorRequestActivationPayload = {
+  areaLocation: DonorAreaLocation;
+  /** API `DonationType` snake_case, e.g. `whole_blood`. */
+  donationType: string;
+};
+
 export type DonorQuestionnairePayload = {
   gender: DonorGender;
   age18to64: boolean;

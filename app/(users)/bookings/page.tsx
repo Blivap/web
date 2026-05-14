@@ -5,7 +5,6 @@ import { Layout } from "@/layout/layout.component";
 import { BuyerBookingsView } from "./components/buyer-bookings.view";
 import { DonorBookingsFlowToggle } from "./components/donor-bookings-flow-toggle.view";
 import { useAppSelector } from "@/store/hooks";
-import { userHasDonorRole } from "@/lib/bookings/userHasDonorRole";
 
 function BookingsContent() {
   const user = useAppSelector((s) => s.auth.user);
@@ -26,11 +25,8 @@ function BookingsContent() {
     );
   }
 
-  return userHasDonorRole(user) ? (
-    <DonorBookingsFlowToggle />
-  ) : (
-    <BuyerBookingsView />
-  );
+  /** Incoming vs outgoing for anyone with a resolved profile (roles alone are unreliable from `/me`). */
+  return user ? <DonorBookingsFlowToggle /> : <BuyerBookingsView />;
 }
 
 export default function BookingsPage() {

@@ -2,9 +2,8 @@
 
 const STEPS = [
   { id: 1, label: "Blood type & location" },
-  { id: 2, label: "Screening profile" },
-  { id: 3, label: "Legacy questionnaire" },
-  { id: 4, label: "Activation" },
+  { id: 2, label: "AI questionnaire" },
+  { id: 3, label: "Activation" },
 ];
 
 const pulse = "bg-[#E5E7EB] dark:bg-white/12 animate-pulse rounded-md";
@@ -12,7 +11,7 @@ const pulse = "bg-[#E5E7EB] dark:bg-white/12 animate-pulse rounded-md";
 function SkeletonStepProgress({ currentStep }: { currentStep: number }) {
   return (
     <nav className="flex flex-col relative gap-2 mb-8 w-full" aria-hidden>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 w-full">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 w-full">
         {STEPS.map((s) => {
           const isActive = s.id === currentStep;
           const isPast = s.id < currentStep;

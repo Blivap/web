@@ -120,4 +120,5 @@ export type {
   DonorQuestionnairePayload,
   DonorQuestionnaireResult,
   DonorRegisterPayload,
+  DonorRequestActivationPayload,
 } from "./donors";

@@ -2,10 +2,10 @@ import { fetcher } from "@/services/http";
 import { endpoints } from "@/services/endpoints";
 import type { IResponse } from "@/types";
 import type {
-  DonorAreaLocation,
   DonorLocationPoint,
   DonorQuestionnairePayload,
   DonorRegisterPayload,
+  DonorRequestActivationPayload,
   DonorScreeningProfilePayload,
 } from "@/types/donors";
 import { normalizeDonationTypesList } from "@/lib/donors/screeningDonationTypes";
@@ -38,10 +38,12 @@ export default function DonorRepository() {
       });
     },
 
-    requestActivation(payload?: { areaLocation?: DonorAreaLocation }): Promise<IResponse<unknown>> {
+    requestActivation(
+      payload: DonorRequestActivationPayload,
+    ): Promise<IResponse<unknown>> {
       return fetcher(endpoints.donors.requestActivation, {
         method: "POST",
-        ...(payload ? { data: payload } : {}),
+        data: payload,
       });
     },
 

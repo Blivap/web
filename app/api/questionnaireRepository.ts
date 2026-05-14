@@ -1,6 +1,7 @@
 import { fetcher } from "@/services/http";
 import { endpoints } from "@/services/endpoints";
 import { normalizeDonationTypeForApi } from "@/lib/donors/screeningDonationTypes";
+import type { QuestionnaireAnswerPayloadItem } from "@/lib/donors/questionnaireAnswer";
 import type { IResponse } from "@/types";
 
 export default function QuestionnaireRepository() {
@@ -14,11 +15,11 @@ export default function QuestionnaireRepository() {
 
     answer(
       questionnaireId: string,
-      data: Record<string, unknown>,
+      answers: QuestionnaireAnswerPayloadItem[],
     ): Promise<IResponse<unknown>> {
       return fetcher(endpoints.questionnaire.answer(questionnaireId), {
         method: "PATCH",
-        data,
+        data: { answers },
       });
     },
 

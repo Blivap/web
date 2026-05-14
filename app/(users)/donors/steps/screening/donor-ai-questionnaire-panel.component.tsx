@@ -1,13 +1,37 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 import { Sparkles } from "lucide-react";
 import { $api } from "@/app/api";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
-import { Button } from "@/components/button/button.component";
+import { Radio } from "@/components/forms/Radio";
+import {
+  isQuestionnaireAnswerEnum,
+  type QuestionnaireAnswerEnum,
+  type QuestionnaireAnswerPayloadItem,
+} from "@/lib/donors/questionnaireAnswer";
+import {
+  extractQuestionnaireCompatibilityWarning,
+  extractQuestionnaireIdFromRecord,
+  extractQuestionsFromQuestionnaireRecord,
+  type ParsedQuestionnaireQuestion,
+  questionnaireRecordFromMineResponse,
+} from "@/lib/donors/questionnaireMineResponse";
 
 const panelClass =
   "rounded-lg border border-border bg-[#FAFAFA] px-5 py-4 sm:px-6 dark:border-white/10 dark:bg-white/5";
+
+const ANSWER_OPTIONS: { value: QuestionnaireAnswerEnum; label: string }[] = [
+  { value: "YES", label: "Yes" },
+  { value: "NO", label: "No" },
+  { value: "NULL", label: "Not sure" },
+];
 
 function getErrorMessage(e: unknown, fallback: string): string {
   if (e && typeof e === "object" && "message" in e) {
@@ -22,202 +46,227 @@ function pickRecord(v: unknown): Record<string, unknown> | null {
   return null;
 }
 
-function extractQuestionnaireId(root: Record<string, unknown>): string | null {
-  const direct =
-    typeof root.id === "string"
-      ? root.id
-      : typeof root._id === "string"
-        ? root._id
-        : null;
-  if (direct) return direct;
-  const nested = pickRecord(root.questionnaire ?? root.data);
-  if (nested) {
-    const id =
-      typeof nested.id === "string"
-        ? nested.id
-        : typeof nested._id === "string"
-          ? nested._id
-          : null;
-    if (id) return id;
-  }
-  return null;
-}
-
-type QnItem = { id: string; text: string; answer: string };
-
-function extractQuestions(root: Record<string, unknown>): QnItem[] {
-  const candidates = [
-    root.questions,
-    root.items,
-    pickRecord(root.questionnaire)?.questions,
-  ];
-  for (const c of candidates) {
-    if (!Array.isArray(c)) continue;
-    const out: QnItem[] = [];
-    for (const raw of c) {
-      const q = pickRecord(raw);
-      if (!q) continue;
-      const id =
-        typeof q.id === "string"
-          ? q.id
-          : typeof q._id === "string"
-            ? q._id
-            : null;
-      if (!id) continue;
-      const text =
-        typeof q.text === "string"
-          ? q.text
-          : typeof q.prompt === "string"
-            ? q.prompt
-            : typeof q.question === "string"
-              ? q.question
-              : id;
-      const ans =
-        q.answer != null && typeof q.answer !== "object"
-          ? String(q.answer)
-          : typeof q.value === "string"
-            ? q.value
-            : "";
-      out.push({ id, text, answer: ans });
-    }
-    if (out.length > 0) return out;
-  }
-  return [];
-}
-
 export type DonorAiQuestionnairePanelProps = {
-  /** Primary donation type from screening profile (defaults to whole blood). */
+  /**
+   * Donation type for POST /questionnaire/generate (API snake_case).
+   * Parent should pass `?donationType=` from the URL when set so generate matches the pathway.
+   */
   primaryDonationType: string;
   disabled?: boolean;
+  /** Fired when all generated questions have a YES / NO / NULL choice selected (or questionnaire is empty). */
+  onCompletionChange?: (complete: boolean) => void;
+};
+
+export type DonorAiQuestionnairePanelHandle = {
+  /** PATCH all current choices in one request. Returns false if validation or the request fails. */
+  submitAllAnswers: () => Promise<boolean>;
 };
 
 /**
- * Optional POST /questionnaire/generate + PATCH …/answer flow.
- * Request/response shapes may vary by gateway — adjust parsing if Swagger differs.
+ * Loads GET /questionnaire/mine; if there is no questionnaire yet, POST
+ * /questionnaire/generate runs automatically when this step is shown.
+ * Answers PATCH uses `{ answers: [{ questionId, answer }] }` with YES | NO | NULL.
  */
-export function DonorAiQuestionnairePanel({
-  primaryDonationType,
-  disabled = false,
-}: DonorAiQuestionnairePanelProps) {
+export const DonorAiQuestionnairePanel = forwardRef<
+  DonorAiQuestionnairePanelHandle,
+  DonorAiQuestionnairePanelProps
+>(function DonorAiQuestionnairePanel(
+  { primaryDonationType, disabled = false, onCompletionChange },
+  ref,
+) {
   const [busy, setBusy] = useState(false);
   const [mineError, setMineError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [questionnaireId, setQuestionnaireId] = useState<string | null>(null);
-  const [questions, setQuestions] = useState<QnItem[]>([]);
-  const [draftAnswers, setDraftAnswers] = useState<Record<string, string>>({});
+  const [questions, setQuestions] = useState<ParsedQuestionnaireQuestion[]>([]);
+  const [draftAnswers, setDraftAnswers] = useState<
+    Record<string, QuestionnaireAnswerEnum | "">
+  >({});
   const [lastWarning, setLastWarning] = useState<string | null>(null);
 
-  const refreshMine = useCallback(async () => {
+  /** Fetch mine and apply to state. Does not touch `busy`. */
+  const fetchAndApplyMine = useCallback(async (): Promise<{
+    id: string | null;
+    questionCount: number;
+  }> => {
     setMineError(null);
-    setBusy(true);
     try {
       const { data, status } = await $api.questionnaire.mine();
       if (status < 200 || status >= 300 || data == null) {
         setQuestionnaireId(null);
         setQuestions([]);
-        return;
+        setDraftAnswers({});
+        setLastWarning(null);
+        return { id: null, questionCount: 0 };
       }
-      const raw = unwrapApiRecord(data) ?? pickRecord(data);
+      const raw = questionnaireRecordFromMineResponse(data);
       if (!raw) {
         setQuestionnaireId(null);
         setQuestions([]);
-        return;
+        setDraftAnswers({});
+        setLastWarning(null);
+        return { id: null, questionCount: 0 };
       }
-      const id = extractQuestionnaireId(raw);
+      const id = extractQuestionnaireIdFromRecord(raw);
+      const qs = extractQuestionsFromQuestionnaireRecord(raw);
+      const drafts: Record<string, QuestionnaireAnswerEnum | ""> = {};
+      for (const q of qs) {
+        drafts[q.id] = q.answer;
+      }
       setQuestionnaireId(id);
-      setQuestions(extractQuestions(raw));
-      const nextDraft: Record<string, string> = {};
-      for (const q of extractQuestions(raw)) {
-        nextDraft[q.id] = q.answer ?? "";
-      }
-      setDraftAnswers(nextDraft);
+      setQuestions(qs);
+      setDraftAnswers(drafts);
+      setLastWarning(extractQuestionnaireCompatibilityWarning(raw));
+      return { id, questionCount: qs.length };
     } catch (e) {
       setMineError(getErrorMessage(e, "Could not load questionnaire status."));
-    } finally {
-      setBusy(false);
+      setQuestionnaireId(null);
+      setQuestions([]);
+      setDraftAnswers({});
+      setLastWarning(null);
+      return { id: null, questionCount: 0 };
     }
   }, []);
 
   useEffect(() => {
-    if (!disabled) void refreshMine();
-  }, [disabled, refreshMine]);
+    if (disabled) return;
 
-  const handleGenerate = async () => {
-    setActionError(null);
-    setLastWarning(null);
-    setBusy(true);
-    try {
-      const { data, status } = await $api.questionnaire.generate(
-        primaryDonationType,
-      );
-      if (status === 403) {
-        setActionError(
-          "The server declined this questionnaire (compatibility or policy). You can still request blood donor activation without it.",
-        );
-        return;
-      }
-      if (status < 200 || status >= 300) {
-        setActionError("Could not generate questionnaire.");
-        return;
-      }
-      const raw = unwrapApiRecord(data) ?? pickRecord(data);
-      if (raw && typeof raw.warning === "string" && raw.warning.trim()) {
-        setLastWarning(raw.warning.trim());
-      }
-      await refreshMine();
-    } catch (e) {
-      setActionError(
-        getErrorMessage(
-          e,
-          "Could not generate questionnaire. It may already exist — try refresh.",
-        ),
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
+    let cancelled = false;
 
-  const saveOne = async (questionId: string) => {
-    if (!questionnaireId) return;
-    setActionError(null);
-    setBusy(true);
-    try {
-      const value = draftAnswers[questionId] ?? "";
-      await $api.questionnaire.answer(questionnaireId, {
-        questionId,
-        answer: value,
-      });
-      await refreshMine();
-    } catch (e) {
-      setActionError(
-        getErrorMessage(e, "Could not save answer. Check the expected body in API docs."),
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
+    (async () => {
+      setBusy(true);
+      setActionError(null);
+      setLastWarning(null);
+      try {
+        const first = await fetchAndApplyMine();
+        if (cancelled) return;
 
-  if (disabled) return null;
+        const needsGenerate = first.id == null;
+        if (needsGenerate) {
+          const { data, status } =
+            await $api.questionnaire.generate(primaryDonationType);
+          if (cancelled) return;
+
+          if (status === 403) {
+            setActionError(
+              "The server declined this questionnaire (compatibility or policy). You can still request blood donor activation without it.",
+            );
+            return;
+          }
+          if (status < 200 || status >= 300) {
+            setActionError("Could not generate questionnaire.");
+            return;
+          }
+          const raw = unwrapApiRecord(data) ?? pickRecord(data);
+          const compat = extractQuestionnaireCompatibilityWarning(raw);
+          if (compat) {
+            setLastWarning(compat);
+          } else if (
+            raw &&
+            typeof raw.warning === "string" &&
+            raw.warning.trim()
+          ) {
+            setLastWarning(raw.warning.trim());
+          }
+          await fetchAndApplyMine();
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setActionError(
+            getErrorMessage(e, "Could not prepare questionnaire."),
+          );
+        }
+      } finally {
+        if (!cancelled) setBusy(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [disabled, primaryDonationType, fetchAndApplyMine]);
 
   const incomplete = questions.filter(
-    (q) => !(draftAnswers[q.id] ?? "").trim(),
+    (q) => !isQuestionnaireAnswerEnum(draftAnswers[q.id] ?? ""),
   );
+
+  const allDraftsFilled =
+    questions.length > 0 &&
+    questions.every((q) => isQuestionnaireAnswerEnum(draftAnswers[q.id] ?? ""));
+
+  const emptyQuestionnaireDone =
+    Boolean(questionnaireId) && questions.length === 0;
+
+  const isComplete = allDraftsFilled || emptyQuestionnaireDone;
+
+  useEffect(() => {
+    onCompletionChange?.(isComplete);
+  }, [isComplete, onCompletionChange]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      async submitAllAnswers(): Promise<boolean> {
+        if (questions.length === 0) return true;
+        const payload: QuestionnaireAnswerPayloadItem[] = [];
+        for (const q of questions) {
+          const choice = draftAnswers[q.id] ?? "";
+          if (!isQuestionnaireAnswerEnum(choice)) {
+            setActionError(
+              "Choose Yes, No, or Not sure for every question before continuing.",
+            );
+            return false;
+          }
+          payload.push({ questionId: q.id, answer: choice });
+        }
+        if (!questionnaireId) {
+          setActionError(
+            "Questionnaire is not ready yet. Wait for loading to finish or refresh.",
+          );
+          return false;
+        }
+        setActionError(null);
+        setBusy(true);
+        try {
+          await $api.questionnaire.answer(questionnaireId, payload);
+          await fetchAndApplyMine();
+          return true;
+        } catch (e) {
+          setActionError(
+            getErrorMessage(
+              e,
+              "Could not save answers. Check the expected body in API docs.",
+            ),
+          );
+          return false;
+        } finally {
+          setBusy(false);
+        }
+      },
+    }),
+    [questionnaireId, questions, draftAnswers, fetchAndApplyMine],
+  );
+
+  if (disabled) return null;
 
   return (
     <div className={`${panelClass} space-y-3`}>
       <div className="flex flex-wrap items-center gap-2">
         <Sparkles className="size-4 text-primary" aria-hidden />
         <h3 className="text-sm font-semibold text-text-primary">
-          Optional typed questionnaire (AI)
+          Typed questionnaire (AI)
         </h3>
       </div>
       <p className="text-xs leading-relaxed text-text-secondary">
-        This does not unlock active donor status. After your screening profile
-        looks right for your primary donation type, you can generate typed
-        questions for richer screening and your public donor card.
+        Questions load automatically for your donation type. Choose Yes, No, or
+        Not sure for each item, then use Continue to save them and move on. This
+        supports your donor profile and review — it does not replace the
+        activation gate.
       </p>
       {mineError ? (
-        <p className="text-xs text-amber-800 dark:text-amber-200">{mineError}</p>
+        <p className="text-xs text-amber-800 dark:text-amber-200">
+          {mineError}
+        </p>
       ) : null}
       {actionError ? (
         <p className="text-xs text-red-600 dark:text-red-400" role="alert">
@@ -225,77 +274,68 @@ export function DonorAiQuestionnairePanel({
         </p>
       ) : null}
       {lastWarning ? (
-        <p className="text-xs text-amber-800 dark:text-amber-200">{lastWarning}</p>
+        <p className="text-xs text-amber-800 dark:text-amber-200">
+          {lastWarning}
+        </p>
       ) : null}
 
-      <div className="flex flex-wrap gap-2 pt-1">
-        <Button
-          type="button"
-          variant="outline"
-          disabled={busy}
-          loading={busy}
-          onClick={() => void handleGenerate()}
-          className="rounded-md! px-5 py-2 text-xs"
-        >
-          Generate questionnaire
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={busy}
-          onClick={() => void refreshMine()}
-          className="rounded-md! px-5 py-2 text-xs"
-        >
-          Refresh status
-        </Button>
-      </div>
+      {busy && questions.length === 0 && !actionError ? (
+        <p className="text-xs text-text-secondary" aria-live="polite">
+          Loading your questionnaire…
+        </p>
+      ) : null}
 
       {questions.length > 0 ? (
-        <ul className="space-y-3 pt-1">
-          {questions.map((q) => (
-            <li
-              key={q.id}
-              className="rounded-md border border-border bg-white px-4 py-3 dark:border-white/10 dark:bg-[#1a1a22]"
-            >
-              <p className="text-xs font-medium text-text-primary">{q.text}</p>
-              <textarea
-                className="mt-2 w-full rounded-md border border-border bg-white px-3 py-2 text-xs text-text-primary outline-none focus:border-primary dark:border-white/10 dark:bg-[#14141a]"
-                rows={2}
-                value={draftAnswers[q.id] ?? ""}
-                onChange={(e) =>
-                  setDraftAnswers((prev) => ({
-                    ...prev,
-                    [q.id]: e.target.value,
-                  }))
-                }
-                placeholder="Your answer"
-              />
-              <Button
-                type="button"
-                variant="primary"
-                disabled={busy || !(draftAnswers[q.id] ?? "").trim()}
-                loading={busy}
-                onClick={() => void saveOne(q.id)}
-                className="mt-2 rounded-md! px-5 py-2 text-xs"
+        <ul className="space-y-3 pt-1 max-h-[300px] lg:max-h-[450px] overflow-y-auto custom-scrollbar">
+          {questions.map((q) => {
+            const selected = draftAnswers[q.id] ?? "";
+            const name = `questionnaire-${q.id}`;
+            return (
+              <li
+                key={q.id}
+                className="rounded-md border border-border bg-white px-4 py-3 dark:border-white/10 dark:bg-[#1a1a22]"
               >
-                Save answer
-              </Button>
-            </li>
-          ))}
+                <p className="text-xs font-medium text-text-primary">
+                  {q.text}
+                </p>
+                <fieldset className="mt-3 flex flex-wrap gap-4">
+                  <legend className="sr-only">Your answer</legend>
+                  {ANSWER_OPTIONS.map(({ value, label }) => (
+                    <Radio
+                      key={value}
+                      name={name}
+                      value={value}
+                      checked={selected === value}
+                      disabled={busy}
+                      onChange={() =>
+                        setDraftAnswers((prev) => ({
+                          ...prev,
+                          [q.id]: value,
+                        }))
+                      }
+                    >
+                      <span className="text-xs text-text-primary">{label}</span>
+                    </Radio>
+                  ))}
+                </fieldset>
+              </li>
+            );
+          })}
         </ul>
-      ) : (
+      ) : !busy && !actionError ? (
         <p className="text-xs text-text-tertiary">
-          No questionnaire loaded yet. Use Generate (primary type:{" "}
-          <span className="font-mono">{primaryDonationType}</span>) or Refresh.
+          No questions were returned. You can still continue if your profile
+          already satisfies activation rules (primary type:{" "}
+          <span className="font-mono">{primaryDonationType}</span>).
         </p>
-      )}
+      ) : null}
 
       {questions.length > 0 && incomplete.length === 0 ? (
         <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200">
-          All listed answers are non-empty — confirm completion rules on the
-          backend if the public card still shows incomplete.
+          Every question has an answer — use Continue below to save them on the
+          server and go to activation.
         </p>
       ) : null}
     </div>
   );
-}
+});
