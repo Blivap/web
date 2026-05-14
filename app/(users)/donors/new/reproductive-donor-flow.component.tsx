@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/button/button.component";
-import { Radio } from "@/components/forms/Radio";
 import { Checkbox } from "@/components/forms/checkbox/checkbox.component";
 import {
   Select,
@@ -13,8 +12,35 @@ import {
 import type { DonorRegistrationType } from "./donor-registration-type";
 import { DonorRegistrationSuccessModal } from "./donor-registration-success-modal.component";
 import { navigateOutAfterSuccess } from "@/lib/navigation/navigateOutAfterSuccess";
+import {
+  DONOR_COUNTRIES,
+  getNonNgCityRows,
+  getNonNgStateRows,
+  nigeriaCityRowsForState,
+  OVARY_CYCLE_OPTIONS,
+  OVARY_MOTIVATION_OPTIONS,
+  OVARY_PREGNANCY_HISTORY_OPTIONS,
+  parseNigeriaCityValue,
+  REPRODUCTIVE_EDUCATION_OPTIONS,
+  SPERM_GENOTYPE_BLOOD_OPTIONS,
+  SPERM_MOTIVATION_OPTIONS,
+  YES_NO_NOT_SURE_OPTIONS,
+} from "@/lib/donors/reproductiveDonorSelectOptions";
+import { NIGERIA_STATES } from "@/lib/donors/location-options";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useMemo, useState } from "react";
+
+function countryLabel(code: string): string {
+  const row = DONOR_COUNTRIES.find((c) => c.value === code);
+  return row?.label ?? code;
+}
+
+function optionLabel(
+  opts: readonly { value: string; label: string }[],
+  value: string,
+): string {
+  return opts.find((o) => o.value === value)?.label ?? value;
+}
 
 type ReproductiveFormValues = {
   ageRange: string;
@@ -57,11 +83,6 @@ type FlowConfig = {
   }[];
   successFooterNote: string;
 };
-
-const inputClassName =
-  "w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/10 dark:bg-[#1a1a22]";
-
-const radioLabelClassName = "text-sm text-text-primary";
 
 const AVAILABILITY_OPTIONS = [
   { value: "weekdays", label: "Weekdays" },
@@ -274,6 +295,48 @@ export function ReproductiveDonorFlow({
     [config.stepOneLabel, config.stepThreeLabel, config.stepTwoLabel],
   );
 
+  const isNigeria = values.country === "NG";
+  const ngCityRows = useMemo(
+    () => nigeriaCityRowsForState(values.state),
+    [values.state],
+  );
+  const ngCityCombined = useMemo(() => {
+    if (!isNigeria || !values.state || !values.city) return "";
+    const key = `${values.state}::${values.city}`;
+    return ngCityRows.some((r) => r.value === key) ? key : "";
+  }, [isNigeria, values.state, values.city, ngCityRows]);
+
+  const nonNgStateRows = useMemo(
+    () => getNonNgStateRows(values.country),
+    [values.country],
+  );
+  const nonNgCityRows = useMemo(
+    () => getNonNgCityRows(values.country, values.state),
+    [values.country, values.state],
+  );
+
+  const profileRows = useMemo(
+    () =>
+      donorType === "sperm"
+        ? REPRODUCTIVE_EDUCATION_OPTIONS
+        : OVARY_CYCLE_OPTIONS,
+    [donorType],
+  );
+  const secondaryRows = useMemo(
+    () =>
+      donorType === "sperm"
+        ? SPERM_GENOTYPE_BLOOD_OPTIONS
+        : OVARY_PREGNANCY_HISTORY_OPTIONS,
+    [donorType],
+  );
+  const motivationRows = useMemo(
+    () =>
+      donorType === "sperm"
+        ? SPERM_MOTIVATION_OPTIONS
+        : OVARY_MOTIVATION_OPTIONS,
+    [donorType],
+  );
+
   const updateValue = <K extends keyof ReproductiveFormValues>(
     field: K,
     value: ReproductiveFormValues[K],
@@ -284,32 +347,32 @@ export function ReproductiveDonorFlow({
   const validateStep = (currentStep: number): string | null => {
     if (currentStep === 1) {
       if (!values.ageRange) return "Select an age bracket.";
-      if (!values.profileQualifier.trim()) {
-        return `Enter ${config.profileQualifierLabel.toLowerCase()}.`;
+      if (!values.profileQualifier) {
+        return `Select ${config.profileQualifierLabel.toLowerCase()}.`;
       }
-      if (!values.secondaryQualifier.trim()) {
-        return `Enter ${config.secondaryQualifierLabel.toLowerCase()}.`;
+      if (!values.secondaryQualifier) {
+        return `Select ${config.secondaryQualifierLabel.toLowerCase()}.`;
       }
-      if (!values.country.trim() || !values.state.trim() || !values.city.trim()) {
-        return "Country, state, and city are required.";
+      if (!values.country || !values.state || !values.city) {
+        return "Select country, state or region, and city.";
       }
-      if (!values.availability.trim()) return "Tell us your current availability.";
+      if (!values.availability) return "Select your availability.";
     }
 
     if (currentStep === 2) {
-      if (!values.screeningOne) return "Answer the first screening question.";
-      if (!values.screeningTwo) return "Answer the second screening question.";
+      if (!values.screeningOne) return "Select an answer for the first question.";
+      if (!values.screeningTwo) return "Select an answer for the second question.";
       if (!values.hereditaryHistory) {
-        return "Tell us whether you know of any hereditary health history.";
+        return "Select an answer for hereditary health history.";
       }
       if (!values.willingForScreening) {
-        return "Tell us whether you are open to further screening.";
+        return "Select whether you are open to further screening.";
       }
       if (!values.recentHealthIssue) {
-        return "Tell us if you have had any recent health issues.";
+        return "Select an answer about recent health issues.";
       }
-      if (!values.motivation.trim()) {
-        return "Add a short note on why you want to proceed.";
+      if (!values.motivation) {
+        return "Select why you want to proceed.";
       }
     }
 
@@ -368,7 +431,7 @@ export function ReproductiveDonorFlow({
       {step === 1 ? (
         <SectionCard
           title={config.stepOneLabel}
-          description="These donor-specific details decide the screening path you will see next."
+          description="These donor-specific details decide the screening path you will see next. Answers use fixed lists only (no free typing) so coordinators see consistent, comparable profiles."
         >
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-3">
@@ -376,7 +439,7 @@ export function ReproductiveDonorFlow({
                 {config.ageQuestion}
               </label>
               <Select
-                value={values.ageRange}
+                value={values.ageRange || undefined}
                 onValueChange={(value) => updateValue("ageRange", value)}
               >
                 <SelectTrigger>
@@ -394,57 +457,168 @@ export function ReproductiveDonorFlow({
 
             <div className="grid gap-4 md:grid-cols-2">
               <FieldShell label={config.profileQualifierLabel}>
-                <input
-                  value={values.profileQualifier}
-                  onChange={(event) =>
-                    updateValue("profileQualifier", event.target.value)
-                  }
-                  className={inputClassName}
-                  placeholder={config.profileQualifierPlaceholder}
-                />
+                <Select
+                  value={values.profileQualifier || undefined}
+                  onValueChange={(value) => updateValue("profileQualifier", value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        donorType === "sperm"
+                          ? "Select education level"
+                          : "Select cycle regularity"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {profileRows.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FieldShell>
               <FieldShell label={config.secondaryQualifierLabel}>
-                <input
-                  value={values.secondaryQualifier}
-                  onChange={(event) =>
-                    updateValue("secondaryQualifier", event.target.value)
+                <Select
+                  value={values.secondaryQualifier || undefined}
+                  onValueChange={(value) =>
+                    updateValue("secondaryQualifier", value)
                   }
-                  className={inputClassName}
-                  placeholder={config.secondaryQualifierPlaceholder}
-                />
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        donorType === "sperm"
+                          ? "Select genotype or blood group"
+                          : "Select pregnancy / fertility history"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {secondaryRows.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FieldShell>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
               <FieldShell label="Country">
-                <input
-                  value={values.country}
-                  onChange={(event) => updateValue("country", event.target.value)}
-                  className={inputClassName}
-                  placeholder="e.g. Nigeria"
-                />
+                <Select
+                  value={values.country || undefined}
+                  onValueChange={(value) => {
+                    updateValue("country", value);
+                    updateValue("state", "");
+                    updateValue("city", "");
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DONOR_COUNTRIES.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FieldShell>
               <FieldShell label="State / region">
-                <input
-                  value={values.state}
-                  onChange={(event) => updateValue("state", event.target.value)}
-                  className={inputClassName}
-                  placeholder="e.g. Lagos"
-                />
+                {isNigeria ? (
+                  <Select
+                    value={values.state || undefined}
+                    onValueChange={(value) => {
+                      updateValue("state", value);
+                      updateValue("city", "");
+                    }}
+                    disabled={!values.country}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {NIGERIA_STATES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Select
+                    value={values.state || undefined}
+                    onValueChange={(value) => {
+                      updateValue("state", value);
+                      updateValue("city", "");
+                    }}
+                    disabled={!values.country}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select region" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {nonNgStateRows.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </FieldShell>
               <FieldShell label="City / town">
-                <input
-                  value={values.city}
-                  onChange={(event) => updateValue("city", event.target.value)}
-                  className={inputClassName}
-                  placeholder="e.g. Ikeja"
-                />
+                {isNigeria ? (
+                  <Select
+                    value={ngCityCombined || undefined}
+                    onValueChange={(combined) => {
+                      const parsed = parseNigeriaCityValue(combined);
+                      if (parsed) {
+                        updateValue("state", parsed.state);
+                        updateValue("city", parsed.city);
+                      }
+                    }}
+                    disabled={!values.state}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select city" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {ngCityRows.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Select
+                    value={values.city || undefined}
+                    onValueChange={(value) => updateValue("city", value)}
+                    disabled={!values.country || !values.state}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select city or area" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {nonNgCityRows.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </FieldShell>
             </div>
 
             <FieldShell label="Availability">
               <Select
-                value={values.availability}
+                value={values.availability || undefined}
                 onValueChange={(value) => updateValue("availability", value)}
               >
                 <SelectTrigger>
@@ -491,36 +665,41 @@ export function ReproductiveDonorFlow({
                 label: "Have you had any recent illness, fever, or unresolved health concern?",
               },
             ].map((question) => (
-              <div key={question.field} className="flex flex-col gap-3">
-                <span className="text-sm font-medium text-text-primary">
-                  {question.label}
-                </span>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {["yes", "no", "not sure"].map((option) => (
-                    <Radio
-                      key={`${question.field}-${option}`}
-                      name={`${donorType}-${question.field}`}
-                      value={option}
-                      checked={values[question.field] === option}
-                      onChange={() => updateValue(question.field, option)}
-                      labelClassName={radioLabelClassName}
-                    >
-                      {option === "not sure"
-                        ? "Not sure"
-                        : option.charAt(0).toUpperCase() + option.slice(1)}
-                    </Radio>
-                  ))}
-                </div>
-              </div>
+              <FieldShell key={question.field} label={question.label}>
+                <Select
+                  value={values[question.field] || undefined}
+                  onValueChange={(value) => updateValue(question.field, value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select an answer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {YES_NO_NOT_SURE_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FieldShell>
             ))}
 
             <FieldShell label="Why would you like to continue with this donor path?">
-              <textarea
-                value={values.motivation}
-                onChange={(event) => updateValue("motivation", event.target.value)}
-                className={`${inputClassName} min-h-28 resize-y`}
-                placeholder="Share any context that would help a coordinator guide your next step."
-              />
+              <Select
+                value={values.motivation || undefined}
+                onValueChange={(value) => updateValue("motivation", value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {motivationRows.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </FieldShell>
           </div>
         </SectionCard>
@@ -547,22 +726,25 @@ export function ReproductiveDonorFlow({
               <ReviewRow label="Age range" value={values.ageRange} />
               <ReviewRow
                 label={config.profileQualifierLabel}
-                value={values.profileQualifier}
+                value={optionLabel(profileRows, values.profileQualifier)}
               />
               <ReviewRow
                 label={config.secondaryQualifierLabel}
-                value={values.secondaryQualifier}
+                value={optionLabel(secondaryRows, values.secondaryQualifier)}
               />
               <ReviewRow
                 label="Location"
-                value={[values.city, values.state, values.country]
+                value={[values.city, values.state, countryLabel(values.country)]
                   .filter(Boolean)
-                  .join(", ")}
+                  .join(" · ")}
               />
-              <ReviewRow label="Availability" value={values.availability} />
+              <ReviewRow
+                label="Availability"
+                value={optionLabel(AVAILABILITY_OPTIONS, values.availability)}
+              />
               <ReviewRow
                 label="Motivation"
-                value={values.motivation.trim()}
+                value={optionLabel(motivationRows, values.motivation)}
               />
             </div>
 

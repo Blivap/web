@@ -16,11 +16,7 @@ import {
 import { Formik, useFormikContext } from "formik";
 import axios from "axios";
 import { $api } from "@/app/api";
-import { useAppDispatch } from "@/store/hooks";
-import { setUser } from "@/store/slices/authSlice";
-import { normalizeUser } from "@/lib/utils";
-import { medicalAnswersToQuestionnairePayload } from "@/lib/donors/questionnairePayload";
-import { parseQuestionnaireResult } from "@/lib/donors/parseQuestionnaireResponse";
+import { Button } from "@/components/ui/button";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import {
   extractQuestionnaireResultFromProfile,
@@ -31,9 +27,15 @@ import type {
   DonorQuestionnaireResult,
   DonorRegisterPayload,
 } from "@/types/donors";
+import { extractScreeningProfileFromDonor } from "@/lib/donors/extractScreeningProfileFromDonor";
+import { normalizeDonationTypeForApi } from "@/lib/donors/screeningDonationTypes";
 
-import { StepOne, type MedicalAnswers } from "../steps/one/step_one.component";
 import { StepThree } from "../steps/three/step_three.component";
+import {
+  DonorAiQuestionnairePanel,
+  type DonorAiQuestionnairePanelHandle,
+} from "../steps/screening/donor-ai-questionnaire-panel.component";
+import type { MedicalAnswers } from "../steps/one/step_one.component";
 import {
   DonorBasicsStep,
   type DonorBasicsValues,
@@ -50,12 +52,17 @@ type AreaLocationPayload = {
   area: string;
 };
 
-const STEP_PARAM_VALUES = ["basics", "health", "activation"] as const;
+const STEP_PARAM_VALUES = ["basics", "questionnaire", "activation"] as const;
 type StepParam = (typeof STEP_PARAM_VALUES)[number];
 
 function stepParamToNumber(param: string | null): number {
+  if (!param) return 1;
   const i = STEP_PARAM_VALUES.indexOf(param as StepParam);
-  return i >= 0 ? i + 1 : 1;
+  if (i >= 0) return i + 1;
+  /** Legacy URLs — map removed steps onto the AI questionnaire step. */
+  if (param === "screening" || param === "health") return 2;
+  if (param === "activation") return 3;
+  return 1;
 }
 
 function stepNumberToParam(step: number): StepParam {
@@ -248,7 +255,7 @@ function isRetakeRescheduled(raw: Record<string, unknown>): boolean {
 
 const STEPS = [
   { id: 1, label: "Blood type & location" },
-  { id: 2, label: "Health questionnaire" },
+  { id: 2, label: "AI questionnaire" },
   { id: 3, label: "Activation" },
 ];
 
@@ -258,7 +265,7 @@ function StepProgress({ currentStep }: { currentStep: number }) {
       className="flex flex-col relative gap-2 mb-8 w-full "
       aria-label="Progress"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 w-full">
         {STEPS.map((step) => {
           const isActive = step.id === currentStep;
           const isPast = step.id < currentStep;
@@ -320,25 +327,34 @@ const initialValues: NewDonorFormValues = {
 };
 
 function NewDonorForm() {
-  const dispatch = useAppDispatch();
   const { values, setFieldValue } = useFormikContext<NewDonorFormValues>();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const contentRef = useRef<HTMLDivElement>(null);
+  const aiQuestionnaireRef = useRef<DonorAiQuestionnairePanelHandle>(null);
   const hasAutoRoutedToRequiredStep = useRef(false);
 
+  const donationTypeFromQuery = useMemo(
+    () => searchParams.get("donationType")?.trim() || null,
+    [searchParams],
+  );
+
   const [basicsComplete, setBasicsComplete] = useState(false);
-  const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
+  const [
+    legacyHealthQuestionnaireComplete,
+    setLegacyHealthQuestionnaireComplete,
+  ] = useState(false);
+  const [aiQuestionnaireComplete, setAiQuestionnaireComplete] = useState(false);
   const [questionnaireResult, setQuestionnaireResult] =
     useState<DonorQuestionnaireResult | null>(null);
 
   const [basicsError, setBasicsError] = useState<string | null>(null);
-  const [healthError, setHealthError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
-  const [isSubmittingQuestionnaire, setIsSubmittingQuestionnaire] =
-    useState(false);
   const [hydrated, setHydrated] = useState(false);
+
+  const activationPreparationComplete =
+    legacyHealthQuestionnaireComplete || aiQuestionnaireComplete;
 
   const requestedStep = useMemo(
     () => stepParamToNumber(searchParams.get("step")),
@@ -352,12 +368,9 @@ function NewDonorForm() {
     [setFieldValue],
   );
 
-  const handleMedicalChange = useCallback(
-    (name: string, value: string) => {
-      void setFieldValue(`medical.${name}`, value);
-    },
-    [setFieldValue],
-  );
+  const handleAiCompletionChange = useCallback((complete: boolean) => {
+    setAiQuestionnaireComplete(complete);
+  }, []);
 
   const [isRequestingActivation, setIsRequestingActivation] = useState(false);
   const [activationRequestError, setActivationRequestError] = useState<
@@ -368,6 +381,16 @@ function NewDonorForm() {
   const [parsedAreaLocation, setParsedAreaLocation] =
     useState<AreaLocationPayload | null>(null);
   const [retakeUnlocked, setRetakeUnlocked] = useState(false);
+  const [primaryDonationTypeForAi, setPrimaryDonationTypeForAi] =
+    useState("whole_blood");
+
+  /** Query wins so POST /questionnaire/generate matches deep links (`?donationType=`). */
+  const donationTypeForQuestionnaire = useMemo(() => {
+    if (donationTypeFromQuery) {
+      return normalizeDonationTypeForApi(donationTypeFromQuery);
+    }
+    return primaryDonationTypeForAi;
+  }, [donationTypeFromQuery, primaryDonationTypeForAi]);
 
   useEffect(() => {
     let cancelled = false;
@@ -392,12 +415,22 @@ function NewDonorForm() {
         }
 
         if (isQuestionnaireAnswered(raw)) {
-          setQuestionnaireComplete(true);
+          setLegacyHealthQuestionnaireComplete(true);
           setQuestionnaireResult(extractQuestionnaireResultFromProfile(raw));
           const medical = extractMedicalAnswersFromProfile(raw);
           for (const [name, value] of Object.entries(medical)) {
             void setFieldValue(`medical.${name}`, value);
           }
+        }
+
+        const screeningPayload = extractScreeningProfileFromDonor(raw);
+        const types = screeningPayload.activeDonationTypes;
+        if (types && types.length > 0) {
+          setPrimaryDonationTypeForAi(normalizeDonationTypeForApi(types[0]));
+        } else if (donationTypeFromQuery) {
+          setPrimaryDonationTypeForAi(
+            normalizeDonationTypeForApi(donationTypeFromQuery),
+          );
         }
 
         setRetakeUnlocked(isRetakeRescheduled(raw));
@@ -411,14 +444,15 @@ function NewDonorForm() {
     return () => {
       cancelled = true;
     };
-  }, [setFieldValue]);
+  }, [donationTypeFromQuery, setFieldValue]);
 
-  const allMedicalAnswered = REQUIRED_MEDICAL_FIELDS.every((field) =>
-    Boolean(values.medical[field]),
-  );
-
-  const requiredStep = !basicsComplete ? 1 : !questionnaireComplete ? 2 : 3;
-  const step = Math.min(requestedStep, 3);
+  const requiredStep = !basicsComplete
+    ? 1
+    : !activationPreparationComplete
+      ? 2
+      : 3;
+  const maxAllowedStep = requiredStep;
+  const step = Math.min(requestedStep, maxAllowedStep);
 
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
@@ -426,9 +460,9 @@ function NewDonorForm() {
 
   /**
    * Updates the URL step. Do not clamp with maxAllowedStep here — that value is
-   * still stale in the same tick as setBasicsComplete / setQuestionnaireComplete,
-   * which incorrectly kept step 2 after questionnaire submit. Visibility is
-   * still limited by `step = Math.min(requestedStep, maxAllowedStep)`.
+   * still stale in the same tick as setBasicsComplete / completion flags,
+   * which incorrectly kept the URL behind. Visibility is still limited by
+   * `step = Math.min(requestedStep, maxAllowedStep)`.
    */
   const setStepParam = useCallback(
     (newStep: number) => {
@@ -438,6 +472,20 @@ function NewDonorForm() {
     },
     [pathname, router, searchParams],
   );
+
+  const [isSavingAiQuestionnaire, setIsSavingAiQuestionnaire] = useState(false);
+
+  const handleContinueToActivation = useCallback(async () => {
+    if (!aiQuestionnaireComplete) return;
+    setIsSavingAiQuestionnaire(true);
+    try {
+      const ok = (await aiQuestionnaireRef.current?.submitAllAnswers()) ?? true;
+      if (!ok) return;
+      setStepParam(3);
+    } finally {
+      setIsSavingAiQuestionnaire(false);
+    }
+  }, [aiQuestionnaireComplete, setStepParam]);
 
   useEffect(() => {
     if (!hydrated || hasAutoRoutedToRequiredStep.current) return;
@@ -508,48 +556,6 @@ function NewDonorForm() {
     }
   };
 
-  const handleSubmitQuestionnaire = async () => {
-    setHealthError(null);
-    if (questionnaireComplete && !retakeUnlocked) {
-      setStepParam(3);
-      return;
-    }
-    if (!allMedicalAnswered) return;
-
-    setIsSubmittingQuestionnaire(true);
-    try {
-      const body = medicalAnswersToQuestionnairePayload(values.medical);
-      const { status, data } = await $api.donors.questionnaire(body);
-      if (status >= 200 && status < 300) {
-        const parsed = parseQuestionnaireResult(data);
-        setQuestionnaireResult(parsed);
-        setQuestionnaireComplete(true);
-        setStepParam(3);
-
-        try {
-          const me = await $api.auth.me();
-          if (me.status >= 200 && me.status < 300 && me.data) {
-            const userPayload = normalizeUser(me.data);
-            if (userPayload) dispatch(setUser(userPayload));
-          }
-        } catch {
-          // ignore refresh failure
-        }
-      } else {
-        setHealthError("Questionnaire could not be submitted.");
-      }
-    } catch (e) {
-      setHealthError(
-        getErrorMessage(
-          e,
-          "Questionnaire could not be submitted. It may already have been submitted.",
-        ),
-      );
-    } finally {
-      setIsSubmittingQuestionnaire(false);
-    }
-  };
-
   const handleRequestActivation = async () => {
     setActivationRequestError(null);
     if (!basicsComplete) {
@@ -559,8 +565,10 @@ function NewDonorForm() {
       setStepParam(1);
       return;
     }
-    if (!questionnaireComplete) {
-      setActivationRequestError("Complete the health questionnaire first.");
+    if (!activationPreparationComplete) {
+      setActivationRequestError(
+        "Complete the AI questionnaire first (all answers filled), or finish loading your profile.",
+      );
       setStepParam(2);
       return;
     }
@@ -598,6 +606,7 @@ function NewDonorForm() {
     try {
       const { status, error, message } = await $api.donors.requestActivation({
         areaLocation,
+        donationType: donationTypeForQuestionnaire,
       });
       if (status >= 200 && status < 300) {
         setIsActivationSuccessModalOpen(true);
@@ -641,7 +650,7 @@ function NewDonorForm() {
   }
 
   return (
-    <div className="sm:p-6 w-full flex flex-col  flex-1 h-full grow">
+    <div className="flex h-full min-h-0 w-full flex-1 flex-col px-4 pb-6 pt-4 sm:p-6">
       <StepProgress currentStep={step} />
       <div
         ref={contentRef}
@@ -657,17 +666,39 @@ function NewDonorForm() {
           editable={!basicsComplete || retakeUnlocked}
           completed={basicsComplete}
         />
-        <StepOne
-          active={step === 2}
-          medical={values.medical}
-          handleMedicalChange={handleMedicalChange}
-          onSubmitQuestionnaire={handleSubmitQuestionnaire}
-          onBack={() => setStepParam(1)}
-          isSubmitting={isSubmittingQuestionnaire}
-          submitError={healthError}
-          editable={!questionnaireComplete || retakeUnlocked}
-          completed={questionnaireComplete}
-        />
+        <div
+          className={`mt-6 flex flex-col gap-5 xl:mt-10 ${step !== 2 ? "hidden" : ""}`}
+          aria-hidden={step !== 2}
+        >
+          <DonorAiQuestionnairePanel
+            ref={aiQuestionnaireRef}
+            primaryDonationType={donationTypeForQuestionnaire}
+            disabled={step !== 2}
+            onCompletionChange={handleAiCompletionChange}
+          />
+          {activationPreparationComplete ? (
+            <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStepParam(1)}
+                disabled={isSavingAiQuestionnaire}
+                className="w-fit"
+              >
+                Back
+              </Button>
+              <Button
+                type="button"
+                onClick={() => void handleContinueToActivation()}
+                loading={isSavingAiQuestionnaire}
+                disabled={isSavingAiQuestionnaire || !aiQuestionnaireComplete}
+                className="w-fit"
+              >
+                Continue
+              </Button>
+            </div>
+          ) : null}
+        </div>
         <StepThree
           active={step === 3}
           onSendRequest={handleRequestActivation}
@@ -687,17 +718,17 @@ function NewDonorForm() {
         }}
         eyebrow="Blood donor registration"
         title="Your activation request is now in review"
-        description="Your blood donor profile, health questionnaire, and activation request have been captured. Our team can now continue the verification process from here."
+        description="Your blood donor profile, AI questionnaire answers, and activation request are on file. Our team continues verification from the activation gate."
         highlights={[
           {
             title: "Medical review",
             description:
-              "Your questionnaire answers and donor details will be checked for eligibility and completeness.",
+              "Donor details, AI questionnaire responses, and activation requests are checked for eligibility and completeness.",
           },
           {
             title: "Verification progress",
             description:
-              "If anything else is needed, the next instruction will come through your account flow.",
+              "Typed questionnaires improve matching and your public card; they do not replace activation rules.",
           },
           {
             title: "Overview updates",

@@ -100,10 +100,18 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
   const bookingRaw = unwrapApiRecord(r.booking) ?? r.booking;
   let reqId: string | null = requesterUserId;
   let donId: string | null = donorUserId;
+  /** Chat + REST `/chat/:donationId/...` use the booking Mongo id — not the meetup session id. */
+  let bookingId =
+    pickString(r.bookingId ?? r.booking_id) ??
+    undefined;
   if (bookingRaw && typeof bookingRaw === "object") {
     const b = bookingRaw as Record<string, unknown>;
     if (!reqId) reqId = pickString(b.requesterId ?? b.requester_id);
     if (!donId) donId = pickString(b.donorUserId ?? b.donor_user_id);
+    if (!bookingId) {
+      bookingId =
+        pickString(b.id ?? b._id ?? b.bookingId ?? b.booking_id) ?? undefined;
+    }
   }
 
   let verificationGateSatisfied = pickBool(
@@ -210,7 +218,7 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
     me,
     peer,
     ...(meetingCode ? { meetingCode } : { meetingCode: null }),
-    bookingId: pickString(r.bookingId ?? r.booking_id) ?? undefined,
+    ...(bookingId ? { bookingId } : {}),
     ...(reqId ? { requesterUserId: reqId } : {}),
     ...(donId ? { donorUserId: donId } : {}),
     ...(reqVerifiedAt

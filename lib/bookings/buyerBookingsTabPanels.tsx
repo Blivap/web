@@ -4,11 +4,12 @@ import { Bell, Send } from "lucide-react";
 import type { BookingsShellRow, BookingsTabPanel } from "@/app/(users)/bookings/components/bookings-shell.view";
 import { stashMeetupCodeFromBookingRow } from "@/lib/meetups/meetupSessionStorageKeys";
 import {
-  bookingSubtitleRequester,
+  bookingRowDetailPartsForViewer,
   bookingTitleForViewer,
   formatScheduledLabel,
   statusToPill,
 } from "@/lib/bookings/formatBookingDisplay";
+import { BookingRowSubtitle } from "@/app/(users)/bookings/components/booking-row-subtitle.component";
 import {
   buyerBtnGhost,
   buyerBtnReminder,
@@ -26,11 +27,11 @@ export const BUYER_TAB_ORDER: readonly BuyerPanelKey[] = [
 ];
 
 const sentPanelBanner = (
-  <div className="flex items-center gap-3 rounded-lg border border-primary/25 bg-primary/6 px-3 py-2.5 dark:border-primary/35 dark:bg-primary/10">
+  <div className="flex flex-col items-start gap-3 rounded-lg border border-primary/25 bg-primary/6 px-3 py-2.5 sm:flex-row sm:items-center dark:border-primary/35 dark:bg-primary/10">
     <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary dark:bg-primary/20">
       <Send className="size-4" aria-hidden />
     </div>
-    <p className="text-xs text-text-secondary sm:text-sm">
+    <p className="min-w-0 text-xs text-text-secondary sm:text-sm">
       <span className="font-medium text-text-primary">Sent</span>
       {" · "}
       Every request you made, every status.
@@ -68,7 +69,15 @@ export function buildBuyerBookingsTabPanels(
   const mapRow = (b: Booking, ctx: BuyerPanelKey): BookingsShellRow => {
     const pill = statusToPill(b.status);
     const title = bookingTitleForViewer(b, "requester");
-    const subtitle = bookingSubtitleRequester(b, hospitalLabel(b.hospitalId));
+    const subtitle = (
+      <BookingRowSubtitle
+        {...bookingRowDetailPartsForViewer(
+          b,
+          "requester",
+          hospitalLabel(b.hospitalId),
+        )}
+      />
+    );
     const dateCol = formatScheduledLabel(b.scheduledAt);
     const reported = (b.reportsCount ?? 0) > 0;
 

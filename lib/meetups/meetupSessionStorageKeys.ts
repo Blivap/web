@@ -7,6 +7,11 @@ export function meetupCodeHintStorageKey(sessionId: string): string {
   return `meetup_code_${sessionId}`;
 }
 
+/** Booking Mongo id for `/chat/:donationId` — stashed when opening meetup from a booking so chat works if GET /meetups/:sessionId omits `bookingId`. */
+export function meetupChatBookingStashKey(sessionId: string): string {
+  return `meetup_chat_booking_${encodeURIComponent(sessionId)}`;
+}
+
 /** Stashed when the user opens the meetup flow from a booking that already has a meeting code. */
 export function meetupBookingCodeStashKey(bookingId: string): string {
   return `meetup_booking_code_${encodeURIComponent(bookingId)}`;

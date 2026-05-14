@@ -31,6 +31,13 @@ export type DonorRegisterPayload = {
   location?: DonorLocationPoint;
 };
 
+/** POST /donors/request-activation — area + donation program (matches `?donationType=` when present). */
+export type DonorRequestActivationPayload = {
+  areaLocation: DonorAreaLocation;
+  /** API `DonationType` snake_case, e.g. `whole_blood`. */
+  donationType: string;
+};
+
 export type DonorQuestionnairePayload = {
   gender: DonorGender;
   age18to64: boolean;
@@ -58,3 +65,26 @@ export type DonorQuestionnaireResult = {
 
 /** Internal wizard state for health questions before mapping to API booleans. */
 export type DonorMedicalFormAnswers = Record<string, string>;
+
+/** PATCH /donors/screening-profile — clinical / intent (separate from legacy questionnaire gender). */
+export type DonorBiologicalSex = "female" | "male" | "other" | "unknown";
+
+export type DonorScreeningProfilePayload = {
+  biologicalSex?: DonorBiologicalSex | null;
+  activeDonationTypes?: string[] | null;
+  isActivelyLactating?: boolean | null;
+  isCurrentlyPregnant?: boolean | null;
+};
+
+/** GET /donors/:id `screening` — AI questionnaire summary for the primary donation type. */
+export type DonorPublicScreeningQuestion = {
+  id: string;
+  text?: string;
+  answer?: unknown;
+};
+
+export type DonorPublicScreening = {
+  donationType?: string;
+  screeningComplete?: boolean;
+  questions?: DonorPublicScreeningQuestion[];
+};

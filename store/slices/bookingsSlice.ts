@@ -1,6 +1,7 @@
 import {
   createAsyncThunk,
   createSlice,
+  type PayloadAction,
 } from "@reduxjs/toolkit";
 import { $api } from "@/app/api";
 import { fetchAllBookingListPages } from "@/lib/bookings/fetchAllBookingListPages";
@@ -66,9 +67,12 @@ async function loadBookingsWithHospitals(
   return { bookings: listRes.bookings, hospitalNamesById };
 }
 
+/** Optional `silent` refetch keeps list on screen (no loading skeleton). */
+type LoadBookingsArg = { silent?: boolean } | undefined;
+
 export const loadSentBookings = createAsyncThunk(
   "bookings/loadSent",
-  async (_, { rejectWithValue }) => {
+  async (_arg: LoadBookingsArg, { rejectWithValue }) => {
     try {
       return await loadBookingsWithHospitals((params) =>
         $api.bookings.sent(params),
@@ -85,7 +89,7 @@ export const loadSentBookings = createAsyncThunk(
 
 export const loadReceivedBookings = createAsyncThunk(
   "bookings/loadReceived",
-  async (_, { rejectWithValue }) => {
+  async (_arg: LoadBookingsArg, { rejectWithValue }) => {
     try {
       return await loadBookingsWithHospitals((params) =>
         $api.bookings.received(params),
@@ -103,11 +107,49 @@ export const loadReceivedBookings = createAsyncThunk(
 const bookingsSlice = createSlice({
   name: "bookings",
   initialState,
-  reducers: {},
+  reducers: {
+    /**
+     * Merges fields into a booking in both sent and received lists (if present).
+     * Rebuilds the `items` array so subscribers always see a new reference.
+     */
+    patchBookingInLists: (
+      state,
+      action: PayloadAction<
+        { id: string } & Partial<
+          Pick<
+            Booking,
+            | "status"
+            | "respondedAt"
+            | "meetingCode"
+            | "slotEndAt"
+            | "reportsCount"
+          >
+        >
+      >,
+    ) => {
+      const { id, ...patch } = action.payload;
+      if (Object.keys(patch).length === 0) return;
+
+      for (const branch of ["sent", "received"] as const) {
+        const items = state[branch].items;
+        const idx = items.findIndex((b) => b.id === id);
+        if (idx === -1) continue;
+        const row = items[idx];
+        const merged = { ...row, ...patch };
+        state[branch].items = [
+          ...items.slice(0, idx),
+          merged,
+          ...items.slice(idx + 1),
+        ];
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(loadSentBookings.pending, (state) => {
-        state.sent.status = "loading";
+      .addCase(loadSentBookings.pending, (state, action) => {
+        if (!action.meta.arg?.silent) {
+          state.sent.status = "loading";
+        }
         state.sent.error = null;
       })
       .addCase(loadSentBookings.fulfilled, (state, action) => {
@@ -123,10 +165,14 @@ const bookingsSlice = createSlice({
         state.sent.error =
           (action.payload as string | undefined) ??
           "Could not load bookings.";
-        state.sent.items = [];
+        if (!action.meta.arg?.silent) {
+          state.sent.items = [];
+        }
       })
-      .addCase(loadReceivedBookings.pending, (state) => {
-        state.received.status = "loading";
+      .addCase(loadReceivedBookings.pending, (state, action) => {
+        if (!action.meta.arg?.silent) {
+          state.received.status = "loading";
+        }
         state.received.error = null;
       })
       .addCase(loadReceivedBookings.fulfilled, (state, action) => {
@@ -142,10 +188,13 @@ const bookingsSlice = createSlice({
         state.received.error =
           (action.payload as string | undefined) ??
           "Could not load bookings.";
-        state.received.items = [];
+        if (!action.meta.arg?.silent) {
+          state.received.items = [];
+        }
       })
       .addCase(logout, () => ({ ...initialState }));
   },
 });
 
+export const { patchBookingInLists } = bookingsSlice.actions;
 export default bookingsSlice.reducer;

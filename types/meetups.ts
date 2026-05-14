@@ -45,6 +45,10 @@ export type MeetupSession = {
   donorUserId?: string;
   me: MeetupParticipant;
   peer: MeetupParticipant;
+  /**
+   * Booking Mongo `_id` — same as `donationId` for Socket `/chat` and `GET /chat/:donationId/...`.
+   * Not the meetup session id.
+   */
   bookingId?: string;
 };
 

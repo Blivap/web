@@ -12,9 +12,12 @@ export function useBookingDeepLinkHighlight(
   useEffect(() => {
     if (!highlightBookingId || loadState !== "ok") return;
     const t = window.setTimeout(() => {
-      document
-        .getElementById(`booking-row-${highlightBookingId}`)
-        ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      const sel = `[data-booking-row-id="${CSS.escape(highlightBookingId)}"]`;
+      const candidates = document.querySelectorAll<HTMLElement>(sel);
+      const visible = Array.from(candidates).find(
+        (el) => el.offsetWidth > 0 && el.offsetHeight > 0,
+      );
+      visible?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }, 300);
     return () => window.clearTimeout(t);
   }, [highlightBookingId, loadState, rowIdsFingerprint]);

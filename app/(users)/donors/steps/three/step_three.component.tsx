@@ -1,8 +1,9 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Info } from "lucide-react";
 import type { DonorQuestionnaireResult } from "@/types/donors";
-import { Button } from "@/components/button/button.component";
+import { Button } from "@/components/ui/button";
 
 export interface StepThreeProps {
   onSendRequest: () => void | Promise<void>;
@@ -13,6 +14,8 @@ export interface StepThreeProps {
   active: boolean;
   /** Set after POST /donors/questionnaire succeeds. */
   eligibility?: DonorQuestionnaireResult | null;
+  /** Optional typed questionnaire / extra context (does not gate activation). */
+  optionalContent?: ReactNode;
 }
 function statusTone(status: string) {
   if (status === "eligible" || status === "pending_review") {
@@ -61,6 +64,7 @@ export function StepThree({
   requestError = null,
   active,
   eligibility = null,
+  optionalContent = null,
 }: StepThreeProps) {
   const status = eligibility?.eligibilityStatus ?? "pending";
   const tone = statusTone(status);
@@ -69,7 +73,7 @@ export function StepThree({
   return (
     active && (
       <div className="flex flex-col gap-6 mt-6 xl:mt-10 overflow-hidden">
-        <div className="rounded-xl border border-border bg-white p-5 sm:p-6 shadow-[0_10px_25px_rgba(0,0,0,0.04)] dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-none">
+        <div className="rounded-xl border border-border bg-white px-5 py-5 sm:px-6 sm:py-6 shadow-[0_10px_25px_rgba(0,0,0,0.04)] dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-none">
           <h2 className="text-lg font-semibold text-text-primary">
             Eligibility and activation request
           </h2>
@@ -101,10 +105,15 @@ export function StepThree({
           <div className="mt-5 rounded-lg border border-border bg-[#FAFAFA] px-4 py-3 dark:border-white/10 dark:bg-white/5">
             <p className="text-xs font-medium text-text-primary">Next step</p>
             <p className="mt-1 text-xs text-text-secondary">
-              Send activation to start donor verification. You will see a
-              confirmation modal and can continue to your overview page.
+              Send activation to start donor verification. This uses your profile
+              and questionnaire data on file — the AI questionnaire supports
+              review but does not replace the activation gate.
             </p>
           </div>
+
+          {optionalContent ? (
+            <div className="mt-5">{optionalContent}</div>
+          ) : null}
 
           {requestError && (
             <p
@@ -115,13 +124,13 @@ export function StepThree({
             </p>
           )}
 
-          <div className="mt-5 flex items-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             {onBack && (
               <Button
                 type="button"
                 variant="outline"
                 onClick={onBack}
-                className="w-fit rounded-md! px-5 py-2"
+                className="w-fit rounded-md! px-6 py-2.5"
               >
                 Back
               </Button>
@@ -135,7 +144,7 @@ export function StepThree({
                   ? onRequestRetake()
                   : onSendRequest())
               }
-              className="w-fit rounded-md! px-5 py-2"
+              className="w-fit rounded-md! px-6 py-2.5"
             >
               {isIneligible ? "Request retake" : "Send request"}
             </Button>

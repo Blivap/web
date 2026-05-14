@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,7 +23,7 @@ export type BookingsShellRow = {
   id: string;
   dateCol: string;
   title: string;
-  subtitle: string;
+  subtitle: ReactNode;
   pillLabel: string;
   pillVariant: BookingPillVariant;
   /** Trust & safety: show when API attached reports to this booking. */
@@ -127,6 +122,12 @@ type BookingsRowsTableProps = {
   tableEmptyMessage: string;
 };
 
+function bookingRowHighlightClass(highlight: boolean | undefined): string {
+  return highlight
+    ? "bg-primary/5 ring-2 ring-inset ring-primary/40"
+    : "";
+}
+
 function BookingsRowsTable({
   rows,
   colA,
@@ -159,116 +160,190 @@ function BookingsRowsTable({
   const hasRows = rows.length > 0;
   const rangeFrom =
     rows.length === 0 ? 0 : (safePage - 1) * BOOKINGS_TABLE_PAGE_SIZE + 1;
-  const rangeTo = Math.min(
-    safePage * BOOKINGS_TABLE_PAGE_SIZE,
-    rows.length,
-  );
+  const rangeTo = Math.min(safePage * BOOKINGS_TABLE_PAGE_SIZE, rows.length);
 
   return (
     <>
-      <div className="mt-3 overflow-x-auto border-t border-border pt-3 dark:border-white/10">
-        <table
-          className={`w-full border-collapse text-left ${actionsColumnLabel ? "min-w-[720px]" : "min-w-[560px]"}`}
-        >
-          <thead>
-            <tr>
-              <th
-                scope="col"
-                className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+      <div className="mt-3 border-t border-border pt-3 dark:border-white/10">
+        <div className="flex flex-col gap-3 md:hidden">
+          {rows.length === 0 ? (
+            <p className="py-10 text-center text-sm text-text-secondary">
+              {tableEmptyMessage}
+            </p>
+          ) : (
+            paginatedRows.map((row) => (
+              <article
+                key={row.id}
+                data-booking-row-id={row.id}
+                className={`rounded-lg border border-[#F3F4F6] bg-white p-4 dark:border-white/10 dark:bg-[#1a1a22] ${bookingRowHighlightClass(row.highlight)}`}
               >
-                {colA}
-              </th>
-              <th
-                scope="col"
-                className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
-              >
-                {colB}
-              </th>
-              <th
-                scope="col"
-                className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
-              >
-                {colC}
-              </th>
-              {actionsColumnLabel ? (
-                <th
-                  scope="col"
-                  className="pb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary"
-                >
-                  {actionsColumnLabel}
-                </th>
-              ) : null}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={colCount}
-                  className="py-10 text-center text-sm text-text-secondary"
-                >
-                  {tableEmptyMessage}
-                </td>
-              </tr>
-            ) : (
-              paginatedRows.map((row) => (
-                <tr
-                  key={row.id}
-                  id={`booking-row-${row.id}`}
-                  className={`border-t border-[#F3F4F6] dark:border-white/10 ${
-                    row.highlight
-                      ? "bg-primary/5 ring-2 ring-inset ring-primary/40"
-                      : ""
-                  }`}
-                >
-                  <td className="whitespace-nowrap py-4 pr-4 align-top text-sm text-text-secondary">
-                    {row.dateCol}
-                  </td>
-                  <td className="py-4 pr-4 align-top">
-                    <div className="flex gap-3">
-                      {row.avatarUrl ? (
-                        <Image
-                          src={row.avatarUrl}
-                          alt=""
-                          width={40}
-                          height={40}
-                          className="size-10 shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
-                        />
-                      ) : null}
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-text-primary">
-                          {row.title}
-                        </p>
-                        <p className="mt-1 text-sm leading-snug text-text-secondary">
-                          {row.subtitle}
-                        </p>
-                      </div>
+                <div className="flex gap-3">
+                  {row.avatarUrl ? (
+                    <Image
+                      src={row.avatarUrl}
+                      alt=""
+                      width={40}
+                      height={40}
+                      className="size-10 shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
+                    />
+                  ) : null}
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-text-tertiary">
+                        {colA}
+                      </p>
+                      <p className="mt-0.5 text-sm text-text-secondary">
+                        {row.dateCol}
+                      </p>
                     </div>
-                  </td>
-                  <td className="py-4 pr-4 align-top">
-                    <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center">
-                      <BookingStatusPill variant={row.pillVariant}>
-                        {row.pillLabel}
-                      </BookingStatusPill>
-                      {row.reported ? (
-                        <span className="inline-flex w-fit items-center rounded-full bg-[#374151] px-2 py-0.5 text-[11px] font-medium text-white dark:bg-white/15 dark:text-white">
-                          Reported
-                        </span>
-                      ) : null}
-                    </div>
-                  </td>
-                  {actionsColumnLabel ? (
-                    <td className="py-4 align-top">
+                    <p className="text-pretty text-[0.9375rem] font-semibold leading-snug tracking-tight text-text-primary">
+                      {row.title}
+                    </p>
+                    <div className="min-w-0 max-w-full">{row.subtitle}</div>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-text-tertiary">
+                    {colC}
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap gap-2">
+                    <BookingStatusPill variant={row.pillVariant}>
+                      {row.pillLabel}
+                    </BookingStatusPill>
+                    {row.reported ? (
+                      <span className="inline-flex w-fit items-center rounded-full bg-[#374151] px-2 py-0.5 text-[11px] font-medium text-white dark:bg-white/15 dark:text-white">
+                        Reported
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                {actionsColumnLabel ? (
+                  <div className="mt-4 border-t border-border pt-3 dark:border-white/10">
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-text-tertiary">
+                      {actionsColumnLabel}
+                    </p>
+                    <div
+                      className={
+                        "flex min-w-0 flex-col gap-2 " +
+                        "[&>a]:inline-flex [&>a]:w-full [&>a]:shrink-0 [&>a]:justify-center [&>button]:w-full " +
+                        "[&>div]:w-full [&>div]:min-w-0 [&>div]:max-w-full [&>div]:flex-col [&>div]:gap-2 " +
+                        "[&>div>a]:inline-flex [&>div>a]:w-full [&>div>a]:justify-center [&>div>button]:w-full " +
+                        "[&>span]:block [&>span]:max-w-full [&>span]:text-pretty"
+                      }
+                    >
                       {row.actionsSlot ?? (
                         <span className="text-xs text-text-tertiary">—</span>
                       )}
-                    </td>
-                  ) : null}
+                    </div>
+                  </div>
+                ) : null}
+              </article>
+            ))
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
+          <table
+            className={`w-full border-collapse text-left ${actionsColumnLabel ? "min-w-[720px]" : "min-w-[560px]"}`}
+          >
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                  className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+                >
+                  {colA}
+                </th>
+                <th
+                  scope="col"
+                  className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+                >
+                  {colB}
+                </th>
+                <th
+                  scope="col"
+                  className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+                >
+                  {colC}
+                </th>
+                {actionsColumnLabel ? (
+                  <th
+                    scope="col"
+                    className="pb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+                  >
+                    {actionsColumnLabel}
+                  </th>
+                ) : null}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={colCount}
+                    className="py-10 text-center text-sm text-text-secondary"
+                  >
+                    {tableEmptyMessage}
+                  </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                paginatedRows.map((row) => (
+                  <tr
+                    key={row.id}
+                    data-booking-row-id={row.id}
+                    className={`border-t border-[#F3F4F6] dark:border-white/10 ${bookingRowHighlightClass(row.highlight)}`}
+                  >
+                    <td className="whitespace-nowrap py-4 pr-4 align-top text-sm text-text-secondary">
+                      {row.dateCol}
+                    </td>
+                    <td className="py-4 pr-4 align-top">
+                      <div className="flex gap-3">
+                        {row.avatarUrl ? (
+                          <Image
+                            src={row.avatarUrl}
+                            alt=""
+                            width={40}
+                            height={40}
+                            className="size-10 shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
+                          />
+                        ) : null}
+                        <div className="min-w-0 flex-1 space-y-1.5">
+                          <p className="text-pretty text-[0.9375rem] font-semibold leading-snug tracking-tight text-text-primary sm:text-sm">
+                            {row.title}
+                          </p>
+                          <div className="mt-1.5 max-w-xl min-w-0">
+                            {row.subtitle}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 pr-4 align-top">
+                      <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center">
+                        <BookingStatusPill variant={row.pillVariant}>
+                          {row.pillLabel}
+                        </BookingStatusPill>
+                        {row.reported ? (
+                          <span className="inline-flex w-fit items-center rounded-full bg-[#374151] px-2 py-0.5 text-[11px] font-medium text-white dark:bg-white/15 dark:text-white">
+                            Reported
+                          </span>
+                        ) : null}
+                      </div>
+                    </td>
+                    {actionsColumnLabel ? (
+                      <td className="max-w-[min(100%,22rem)] py-4 align-top">
+                        <div className="min-w-0">
+                          {row.actionsSlot ?? (
+                            <span className="text-xs text-text-tertiary">—</span>
+                          )}
+                        </div>
+                      </td>
+                    ) : null}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
       {hasRows ? (
         <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-[#F9FAFB] px-3 py-3 dark:border-white/10 dark:bg-white/6 sm:flex-row sm:items-center sm:justify-between sm:px-4">
@@ -320,9 +395,7 @@ function BookingsRowsTable({
                 <PaginationNext
                   aria-label="Next page"
                   disabled={safePage >= totalPages}
-                  onClick={() =>
-                    setPage((p) => Math.min(totalPages, p + 1))
-                  }
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 />
               </PaginationItem>
             </PaginationContent>
@@ -352,8 +425,7 @@ function BookingsTabBody({
 
   const bannerBeforeSummaries =
     panelBanner && !bannerInListCard ? panelBanner : null;
-  const bannerInsideCard =
-    panelBanner && bannerInListCard ? panelBanner : null;
+  const bannerInsideCard = panelBanner && bannerInListCard ? panelBanner : null;
 
   return (
     <div className="flex flex-col gap-3">
@@ -386,7 +458,9 @@ function BookingsTabBody({
           className={`text-sm font-semibold text-text-primary sm:text-base ${listEyebrow || bannerInsideCard ? "mt-3" : ""}`}
         >
           {mainListTitle}{" "}
-          <span className="font-medium text-text-tertiary">({mainListCount})</span>
+          <span className="font-medium text-text-tertiary">
+            ({mainListCount})
+          </span>
         </h2>
         <BookingsRowsTable
           key={rowIdsKey}
@@ -429,9 +503,7 @@ export function BookingsShellSkeleton({
             <div
               key={`sk-tab-${i}`}
               className={`min-w-0 flex-1 rounded-lg py-2.5 text-center text-sm ${
-                i === 0
-                  ? "bg-white dark:bg-[#1a1a22]"
-                  : "text-text-secondary"
+                i === 0 ? "bg-white dark:bg-[#1a1a22]" : "text-text-secondary"
               }`}
             >
               {label}

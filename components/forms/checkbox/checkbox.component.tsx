@@ -1,7 +1,6 @@
 "use client";
 
 import classNames from "classnames";
-import { Check } from "lucide-react";
 import {
   type ChangeEvent,
   type DetailedHTMLProps,
@@ -78,7 +77,10 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               ref={ref}
               type="checkbox"
               className={classNames(
-                "mt-0.5 shrink-0 w-4 h-4 rounded  text-primary accent-primary focus:ring-0 focus:ring-primary/20 focus:ring-offset-0 outline-none",
+                "mt-0.5 size-4 shrink-0 cursor-[inherit] rounded border border-border bg-bg-primary accent-primary",
+                "text-primary outline-none transition-colors",
+                "focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0a0a0a]",
+                "disabled:opacity-60 dark:border-white/20 dark:bg-[#1a1a22]",
                 checkboxClassName,
                 className,
               )}
@@ -91,7 +93,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             />
             <span
               className={classNames(
-                "text-xs font-medium text-[#100F14] select-none leading-snug",
+                "select-none text-xs font-medium leading-snug text-text-primary",
                 labelClassName,
               )}
             >
@@ -99,7 +101,9 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             </span>
           </label>
           {error ? (
-            <span className="text-red-500 text-[10px]">{error}</span>
+            <span className="text-[10px] text-red-600 dark:text-red-400">
+              {error}
+            </span>
           ) : null}
         </div>
       </div>

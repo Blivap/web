@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { $api } from "@/app/api";
 import {
   getApiMessageFromData,
@@ -12,9 +11,12 @@ import {
 import { parseMeetupEnsureSessionBody } from "@/lib/meetups/parseMeetupResponses";
 import {
   meetupBookingCodeStashKey,
+  meetupChatBookingStashKey,
   meetupCodeHintStorageKey,
   meetupOtqrStorageKey,
 } from "@/lib/meetups/meetupSessionStorageKeys";
+import { routes } from "@/config/routes";
+import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
 
 export function MeetupBootstrapClient() {
   const router = useRouter();
@@ -23,6 +25,12 @@ export function MeetupBootstrapClient() {
   const [error, setError] = useState<string | null>(null);
 
   const missingBooking = !bookingId;
+
+  useEffect(() => {
+    if (missingBooking) {
+      router.replace(routes.bookings);
+    }
+  }, [missingBooking, router]);
 
   useEffect(() => {
     if (missingBooking) return;
@@ -67,6 +75,10 @@ export function MeetupBootstrapClient() {
               codeHint,
             );
           }
+          sessionStorage.setItem(
+            meetupChatBookingStashKey(parsed.sessionId),
+            bookingId,
+          );
         } catch {
           /* storage blocked */
         }
@@ -86,19 +98,7 @@ export function MeetupBootstrapClient() {
   }, [bookingId, missingBooking, router]);
 
   if (missingBooking) {
-    return (
-      <div className="mx-auto max-w-md rounded-xl border border-border bg-white p-6 text-center dark:border-white/10 dark:bg-[#1a1a22]">
-        <p className="text-sm text-text-primary">
-          This link is missing a booking id.
-        </p>
-        <Link
-          href="/bookings"
-          className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
-        >
-          Back to bookings
-        </Link>
-      </div>
-    );
+    return <MeetupPageSkeleton />;
   }
 
   if (error) {
@@ -106,7 +106,7 @@ export function MeetupBootstrapClient() {
       <div className="mx-auto max-w-md rounded-xl border border-border bg-white p-6 text-center dark:border-white/10 dark:bg-[#1a1a22]">
         <p className="text-sm text-text-primary">{error}</p>
         <Link
-          href="/bookings"
+          href={routes.bookings}
           className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
         >
           Back to bookings
@@ -115,10 +115,5 @@ export function MeetupBootstrapClient() {
     );
   }
 
-  return (
-    <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 text-text-secondary">
-      <Loader2 className="size-8 animate-spin text-primary" aria-hidden />
-      <p className="text-sm">Opening meetup…</p>
-    </div>
-  );
+  return <MeetupPageSkeleton />;
 }

@@ -1,6 +1,45 @@
 import type { Booking, BookingStatus } from "@/types/bookings";
 import type { BookingPillVariant } from "@/app/(users)/bookings/components/booking-status-pill";
 
+const SHORT_ID_LEN = 6;
+
+function shortIdLabel(prefix: string, id: string | undefined | null): string {
+  const t = id?.trim() ?? "";
+  if (!t) return `${prefix} —`;
+  const frag = t.length > SHORT_ID_LEN ? `${t.slice(0, SHORT_ID_LEN)}…` : t;
+  return `${prefix} ${frag}`;
+}
+
+/** Anonymous donor row: show only the first 6 characters of `donorUserId` (no prefix). */
+function donorIdSnippet(donorUserId: string | undefined | null): string {
+  const t = donorUserId?.trim() ?? "";
+  if (!t) return "—";
+  return t.slice(0, SHORT_ID_LEN);
+}
+
+export type BookingRowDetailParts = {
+  who: string;
+  hospital: string;
+  when: string;
+};
+
+export function bookingRowDetailPartsForViewer(
+  b: Booking,
+  viewer: "donor" | "requester",
+  hospitalFallback: string,
+): BookingRowDetailParts {
+  const when = formatScheduledLabel(b.scheduledAt);
+  const hospital = b.hospitalName?.trim() || hospitalFallback;
+  if (viewer === "donor") {
+    const who =
+      b.requesterDisplayName?.trim() ||
+      shortIdLabel("Requester", b.requesterId);
+    return { who, hospital, when };
+  }
+  const who = b.donorDisplayName?.trim() || donorIdSnippet(b.donorUserId);
+  return { who, hospital, when };
+}
+
 export function formatScheduledLabel(iso: string): string {
   try {
     const d = new Date(iso);
@@ -60,30 +99,14 @@ export function bookingSubtitleDonor(
   b: Booking,
   hospitalFallback: string,
 ): string {
-  const when = formatScheduledLabel(b.scheduledAt);
-  const hospital = b.hospitalName?.trim() || hospitalFallback;
-  const who =
-    b.requesterDisplayName?.trim() ||
-    `Requester ${b.requesterId.slice(0, 8)}…`;
-  const base = `${who} · ${hospital} · ${when}`;
-  if (b.status === "accepted" && b.meetingCode) {
-    return `${base} · Meeting code: ${b.meetingCode}`;
-  }
-  return base;
+  const p = bookingRowDetailPartsForViewer(b, "donor", hospitalFallback);
+  return `${p.who} · ${p.hospital} · ${p.when}`;
 }
 
 export function bookingSubtitleRequester(
   b: Booking,
   hospitalFallback: string,
 ): string {
-  const when = formatScheduledLabel(b.scheduledAt);
-  const hospital = b.hospitalName?.trim() || hospitalFallback;
-  const donor =
-    b.donorDisplayName?.trim() ||
-    `Donor ${b.donorUserId.slice(0, 8)}…`;
-  const base = `${donor} · ${hospital} · ${when}`;
-  if (b.status === "accepted" && b.meetingCode) {
-    return `${base} · Meeting code: ${b.meetingCode}`;
-  }
-  return base;
+  const p = bookingRowDetailPartsForViewer(b, "requester", hospitalFallback);
+  return `${p.who} · ${p.hospital} · ${p.when}`;
 }

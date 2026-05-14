@@ -25,6 +25,18 @@ export const endpoints = {
     location: "/donors/location",
     me: "/donors/me",
     public: (userId: string) => `/donors/public/${userId}`,
+    /** Clinical / intent profile (JWT). Optional for POST /donors/request-activation. */
+    screeningProfile: "/donors/screening-profile",
+  },
+
+  /** Per–donation-type AI questionnaire (JWT). Does not gate activation. */
+  questionnaire: {
+    generate: "/questionnaire/generate",
+    mine: "/questionnaire/my",
+    answer: (questionnaireId: string) =>
+      `/questionnaire/${encodeURIComponent(questionnaireId)}/answer`,
+    regenerate: (questionnaireId: string) =>
+      `/questionnaire/${encodeURIComponent(questionnaireId)}/regenerate`,
   },
 
   matching: {

@@ -23,27 +23,96 @@ function coerceArray(raw: unknown): unknown[] {
   return [];
 }
 
+/**
+ * Socket.io may emit a bare record, `{ data }`, `{ message }`, JSON string, or a batch array.
+ */
+export function extractSocketChatPayloads(raw: unknown): unknown[] {
+  if (raw == null) return [];
+  if (typeof raw === "string") {
+    try {
+      return extractSocketChatPayloads(JSON.parse(raw));
+    } catch {
+      return [];
+    }
+  }
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw !== "object") return [];
+  const root = unwrapApiRecord(raw) ?? (raw as Record<string, unknown>);
+  if (Array.isArray(root.messages)) return root.messages;
+  if (Array.isArray(root.items)) return root.items;
+  if (Array.isArray(root.data)) return root.data;
+  if (
+    root.message &&
+    typeof root.message === "object" &&
+    !Array.isArray(root.message)
+  ) {
+    return [root.message];
+  }
+  if (root.payload !== undefined) {
+    return extractSocketChatPayloads(root.payload);
+  }
+  return [root];
+}
+
+function simpleStableId(parts: string[]): string {
+  const s = parts.join("|");
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  }
+  return `chat-${Math.abs(h).toString(36)}`;
+}
+
 /** Maps one message record from REST or socket payloads. */
 export function parseDonationChatMessageRecord(
   raw: unknown,
 ): DonationChatMessage | null {
   if (!raw || typeof raw !== "object") return null;
   const r = unwrapApiRecord(raw) ?? (raw as Record<string, unknown>);
-  const id = pickString(r.id ?? r._id ?? r.messageId);
-  if (!id) return null;
-  const text =
+  const textRaw =
     pickString(r.text ?? r.body ?? r.content ?? r.message) ?? "";
+  const text = textRaw.trim();
+  if (!text) return null;
+
+  const id =
+    pickString(
+      r.id ??
+        r._id ??
+        r.messageId ??
+        r.message_id ??
+        r.uuid ??
+        r.publicId ??
+        r.public_id,
+    ) ?? null;
+
   const roleLabel = pickString(
     r.roleLabel ?? r.role_label ?? r.senderRole ?? r.sender_role,
   );
   const kind = pickString(r.kind ?? r.type ?? r.messageType) ?? undefined;
   const senderUserId = pickString(
-    r.senderUserId ?? r.sender_user_id ?? r.userId ?? r.user_id,
+    r.senderUserId ??
+      r.sender_user_id ??
+      r.userId ??
+      r.user_id ??
+      r.fromUserId ??
+      r.from_user_id,
   );
+  const createdAt =
+    pickString(r.createdAt ?? r.created_at ?? r.timestamp ?? r.sentAt) ??
+    undefined;
+
+  const resolvedId =
+    id ??
+    simpleStableId([
+      createdAt ?? "",
+      senderUserId ?? "",
+      text.slice(0, 200),
+    ]);
+
   return {
-    id,
+    id: resolvedId,
     text,
-    createdAt: pickString(r.createdAt ?? r.created_at) ?? undefined,
+    ...(createdAt ? { createdAt } : {}),
     ...(roleLabel ? { roleLabel } : {}),
     ...(kind ? { kind } : {}),
     ...(senderUserId ? { senderUserId } : {}),

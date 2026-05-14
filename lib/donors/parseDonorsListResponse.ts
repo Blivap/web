@@ -4,9 +4,18 @@ import {
   type Donor,
 } from "@/app/(users)/donors/donors.data";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
+import type { DonorPublicScreening } from "@/types/donors";
+import { parseDonorPublicScreening } from "@/lib/donors/parseDonorPublicScreening";
 
 export type DonorDetail = Donor & {
   profileImageUrl?: string | null;
+  /** 0–100 from API when present. */
+  reliabilityScore?: number;
+  completedBookings?: number;
+  successfulDonationCount?: number;
+  isActiveDonor?: boolean;
+  /** AI / typed screening summary when present on GET /donors/:id */
+  screening?: DonorPublicScreening | null;
 };
 
 const VALID_BLOOD = new Set(
@@ -126,22 +135,38 @@ export function parseDonorRecord(raw: unknown): Donor | null {
 
   const { location, country } = areaStringsFromRecord(merged);
 
+  const rawRating = pickNumber(merged.rating ?? merged.averageRating, 0);
+  const reliabilityRaw = pickNumber(merged.reliabilityScore, -1);
+  const rating =
+    rawRating > 0
+      ? Math.min(5, rawRating)
+      : reliabilityRaw >= 0
+        ? Math.min(5, reliabilityRaw / 20)
+        : 0;
+
+  const donations = Math.max(
+    0,
+    Math.round(
+      pickNumber(
+        merged.successfulDonationCount ??
+          merged.donations ??
+          merged.donationCount ??
+          merged.donation_count,
+      ),
+    ),
+  );
+
   return {
     id,
     bloodType,
     location,
     country,
-    packs: Math.max(0, Math.round(pickNumber(merged.packs ?? merged.packCount))),
-    rating: Math.max(
+    packs: Math.max(
       0,
-      pickNumber(merged.rating ?? merged.averageRating, 0),
+      Math.round(pickNumber(merged.packs ?? merged.packCount ?? merged.completedBookings)),
     ),
-    donations: Math.max(
-      0,
-      Math.round(
-        pickNumber(merged.donations ?? merged.donationCount ?? merged.donation_count),
-      ),
-    ),
+    rating,
+    donations,
   };
 }
 
@@ -178,10 +203,32 @@ export function parseDonorDetailResponse(body: unknown): DonorDetail | null {
       : null;
   const merged = mergeRecords(candidate, user);
   const profileImageUrl = pickProfileImageUrl(merged);
+  const reliabilityRaw = pickNumber(merged.reliabilityScore, -1);
+  const completedBookings = Math.max(
+    0,
+    Math.round(pickNumber(merged.completedBookings)),
+  );
+  const successfulDonationCount = Math.max(
+    0,
+    Math.round(
+      pickNumber(merged.successfulDonationCount, donor.donations),
+    ),
+  );
+
+  const screening = parseDonorPublicScreening(
+    merged.screening ?? merged.publicScreening,
+  );
 
   return {
     ...donor,
     ...(profileImageUrl ? { profileImageUrl } : {}),
+    ...(reliabilityRaw >= 0 ? { reliabilityScore: reliabilityRaw } : {}),
+    completedBookings,
+    successfulDonationCount,
+    ...(typeof merged.isActiveDonor === "boolean"
+      ? { isActiveDonor: merged.isActiveDonor }
+      : {}),
+    ...(screening ? { screening } : {}),
   };
 }
 

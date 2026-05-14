@@ -77,7 +77,9 @@ export function DonorBasicsStep({
           <p className="text-sm text-text-secondary max-w-[600px]">
             First we register your donor profile with your blood type. Add where
             you are based with detailed location information. This is required
-            and used to match recipients with nearby donors.
+            and used to match recipients with nearby donors. Next you&apos;ll
+            optionally set your screening profile (biology and donation intent),
+            then the legacy blood questionnaire required for activation.
           </p>
         </div>
 

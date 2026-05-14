@@ -1,13 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ArrowLeft,
   CheckCircle2,
-  Loader2,
+  CircleDashed,
+  HelpCircle,
   MessageCircle,
+  ShieldAlert,
   ShieldCheck,
+  UserRound,
 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { useDonationChat } from "@/hooks/chat/useDonationChat.hook";
@@ -18,12 +28,14 @@ import {
   loadSentBookings,
 } from "@/store/slices/bookingsSlice";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
-import type { MeetupReportPayload } from "@/types/meetups";
+import type { MeetupParticipant, MeetupReportPayload } from "@/types/meetups";
 import {
+  meetupChatBookingStashKey,
   meetupCodeHintStorageKey,
   meetupOtqrStorageKey,
 } from "@/lib/meetups/meetupSessionStorageKeys";
 import { MeetupReportModal } from "./meetup-report-modal.component";
+import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
 
 const cardClass =
   "rounded-xl border border-border bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#1a1a22]";
@@ -52,8 +64,164 @@ function formatShortDate(iso: string | null | undefined): string {
   }
 }
 
+type PlatformIdStatus = "verified" | "not_verified" | "unknown";
+
+function platformIdStatus(v: boolean | undefined): PlatformIdStatus {
+  if (v === true) return "verified";
+  if (v === false) return "not_verified";
+  return "unknown";
+}
+
+function MeetupVerificationRow({
+  label,
+  description,
+  status,
+}: {
+  label: string;
+  description: string;
+  status: "done" | "pending" | "issue" | "unknown";
+}) {
+  const config = {
+    done: {
+      Icon: CheckCircle2,
+      chip: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/55 dark:text-emerald-100",
+      text: "Done",
+    },
+    pending: {
+      Icon: CircleDashed,
+      chip: "bg-amber-100 text-amber-950 dark:bg-amber-950/45 dark:text-amber-100",
+      text: "Still needed",
+    },
+    issue: {
+      Icon: ShieldAlert,
+      chip: "bg-amber-100 text-amber-950 dark:bg-amber-950/45 dark:text-amber-100",
+      text: "Not verified",
+    },
+    unknown: {
+      Icon: HelpCircle,
+      chip: "bg-[#F3F4F6] text-text-secondary dark:bg-white/12 dark:text-white/85",
+      text: "Not shown",
+    },
+  } as const;
+
+  const { Icon, chip, text } = config[status];
+
+  return (
+    <div className="flex items-start justify-between gap-3 rounded-lg border border-border/80 bg-white/80 px-3 py-2.5 dark:border-white/12 dark:bg-[#2a2a34]">
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">
+          {label}
+        </p>
+        <p className="mt-0.5 text-[13px] leading-snug text-text-secondary dark:text-white/75">
+          {description}
+        </p>
+      </div>
+      <span
+        className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${chip}`}
+      >
+        <Icon className="size-3.5 shrink-0" aria-hidden />
+        {text}
+      </span>
+    </div>
+  );
+}
+
+function MeetupParticipantVerificationCard({
+  title,
+  participant,
+  emphasize,
+}: {
+  title: string;
+  participant: MeetupParticipant;
+  emphasize?: boolean;
+}) {
+  const pid = platformIdStatus(participant.identityVerified);
+  const platformRowStatus: "done" | "pending" | "issue" | "unknown" =
+    pid === "verified" ? "done" : pid === "not_verified" ? "issue" : "unknown";
+  const meetupRowStatus = participant.meetupVerified ? "done" : "pending";
+
+  return (
+    <div
+      className={`flex flex-col gap-2 rounded-xl border p-3 ${
+        emphasize
+          ? "border-primary/35 bg-primary/4 ring-1 ring-primary/15 dark:border-primary/30 dark:bg-primary/10"
+          : "border-border bg-[#FAFAFA] dark:border-white/10 dark:bg-white/3"
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <UserRound
+          className={`size-4 shrink-0 ${emphasize ? "text-primary" : "text-text-tertiary dark:text-white/70"}`}
+          aria-hidden
+        />
+        <p className="text-sm font-semibold text-text-primary">{title}</p>
+        {participant.role ? (
+          <span className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-text-tertiary ring-1 ring-border dark:bg-[#2e2e38] dark:text-white/70 dark:ring-white/12">
+            {participant.role}
+          </span>
+        ) : null}
+      </div>
+      <div className="flex flex-col gap-2">
+        <MeetupVerificationRow
+          label="Platform identity"
+          description="Government ID (NIN) on file with Blivap before the meetup."
+          status={platformRowStatus}
+        />
+        <MeetupVerificationRow
+          label="This meetup"
+          description="In-person check: code or QR used at the donation meetup."
+          status={meetupRowStatus}
+        />
+      </div>
+    </div>
+  );
+}
+
+function MeetupVerificationSummary({
+  me,
+  peer,
+}: {
+  me: MeetupParticipant;
+  peer: MeetupParticipant;
+}) {
+  return (
+    <div className="mt-4 border-t border-border pt-4 dark:border-white/10">
+      <div className="flex items-start gap-2">
+        <ShieldCheck
+          className="mt-0.5 size-4 shrink-0 text-primary"
+          aria-hidden
+        />
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold text-text-primary">
+            Who is verified?
+          </h3>
+          <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+            <span className="font-medium text-text-primary">
+              Two separate checks:
+            </span>{" "}
+            your account ID on the platform, then the in-person step for{" "}
+            <span className="whitespace-nowrap">this session only</span>.
+          </p>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <MeetupParticipantVerificationCard
+          title="You"
+          participant={me}
+          emphasize
+        />
+        <MeetupParticipantVerificationCard
+          title="Other person"
+          participant={peer}
+        />
+      </div>
+    </div>
+  );
+}
+
 function normalizeSixDigitCode(raw: string | null | undefined): string | null {
-  const d = String(raw ?? "").replace(/\D/g, "").slice(0, 12);
+  const d = String(raw ?? "")
+    .replace(/\D/g, "")
+    .slice(0, 12);
   return d.length === 6 ? d : null;
 }
 
@@ -89,6 +257,21 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const [chatDraft, setChatDraft] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  /** Booking Mongo id stashed in bootstrap when opening from a booking row (fallback if GET session omits `bookingId`). */
+  const [stashedChatBookingId, setStashedChatBookingId] = useState<
+    string | null
+  >(null);
+
+  useEffect(() => {
+    try {
+      const v = sessionStorage
+        .getItem(meetupChatBookingStashKey(sessionId))
+        ?.trim();
+      setStashedChatBookingId(v && v.length > 0 ? v : null);
+    } catch {
+      setStashedChatBookingId(null);
+    }
+  }, [sessionId]);
 
   const {
     session,
@@ -107,14 +290,23 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     reportBusy,
   } = useMeetupSession(sessionId);
 
-  const donationId = session?.bookingId;
+  /**
+   * Booking `_id` from the API — this is `donationId` for `/chat` (Socket.IO + REST).
+   * It must never be the meetup session id.
+   */
+  const donationChatBookingId =
+    session?.bookingId ?? stashedChatBookingId ?? undefined;
   const donationChatEnabled =
-    sessionLoad === "ok" && Boolean(donationId) && Boolean(token);
+    sessionLoad === "ok" &&
+    session?.chatEnabled !== false &&
+    Boolean(donationChatBookingId) &&
+    Boolean(token);
 
   const donationChat = useDonationChat({
-    donationId,
+    donationId: donationChatBookingId,
     accessToken: token,
     enabled: donationChatEnabled,
+    viewerUserId: user?.id,
   });
 
   const isRequester = useMemo(
@@ -130,6 +322,25 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       return a.id.localeCompare(b.id);
     });
   }, [donationChat.messages]);
+
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+  const lastChatMessageIdRef = useRef<string | null>(null);
+  const newestChatMessageId =
+    sortedChatMessages.length > 0
+      ? sortedChatMessages[sortedChatMessages.length - 1]!.id
+      : null;
+
+  useLayoutEffect(() => {
+    const el = chatScrollRef.current;
+    if (!newestChatMessageId) {
+      lastChatMessageIdRef.current = null;
+      return;
+    }
+    if (lastChatMessageIdRef.current === newestChatMessageId) return;
+    lastChatMessageIdRef.current = newestChatMessageId;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [newestChatMessageId]);
 
   const displayMeetingCode = useMemo(() => {
     return (
@@ -179,8 +390,8 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       return;
     }
     showSnackbar("Your donation confirmation was recorded.");
-    void dispatch(loadSentBookings());
-    void dispatch(loadReceivedBookings());
+    void dispatch(loadSentBookings({ silent: true }));
+    void dispatch(loadReceivedBookings({ silent: true }));
   }, [user, confirmDonation, showSnackbar, dispatch]);
 
   const onSendChat = useCallback(async () => {
@@ -246,14 +457,18 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
   const chatStatusLine = useMemo(() => {
     if (sessionLoad !== "ok") return null;
-    if (!donationId) {
-      return "Chat will appear when this meetup is linked to your booking (refresh if this persists).";
+    if (session?.chatEnabled === false) {
+      return "Donation chat opens after this booking is accepted. Meetup verify / confirm flows use /meetups only — they do not carry chat messages.";
+    }
+    if (!donationChatBookingId) {
+      return "Chat needs your booking id (same value as in /chat/:donationId). Refresh or open meetup again from the booking row if this stays empty.";
     }
     if (!token) return "Sign in again to use donation chat.";
     if (donationChat.roomClosed) {
-      return donationChat.roomCloseReason
-        ? `Chat closed: ${donationChat.roomCloseReason}`
-        : "This donation chat is closed — the thread is read-only.";
+      return (
+        donationChat.roomCloseReason?.trim() ||
+        "This donation chat is closed — you cannot send new messages."
+      );
     }
     if (!donationChat.socketConnected && donationChatEnabled) {
       return "Connecting to live chat…";
@@ -262,7 +477,8 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     return null;
   }, [
     sessionLoad,
-    donationId,
+    session?.chatEnabled,
+    donationChatBookingId,
     token,
     donationChat.roomClosed,
     donationChat.roomCloseReason,
@@ -271,13 +487,49 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     donationChat.historyError,
   ]);
 
+  const donationChatStatusBadge = useMemo(() => {
+    if (sessionLoad !== "ok" || !donationChatBookingId || !token) return null;
+    if (donationChat.roomClosed) {
+      return {
+        label: "Closed",
+        className:
+          "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/45 dark:text-amber-100",
+      } as const;
+    }
+    if (donationChat.historyError) {
+      return {
+        label: "Error",
+        className:
+          "border-red-200 bg-red-50 text-red-900 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-100",
+      } as const;
+    }
+    if (!donationChat.socketConnected && donationChatEnabled) {
+      return {
+        label: "Connecting",
+        className:
+          "border-border bg-[#F3F4F6] text-text-secondary dark:border-white/10 dark:bg-white/8 dark:text-text-secondary",
+      } as const;
+    }
+    if (donationChat.socketConnected) {
+      return {
+        label: "Live",
+        className:
+          "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/45 dark:text-emerald-100",
+      } as const;
+    }
+    return null;
+  }, [
+    sessionLoad,
+    donationChatBookingId,
+    token,
+    donationChat.roomClosed,
+    donationChat.historyError,
+    donationChat.socketConnected,
+    donationChatEnabled,
+  ]);
+
   if (sessionLoad === "loading" || sessionLoad === "idle") {
-    return (
-      <div className="flex min-h-[240px] flex-col items-center justify-center gap-3 text-text-secondary">
-        <Loader2 className="size-8 animate-spin text-primary" aria-hidden />
-        <p className="text-sm">Loading meetup…</p>
-      </div>
-    );
+    return <MeetupPageSkeleton />;
   }
 
   if (sessionLoad === "error" || !session) {
@@ -298,14 +550,14 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex flex-col gap-6">
       <div>
         <Link
           href="/bookings"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
         >
           <ArrowLeft className="size-4" aria-hidden />
-          Back to bookings
+          Back
         </Link>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight text-text-primary">
           Donation meetup
@@ -323,8 +575,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         >
           <span className="font-medium">Verify your NIN</span>
           {" · "}
-          National ID verification is required before you can use meetup tools.
-          {" "}
+          National ID verification is required before you can use meetup tools.{" "}
           <Link href="/verify-id" className="font-medium underline">
             Go to verification
           </Link>
@@ -363,49 +614,19 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
           ) : null}
         </div>
 
-        <div className="mt-4 grid gap-3 border-t border-border pt-4 dark:border-white/10">
-          <div className="flex items-start gap-2 text-sm">
-            <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-            <div>
-              <p className="font-medium text-text-primary">You</p>
-              <p className="text-text-secondary">
-                Identity verified:{" "}
-                {session.me.identityVerified ? "Yes" : "Not shown / no"}
-                {" · "}
-                At meetup:{" "}
-                {session.me.meetupVerified ? "Verified" : "Not yet verified"}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2 text-sm">
-            <ShieldCheck className="mt-0.5 size-4 shrink-0 text-text-tertiary" aria-hidden />
-            <div>
-              <p className="font-medium text-text-primary">Other party</p>
-              <p className="text-text-secondary">
-                Identity verified:{" "}
-                {session.peer.identityVerified ? "Yes" : "Not shown / no"}
-                {" · "}
-                At meetup:{" "}
-                {session.peer.meetupVerified ? "Verified" : "Not yet verified"}
-              </p>
-            </div>
-          </div>
-        </div>
+        <MeetupVerificationSummary me={session.me} peer={session.peer} />
       </section>
 
       {ninOk && displayMeetingCode && !readOnly ? (
         <section className={cardClass}>
           <h2 className="text-sm font-semibold text-text-primary">
-            Share the code as a QR
+            Share as QR (optional)
           </h2>
           <p className="mt-1 text-xs text-text-secondary">
-            The other person can scan this to read the six digits, then both of you
-            use &quot;Verify code&quot; with the same number. (This is only the
-            meeting digits — not the rare one-time server token used under
-            &quot;Verify from QR&quot;.)
-          </p>
-          <p className="mt-3 text-center font-mono text-xl font-semibold tracking-[0.35em] text-text-primary">
-            {displayMeetingCode}
+            The six-digit meeting code is sent in your Blivap notifications
+            only, not shown here. The other person can scan this QR to read the
+            same digits on their device, or you can both open your notifications
+            and enter the code under &quot;Verify code&quot; below.
           </p>
           <div className="mt-4 flex justify-center rounded-lg bg-white p-4 dark:bg-white">
             <QRCode value={displayMeetingCode} size={180} level="M" />
@@ -434,8 +655,8 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             Verify at the hospital
           </h2>
           <p className="mt-1 text-xs text-text-secondary">
-            Either both of you enter the same six-digit code, or one person scans
-            the other&apos;s one-time QR (first successful scan wins).
+            Either both of you enter the same six-digit code, or one person
+            scans the other&apos;s one-time QR (first successful scan wins).
           </p>
 
           {showCodePath ? (
@@ -449,7 +670,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   maxLength={6}
-                  className={`${inputClass} max-w-[11rem] font-mono tracking-widest`}
+                  className={`${inputClass} max-w-44 font-mono tracking-widest`}
                   placeholder="000000"
                   value={codeInput}
                   onChange={(e) =>
@@ -556,14 +777,21 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
       <section className={cardClass}>
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <MessageCircle className="size-4 text-primary" aria-hidden />
             <h2 className="text-sm font-semibold text-text-primary">
               Donation chat
             </h2>
+            {donationChatStatusBadge ? (
+              <span
+                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${donationChatStatusBadge.className}`}
+              >
+                {donationChatStatusBadge.label}
+              </span>
+            ) : null}
           </div>
           {ninOk &&
-          donationId &&
+          donationChatBookingId &&
           !readOnly &&
           !donationChat.roomClosed &&
           !donationChat.arrivedRecorded ? (
@@ -583,14 +811,20 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
           ) : null}
         </div>
         <p className="mt-1 text-xs text-text-secondary">
-          Live messages use the server chat channel (not meetup REST). Pending
-          bookings have no room until the donor accepts.
+          Live messages use Socket.IO{" "}
+          <span className="font-mono text-[11px]">/chat</span> with your{" "}
+          <strong className="font-medium text-text-primary">booking id</strong>{" "}
+          (not the session id in this page URL). There is no meetup HTTP API for
+          chat; verify code / QR / complete stay on /meetups.
         </p>
         {chatStatusLine ? (
           <p className="mt-2 text-xs text-text-secondary">{chatStatusLine}</p>
         ) : null}
         {donationChat.sendError ? (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400" role="alert">
+          <p
+            className="mt-2 text-sm text-red-600 dark:text-red-400"
+            role="alert"
+          >
             {donationChat.sendError}
           </p>
         ) : null}
@@ -599,7 +833,10 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             {donationChat.typingLabel} is typing…
           </p>
         ) : null}
-        <div className="mt-3 max-h-64 space-y-2 overflow-y-auto rounded-lg border border-border bg-[#FAFAFB] p-3 dark:border-white/10 dark:bg-black/20">
+        <div
+          ref={chatScrollRef}
+          className="mt-3 max-h-64 space-y-2 overflow-y-auto rounded-lg border border-border bg-[#FAFAFB] p-3 dark:border-white/10 dark:bg-black/20"
+        >
           {donationChat.historyLoading && sortedChatMessages.length === 0 ? (
             <p className="text-xs text-text-secondary">Loading messages…</p>
           ) : sortedChatMessages.length === 0 ? (
@@ -610,11 +847,13 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             </p>
           ) : (
             sortedChatMessages.map((m) => {
-              const mine = Boolean(user?.id && m.senderUserId === user.id);
+              const mine = Boolean(
+                m.senderUserId === user?.id || m.roleLabel === "VerifiedDonor",
+              );
               return (
                 <div
                   key={m.id}
-                  className={`max-w-[95%] rounded-lg px-2.5 py-1.5 text-xs ${
+                  className={`max-w-[50%] rounded-lg px-2.5 py-1.5 text-xs ${
                     mine
                       ? "ml-auto bg-primary text-white"
                       : "mr-auto bg-white text-text-primary dark:bg-[#252530]"
@@ -631,7 +870,9 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                       {m.roleLabel}
                     </p>
                   ) : null}
-                  <p className="whitespace-pre-wrap break-words">{m.text}</p>
+                  <p className="whitespace-pre-wrap wrap-break-words">
+                    {m.text}
+                  </p>
                   {m.createdAt ? (
                     <p
                       className={
@@ -660,7 +901,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         ) : null}
         <div className="mt-3 flex flex-col gap-2 sm:flex-row">
           <textarea
-            className={`${inputClass} min-h-[72px] flex-1 resize-y sm:min-h-[44px]`}
+            className={`${inputClass} min-h-[72px] flex-1 sm:min-h-[44px] resize-none`}
             placeholder={
               chatComposerDisabled
                 ? donationChat.roomClosed

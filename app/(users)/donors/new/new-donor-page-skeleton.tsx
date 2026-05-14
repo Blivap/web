@@ -2,8 +2,8 @@
 
 const STEPS = [
   { id: 1, label: "Blood type & location" },
-  { id: 2, label: "Health questionnaire" },
-  { id: 3, label: "Next steps" },
+  { id: 2, label: "AI questionnaire" },
+  { id: 3, label: "Activation" },
 ];
 
 const pulse = "bg-[#E5E7EB] dark:bg-white/12 animate-pulse rounded-md";
@@ -11,7 +11,7 @@ const pulse = "bg-[#E5E7EB] dark:bg-white/12 animate-pulse rounded-md";
 function SkeletonStepProgress({ currentStep }: { currentStep: number }) {
   return (
     <nav className="flex flex-col relative gap-2 mb-8 w-full" aria-hidden>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 w-full">
         {STEPS.map((s) => {
           const isActive = s.id === currentStep;
           const isPast = s.id < currentStep;
@@ -59,7 +59,7 @@ function SkeletonStepProgress({ currentStep }: { currentStep: number }) {
 export function NewDonorPageSkeleton() {
   return (
     <div
-      className="sm:p-6 w-full flex flex-col flex-1 h-full grow"
+      className="flex h-full min-h-0 w-full flex-1 flex-col px-4 pb-6 pt-4 sm:p-6"
       aria-busy="true"
       aria-live="polite"
     >
