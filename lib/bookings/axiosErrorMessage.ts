@@ -12,10 +12,7 @@ export function getApiMessageFromData(data: unknown): string | null {
 }
 
 /** Best-effort message from Nest/axios error bodies. */
-export function getAxiosErrorMessage(
-  e: unknown,
-  fallback: string,
-): string {
+export function getAxiosErrorMessage(e: unknown, fallback: string): string {
   if (!axios.isAxiosError(e)) return fallback;
   return getApiMessageFromData(e.response?.data) ?? fallback;
 }

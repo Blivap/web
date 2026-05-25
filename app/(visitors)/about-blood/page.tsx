@@ -100,7 +100,9 @@ export default function AboutBlood() {
                   className="bg-white text-[#111827] dark:bg-[#111827] dark:text-white p-2.5 rounded-md border border-[#E5E7EB] dark:border-white/10"
                 >
                   <h4 className="font-semibold text-xs mb-0.5">{item.title}</h4>
-                  <p className="text-[10px] text-[#6B7280] dark:text-slate-400">{item.desc}</p>
+                  <p className="text-[10px] text-[#6B7280] dark:text-slate-400">
+                    {item.desc}
+                  </p>
                 </div>
               ))}
             </div>

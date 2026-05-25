@@ -108,7 +108,10 @@ const DEFAULT_VALUES: ReproductiveFormValues = {
   consent: false,
 };
 
-const FLOW_CONFIG: Record<Exclude<DonorRegistrationType, "blood">, FlowConfig> = {
+const FLOW_CONFIG: Record<
+  Exclude<DonorRegistrationType, "blood">,
+  FlowConfig
+> = {
   sperm: {
     typeLabel: "Sperm donor",
     title: "Sperm donor screening",
@@ -166,7 +169,8 @@ const FLOW_CONFIG: Record<Exclude<DonorRegistrationType, "blood">, FlowConfig> =
     profileQualifierLabel: "Menstrual cycle regularity",
     profileQualifierPlaceholder: "e.g. Regular, Irregular, Not sure",
     secondaryQualifierLabel: "Pregnancy / fertility history",
-    secondaryQualifierPlaceholder: "e.g. No prior pregnancy, One prior pregnancy",
+    secondaryQualifierPlaceholder:
+      "e.g. No prior pregnancy, One prior pregnancy",
     screeningOneLabel: "Have you used hormonal treatment in the past 6 months?",
     screeningTwoLabel: "Have you had pelvic or ovarian surgery before?",
     reviewHighlights: [
@@ -273,7 +277,9 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
         {label}
       </p>
-      <p className="mt-1 text-sm text-text-primary">{value || "Not provided"}</p>
+      <p className="mt-1 text-sm text-text-primary">
+        {value || "Not provided"}
+      </p>
     </div>
   );
 }
@@ -360,8 +366,10 @@ export function ReproductiveDonorFlow({
     }
 
     if (currentStep === 2) {
-      if (!values.screeningOne) return "Select an answer for the first question.";
-      if (!values.screeningTwo) return "Select an answer for the second question.";
+      if (!values.screeningOne)
+        return "Select an answer for the first question.";
+      if (!values.screeningTwo)
+        return "Select an answer for the second question.";
       if (!values.hereditaryHistory) {
         return "Select an answer for hereditary health history.";
       }
@@ -459,7 +467,9 @@ export function ReproductiveDonorFlow({
               <FieldShell label={config.profileQualifierLabel}>
                 <Select
                   value={values.profileQualifier || undefined}
-                  onValueChange={(value) => updateValue("profileQualifier", value)}
+                  onValueChange={(value) =>
+                    updateValue("profileQualifier", value)
+                  }
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue
@@ -654,15 +664,18 @@ export function ReproductiveDonorFlow({
               },
               {
                 field: "hereditaryHistory" as const,
-                label: "Are you aware of any hereditary medical condition in your family history?",
+                label:
+                  "Are you aware of any hereditary medical condition in your family history?",
               },
               {
                 field: "willingForScreening" as const,
-                label: "Are you willing to continue with lab and specialist screening if invited?",
+                label:
+                  "Are you willing to continue with lab and specialist screening if invited?",
               },
               {
                 field: "recentHealthIssue" as const,
-                label: "Have you had any recent illness, fever, or unresolved health concern?",
+                label:
+                  "Have you had any recent illness, fever, or unresolved health concern?",
               },
             ].map((question) => (
               <FieldShell key={question.field} label={question.label}>
@@ -716,9 +729,10 @@ export function ReproductiveDonorFlow({
                 This donor type currently uses a frontend-only procedure.
               </p>
               <p className="mt-1 text-sm text-text-secondary">
-                Blood donor registration remains the live backend-connected flow.
-                These sperm and ovary donor screens now change based on the
-                selected query type and can be wired to backend submission next.
+                Blood donor registration remains the live backend-connected
+                flow. These sperm and ovary donor screens now change based on
+                the selected query type and can be wired to backend submission
+                next.
               </p>
             </div>
 

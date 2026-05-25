@@ -129,7 +129,8 @@ export function formatPublicCooldownLabel(
     const bits: string[] = [];
     if (parts.years > 0) bits.push(`${parts.years} yr`);
     if (parts.months > 0) bits.push(`${parts.months} mo`);
-    if (parts.days > 0) bits.push(`${parts.days} day${parts.days === 1 ? "" : "s"}`);
+    if (parts.days > 0)
+      bits.push(`${parts.days} day${parts.days === 1 ? "" : "s"}`);
     return `Rest period · ${bits.join(" ")}`;
   }
   if (parts.hours > 0) {

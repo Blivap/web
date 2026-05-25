@@ -80,7 +80,9 @@ export default function WhatWeDo() {
           <div className="bg-[#F9FAFB] text-[#111827] dark:bg-[#0F172A] dark:text-white p-4 rounded-lg border border-[#E5E7EB] dark:border-white/10">
             <div className="flex items-center gap-2 mb-3">
               <Target className="text-primary" size={18} />
-              <h2 className="font-semibold text-base text-black dark:text-white">Our impact</h2>
+              <h2 className="font-semibold text-base text-black dark:text-white">
+                Our impact
+              </h2>
             </div>
             <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed mb-4">
               Blivap has facilitated thousands of donations across Nigeria.
@@ -100,7 +102,9 @@ export default function WhatWeDo() {
                   <p className="text-sm font-semibold text-primary">
                     {stat.number}
                   </p>
-                  <p className="text-[10px] text-[#6B7280] dark:text-slate-400">{stat.label}</p>
+                  <p className="text-[10px] text-[#6B7280] dark:text-slate-400">
+                    {stat.label}
+                  </p>
                 </div>
               ))}
             </div>

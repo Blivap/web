@@ -32,10 +32,7 @@ export default function SettingsPage() {
     isProfileLoading,
     isPasswordResetRequesting,
   } = useSettings();
-  const {
-    avatars,
-    getAvatars,
-  } = useSelectAvatar();
+  const { avatars, getAvatars } = useSelectAvatar();
   const { open: openAvatarModal } = useAvatarModal();
   useEffect(() => {
     if (!avatars) {
@@ -139,7 +136,9 @@ export default function SettingsPage() {
                           onClick={() => {
                             dispatch(
                               setSelectedAvatar(
-                                values.profileImage || user?.profileImage || null,
+                                values.profileImage ||
+                                  user?.profileImage ||
+                                  null,
                               ),
                             );
                             openAvatarModal();
@@ -291,7 +290,6 @@ export default function SettingsPage() {
           </div>
         </section>
       </div>
-
     </Layout>
   );
 }

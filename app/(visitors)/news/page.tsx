@@ -346,7 +346,9 @@ export default function News() {
               <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4 dark:border-white/10 dark:bg-[#0F172A]">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-black dark:text-white">Category</p>
+                    <p className="text-sm font-semibold text-black dark:text-white">
+                      Category
+                    </p>
                     <p className="mt-1 text-xs text-[#6B7280] dark:text-slate-400">
                       Choose a topic only when you want to narrow the feed.
                     </p>
@@ -381,8 +383,13 @@ export default function News() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-1">
                 <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4 dark:border-white/10 dark:bg-[#0F172A]">
                   <div className="mb-3 flex items-center gap-2">
-                    <Languages size={15} className="text-[#667085] dark:text-slate-500" />
-                    <p className="text-sm font-semibold text-black dark:text-white">Language</p>
+                    <Languages
+                      size={15}
+                      className="text-[#667085] dark:text-slate-500"
+                    />
+                    <p className="text-sm font-semibold text-black dark:text-white">
+                      Language
+                    </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {NEWS_LANGUAGES.map((language) => (
@@ -409,8 +416,13 @@ export default function News() {
 
                 <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4 dark:border-white/10 dark:bg-[#0F172A]">
                   <div className="mb-3 flex items-center gap-2">
-                    <Globe2 size={15} className="text-[#667085] dark:text-slate-500" />
-                    <p className="text-sm font-semibold text-black dark:text-white">Country</p>
+                    <Globe2
+                      size={15}
+                      className="text-[#667085] dark:text-slate-500"
+                    />
+                    <p className="text-sm font-semibold text-black dark:text-white">
+                      Country
+                    </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {NEWS_COUNTRIES.map((country) => (
@@ -437,7 +449,10 @@ export default function News() {
 
                 <div className="rounded-2xl border border-[#EEF2F6] bg-[#FCFCFD] p-4 dark:border-white/10 dark:bg-[#0F172A]">
                   <div className="mb-3 flex items-center gap-2">
-                    <Clock3 size={15} className="text-[#667085] dark:text-slate-500" />
+                    <Clock3
+                      size={15}
+                      className="text-[#667085] dark:text-slate-500"
+                    />
                     <p className="text-sm font-semibold text-black dark:text-white">
                       Timeframe
                     </p>
@@ -474,7 +489,9 @@ export default function News() {
             <p className="text-lg font-semibold text-black dark:text-white">
               Could not load news
             </p>
-            <p className="max-w-xl text-sm text-[#6B7280] dark:text-slate-400">{error}</p>
+            <p className="max-w-xl text-sm text-[#6B7280] dark:text-slate-400">
+              {error}
+            </p>
             <button
               type="button"
               onClick={() => void refetch()}

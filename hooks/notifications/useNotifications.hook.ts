@@ -84,9 +84,7 @@ export function useNotifications({
           setHasMore(false);
           return;
         }
-        setRows((current) =>
-          silent ? mergePollResult(current, list) : list,
-        );
+        setRows((current) => (silent ? mergePollResult(current, list) : list));
         setHasMore(list.length === PAGE_SIZE);
         return;
       }
@@ -174,8 +172,7 @@ export function useNotifications({
     });
 
     try {
-      const { status, error: apiError } =
-        await $api.notifications.markRead(id);
+      const { status, error: apiError } = await $api.notifications.markRead(id);
       if (status < 200 || status >= 300) {
         setRows(previous);
         setError(apiError ?? "Could not mark notification as read.");

@@ -17,9 +17,7 @@ export type FetchAllBookingsResult =
  * `meta.total` is satisfied or a short page / empty page ends the chain.
  */
 export async function fetchAllBookingListPages(
-  fetchPage: (
-    params: BookingListQuery,
-  ) => Promise<IResponse<unknown>>,
+  fetchPage: (params: BookingListQuery) => Promise<IResponse<unknown>>,
 ): Promise<FetchAllBookingsResult> {
   const merged: Booking[] = [];
   let page = 1;

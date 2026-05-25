@@ -38,9 +38,7 @@ const initialState: BookingsState = {
 };
 
 async function loadBookingsWithHospitals(
-  listFetcher: (
-    params: BookingListQuery,
-  ) => Promise<IResponse<unknown>>,
+  listFetcher: (params: BookingListQuery) => Promise<IResponse<unknown>>,
 ): Promise<{
   bookings: Booking[];
   hospitalNamesById: Record<string, string>;
@@ -163,8 +161,7 @@ const bookingsSlice = createSlice({
       .addCase(loadSentBookings.rejected, (state, action) => {
         state.sent.status = "error";
         state.sent.error =
-          (action.payload as string | undefined) ??
-          "Could not load bookings.";
+          (action.payload as string | undefined) ?? "Could not load bookings.";
         if (!action.meta.arg?.silent) {
           state.sent.items = [];
         }
@@ -186,8 +183,7 @@ const bookingsSlice = createSlice({
       .addCase(loadReceivedBookings.rejected, (state, action) => {
         state.received.status = "error";
         state.received.error =
-          (action.payload as string | undefined) ??
-          "Could not load bookings.";
+          (action.payload as string | undefined) ?? "Could not load bookings.";
         if (!action.meta.arg?.silent) {
           state.received.items = [];
         }

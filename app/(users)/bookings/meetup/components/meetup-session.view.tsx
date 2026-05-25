@@ -47,7 +47,6 @@ import {
 } from "@/lib/meetups/meetupVerifyQrUrl";
 import { MeetupQrScanner } from "./meetup-qr-scanner.component";
 import { routes } from "@/config/routes";
-import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component";
 import { MeetupReportModal } from "./meetup-report-modal.component";
 import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
 import {
@@ -269,18 +268,14 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const [terminateAlertOpen, setTerminateAlertOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   /** Booking Mongo id stashed in bootstrap when opening from a booking row (fallback if GET session omits `bookingId`). */
-  const [stashedChatBookingId, setStashedChatBookingId] = useState<
-    string | null
-  >(null);
-
-  useEffect(() => {
+  const stashedChatBookingId = useMemo(() => {
     try {
       const v = sessionStorage
         .getItem(meetupChatBookingStashKey(sessionId))
         ?.trim();
-      setStashedChatBookingId(v && v.length > 0 ? v : null);
+      return v && v.length > 0 ? v : null;
     } catch {
-      setStashedChatBookingId(null);
+      return null;
     }
   }, [sessionId]);
 
@@ -472,13 +467,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     void dispatch(loadSentBookings({ silent: true }));
     void dispatch(loadReceivedBookings({ silent: true }));
     router.push(routes.bookings);
-  }, [
-    readOnly,
-    terminateMeet,
-    showSnackbar,
-    dispatch,
-    router,
-  ]);
+  }, [readOnly, terminateMeet, showSnackbar, dispatch, router]);
 
   const myDonationDone = useMemo(() => {
     if (!session || !user?.id) return false;
@@ -514,19 +503,21 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     }
     const digits = normalizeMeetupSixDigitCode(pending);
     if (!digits) return;
-    if (myMeetupCode && digits === myMeetupCode) {
-      setLocalError("That QR is your own code. Scan the other person's QR.");
-      return;
-    }
 
     void (async () => {
+      if (myMeetupCode && digits === myMeetupCode) {
+        const msg = "That QR is your own code. Scan the other person's QR.";
+        setLocalError(msg);
+        showSnackbar(msg, "error");
+        return;
+      }
       setLocalError(null);
       const res = await verifyCode(digits);
       if (!res.ok) {
         setLocalError(res.message);
         return;
       }
-      showSnackbar("Their code verified — thank you.");
+      showSnackbar("Their code verified — thank you.", "success");
     })();
   }, [
     sessionLoad,
@@ -1026,7 +1017,10 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         Terminate meet
       </button>
 
-      <AlertDialog open={terminateAlertOpen} onOpenChange={setTerminateAlertOpen}>
+      <AlertDialog
+        open={terminateAlertOpen}
+        onOpenChange={setTerminateAlertOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Terminate this meetup?</AlertDialogTitle>
@@ -1036,7 +1030,9 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={terminateBusy}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={terminateBusy}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/25 dark:bg-destructive/90"
               disabled={terminateBusy}

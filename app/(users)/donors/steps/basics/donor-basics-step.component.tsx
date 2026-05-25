@@ -51,10 +51,10 @@ export function DonorBasicsStep({
 }: DonorBasicsStepProps) {
   const canSubmit = Boolean(
     values.bloodType &&
-      values.country.trim() &&
-      values.state.trim() &&
-      values.city.trim() &&
-      values.area.trim(),
+    values.country.trim() &&
+    values.state.trim() &&
+    values.city.trim() &&
+    values.area.trim(),
   );
   const isLocked = !editable;
   const showNextAction = isLocked && completed;
@@ -108,8 +108,8 @@ export function DonorBasicsStep({
             Address & location (required)
           </p>
           <p className="text-xs text-text-secondary">
-            Enter location details manually. Browser location permissions are not
-            used here.
+            Enter location details manually. Browser location permissions are
+            not used here.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -216,7 +216,6 @@ export function DonorBasicsStep({
               />
             </div>
           </div>
-
         </div>
 
         {error && (

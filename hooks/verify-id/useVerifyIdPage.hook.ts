@@ -62,8 +62,7 @@ export function useVerifyIdPage() {
    * then redirect verified users to overview.
    */
   const awaitingProfile = hasSession && user === null;
-  const showGateLoader =
-    !mounted || awaitingProfile || alreadyVerified;
+  const showGateLoader = !mounted || awaitingProfile || alreadyVerified;
 
   useEffect(() => {
     if (!mounted || !user) return;

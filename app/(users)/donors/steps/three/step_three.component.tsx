@@ -105,9 +105,9 @@ export function StepThree({
           <div className="mt-5 rounded-lg border border-border bg-[#FAFAFA] px-4 py-3 dark:border-white/10 dark:bg-white/5">
             <p className="text-xs font-medium text-text-primary">Next step</p>
             <p className="mt-1 text-xs text-text-secondary">
-              Send activation to start donor verification. This uses your profile
-              and questionnaire data on file — the AI questionnaire supports
-              review but does not replace the activation gate.
+              Send activation to start donor verification. This uses your
+              profile and questionnaire data on file — the AI questionnaire
+              supports review but does not replace the activation gate.
             </p>
           </div>
 

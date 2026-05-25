@@ -11,7 +11,6 @@ import StoreProvider from "../store/provider";
 import { StructuredData } from "@/components/seo/structured-data";
 import { AuthChecker } from "@/components/auth/auth-checker";
 import { AuthRoutesPrefetch } from "@/components/auth/auth-routes-prefetch";
-import { AuthLoader } from "@/components/auth/auth-loader.component";
 import { BlivapLogo } from "@/public/svg";
 
 const geistSans = Geist({

@@ -57,7 +57,10 @@ export function CopyableTextLabel({
     >
       <span className="min-w-0 truncate">{copied ? "Copied!" : trimmed}</span>
       {copied ? (
-        <Check className="size-3 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
+        <Check
+          className="size-3 shrink-0 text-emerald-600 dark:text-emerald-400"
+          aria-hidden
+        />
       ) : (
         <Copy className="size-3 shrink-0 text-text-tertiary" aria-hidden />
       )}

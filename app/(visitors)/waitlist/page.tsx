@@ -170,7 +170,10 @@ export default function WaitList() {
             </p>
           </div>
           <div className="flex w-full rounded-[40px] bg-white dark:border dark:border-white/10 dark:bg-[#111827]">
-            <form className="ml-2 flex w-full items-center gap-4 md:ml-7" action="">
+            <form
+              className="ml-2 flex w-full items-center gap-4 md:ml-7"
+              action=""
+            >
               <Image
                 src="/icons/outline-email.svg"
                 alt="icon"
@@ -195,9 +198,13 @@ export default function WaitList() {
         </div>
         <div className="flex gap-2 md:gap-6 justify-between">
           <div className="flex flex-col gap-3">
-            <p className="font-bold text-lg text-black dark:text-white">About Product</p>
+            <p className="font-bold text-lg text-black dark:text-white">
+              About Product
+            </p>
             <ul className="flex flex-col gap-3">
-              <li className="text-[#959595] text-base leading-[27px] dark:text-slate-400">Patch</li>
+              <li className="text-[#959595] text-base leading-[27px] dark:text-slate-400">
+                Patch
+              </li>
               <li className="text-[#959595] text-base leading-[27px] dark:text-slate-400">
                 Updates
               </li>
@@ -207,9 +214,13 @@ export default function WaitList() {
             </ul>
           </div>
           <div className="flex flex-col gap-3">
-            <p className="font-bold text-lg text-black dark:text-white">Company</p>
+            <p className="font-bold text-lg text-black dark:text-white">
+              Company
+            </p>
             <ul className="flex flex-col gap-3">
-              <li className="text-[#959595] text-base leading-[27px] dark:text-slate-400">Patch</li>
+              <li className="text-[#959595] text-base leading-[27px] dark:text-slate-400">
+                Patch
+              </li>
               <li className="text-[#959595] text-base leading-[27px] dark:text-slate-400">
                 Updates
               </li>
@@ -219,7 +230,9 @@ export default function WaitList() {
             </ul>
           </div>
           <div className="flex flex-col gap-3">
-            <p className="font-bold text-lg text-black dark:text-white">Support</p>
+            <p className="font-bold text-lg text-black dark:text-white">
+              Support
+            </p>
             <ul className="flex flex-col gap-3">
               <li className="text-[#959595] text-base leading-[27px] dark:text-slate-400">
                 Help Center

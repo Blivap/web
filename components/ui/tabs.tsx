@@ -47,10 +47,9 @@ function Tabs({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const fallbackTab =
-    (defaultValue !== undefined && defaultValue !== ""
-      ? defaultValue
-      : "pending") as string;
+  const fallbackTab = (
+    defaultValue !== undefined && defaultValue !== "" ? defaultValue : "pending"
+  ) as string;
 
   let urlTab = fallbackTab;
   if (queryKey) {

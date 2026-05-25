@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { Bell, Flag, Send, Undo2, Video, X } from "lucide-react";
-import type { BookingsShellRow, BookingsTabPanel } from "@/app/(users)/bookings/components/bookings-shell.view";
+import type {
+  BookingsShellRow,
+  BookingsTabPanel,
+} from "@/app/(users)/bookings/components/bookings-shell.view";
 import {
   BookingIconActions,
   BookingIconButton,
@@ -107,9 +110,7 @@ export function buildBuyerBookingsTabPanels(
     const confirmedActions = () => {
       const busy = mutatingId === b.id;
       return (
-        <BookingIconActions
-          hint={!ninOk ? "Verify NIN for meetup" : undefined}
-        >
+        <BookingIconActions hint={!ninOk ? "Verify NIN for meetup" : undefined}>
           <BookingIconButton
             label="Open meetup"
             icon={<Video className="size-4" />}

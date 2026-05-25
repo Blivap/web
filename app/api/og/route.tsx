@@ -85,9 +85,7 @@ export async function GET(request: Request) {
   try {
     const requestUrl = new URL(request.url);
     const nameRaw = requestUrl.searchParams.get("name");
-    const appName = nameRaw
-      ? clampText(safeDecode(nameRaw), 48)
-      : "Blivap";
+    const appName = nameRaw ? clampText(safeDecode(nameRaw), 48) : "Blivap";
 
     const logoDataUri = await resolveOgLogoDataUri(requestUrl);
 
@@ -109,93 +107,92 @@ export async function GET(request: Request) {
     const fontFamily = fontData ? "BlivapHelvetica" : "system-ui";
 
     return new ImageResponse(
-      (
+      <div
+        tw="flex w-full h-full flex-col"
+        style={{
+          background:
+            "linear-gradient(160deg, #08060c 0%, #030308 55%, #05040a 100%)",
+          padding: 14,
+          boxSizing: "border-box",
+        }}
+      >
         <div
-          tw="flex w-full h-full flex-col"
           style={{
-            background:
-              "linear-gradient(160deg, #08060c 0%, #030308 55%, #05040a 100%)",
-            padding: 14,
-            boxSizing: "border-box",
+            height: 9,
+            flexShrink: 0,
+            background: `linear-gradient(90deg, ${BRAND_SECONDARY} 0%, ${BRAND_PRIMARY} 42%, ${BRAND_SECONDARY} 100%)`,
+            opacity: 0.95,
+          }}
+        />
+
+        <div
+          tw="flex flex-1 flex-row overflow-hidden items-center justify-center"
+          style={{
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderTop: "none",
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.04), 0 24px 80px rgba(0,0,0,0.35)",
           }}
         >
-          <div
-            style={{
-              height: 9,
-              flexShrink: 0,
-              background: `linear-gradient(90deg, ${BRAND_SECONDARY} 0%, ${BRAND_PRIMARY} 42%, ${BRAND_SECONDARY} 100%)`,
-              opacity: 0.95,
-            }}
-          />
-
-          <div
-            tw="flex flex-1 flex-row overflow-hidden items-center justify-center"
-            style={{
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderTop: "none",
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.04), 0 24px 80px rgba(0,0,0,0.35)",
-            }}
-          >
-            <div tw="flex flex-col items-center justify-center shrink-0">
-              <div
-                tw="flex items-center justify-center shrink-0 overflow-hidden"
-                style={{
-                  width: 200,
-                  height: 200,
-                  borderRadius: 36,
-                }}
-              >
-                {logoDataUri ? (
-                  <img
-                    src={logoDataUri}
-                    alt=""
-                    width={200}
-                    height={200}
-                    style={{
-                      width: 200,
-                      height: 200,
-                      borderRadius: 36,
-                      objectFit: "contain",
-                      objectPosition: "center",
-                      flexShrink: 0,
-                    }}
-                  />
-                ) : (
-                  <div
-                    tw="flex items-center justify-center shrink-0"
-                    style={{
-                      width: 200,
-                      height: 200,
-                      borderRadius: 36,
-                      fontFamily,
-                      fontSize: 96,
-                      fontWeight: 700,
-                      color: "#fff",
-                      background: `linear-gradient(155deg, ${BRAND_PRIMARY} 0%, #2a0610 100%)`,
-                    }}
-                  >
-                    B
-                  </div>
-                )}
-              </div>
-              <span
-                style={{
-                  fontFamily,
-                  marginTop: 36,
-                  fontSize: 72,
-                  fontWeight: 700,
-                  color: "#f6f6f8",
-                  letterSpacing: "-0.035em",
-                  lineHeight: 1,
-                }}
-              >
-                {appName}
-              </span>
+          <div tw="flex flex-col items-center justify-center shrink-0">
+            <div
+              tw="flex items-center justify-center shrink-0 overflow-hidden"
+              style={{
+                width: 200,
+                height: 200,
+                borderRadius: 36,
+              }}
+            >
+              {logoDataUri ? (
+                // eslint-disable-next-line @next/next/no-img-element -- OG ImageResponse requires native img for data URIs
+                <img
+                  src={logoDataUri}
+                  alt=""
+                  width={200}
+                  height={200}
+                  style={{
+                    width: 200,
+                    height: 200,
+                    borderRadius: 36,
+                    objectFit: "contain",
+                    objectPosition: "center",
+                    flexShrink: 0,
+                  }}
+                />
+              ) : (
+                <div
+                  tw="flex items-center justify-center shrink-0"
+                  style={{
+                    width: 200,
+                    height: 200,
+                    borderRadius: 36,
+                    fontFamily,
+                    fontSize: 96,
+                    fontWeight: 700,
+                    color: "#fff",
+                    background: `linear-gradient(155deg, ${BRAND_PRIMARY} 0%, #2a0610 100%)`,
+                  }}
+                >
+                  B
+                </div>
+              )}
             </div>
+            <span
+              style={{
+                fontFamily,
+                marginTop: 36,
+                fontSize: 72,
+                fontWeight: 700,
+                color: "#f6f6f8",
+                letterSpacing: "-0.035em",
+                lineHeight: 1,
+              }}
+            >
+              {appName}
+            </span>
           </div>
         </div>
-      ),
+      </div>,
       {
         ...size,
         fonts: fontData

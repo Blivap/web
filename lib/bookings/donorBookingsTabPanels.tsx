@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { Check, Flag, Video, X } from "lucide-react";
-import type { BookingsShellRow, BookingsTabPanel } from "@/app/(users)/bookings/components/bookings-shell.view";
+import type {
+  BookingsShellRow,
+  BookingsTabPanel,
+} from "@/app/(users)/bookings/components/bookings-shell.view";
 import {
   BookingIconActions,
   BookingIconButton,
@@ -67,9 +70,7 @@ export function buildDonorBookingsTabPanels(
     if (tab === "pending" && b.status === "pending") {
       const busy = mutatingId === b.id;
       actionsSlot = (
-        <BookingIconActions
-          hint={!ninOk ? "Verify NIN to accept" : undefined}
-        >
+        <BookingIconActions hint={!ninOk ? "Verify NIN to accept" : undefined}>
           <BookingIconButton
             label="Accept booking"
             icon={<Check className="size-4" strokeWidth={2.5} />}
@@ -95,9 +96,7 @@ export function buildDonorBookingsTabPanels(
       );
     } else if (tab === "confirmed" && b.status === "accepted") {
       actionsSlot = (
-        <BookingIconActions
-          hint={!ninOk ? "Verify NIN for meetup" : undefined}
-        >
+        <BookingIconActions hint={!ninOk ? "Verify NIN for meetup" : undefined}>
           <BookingIconButton
             label="Open meetup"
             icon={<Video className="size-4" />}

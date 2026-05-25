@@ -56,7 +56,9 @@ export default function Researchers() {
                 key={i}
                 className="rounded-lg border border-[#E5E7EB] bg-white p-3 dark:border-white/10 dark:bg-[#111827] sm:p-4"
               >
-                <div className={`${feature.color} mb-2 w-fit rounded-full p-2 dark:bg-white/10`}>
+                <div
+                  className={`${feature.color} mb-2 w-fit rounded-full p-2 dark:bg-white/10`}
+                >
                   <feature.icon className="text-primary" size={18} />
                 </div>
                 <h3 className="mb-1.5 text-sm font-semibold text-black dark:text-white">

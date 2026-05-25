@@ -145,14 +145,15 @@ export function BookingRequestSentModal({
         </div>
 
         <DialogFooter className="border-t border-border bg-[#FAFAFB] px-6 py-4 sm:justify-between dark:border-white/10 dark:bg-white/4">
-          <Button variant="ghost" size="sm" className="w-full sm:w-auto" asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full sm:w-auto"
+            asChild
+          >
             <Link href={routes.bookings}>View bookings</Link>
           </Button>
-          <Button
-            type="button"
-            className="w-full sm:w-auto"
-            onClick={onClose}
-          >
+          <Button type="button" className="w-full sm:w-auto" onClick={onClose}>
             Done
           </Button>
         </DialogFooter>

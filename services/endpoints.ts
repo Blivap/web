@@ -51,26 +51,19 @@ export const endpoints = {
     sent: "/bookings/sent",
     received: "/bookings/received",
     mine: "/bookings/mine",
-    respond: (id: string) =>
-      `/bookings/${encodeURIComponent(id)}/respond`,
-    accept: (id: string) =>
-      `/bookings/${encodeURIComponent(id)}/accept`,
-    decline: (id: string) =>
-      `/bookings/${encodeURIComponent(id)}/decline`,
-    cancel: (id: string) =>
-      `/bookings/${encodeURIComponent(id)}/cancel`,
-    report: (id: string) =>
-      `/bookings/${encodeURIComponent(id)}/report`,
+    respond: (id: string) => `/bookings/${encodeURIComponent(id)}/respond`,
+    accept: (id: string) => `/bookings/${encodeURIComponent(id)}/accept`,
+    decline: (id: string) => `/bookings/${encodeURIComponent(id)}/decline`,
+    cancel: (id: string) => `/bookings/${encodeURIComponent(id)}/cancel`,
+    report: (id: string) => `/bookings/${encodeURIComponent(id)}/report`,
     /** Optional: notify donor again (rebuzz / reminder). Backend must implement. */
-    remind: (id: string) =>
-      `/bookings/${encodeURIComponent(id)}/remind`,
+    remind: (id: string) => `/bookings/${encodeURIComponent(id)}/remind`,
   },
 
   meetups: {
     ensureSession: (bookingId: string) =>
       `/meetups/bookings/${encodeURIComponent(bookingId)}/session`,
-    session: (sessionId: string) =>
-      `/meetups/${encodeURIComponent(sessionId)}`,
+    session: (sessionId: string) => `/meetups/${encodeURIComponent(sessionId)}`,
     verifyCode: (sessionId: string) =>
       `/meetups/${encodeURIComponent(sessionId)}/verify-code`,
     verifyQr: (sessionId: string) =>

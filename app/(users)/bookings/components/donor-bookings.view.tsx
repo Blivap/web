@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  BookingsShellSkeleton,
-  BookingsShell,
-} from "./bookings-shell.view";
+import { BookingsShellSkeleton, BookingsShell } from "./bookings-shell.view";
 import { BookingReportModal } from "./booking-report-modal.component";
 import { useDonorBookings } from "@/hooks/bookings/useDonorBookings.hook";
 

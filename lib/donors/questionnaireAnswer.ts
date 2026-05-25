@@ -30,7 +30,8 @@ export function answerDraftFromApiQuestionRow(
     !(typeof answeredAt === "string" && answeredAt.trim() === "");
 
   if (!hasAnswerTimestamp) {
-    if (upper === "YES" || upper === "NO") return upper as QuestionnaireAnswerEnum;
+    if (upper === "YES" || upper === "NO")
+      return upper as QuestionnaireAnswerEnum;
     if (upper === "NULL" || upper === "") return "";
     return "";
   }

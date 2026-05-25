@@ -16,11 +16,7 @@ function Sk({ className }: { className?: string }) {
 
 export function DonorProfilePageSkeleton() {
   return (
-    <div
-      className="flex flex-col gap-6"
-      aria-busy="true"
-      aria-live="polite"
-    >
+    <div className="flex flex-col gap-6" aria-busy="true" aria-live="polite">
       <span className="sr-only">Loading donor profile…</span>
 
       <div

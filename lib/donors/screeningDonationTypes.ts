@@ -42,7 +42,10 @@ export const SCREENING_DONATION_TYPE_OPTIONS: readonly {
   { value: "platelets", label: "Platelets" },
   { value: "sperm_egg_gametes", label: "Sperm / egg / gametes" },
   { value: "surrogate_embryo_carrier", label: "Surrogacy / embryo carrier" },
-  { value: "milk_placenta_cord_blood", label: "Breast milk, placenta, or cord blood" },
+  {
+    value: "milk_placenta_cord_blood",
+    label: "Breast milk, placenta, or cord blood",
+  },
   { value: "kidney", label: "Kidney" },
   { value: "liver", label: "Liver" },
   { value: "heart", label: "Heart" },
@@ -56,7 +59,10 @@ export const SCREENING_DONATION_TYPE_OPTIONS: readonly {
   { value: "heart_valve", label: "Heart valve" },
   { value: "tendon_ligament", label: "Tendon / ligament" },
   { value: "vascular_tissue", label: "Vascular tissue" },
-  { value: "clinical_trial_participation", label: "Clinical trial participation" },
+  {
+    value: "clinical_trial_participation",
+    label: "Clinical trial participation",
+  },
   {
     value: "deceased_brain_body_education",
     label: "Brain / body donation (research or education)",
@@ -71,37 +77,38 @@ export type ScreeningDonationTypeValue =
   (typeof SCREENING_DONATION_TYPE_OPTIONS)[number]["value"];
 
 /** Older UI / drafts used SCREAMING_SNAKE — map to API snake_case. */
-const LEGACY_DONATION_TYPE_MAP: Readonly<Record<string, QuestionnaireDonationType>> =
-  {
-    WHOLE_BLOOD: "whole_blood",
-    PLASMA: "plasma",
-    PLATELETS: "platelets",
-    SPERM: "sperm_egg_gametes",
-    OOCYTE: "sperm_egg_gametes",
-    EGG: "sperm_egg_gametes",
-    EMBRYO: "surrogate_embryo_carrier",
-    CORD_BLOOD: "milk_placenta_cord_blood",
-    BONE_MARROW: "clinical_trial_participation",
-    KIDNEY: "kidney",
-    LIVER: "liver",
-    HEART: "heart",
-    LUNG: "lung",
-    PANCREAS: "pancreas",
-    INTESTINE: "intestine",
-    MULTI_ORGAN: "multi_organ",
-    CORNEA: "cornea",
-    SKIN: "skin",
-    BONE: "bone",
-    HEART_VALVE: "heart_valve",
-    TENDON_LIGAMENT: "tendon_ligament",
-    VASCULAR_TISSUE: "vascular_tissue",
-    SPERM_EGG_GAMETES: "sperm_egg_gametes",
-    SURROGATE_EMBRYO_CARRIER: "surrogate_embryo_carrier",
-    MILK_PLACENTA_CORD_BLOOD: "milk_placenta_cord_blood",
-    CLINICAL_TRIAL_PARTICIPATION: "clinical_trial_participation",
-    DECEASED_BRAIN_BODY_EDUCATION: "deceased_brain_body_education",
-    WHOLE_BODY_ANATOMY_EDUCATION: "whole_body_anatomy_education",
-  };
+const LEGACY_DONATION_TYPE_MAP: Readonly<
+  Record<string, QuestionnaireDonationType>
+> = {
+  WHOLE_BLOOD: "whole_blood",
+  PLASMA: "plasma",
+  PLATELETS: "platelets",
+  SPERM: "sperm_egg_gametes",
+  OOCYTE: "sperm_egg_gametes",
+  EGG: "sperm_egg_gametes",
+  EMBRYO: "surrogate_embryo_carrier",
+  CORD_BLOOD: "milk_placenta_cord_blood",
+  BONE_MARROW: "clinical_trial_participation",
+  KIDNEY: "kidney",
+  LIVER: "liver",
+  HEART: "heart",
+  LUNG: "lung",
+  PANCREAS: "pancreas",
+  INTESTINE: "intestine",
+  MULTI_ORGAN: "multi_organ",
+  CORNEA: "cornea",
+  SKIN: "skin",
+  BONE: "bone",
+  HEART_VALVE: "heart_valve",
+  TENDON_LIGAMENT: "tendon_ligament",
+  VASCULAR_TISSUE: "vascular_tissue",
+  SPERM_EGG_GAMETES: "sperm_egg_gametes",
+  SURROGATE_EMBRYO_CARRIER: "surrogate_embryo_carrier",
+  MILK_PLACENTA_CORD_BLOOD: "milk_placenta_cord_blood",
+  CLINICAL_TRIAL_PARTICIPATION: "clinical_trial_participation",
+  DECEASED_BRAIN_BODY_EDUCATION: "deceased_brain_body_education",
+  WHOLE_BODY_ANATOMY_EDUCATION: "whole_body_anatomy_education",
+};
 
 /**
  * Coerce any stored or UI string to a valid API donation type (for generate + PATCH).

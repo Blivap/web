@@ -128,10 +128,7 @@ function Carousel({
   );
 }
 
-function CarouselContent({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
   const { carouselRef, orientation } = useCarousel();
 
   return (
@@ -169,8 +166,22 @@ type CarouselNavButtonProps = Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   "children"
 > & {
-  variant?: "default" | "outline" | "secondary" | "ghost" | "destructive" | "link";
-  size?: "default" | "xs" | "sm" | "lg" | "icon" | "icon-xs" | "icon-sm" | "icon-lg";
+  variant?:
+    | "default"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "destructive"
+    | "link";
+  size?:
+    | "default"
+    | "xs"
+    | "sm"
+    | "lg"
+    | "icon"
+    | "icon-xs"
+    | "icon-sm"
+    | "icon-lg";
 };
 
 function CarouselPrevious({

@@ -86,9 +86,7 @@ export function MeetupReportModal({
         <select
           className={`${fieldClass} mt-1`}
           value={category}
-          onChange={(e) =>
-            setCategory(e.target.value as MeetupReportCategory)
-          }
+          onChange={(e) => setCategory(e.target.value as MeetupReportCategory)}
           disabled={submitting}
         >
           {MEETUP_REPORT_CATEGORIES.map((c) => (
@@ -121,7 +119,10 @@ export function MeetupReportModal({
           disabled={submitting}
         />
         {error ? (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400" role="alert">
+          <p
+            className="mt-2 text-sm text-red-600 dark:text-red-400"
+            role="alert"
+          >
             {error}
           </p>
         ) : null}

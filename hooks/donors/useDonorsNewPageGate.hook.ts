@@ -42,8 +42,8 @@ export function useDonorsNewPageGate() {
 
   const needsVerifyId = Boolean(
     user &&
-      user.nationalIdentificationNumberVerified === false &&
-      !isElevatedStaff(user),
+    user.nationalIdentificationNumberVerified === false &&
+    !isElevatedStaff(user),
   );
 
   useEffect(() => {
