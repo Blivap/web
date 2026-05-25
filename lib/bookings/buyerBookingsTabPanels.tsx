@@ -1,20 +1,16 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
-import { Bell, Send } from "lucide-react";
+import { Bell, Flag, Send, Undo2, Video, X } from "lucide-react";
 import type { BookingsShellRow, BookingsTabPanel } from "@/app/(users)/bookings/components/bookings-shell.view";
+import {
+  BookingIconActions,
+  BookingIconButton,
+} from "@/app/(users)/bookings/components/booking-icon-button.component";
 import { stashMeetupCodeFromBookingRow } from "@/lib/meetups/meetupSessionStorageKeys";
 import {
   bookingRowDetailPartsForViewer,
-  bookingTitleForViewer,
-  formatScheduledLabel,
+  formatScheduledShort,
   statusToPill,
 } from "@/lib/bookings/formatBookingDisplay";
-import { BookingRowSubtitle } from "@/app/(users)/bookings/components/booking-row-subtitle.component";
-import {
-  buyerBtnGhost,
-  buyerBtnReminder,
-  buyerBtnSecondary,
-} from "@/lib/bookings/bookingsActionButtonClassNames";
 import type { Booking } from "@/types/bookings";
 import type { IUser } from "@/types";
 
@@ -34,7 +30,7 @@ const sentPanelBanner = (
     <p className="min-w-0 text-xs text-text-secondary sm:text-sm">
       <span className="font-medium text-text-primary">Sent</span>
       {" · "}
-      Every request you made, every status.
+      Requests you have made and their status.
     </p>
   </div>
 );
@@ -68,128 +64,113 @@ export function buildBuyerBookingsTabPanels(
 
   const mapRow = (b: Booking, ctx: BuyerPanelKey): BookingsShellRow => {
     const pill = statusToPill(b.status);
-    const title = bookingTitleForViewer(b, "requester");
-    const subtitle = (
-      <BookingRowSubtitle
-        {...bookingRowDetailPartsForViewer(
-          b,
-          "requester",
-          hospitalLabel(b.hospitalId),
-        )}
-      />
+    const parts = bookingRowDetailPartsForViewer(
+      b,
+      "requester",
+      hospitalLabel(b.hospitalId),
     );
-    const dateCol = formatScheduledLabel(b.scheduledAt);
-    const reported = (b.reportsCount ?? 0) > 0;
+    const ninOk = user?.nationalIdentificationNumberVerified === true;
 
     let actionsSlot: ReactNode;
 
     const pendingActions = () => {
       const busyWithdraw = mutatingId === b.id;
       const busyRemind = remindingId === b.id;
+      const busy = busyWithdraw || busyRemind;
       return (
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <button
-            type="button"
-            className={buyerBtnSecondary}
-            disabled={busyWithdraw || busyRemind}
+        <BookingIconActions>
+          <BookingIconButton
+            label={busyWithdraw ? "Withdrawing…" : "Withdraw request"}
+            icon={<Undo2 className="size-4" />}
+            variant="default"
+            disabled={busy}
             onClick={() => withdrawBooking(b.id)}
-          >
-            {busyWithdraw ? "Withdrawing…" : "Withdraw"}
-          </button>
-          <button
-            type="button"
-            className={buyerBtnReminder}
-            disabled={busyWithdraw || busyRemind}
+          />
+          <BookingIconButton
+            label={busyRemind ? "Sending reminder…" : "Remind donor"}
+            icon={<Bell className="size-4" />}
+            variant="primary"
+            disabled={busy}
             onClick={() => remindDonor(b.id)}
-          >
-            <Bell className="size-3.5 shrink-0" aria-hidden />
-            {busyRemind ? "Sending…" : "Send reminder"}
-          </button>
-          <button
-            type="button"
-            className={buyerBtnGhost}
-            disabled={busyWithdraw || busyRemind}
+          />
+          <BookingIconButton
+            label="Report issue"
+            icon={<Flag className="size-3.5" />}
+            variant="ghost"
+            disabled={busy}
             onClick={() => setReportBookingId(b.id)}
-          >
-            Report issue
-          </button>
-        </div>
+          />
+        </BookingIconActions>
       );
     };
 
     const confirmedActions = () => {
       const busy = mutatingId === b.id;
-      const ninOk = user?.nationalIdentificationNumberVerified === true;
       return (
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          {ninOk ? (
-            <Link
-              href={`/bookings/meetup?bookingId=${encodeURIComponent(b.id)}`}
-              className={buyerBtnSecondary}
-              onClick={() => stashMeetupCodeFromBookingRow(b.id, b.meetingCode)}
-            >
-              Meetup room
-            </Link>
-          ) : (
-            <span className="text-xs text-amber-800 dark:text-amber-300">
-              Verify your NIN to open the meetup room.
-            </span>
-          )}
-          <button
-            type="button"
-            className={buyerBtnSecondary}
+        <BookingIconActions
+          hint={!ninOk ? "Verify NIN for meetup" : undefined}
+        >
+          <BookingIconButton
+            label="Open meetup"
+            icon={<Video className="size-4" />}
+            variant="primary"
+            disabled={!ninOk}
+            href={
+              ninOk
+                ? `/bookings/meetup?bookingId=${encodeURIComponent(b.id)}`
+                : undefined
+            }
+            onNavigate={() =>
+              stashMeetupCodeFromBookingRow(b.id, b.meetingCode)
+            }
+          />
+          <BookingIconButton
+            label={busy ? "Cancelling…" : "Cancel booking"}
+            icon={<X className="size-4" strokeWidth={2.5} />}
+            variant="danger"
             disabled={busy}
             onClick={() => withdrawBooking(b.id)}
-          >
-            {busy ? "Cancelling…" : "Cancel booking"}
-          </button>
-          <button
-            type="button"
-            className={buyerBtnGhost}
+          />
+          <BookingIconButton
+            label="Report issue"
+            icon={<Flag className="size-3.5" />}
+            variant="ghost"
             disabled={busy}
             onClick={() => setReportBookingId(b.id)}
-          >
-            Report issue
-          </button>
-        </div>
+          />
+        </BookingIconActions>
       );
     };
+
+    const reportOnly = () => (
+      <BookingIconActions>
+        <BookingIconButton
+          label="Report issue"
+          icon={<Flag className="size-3.5" />}
+          variant="ghost"
+          onClick={() => setReportBookingId(b.id)}
+        />
+      </BookingIconActions>
+    );
 
     if (ctx === "sent") {
       if (b.status === "pending") actionsSlot = pendingActions();
       else if (b.status === "accepted") actionsSlot = confirmedActions();
-      else
-        actionsSlot = (
-          <button
-            type="button"
-            className={buyerBtnGhost}
-            onClick={() => setReportBookingId(b.id)}
-          >
-            Report issue
-          </button>
-        );
+      else actionsSlot = reportOnly();
     } else if (ctx === "confirmed" && b.status === "accepted") {
       actionsSlot = confirmedActions();
     } else {
-      actionsSlot = (
-        <button
-          type="button"
-          className={buyerBtnGhost}
-          onClick={() => setReportBookingId(b.id)}
-        >
-          Report issue
-        </button>
-      );
+      actionsSlot = reportOnly();
     }
 
     return {
       id: b.id,
-      dateCol,
-      title,
-      subtitle,
+      dateCol: formatScheduledShort(b.scheduledAt),
+      title: parts.who,
+      subtitle: parts.hospital,
       pillLabel: pill.label,
       pillVariant: pill.variant,
-      reported,
+      reported: (b.reportsCount ?? 0) > 0,
       avatarUrl: b.donorProfileImage ?? undefined,
       actionsSlot,
       highlight: Boolean(highlightBookingId && b.id === highlightBookingId),
@@ -206,13 +187,15 @@ export function buildBuyerBookingsTabPanels(
 
   const rowsSent = () => bookings.map((b) => mapRow(b, "sent"));
 
+  const columns = ["When", "Donor", "Status"] as const;
+
   return {
     sent: {
       panelBanner: sentPanelBanner,
       bannerInListCard: true,
       summarySections: [],
       mainListTitle: "Sent",
-      columnLabels: ["Scheduled", "Booking", "Status"],
+      columnLabels: columns,
       rows: rowsSent(),
       actionsColumnLabel: "Actions",
       tableEmptyMessage: "No outbound requests yet.",
@@ -220,7 +203,7 @@ export function buildBuyerBookingsTabPanels(
     confirmed: {
       summarySections: [],
       mainListTitle: "Confirmed",
-      columnLabels: ["Scheduled", "Booking", "Status"],
+      columnLabels: columns,
       rows: rowsFor("confirmed"),
       actionsColumnLabel: "Actions",
       tableEmptyMessage: "No confirmed bookings yet.",
@@ -228,9 +211,9 @@ export function buildBuyerBookingsTabPanels(
     past: {
       summarySections: [],
       mainListTitle: "Past",
-      columnLabels: ["Date", "Booking", "Outcome"],
+      columnLabels: columns,
       rows: rowsFor("past"),
-      actionsColumnLabel: "Record",
+      actionsColumnLabel: "Actions",
       tableEmptyMessage: "No past bookings.",
     },
   };

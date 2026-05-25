@@ -23,7 +23,7 @@ export type BookingsShellRow = {
   id: string;
   dateCol: string;
   title: string;
-  subtitle: ReactNode;
+  subtitle?: ReactNode;
   pillLabel: string;
   pillVariant: BookingPillVariant;
   /** Trust & safety: show when API attached reports to this booking. */
@@ -128,6 +128,69 @@ function bookingRowHighlightClass(highlight: boolean | undefined): string {
     : "";
 }
 
+function BookingRowMeta({
+  title,
+  subtitle,
+  avatarUrl,
+}: {
+  title: string;
+  subtitle?: ReactNode;
+  avatarUrl?: string | null;
+}) {
+  return (
+    <div className="flex min-w-0 items-center gap-2.5">
+      {avatarUrl ? (
+        <Image
+          src={avatarUrl}
+          alt=""
+          width={36}
+          height={36}
+          className="size-9 shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
+        />
+      ) : (
+        <span
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#F4F4F5] text-[10px] font-semibold uppercase text-text-tertiary dark:bg-white/8"
+          aria-hidden
+        >
+          {title.slice(0, 1)}
+        </span>
+      )}
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-text-primary">{title}</p>
+        {subtitle ? (
+          <p className="truncate text-xs text-text-tertiary">
+            {subtitle}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function BookingRowStatus({
+  pillLabel,
+  pillVariant,
+  reported,
+}: {
+  pillLabel: string;
+  pillVariant: BookingPillVariant;
+  reported?: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <BookingStatusPill variant={pillVariant}>{pillLabel}</BookingStatusPill>
+      {reported ? (
+        <span
+          className="inline-flex size-5 items-center justify-center rounded-full bg-[#374151] text-[9px] font-bold text-white dark:bg-white/15"
+          title="Reported"
+        >
+          !
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 function BookingsRowsTable({
   rows,
   colA,
@@ -175,68 +238,32 @@ function BookingsRowsTable({
               <article
                 key={row.id}
                 data-booking-row-id={row.id}
-                className={`rounded-lg border border-[#F3F4F6] bg-white p-4 dark:border-white/10 dark:bg-[#1a1a22] ${bookingRowHighlightClass(row.highlight)}`}
+                className={`rounded-xl border border-[#F3F4F6] bg-white p-3 dark:border-white/10 dark:bg-[#1a1a22] ${bookingRowHighlightClass(row.highlight)}`}
               >
-                <div className="flex gap-3">
-                  {row.avatarUrl ? (
-                    <Image
-                      src={row.avatarUrl}
-                      alt=""
-                      width={40}
-                      height={40}
-                      className="size-10 shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
-                    />
-                  ) : null}
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-text-tertiary">
-                        {colA}
-                      </p>
-                      <p className="mt-0.5 text-sm text-text-secondary">
-                        {row.dateCol}
-                      </p>
-                    </div>
-                    <p className="text-pretty text-[0.9375rem] font-semibold leading-snug tracking-tight text-text-primary">
-                      {row.title}
-                    </p>
-                    <div className="min-w-0 max-w-full">{row.subtitle}</div>
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-text-tertiary">
-                    {colC}
+                <div className="flex flex-col gap-2.5">
+                  <p className="text-[11px] font-medium text-text-tertiary">
+                    {row.dateCol}
                   </p>
-                  <div className="mt-1.5 flex flex-wrap gap-2">
-                    <BookingStatusPill variant={row.pillVariant}>
-                      {row.pillLabel}
-                    </BookingStatusPill>
-                    {row.reported ? (
-                      <span className="inline-flex w-fit items-center rounded-full bg-[#374151] px-2 py-0.5 text-[11px] font-medium text-white dark:bg-white/15 dark:text-white">
-                        Reported
-                      </span>
+                  <BookingRowMeta
+                    title={row.title}
+                    subtitle={row.subtitle}
+                    avatarUrl={row.avatarUrl}
+                  />
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <BookingRowStatus
+                      pillLabel={row.pillLabel}
+                      pillVariant={row.pillVariant}
+                      reported={row.reported}
+                    />
+                    {actionsColumnLabel ? (
+                      <div className="flex shrink-0 items-center">
+                        {row.actionsSlot ?? (
+                          <span className="text-xs text-text-tertiary">—</span>
+                        )}
+                      </div>
                     ) : null}
                   </div>
                 </div>
-                {actionsColumnLabel ? (
-                  <div className="mt-4 border-t border-border pt-3 dark:border-white/10">
-                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-text-tertiary">
-                      {actionsColumnLabel}
-                    </p>
-                    <div
-                      className={
-                        "flex min-w-0 flex-col gap-2 " +
-                        "[&>a]:inline-flex [&>a]:w-full [&>a]:shrink-0 [&>a]:justify-center [&>button]:w-full " +
-                        "[&>div]:w-full [&>div]:min-w-0 [&>div]:max-w-full [&>div]:flex-col [&>div]:gap-2 " +
-                        "[&>div>a]:inline-flex [&>div>a]:w-full [&>div>a]:justify-center [&>div>button]:w-full " +
-                        "[&>span]:block [&>span]:max-w-full [&>span]:text-pretty"
-                      }
-                    >
-                      {row.actionsSlot ?? (
-                        <span className="text-xs text-text-tertiary">—</span>
-                      )}
-                    </div>
-                  </div>
-                ) : null}
               </article>
             ))
           )}
@@ -244,34 +271,34 @@ function BookingsRowsTable({
 
         <div className="hidden overflow-x-auto md:block">
           <table
-            className={`w-full border-collapse text-left ${actionsColumnLabel ? "min-w-[720px]" : "min-w-[560px]"}`}
+            className={`w-full border-collapse text-left ${actionsColumnLabel ? "min-w-[520px]" : "min-w-[400px]"}`}
           >
             <thead>
               <tr>
                 <th
                   scope="col"
-                  className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+                  className="w-[1%] whitespace-nowrap pb-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
                 >
                   {colA}
                 </th>
                 <th
                   scope="col"
-                  className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+                  className="pb-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
                 >
                   {colB}
                 </th>
                 <th
                   scope="col"
-                  className="pb-3 pr-4 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+                  className="w-[1%] whitespace-nowrap pb-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
                 >
                   {colC}
                 </th>
                 {actionsColumnLabel ? (
                   <th
                     scope="col"
-                    className="pb-3 text-xs font-medium uppercase tracking-wide text-text-tertiary"
+                    className="w-[1%] pb-2 text-end text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
                   >
-                    {actionsColumnLabel}
+                    <span className="sr-only">{actionsColumnLabel}</span>
                   </th>
                 ) : null}
               </tr>
@@ -293,45 +320,26 @@ function BookingsRowsTable({
                     data-booking-row-id={row.id}
                     className={`border-t border-[#F3F4F6] dark:border-white/10 ${bookingRowHighlightClass(row.highlight)}`}
                   >
-                    <td className="whitespace-nowrap py-4 pr-4 align-top text-sm text-text-secondary">
+                    <td className="whitespace-nowrap py-3 pr-3 align-middle text-xs text-text-secondary">
                       {row.dateCol}
                     </td>
-                    <td className="py-4 pr-4 align-top">
-                      <div className="flex gap-3">
-                        {row.avatarUrl ? (
-                          <Image
-                            src={row.avatarUrl}
-                            alt=""
-                            width={40}
-                            height={40}
-                            className="size-10 shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
-                          />
-                        ) : null}
-                        <div className="min-w-0 flex-1 space-y-1.5">
-                          <p className="text-pretty text-[0.9375rem] font-semibold leading-snug tracking-tight text-text-primary sm:text-sm">
-                            {row.title}
-                          </p>
-                          <div className="mt-1.5 max-w-xl min-w-0">
-                            {row.subtitle}
-                          </div>
-                        </div>
-                      </div>
+                    <td className="py-3 pr-3 align-middle">
+                      <BookingRowMeta
+                        title={row.title}
+                        subtitle={row.subtitle}
+                        avatarUrl={row.avatarUrl}
+                      />
                     </td>
-                    <td className="py-4 pr-4 align-top">
-                      <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center">
-                        <BookingStatusPill variant={row.pillVariant}>
-                          {row.pillLabel}
-                        </BookingStatusPill>
-                        {row.reported ? (
-                          <span className="inline-flex w-fit items-center rounded-full bg-[#374151] px-2 py-0.5 text-[11px] font-medium text-white dark:bg-white/15 dark:text-white">
-                            Reported
-                          </span>
-                        ) : null}
-                      </div>
+                    <td className="py-3 pr-3 align-middle">
+                      <BookingRowStatus
+                        pillLabel={row.pillLabel}
+                        pillVariant={row.pillVariant}
+                        reported={row.reported}
+                      />
                     </td>
                     {actionsColumnLabel ? (
-                      <td className="max-w-[min(100%,22rem)] py-4 align-top">
-                        <div className="min-w-0">
+                      <td className="py-3 align-middle">
+                        <div className="flex flex-row flex-nowrap items-center justify-end gap-1">
                           {row.actionsSlot ?? (
                             <span className="text-xs text-text-tertiary">—</span>
                           )}

@@ -48,6 +48,7 @@ export const routes = {
   dashboard: "/dashboard",
   selectAvatar: "/select_avatar",
   donors: "/donors",
+  donorsDetail: (id: string) => `/donors/${encodeURIComponent(id)}`,
   donorsNew: "/donors/new",
   wallet: "/wallet",
   history: "/history",

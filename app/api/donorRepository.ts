@@ -12,8 +12,13 @@ import { normalizeDonationTypesList } from "@/lib/donors/screeningDonationTypes"
 
 export default function DonorRepository() {
   return {
-    list(): Promise<IResponse<unknown>> {
-      return fetcher(endpoints.donors.list, { method: "GET" });
+    list(params?: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      bloodType?: string;
+    }): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.donors.list, { method: "GET", params });
     },
 
     getById(id: string): Promise<IResponse<unknown>> {

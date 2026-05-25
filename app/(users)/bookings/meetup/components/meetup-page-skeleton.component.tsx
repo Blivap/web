@@ -78,34 +78,24 @@ export function MeetupPageSkeleton() {
         </div>
       </section>
 
-      {/* Share code / QR card */}
-      <section className={cardClass}>
-        <Sk className="h-4 w-44" />
-        <Sk className="mt-2 h-3 w-full" />
-        <Sk className="mt-1 h-3 w-[88%]" />
-        <Sk className="mx-auto mt-4 h-8 w-40 max-w-full" />
-        <div className="mt-4 flex justify-center rounded-lg border border-border bg-white p-4 dark:border-white/10 dark:bg-white/5">
-          <Sk className="size-[180px] max-w-full rounded-md" />
-        </div>
-      </section>
-
-      {/* Verify at the hospital */}
+      {/* Verify at the hospital — your code + QR, then their code */}
       <section className={cardClass}>
         <Sk className="h-4 w-48" />
         <Sk className="mt-2 h-3 w-full" />
         <Sk className="mt-1 h-3 w-[82%]" />
-        <div className="mt-4">
-          <Sk className="h-3 w-28" />
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Sk className="h-10 w-44 max-w-full rounded-lg" />
-            <Sk className="h-10 w-36 rounded-lg" />
+        <div className="mt-4 rounded-lg border border-border p-3 dark:border-white/10">
+          <Sk className="h-3 w-20" />
+          <Sk className="mt-2 h-8 w-36" />
+          <div className="mt-4 flex justify-center rounded-lg border border-border bg-white p-4 dark:border-white/10 dark:bg-white/5">
+            <Sk className="size-[180px] max-w-full rounded-md" />
           </div>
         </div>
         <div className="mt-6 border-t border-border pt-4 dark:border-white/10">
-          <Sk className="h-3 w-40" />
-          <Sk className="mt-1 h-3 w-full max-w-lg" />
-          <Sk className="mt-2 h-[72px] w-full rounded-lg" />
-          <Sk className="mt-2 h-9 w-36 rounded-lg" />
+          <Sk className="h-3 w-36" />
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Sk className="h-10 w-44 max-w-full rounded-lg" />
+            <Sk className="h-10 w-40 rounded-lg" />
+          </div>
         </div>
       </section>
 

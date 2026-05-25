@@ -13,6 +13,7 @@ import {
   meetupVerificationGateSatisfied,
 } from "@/lib/meetups/meetupSessionDerived";
 import { parseMeetupSessionBody } from "@/lib/meetups/parseMeetupResponses";
+import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import type { MeetupReportPayload, MeetupSession } from "@/types/meetups";
 
 const POLL_MS = 5000;
@@ -23,6 +24,7 @@ function statusFromAxios(e: unknown): number | undefined {
 }
 
 export function useMeetupSession(sessionId: string | undefined) {
+  const { showSnackbar } = useSnackbar();
   const [session, setSession] = useState<MeetupSession | null>(null);
   const [sessionLoad, setSessionLoad] = useState<
     "idle" | "loading" | "ok" | "error"
@@ -32,6 +34,7 @@ export function useMeetupSession(sessionId: string | undefined) {
   const [verifyBusy, setVerifyBusy] = useState(false);
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [reportBusy, setReportBusy] = useState(false);
+  const [terminateBusy, setTerminateBusy] = useState(false);
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -83,48 +86,43 @@ export function useMeetupSession(sessionId: string | undefined) {
 
   const verifyCode = useCallback(
     async (code: string) => {
-      if (!sessionId) return { ok: false as const, message: "Missing session." };
+      const fail = (message: string) => {
+        showSnackbar("Unable to verify code. Try again.", "error");
+        return { ok: false as const, message };
+      };
+
+      if (!sessionId) return fail("Missing session.");
       setVerifyBusy(true);
       try {
         const { status, data } = await $api.meetups.verifyCode(sessionId, code);
         if (status === 429) {
-          return {
-            ok: false as const,
-            message: "Too many attempts. Try again later.",
-          };
+          return fail("Too many attempts. Try again later.");
         }
         if (status < 200 || status >= 300) {
-          return {
-            ok: false as const,
-            message:
-              getApiMessageFromData(data) ??
+          return fail(
+            getApiMessageFromData(data) ??
               "That code did not work. Check the digits and try again.",
-          };
+          );
         }
         await refreshSession();
         return { ok: true as const };
       } catch (e) {
         const st = statusFromAxios(e);
         if (st === 429) {
-          return {
-            ok: false as const,
-            message: "Too many attempts. Try again later.",
-          };
+          return fail("Too many attempts. Try again later.");
         }
-        return {
-          ok: false as const,
-          message: getAxiosErrorMessage(e, "Verification failed. Try again."),
-        };
+        return fail(getAxiosErrorMessage(e, "Verification failed. Try again."));
       } finally {
         setVerifyBusy(false);
       }
     },
-    [sessionId, refreshSession],
+    [sessionId, refreshSession, showSnackbar],
   );
 
   const verifyQr = useCallback(
     async (token: string) => {
-      if (!sessionId) return { ok: false as const, message: "Missing session." };
+      if (!sessionId)
+        return { ok: false as const, message: "Missing session." };
       setVerifyBusy(true);
       try {
         const { status, data } = await $api.meetups.verifyQr(sessionId, token);
@@ -222,9 +220,35 @@ export function useMeetupSession(sessionId: string | undefined) {
     [sessionId, session, refreshSession],
   );
 
+  const terminateMeet = useCallback(async () => {
+    if (!sessionId) return { ok: false as const, message: "Missing session." };
+    setTerminateBusy(true);
+    try {
+      const { status, data } = await $api.meetups.cancel(sessionId);
+      if (status < 200 || status >= 300) {
+        const message =
+          getApiMessageFromData(data) ?? "Could not terminate this meetup.";
+        showSnackbar(message, "error");
+        return { ok: false as const, message };
+      }
+      await refreshSession();
+      return { ok: true as const };
+    } catch (e) {
+      const message = getAxiosErrorMessage(
+        e,
+        "Could not terminate this meetup. Try again.",
+      );
+      showSnackbar(message, "error");
+      return { ok: false as const, message };
+    } finally {
+      setTerminateBusy(false);
+    }
+  }, [sessionId, refreshSession, showSnackbar]);
+
   const submitReport = useCallback(
     async (payload: MeetupReportPayload) => {
-      if (!sessionId) return { ok: false as const, message: "Missing session." };
+      if (!sessionId)
+        return { ok: false as const, message: "Missing session." };
       setReportBusy(true);
       try {
         const { status, data } = await $api.meetups.report(sessionId, payload);
@@ -262,7 +286,8 @@ export function useMeetupSession(sessionId: string | undefined) {
   );
 
   const resolveIsRequester = useCallback(
-    (userId: string) => (session ? meetupUserIsRequester(session, userId) : null),
+    (userId: string) =>
+      session ? meetupUserIsRequester(session, userId) : null,
     [session],
   );
 
@@ -281,5 +306,7 @@ export function useMeetupSession(sessionId: string | undefined) {
     confirmBusy,
     submitReport,
     reportBusy,
+    terminateMeet,
+    terminateBusy,
   };
 }

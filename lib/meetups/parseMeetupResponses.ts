@@ -27,10 +27,17 @@ function parseParticipant(raw: unknown): MeetupParticipant {
     roleLower === "requester" || roleLower === "donor"
       ? roleLower
       : (roleRaw ?? undefined);
+  const meetingRaw = o.meetingCode ?? o.meeting_code;
+  const meetingCode =
+    pickString(meetingRaw) ??
+    (typeof meetingRaw === "number" && Number.isFinite(meetingRaw)
+      ? String(meetingRaw).padStart(6, "0")
+      : null);
 
   return {
     ...(userId ? { userId } : {}),
     ...(role ? { role } : {}),
+    ...(meetingCode ? { meetingCode } : {}),
     ...(() => {
       const iv = pickBool(
         o.identityVerified ?? o.identity_verified,
@@ -153,6 +160,38 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
         : null);
   }
 
+  const myMeetingRaw =
+    r.myMeetingCode ?? r.my_meeting_code ?? r.myCode ?? r.my_code;
+  const myMeetingCode =
+    pickString(myMeetingRaw) ??
+    (typeof myMeetingRaw === "number" && Number.isFinite(myMeetingRaw)
+      ? String(myMeetingRaw).padStart(6, "0")
+      : null);
+
+  const peerMeetingRaw =
+    r.peerMeetingCode ?? r.peer_meeting_code ?? r.peerCode ?? r.peer_code;
+  const peerMeetingCode =
+    pickString(peerMeetingRaw) ??
+    (typeof peerMeetingRaw === "number" && Number.isFinite(peerMeetingRaw)
+      ? String(peerMeetingRaw).padStart(6, "0")
+      : null);
+
+  const requesterMeetingRaw =
+    r.requesterMeetingCode ?? r.requester_meeting_code;
+  const requesterMeetingCode =
+    pickString(requesterMeetingRaw) ??
+    (typeof requesterMeetingRaw === "number" &&
+    Number.isFinite(requesterMeetingRaw)
+      ? String(requesterMeetingRaw).padStart(6, "0")
+      : null);
+
+  const donorMeetingRaw = r.donorMeetingCode ?? r.donor_meeting_code;
+  const donorMeetingCode =
+    pickString(donorMeetingRaw) ??
+    (typeof donorMeetingRaw === "number" && Number.isFinite(donorMeetingRaw)
+      ? String(donorMeetingRaw).padStart(6, "0")
+      : null);
+
   let me = parseParticipant(r.me);
   let peer = parseParticipant(r.peer);
   const meRole = me.role?.toLowerCase();
@@ -218,6 +257,10 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
     me,
     peer,
     ...(meetingCode ? { meetingCode } : { meetingCode: null }),
+    ...(myMeetingCode ? { myMeetingCode } : {}),
+    ...(peerMeetingCode ? { peerMeetingCode } : {}),
+    ...(requesterMeetingCode ? { requesterMeetingCode } : {}),
+    ...(donorMeetingCode ? { donorMeetingCode } : {}),
     ...(bookingId ? { bookingId } : {}),
     ...(reqId ? { requesterUserId: reqId } : {}),
     ...(donId ? { donorUserId: donId } : {}),

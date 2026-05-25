@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   ChevronRight,
   Droplet,
@@ -16,12 +16,7 @@ import {
 import Link from "next/link";
 import { Layout } from "../../../layout/layout.component";
 import { Avatar } from "../../../components/ui/Avatar/avatar.component";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 import {
   DONATION_TYPE_ENTRIES,
@@ -32,6 +27,12 @@ import {
   withDonationTypeQuery,
 } from "@/lib/donations/donation-pathway-questionnaire-type";
 import { donorDetailPath, routes } from "@/config/routes";
+import { $api } from "@/app/api";
+import { parseDonorRecord } from "@/lib/donors/parseDonorsListResponse";
+import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
+import { DonorCooldownDisplay } from "../donors/components/donor-cooldown-display.component";
+import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
+import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component";
 
 const BECOME_DONOR_CARDS = [
   {
@@ -130,10 +131,32 @@ const pathwayFilterChipBase =
 
 export default function OverviewPage() {
   const { user } = useDashboard();
+  const [myCooldownEndsAt, setMyCooldownEndsAt] = useState<
+    string | null | undefined
+  >(undefined);
   const [pathwaySearch, setPathwaySearch] = useState("");
   const [pathwayFilter, setPathwayFilter] = useState<
     "all" | "live" | "interest"
   >("all");
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const { data, status } = await $api.donors.me();
+        if (cancelled || status < 200 || status >= 300 || !data) return;
+        const raw =
+          unwrapApiRecord(data) ?? (typeof data === "object" ? data : null);
+        const row = parseDonorRecord(raw);
+        if (!cancelled) setMyCooldownEndsAt(row?.cooldownEndsAt ?? null);
+      } catch {
+        if (!cancelled) setMyCooldownEndsAt(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredPathways = useMemo(() => {
     const q = pathwaySearch.trim().toLowerCase();
@@ -168,19 +191,25 @@ export default function OverviewPage() {
                   Signed in
                 </p>
                 <h1 className="mt-0.5 truncate text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
-                  Welcome back, {user?.firstname} {user?.lastname}
+                  {user?.firstname} {user?.lastname}
                 </h1>
               </div>
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <span className="text-text-secondary">Email</span>
-                  <span className="truncate font-medium text-text-primary">
-                    {user?.email ?? "—"}
-                  </span>
+                  <CopyableTextLabel value={user?.email ?? ""} />
                 </div>
-                <div className="flex flex-col gap-0.5 border-l border-border pl-6 dark:border-white/10">
-                  <span className="text-text-secondary">Donations logged</span>
-                  <span className="font-medium text-text-primary">None yet</span>
+                <div className="flex min-w-0 flex-col gap-0.5 border-l border-border pl-6 dark:border-white/10">
+                  <span className="text-text-secondary">Cooldown</span>
+                  {myCooldownEndsAt === undefined ? (
+                    <span className="text-xs text-text-tertiary">Loading…</span>
+                  ) : (
+                    <DonorCooldownDisplay
+                      cooldownEndsAt={myCooldownEndsAt}
+                      variant="owner"
+                      className="w-fit max-w-full"
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -423,7 +452,9 @@ export default function OverviewPage() {
                                 >
                                   <span
                                     className={`mt-1.5 size-2 shrink-0 rounded-full ${
-                                      live ? "bg-primary" : "bg-text-tertiary/40"
+                                      live
+                                        ? "bg-primary"
+                                        : "bg-text-tertiary/40"
                                     }`}
                                     aria-hidden
                                   />
@@ -469,71 +500,100 @@ export default function OverviewPage() {
                       </Link>
                     </div>
                     <div className="max-h-[380px] overflow-y-auto">
-                      {ACTIVE_DONORS.map((donor, index) => (
-                        <div
-                          key={donor.id}
-                          className={`flex flex-col gap-4 px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:px-6 ${
-                            index > 0
-                              ? "border-t border-border dark:border-white/10"
-                              : ""
-                          }`}
-                        >
-                          <div className="flex min-w-0 flex-1 items-center gap-3">
-                            <Avatar className="size-11!" />
-                            <div className="min-w-0 flex flex-col">
+                      {ACTIVE_DONORS.map((donor, index) => {
+                        const cooldown = resolveDonorCooldown(
+                          "cooldownEndsAt" in donor
+                            ? (donor.cooldownEndsAt as string | undefined)
+                            : undefined,
+                        );
+                        const bookingBlocked = cooldown.isActive;
+                        return (
+                          <div
+                            key={donor.id}
+                            className={`flex flex-col gap-4 px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:px-6 ${
+                              index > 0
+                                ? "border-t border-border dark:border-white/10"
+                                : ""
+                            }`}
+                          >
+                            <div className="flex min-w-0 flex-1 items-center gap-3">
+                              <Avatar className="size-11!" />
+                              <div className="min-w-0 flex flex-col gap-1.5">
+                                <Link
+                                  href={donorDetailPath(donor.id)}
+                                  className="truncate text-sm font-semibold text-text-primary hover:text-primary hover:underline"
+                                >
+                                  Donor {donor.id}
+                                </Link>
+                                <span className="text-xs text-text-secondary">
+                                  {donor.packs}
+                                </span>
+                                <DonorCooldownDisplay
+                                  cooldownEndsAt={
+                                    "cooldownEndsAt" in donor
+                                      ? (donor.cooldownEndsAt as
+                                          | string
+                                          | undefined)
+                                      : undefined
+                                  }
+                                  variant="public"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                              <span className="rounded-full bg-[#FCE7E7] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary dark:bg-primary/25">
+                                {donor.bloodType}
+                              </span>
+                              <div className="flex items-center gap-1 text-sm text-text-secondary">
+                                <Star
+                                  className="size-4 fill-amber-400 text-amber-400"
+                                  aria-hidden
+                                />
+                                <span>{donor.rating}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-sm text-text-secondary">
+                                <DropletIcon
+                                  className="size-3.5 text-primary"
+                                  aria-hidden
+                                />
+                                <span>{donor.donations} donations</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-sm text-text-secondary">
+                                <MapPin
+                                  className="size-3.5 shrink-0"
+                                  aria-hidden
+                                />
+                                <span className="truncate">
+                                  {donor.location}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex w-full shrink-0 gap-2 sm:ml-auto sm:w-auto">
                               <Link
                                 href={donorDetailPath(donor.id)}
-                                className="truncate text-sm font-semibold text-text-primary hover:text-primary hover:underline"
+                                className="inline-flex flex-1 items-center justify-center rounded-lg border border-border px-4 py-2 text-xs font-medium text-text-primary transition hover:bg-primary/4 dark:border-white/10 sm:flex-none"
                               >
-                                Donor {donor.id}
+                                View profile
                               </Link>
-                              <span className="text-xs text-text-secondary">
-                                {donor.packs}
-                              </span>
+                              {bookingBlocked ? (
+                                <span
+                                  className="inline-flex flex-1 items-center justify-center rounded-lg border border-border bg-[#F4F4F5] px-4 py-2 text-xs font-medium text-text-tertiary sm:flex-none dark:border-white/10 dark:bg-white/8"
+                                  aria-disabled
+                                >
+                                  Booking paused
+                                </span>
+                              ) : (
+                                <Link
+                                  href={routes.scheduleAppointment(donor.id)}
+                                  className="inline-flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary/90 sm:flex-none"
+                                >
+                                  Book
+                                </Link>
+                              )}
                             </div>
                           </div>
-                          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                            <span className="rounded-full bg-[#FCE7E7] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary dark:bg-primary/25">
-                              {donor.bloodType}
-                            </span>
-                            <div className="flex items-center gap-1 text-sm text-text-secondary">
-                              <Star
-                                className="size-4 fill-amber-400 text-amber-400"
-                                aria-hidden
-                              />
-                              <span>{donor.rating}</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-sm text-text-secondary">
-                              <DropletIcon
-                                className="size-3.5 text-primary"
-                                aria-hidden
-                              />
-                              <span>{donor.donations} donations</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-sm text-text-secondary">
-                              <MapPin
-                                className="size-3.5 shrink-0"
-                                aria-hidden
-                              />
-                              <span className="truncate">{donor.location}</span>
-                            </div>
-                          </div>
-                          <div className="flex w-full shrink-0 gap-2 sm:ml-auto sm:w-auto">
-                            <Link
-                              href={donorDetailPath(donor.id)}
-                              className="inline-flex flex-1 items-center justify-center rounded-lg border border-border px-4 py-2 text-xs font-medium text-text-primary transition hover:bg-primary/4 dark:border-white/10 sm:flex-none"
-                            >
-                              View profile
-                            </Link>
-                            <Link
-                              href={routes.scheduleAppointment(donor.id)}
-                              className="inline-flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary/90 sm:flex-none"
-                            >
-                              Book
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </section>
                 </div>

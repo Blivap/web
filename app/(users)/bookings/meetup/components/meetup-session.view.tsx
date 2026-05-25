@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -15,11 +16,12 @@ import {
   CircleDashed,
   HelpCircle,
   MessageCircle,
+  ScanIcon,
+  SendIcon,
   ShieldAlert,
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-import QRCode from "react-qr-code";
 import { useDonationChat } from "@/hooks/chat/useDonationChat.hook";
 import { useMeetupSession } from "@/hooks/meetups/useMeetupSession.hook";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -28,14 +30,38 @@ import {
   loadSentBookings,
 } from "@/store/slices/bookingsSlice";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
+import QRCode from "react-qr-code";
 import type { MeetupParticipant, MeetupReportPayload } from "@/types/meetups";
 import {
   meetupChatBookingStashKey,
   meetupCodeHintStorageKey,
-  meetupOtqrStorageKey,
 } from "@/lib/meetups/meetupSessionStorageKeys";
+import {
+  normalizeMeetupSixDigitCode,
+  resolveMyMeetupCode,
+} from "@/lib/meetups/meetupSwapCodes";
+import {
+  buildMeetupSwapCodeQrUrl,
+  meetupPendingVerifyCodeStorageKey,
+  parseCodeFromScannedMeetupPayload,
+} from "@/lib/meetups/meetupVerifyQrUrl";
+import { MeetupQrScanner } from "./meetup-qr-scanner.component";
+import { routes } from "@/config/routes";
+import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component";
 import { MeetupReportModal } from "./meetup-report-modal.component";
 import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 const cardClass =
   "rounded-xl border border-border bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#1a1a22]";
@@ -168,7 +194,7 @@ function MeetupParticipantVerificationCard({
         />
         <MeetupVerificationRow
           label="This meetup"
-          description="In-person check: code or QR used at the donation meetup."
+          description="In-person check: you entered the other person's unique code (or scanned their QR)."
           status={meetupRowStatus}
         />
       </div>
@@ -218,14 +244,8 @@ function MeetupVerificationSummary({
   );
 }
 
-function normalizeSixDigitCode(raw: string | null | undefined): string | null {
-  const d = String(raw ?? "")
-    .replace(/\D/g, "")
-    .slice(0, 12);
-  return d.length === 6 ? d : null;
-}
-
 export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
   const token = useAppSelector((s) => s.auth.token);
@@ -233,17 +253,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const ninOk = user?.nationalIdentificationNumberVerified === true;
 
   const [codeInput, setCodeInput] = useState("");
-  const [qrPaste, setQrPaste] = useState("");
-  const [oneTimeQr] = useState(() => {
-    try {
-      const k = meetupOtqrStorageKey(sessionId);
-      const ot = sessionStorage.getItem(k);
-      if (ot) sessionStorage.removeItem(k);
-      return ot;
-    } catch {
-      return null;
-    }
-  });
+  const [peerScannerOpen, setPeerScannerOpen] = useState(false);
   const [meetingHint] = useState(() => {
     try {
       const k = meetupCodeHintStorageKey(sessionId);
@@ -256,6 +266,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   });
   const [chatDraft, setChatDraft] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
+  const [terminateAlertOpen, setTerminateAlertOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   /** Booking Mongo id stashed in bootstrap when opening from a booking row (fallback if GET session omits `bookingId`). */
   const [stashedChatBookingId, setStashedChatBookingId] = useState<
@@ -282,12 +293,13 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     readOnly,
     resolveIsRequester,
     verifyCode,
-    verifyQr,
     confirmDonation,
     verifyBusy,
     confirmBusy,
     submitReport,
     reportBusy,
+    terminateMeet,
+    terminateBusy,
   } = useMeetupSession(sessionId);
 
   /**
@@ -342,18 +354,31 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     el.scrollTop = el.scrollHeight;
   }, [newestChatMessageId]);
 
-  const displayMeetingCode = useMemo(() => {
-    return (
-      normalizeSixDigitCode(meetingHint) ??
-      normalizeSixDigitCode(session?.meetingCode ?? undefined)
+  const myMeetupCode = useMemo(
+    () => resolveMyMeetupCode(session, meetingHint, user?.id),
+    [session, meetingHint, user?.id],
+  );
+
+  const swapCodeQrUrl = useMemo(() => {
+    if (!myMeetupCode) return null;
+    const bookingId = session?.bookingId ?? stashedChatBookingId;
+    if (!bookingId || typeof window === "undefined") return null;
+    return buildMeetupSwapCodeQrUrl(
+      window.location.origin,
+      bookingId,
+      myMeetupCode,
     );
-  }, [meetingHint, session?.meetingCode]);
+  }, [myMeetupCode, session?.bookingId, stashedChatBookingId]);
 
   const onVerifyCode = useCallback(async () => {
     setLocalError(null);
     const digits = codeInput.replace(/\D/g, "").slice(0, 6);
     if (digits.length !== 6) {
-      setLocalError("Enter the six-digit meeting code.");
+      setLocalError("Enter the other person's six-digit code.");
+      return;
+    }
+    if (myMeetupCode && digits === myMeetupCode) {
+      setLocalError("Enter the other person's code, not your own.");
       return;
     }
     const res = await verifyCode(digits);
@@ -363,23 +388,32 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     }
     showSnackbar("Verified — thank you.");
     setCodeInput("");
-  }, [codeInput, verifyCode, showSnackbar]);
+  }, [codeInput, myMeetupCode, verifyCode, showSnackbar]);
 
-  const onVerifyQrPaste = useCallback(async () => {
-    setLocalError(null);
-    const t = qrPaste.trim();
-    if (!t) {
-      setLocalError("Paste the token from the scanned QR code.");
-      return;
-    }
-    const res = await verifyQr(t);
-    if (!res.ok) {
-      setLocalError(res.message);
-      return;
-    }
-    showSnackbar("QR verified.");
-    setQrPaste("");
-  }, [qrPaste, verifyQr, showSnackbar]);
+  const onScannedPeerCode = useCallback(
+    async (decoded: string) => {
+      setLocalError(null);
+      const digits = parseCodeFromScannedMeetupPayload(decoded);
+      if (!digits) {
+        const msg = "Could not read a six-digit code from that QR.";
+        setLocalError(msg);
+        showSnackbar(msg, "error");
+        return;
+      }
+      if (myMeetupCode && digits === myMeetupCode) {
+        const msg = "Scan the other person's QR, not your own.";
+        setLocalError(msg);
+        showSnackbar(msg, "error");
+        return;
+      }
+      const res = await verifyCode(digits);
+      if (!res.ok) return;
+      showSnackbar("Verified — thank you.", "success");
+      setCodeInput("");
+      setPeerScannerOpen(false);
+    },
+    [myMeetupCode, verifyCode, showSnackbar],
+  );
 
   const onConfirmDonation = useCallback(async () => {
     if (!user?.id) return;
@@ -428,6 +462,24 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     [submitReport, showSnackbar],
   );
 
+  const onConfirmTerminateMeet = useCallback(async () => {
+    if (readOnly) return;
+    setLocalError(null);
+    const res = await terminateMeet();
+    if (!res.ok) return;
+    setTerminateAlertOpen(false);
+    showSnackbar("Meetup terminated.", "success");
+    void dispatch(loadSentBookings({ silent: true }));
+    void dispatch(loadReceivedBookings({ silent: true }));
+    router.push(routes.bookings);
+  }, [
+    readOnly,
+    terminateMeet,
+    showSnackbar,
+    dispatch,
+    router,
+  ]);
+
   const myDonationDone = useMemo(() => {
     if (!session || !user?.id) return false;
     if (isRequester === true) return session.requesterDonationConfirmed;
@@ -447,6 +499,45 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     session.codeVerificationEnabled !== false &&
     !readOnly &&
     !gateSatisfied;
+
+  useEffect(() => {
+    if (sessionLoad !== "ok" || !session || readOnly || gateSatisfied) return;
+    if (session.codeVerificationEnabled === false) return;
+
+    let pending: string | null = null;
+    try {
+      const k = meetupPendingVerifyCodeStorageKey(sessionId);
+      pending = sessionStorage.getItem(k);
+      if (pending) sessionStorage.removeItem(k);
+    } catch {
+      return;
+    }
+    const digits = normalizeMeetupSixDigitCode(pending);
+    if (!digits) return;
+    if (myMeetupCode && digits === myMeetupCode) {
+      setLocalError("That QR is your own code. Scan the other person's QR.");
+      return;
+    }
+
+    void (async () => {
+      setLocalError(null);
+      const res = await verifyCode(digits);
+      if (!res.ok) {
+        setLocalError(res.message);
+        return;
+      }
+      showSnackbar("Their code verified — thank you.");
+    })();
+  }, [
+    sessionLoad,
+    session,
+    sessionId,
+    readOnly,
+    gateSatisfied,
+    myMeetupCode,
+    verifyCode,
+    showSnackbar,
+  ]);
 
   const chatComposerDisabled =
     readOnly ||
@@ -617,54 +708,66 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         <MeetupVerificationSummary me={session.me} peer={session.peer} />
       </section>
 
-      {ninOk && displayMeetingCode && !readOnly ? (
-        <section className={cardClass}>
-          <h2 className="text-sm font-semibold text-text-primary">
-            Share as QR (optional)
-          </h2>
-          <p className="mt-1 text-xs text-text-secondary">
-            The six-digit meeting code is sent in your Blivap notifications
-            only, not shown here. The other person can scan this QR to read the
-            same digits on their device, or you can both open your notifications
-            and enter the code under &quot;Verify code&quot; below.
-          </p>
-          <div className="mt-4 flex justify-center rounded-lg bg-white p-4 dark:bg-white">
-            <QRCode value={displayMeetingCode} size={180} level="M" />
-          </div>
-        </section>
-      ) : null}
-
-      {ninOk && oneTimeQr ? (
-        <section className={cardClass}>
-          <h2 className="text-sm font-semibold text-text-primary">
-            One-time QR for the other person
-          </h2>
-          <p className="mt-1 text-xs text-text-secondary">
-            They scan once to verify. Do not share this code in screenshots or
-            public channels.
-          </p>
-          <div className="mt-4 flex justify-center rounded-lg bg-white p-4 dark:bg-white">
-            <QRCode value={oneTimeQr} size={180} level="M" />
-          </div>
-        </section>
-      ) : null}
-
       {ninOk && !readOnly && !gateSatisfied ? (
         <section className={cardClass}>
           <h2 className="text-sm font-semibold text-text-primary">
             Verify at the hospital
           </h2>
           <p className="mt-1 text-xs text-text-secondary">
-            Either both of you enter the same six-digit code, or one person
-            scans the other&apos;s one-time QR (first successful scan wins).
+            Each of you has a unique six-digit code. Share yours (or your QR);
+            enter or scan the other person&apos;s code. Both must verify before
+            donation confirmation unlocks.
           </p>
 
+          {myMeetupCode ? (
+            <div className="mt-4 rounded-lg border border-border bg-[#FAFAFB] p-3 dark:border-white/10 dark:bg-black/20">
+              {swapCodeQrUrl ? (
+                <div className="mt-4  pt-4 ">
+                  {!peerScannerOpen ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={verifyBusy || !ninOk}
+                      onClick={() => setPeerScannerOpen(true)}
+                    >
+                      <ScanIcon className="size-4" aria-hidden />
+                    </Button>
+                  ) : null}
+                  <div className="mt-3 flex flex-col gap-6 justify-center rounded-lg bg-white p-4 dark:bg-white w-fit">
+                    <p className="text-xs font-medium text-text-primary">
+                      {peerScannerOpen ? "Scan their QR" : "Your QR"}
+                    </p>
+                    {peerScannerOpen ? (
+                      <MeetupQrScanner
+                        className="mt-3"
+                        autoStart
+                        disabled={verifyBusy || !ninOk}
+                        busy={verifyBusy}
+                        onScan={onScannedPeerCode}
+                      />
+                    ) : (
+                      <QRCode value={swapCodeQrUrl} size={180} level="M" />
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <p className="mt-4 text-xs text-amber-800 dark:text-amber-300">
+              Your code is not loaded yet. Check your notification or refresh
+              this page.
+            </p>
+          )}
+
           {showCodePath ? (
-            <div className="mt-4">
+            <div className="mt-6 border-t border-border pt-4 dark:border-white/10">
               <label className="text-xs font-medium text-text-primary">
-                Six-digit code
+                Other person&apos;s code
               </label>
-              <div className="mt-1 flex flex-wrap gap-2">
+              <p className="mt-0.5 text-xs text-text-secondary">
+                Ask them to share their digits or let you scan their QR.
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
                 <input
                   type="text"
                   inputMode="numeric"
@@ -684,36 +787,9 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                   disabled={verifyBusy || !ninOk}
                   onClick={() => void onVerifyCode()}
                 >
-                  {verifyBusy ? "Checking…" : "Verify code"}
+                  {verifyBusy ? <Spinner /> : "Verify"} {ninOk}
                 </button>
               </div>
-            </div>
-          ) : null}
-
-          {session.qrVerificationEnabled !== false ? (
-            <div className="mt-6 border-t border-border pt-4 dark:border-white/10">
-              <label className="text-xs font-medium text-text-primary">
-                Token from scanned QR
-              </label>
-              <p className="mt-0.5 text-xs text-text-secondary">
-                If you scanned their QR with your phone, paste the decoded token
-                here.
-              </p>
-              <textarea
-                className={`${inputClass} mt-2 min-h-[72px] resize-y font-mono text-xs`}
-                value={qrPaste}
-                onChange={(e) => setQrPaste(e.target.value)}
-                disabled={verifyBusy || !ninOk}
-                placeholder="Paste token"
-              />
-              <button
-                type="button"
-                className={`${btnSecondary} mt-2`}
-                disabled={verifyBusy || !ninOk}
-                onClick={() => void onVerifyQrPaste()}
-              >
-                {verifyBusy ? "Checking…" : "Verify from QR"}
-              </button>
             </div>
           ) : null}
         </section>
@@ -899,9 +975,9 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             Load older
           </button>
         ) : null}
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-3 flex flex-col items-center gap-2 sm:flex-row">
           <textarea
-            className={`${inputClass} min-h-[72px] flex-1 sm:min-h-[44px] resize-none`}
+            className={`${inputClass} min-h-[72px] flex-1 sm:min-h-[10px] max-h-[40px] resize-none`}
             placeholder={
               chatComposerDisabled
                 ? donationChat.roomClosed
@@ -918,14 +994,15 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             }}
             disabled={chatComposerDisabled}
           />
-          <button
+          <Button
             type="button"
+            size="icon-lg"
             className={`${btnPrimary} shrink-0`}
-            disabled={chatComposerDisabled}
+            disabled={chatComposerDisabled || donationChat.sendBusy}
             onClick={() => void onSendChat()}
           >
-            {donationChat.sendBusy ? "Sending…" : "Send"}
-          </button>
+            <SendIcon className="size-4" aria-hidden />
+          </Button>
         </div>
       </section>
 
@@ -939,6 +1016,40 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
           Report meetup
         </button>
       </div>
+
+      <button
+        type="button"
+        className={`${btnSecondary} w-full border-red-200 text-red-700 hover:bg-red-50 dark:border-red-900/50 dark:text-red-300 dark:hover:bg-red-950/40`}
+        disabled={readOnly || terminateBusy}
+        onClick={() => setTerminateAlertOpen(true)}
+      >
+        Terminate meet
+      </button>
+
+      <AlertDialog open={terminateAlertOpen} onOpenChange={setTerminateAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Terminate this meetup?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This ends the meetup for both parties. Verification and donation
+              chat will stop. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={terminateBusy}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/25 dark:bg-destructive/90"
+              disabled={terminateBusy}
+              onClick={(e) => {
+                e.preventDefault();
+                void onConfirmTerminateMeet();
+              }}
+            >
+              {terminateBusy ? "Terminating…" : "Terminate meet"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <MeetupReportModal
         open={reportOpen}

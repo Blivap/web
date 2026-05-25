@@ -48,6 +48,8 @@ interface NavItem {
   // Optional: custom colors for active/inactive states
   activeColor?: string;
   inactiveColor?: string;
+  /** Non-clickable nav row with an "Upcoming" badge */
+  upcoming?: boolean;
 }
 export const Layout = (props: PropsWithChildren<unknown>) => {
   useNotificationNavigationListener();
@@ -367,14 +369,15 @@ const NavLinks = ({ onLinkClick, darkShell }: NavLinksProps) => {
       icon: WalletIcon,
       activeColor: "#960018",
       inactiveColor: "#070416",
+      upcoming: true,
     },
-
     {
       title: "History",
       href: "history",
       icon: HistoryIcon,
       activeColor: "#960018",
       inactiveColor: "#070416",
+      upcoming: true,
     },
     {
       title: "Settings",
@@ -393,16 +396,34 @@ const NavLinks = ({ onLinkClick, darkShell }: NavLinksProps) => {
   return (
     <div className="flex flex-col gap-6">
       {navItems.map((item, idx) => {
-        const active = isActive(item.href);
-        // Determine icon color: use custom colors if provided, otherwise use defaults
-        const iconColor = active
-          ? item.activeColor || "#960018"
-          : darkShell
-            ? "#c8c8d0"
-            : item.inactiveColor || "#070416";
+        const active = !item.upcoming && isActive(item.href);
+        const iconColor = item.upcoming
+          ? darkShell
+            ? "#6b6b78"
+            : "#9CA3AF"
+          : active
+            ? item.activeColor || "#960018"
+            : darkShell
+              ? "#c8c8d0"
+              : item.inactiveColor || "#070416";
 
-        // Get the icon component
         const IconComponent = item.icon;
+
+        if (item.upcoming) {
+          return (
+            <div
+              key={`link-${idx}`}
+              aria-disabled="true"
+              className="flex cursor-not-allowed items-center gap-4 text-sm font-medium text-text-tertiary opacity-70"
+            >
+              <IconComponent color={iconColor} />
+              <span className="min-w-0 flex-1">{item.title}</span>
+              <span className="shrink-0 rounded-full border border-border bg-[#F4F4F5] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-tertiary dark:border-white/10 dark:bg-white/8">
+                Upcoming
+              </span>
+            </div>
+          );
+        }
 
         return (
           <Link
