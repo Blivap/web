@@ -114,6 +114,10 @@ function ScheduleAppointmentPageContent() {
 
   const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [bookingRequestSentOpen, setBookingRequestSentOpen] = useState(false);
+  const [bookingSuccessSummary, setBookingSuccessSummary] = useState<{
+    scheduledLabel: string;
+    hospitalName: string;
+  } | null>(null);
   const [isSendingBooking, setIsSendingBooking] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [appointment, setAppointment] = useState<AppointmentDetails>({
@@ -253,6 +257,23 @@ function ScheduleAppointmentPageContent() {
         return;
       }
       void dispatch(loadSentBookings({ silent: true }));
+      const hospital = hospitals.find((h) => h.id === appointment.hospitalId);
+      const scheduledDate = new Date(
+        `${appointment.date}T${appointment.time}:00`,
+      );
+      const scheduledLabel = Number.isNaN(scheduledDate.getTime())
+        ? `${appointment.date} · ${appointment.time}`
+        : scheduledDate.toLocaleString(undefined, {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          });
+      setBookingSuccessSummary({
+        scheduledLabel,
+        hospitalName: hospital?.name?.trim() ?? "Selected hospital",
+      });
       setBookingRequestSentOpen(true);
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -599,6 +620,8 @@ function ScheduleAppointmentPageContent() {
       <BookingRequestSentModal
         open={bookingRequestSentOpen}
         onClose={() => setBookingRequestSentOpen(false)}
+        scheduledLabel={bookingSuccessSummary?.scheduledLabel}
+        hospitalName={bookingSuccessSummary?.hospitalName}
       />
     </Layout>
   );

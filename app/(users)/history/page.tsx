@@ -1,5 +1,5 @@
-import { Layout } from "../../../layout/layout.component";
+import { notFound } from "next/navigation";
 
-export default function History() {
-  return <Layout>History</Layout>;
+export default function HistoryPage() {
+  notFound();
 }

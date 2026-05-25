@@ -58,7 +58,7 @@ export const Input = (props: InputProps) => {
         >
           <input
             className={classNames(
-              "w-full bg-transparent py-2.5 text-sm font-medium text-[#100F14] outline-none placeholder:text-xs placeholder:text-[#9794AA] dark:text-white dark:placeholder:text-slate-500",
+              "w-full bg-transparent py-2.5 text-base font-medium text-[#100F14] outline-none placeholder:text-xs placeholder:text-[#9794AA] dark:text-white dark:placeholder:text-slate-500",
               inputClassName,
             )}
             type={

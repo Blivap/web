@@ -27,6 +27,8 @@ import { Button } from "@/components/ui/button";
 import { DonorProfilePageSkeleton } from "./components/donor-profile-page-skeleton.component";
 import { useAppSelector } from "@/store/hooks";
 import { routes } from "@/config/routes";
+import { DonorCooldownDisplay } from "../components/donor-cooldown-display.component";
+import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
 
 const cardClass =
   "rounded-2xl border border-border bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#14141a] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]";
@@ -67,7 +69,7 @@ function StatTile({
   icon: LucideIcon;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-[#FAFAFB] p-4 dark:border-white/10 dark:bg-white/[0.04]">
+    <div className="rounded-xl border border-border bg-[#FAFAFB] p-4 dark:border-white/10 dark:bg-white/4">
       <div className="flex items-start gap-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/18">
           <Icon className="size-4" strokeWidth={2} aria-hidden />
@@ -144,6 +146,11 @@ export default function DonorDetailsPage() {
   const locationLine = donor
     ? [donor.location, donor.country].filter((s) => s && s !== "—").join(" · ")
     : "";
+
+  const isOwnProfile =
+    !!user?.id && !!donor?.userId && donor.userId === user.id;
+  const cooldown = resolveDonorCooldown(donor?.cooldownEndsAt);
+  const bookingBlocked = cooldown.isActive && !isOwnProfile;
 
   return (
     <Layout>
@@ -240,6 +247,11 @@ export default function DonorDetailsPage() {
                       ) : null}
                     </p>
                   </div>
+                  <DonorCooldownDisplay
+                    cooldownEndsAt={donor.cooldownEndsAt}
+                    variant={isOwnProfile ? "owner" : "public"}
+                    className="max-w-md"
+                  />
                   {donor.reliabilityScore != null ? (
                     <div className="max-w-md space-y-2">
                       <div className="flex items-center justify-between gap-2 text-xs">
@@ -363,20 +375,27 @@ export default function DonorDetailsPage() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-              <Button
-                variant="default"
-                onClick={() =>
-                  router.push(
-                    user?.nationalIdentificationNumberVerified
-                      ? routes.scheduleAppointment(donorId)
-                      : routes.verifyId(donorId),
-                  )
-                }
-                className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold"
-              >
-                Continue with donation
-                <ArrowRight className="size-4" aria-hidden />
-              </Button>
+              {bookingBlocked ? (
+                <p className="text-sm text-text-secondary">
+                  This donor is on a rest period. Booking opens when their
+                  cooldown ends.
+                </p>
+              ) : (
+                <Button
+                  variant="default"
+                  onClick={() =>
+                    router.push(
+                      user?.nationalIdentificationNumberVerified
+                        ? routes.scheduleAppointment(donorId)
+                        : routes.verifyId(donorId),
+                    )
+                  }
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold"
+                >
+                  Continue with donation
+                  <ArrowRight className="size-4" aria-hidden />
+                </Button>
+              )}
             </div>
           </div>
         ) : null}

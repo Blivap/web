@@ -57,6 +57,22 @@ export function formatScheduledLabel(iso: string): string {
   }
 }
 
+/** Compact date for booking table rows. */
+export function formatScheduledShort(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+}
+
 export function statusToPill(status: BookingStatus): {
   label: string;
   variant: BookingPillVariant;

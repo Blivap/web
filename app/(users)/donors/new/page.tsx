@@ -44,6 +44,9 @@ import { DonorRegistrationSuccessModal } from "./donor-registration-success-moda
 import { NewDonorPageSkeleton } from "./new-donor-page-skeleton";
 import { normalizeDonorRegistrationType } from "./donor-registration-type";
 import { ReproductiveDonorFlow } from "./reproductive-donor-flow.component";
+import Link from "next/link";
+import { routes } from "@/config/routes";
+import { ArrowLeft } from "lucide-react";
 
 type AreaLocationPayload = {
   country: string;
@@ -651,6 +654,13 @@ function NewDonorForm() {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-1 flex-col px-4 pb-6 pt-4 sm:p-6">
+      <Link
+        href={routes.overview}
+        className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline mb-6"
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+        Back
+      </Link>
       <StepProgress currentStep={step} />
       <div
         ref={contentRef}

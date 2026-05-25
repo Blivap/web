@@ -10,6 +10,8 @@ export type MeetupParticipant = {
   userId?: string;
   /** Present when API labels the current user’s role in the meetup. */
   role?: string;
+  /** This participant’s six-digit meetup code (when returned on `me` / `peer`). */
+  meetingCode?: string | null;
   identityVerified?: boolean;
   /** True when this party has completed in-person verification (code or QR path). */
   meetupVerified?: boolean;
@@ -28,8 +30,14 @@ export type MeetupSession = {
   qrVerificationEnabled?: boolean;
   requesterDonationConfirmed: boolean;
   donorDonationConfirmed: boolean;
-  /** Six-digit code for in-person verification (often on nested `booking`). */
+  /** Legacy single code on session/booking (prefer role-specific fields below). */
   meetingCode?: string | null;
+  /** Current user’s six-digit code to share with the other party. */
+  myMeetingCode?: string | null;
+  /** Other party’s code when the API exposes it (usually you only enter it in person). */
+  peerMeetingCode?: string | null;
+  requesterMeetingCode?: string | null;
+  donorMeetingCode?: string | null;
   /** Present when the requester has verified the meetup code (or equivalent). */
   requesterCodeVerifiedAt?: string | null;
   /** Present when the donor has verified the meetup code (or equivalent). */

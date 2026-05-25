@@ -1,19 +1,16 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { Check, Flag, Video, X } from "lucide-react";
 import type { BookingsShellRow, BookingsTabPanel } from "@/app/(users)/bookings/components/bookings-shell.view";
+import {
+  BookingIconActions,
+  BookingIconButton,
+} from "@/app/(users)/bookings/components/booking-icon-button.component";
 import { stashMeetupCodeFromBookingRow } from "@/lib/meetups/meetupSessionStorageKeys";
 import {
   bookingRowDetailPartsForViewer,
-  bookingTitleForViewer,
-  formatScheduledLabel,
+  formatScheduledShort,
   statusToPill,
 } from "@/lib/bookings/formatBookingDisplay";
-import { BookingRowSubtitle } from "@/app/(users)/bookings/components/booking-row-subtitle.component";
-import {
-  donorActionBtnClass,
-  donorDangerBtnClass,
-  donorGhostBtnClass,
-} from "@/lib/bookings/bookingsActionButtonClassNames";
 import type { Booking } from "@/types/bookings";
 import type { IUser } from "@/types";
 
@@ -58,103 +55,89 @@ export function buildDonorBookingsTabPanels(
 
   const mapRow = (b: Booking, tab: DonorPanelKey): BookingsShellRow => {
     const pill = statusToPill(b.status);
-    const title = bookingTitleForViewer(b, "donor");
-    const subtitle = (
-      <BookingRowSubtitle
-        {...bookingRowDetailPartsForViewer(
-          b,
-          "donor",
-          hospitalLabel(b.hospitalId),
-        )}
-      />
+    const parts = bookingRowDetailPartsForViewer(
+      b,
+      "donor",
+      hospitalLabel(b.hospitalId),
     );
-    const dateCol = formatScheduledLabel(b.scheduledAt);
+    const ninOk = user?.nationalIdentificationNumberVerified === true;
 
     let actionsSlot: ReactNode;
 
     if (tab === "pending" && b.status === "pending") {
       const busy = mutatingId === b.id;
-      const ninOk = user?.nationalIdentificationNumberVerified === true;
       actionsSlot = (
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <button
-            type="button"
-            className={donorActionBtnClass}
+        <BookingIconActions
+          hint={!ninOk ? "Verify NIN to accept" : undefined}
+        >
+          <BookingIconButton
+            label="Accept booking"
+            icon={<Check className="size-4" strokeWidth={2.5} />}
+            variant="primary"
             disabled={busy || !ninOk}
             onClick={() => acceptBooking(b.id)}
-          >
-            Accept
-          </button>
-          <button
-            type="button"
-            className={donorDangerBtnClass}
+          />
+          <BookingIconButton
+            label="Decline booking"
+            icon={<X className="size-4" strokeWidth={2.5} />}
+            variant="danger"
             disabled={busy}
             onClick={() => declineBooking(b.id)}
-          >
-            Decline
-          </button>
-          <button
-            type="button"
-            className={donorGhostBtnClass}
+          />
+          <BookingIconButton
+            label="Report issue"
+            icon={<Flag className="size-3.5" />}
+            variant="ghost"
+            disabled={busy}
             onClick={() => setReportBookingId(b.id)}
-          >
-            Report issue
-          </button>
-          {!ninOk ? (
-            <span className="text-xs text-amber-800 dark:text-amber-300">
-              Verify your NIN before you can accept.
-            </span>
-          ) : null}
-        </div>
+          />
+        </BookingIconActions>
       );
     } else if (tab === "confirmed" && b.status === "accepted") {
-      const ninOk = user?.nationalIdentificationNumberVerified === true;
       actionsSlot = (
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <span className="text-xs text-emerald-700 dark:text-emerald-400">
-            Accepted
-          </span>
-          {ninOk ? (
-            <Link
-              href={`/bookings/meetup?bookingId=${encodeURIComponent(b.id)}`}
-              className={donorActionBtnClass}
-              onClick={() =>
-                stashMeetupCodeFromBookingRow(b.id, b.meetingCode)
-              }
-            >
-              Open meetup
-            </Link>
-          ) : (
-            <span className="text-xs text-amber-800 dark:text-amber-300">
-              Verify your NIN to open the meetup room.
-            </span>
-          )}
-          <button
-            type="button"
-            className={donorGhostBtnClass}
+        <BookingIconActions
+          hint={!ninOk ? "Verify NIN for meetup" : undefined}
+        >
+          <BookingIconButton
+            label="Open meetup"
+            icon={<Video className="size-4" />}
+            variant="primary"
+            disabled={!ninOk}
+            href={
+              ninOk
+                ? `/bookings/meetup?bookingId=${encodeURIComponent(b.id)}`
+                : undefined
+            }
+            onNavigate={() =>
+              stashMeetupCodeFromBookingRow(b.id, b.meetingCode)
+            }
+          />
+          <BookingIconButton
+            label="Report issue"
+            icon={<Flag className="size-3.5" />}
+            variant="ghost"
             onClick={() => setReportBookingId(b.id)}
-          >
-            Report issue
-          </button>
-        </div>
+          />
+        </BookingIconActions>
       );
     } else {
       actionsSlot = (
-        <button
-          type="button"
-          className={donorGhostBtnClass}
-          onClick={() => setReportBookingId(b.id)}
-        >
-          Report issue
-        </button>
+        <BookingIconActions>
+          <BookingIconButton
+            label="Report issue"
+            icon={<Flag className="size-3.5" />}
+            variant="ghost"
+            onClick={() => setReportBookingId(b.id)}
+          />
+        </BookingIconActions>
       );
     }
 
     return {
       id: b.id,
-      dateCol,
-      title,
-      subtitle,
+      dateCol: formatScheduledShort(b.scheduledAt),
+      title: parts.who,
+      subtitle: parts.hospital,
       pillLabel: pill.label,
       pillVariant: pill.variant,
       reported: (b.reportsCount ?? 0) > 0,
@@ -169,11 +152,13 @@ export function buildDonorBookingsTabPanels(
       .filter((b) => donorTabForBooking(b) === t)
       .map((b) => mapRow(b, t));
 
+  const columns = ["When", "Request", "Status"] as const;
+
   return {
     pending: {
       summarySections: [],
       mainListTitle: "Open",
-      columnLabels: ["Scheduled", "Booking", "Status"],
+      columnLabels: columns,
       rows: byTab("pending"),
       actionsColumnLabel: "Actions",
       tableEmptyMessage: "You're all caught up.",
@@ -181,17 +166,17 @@ export function buildDonorBookingsTabPanels(
     confirmed: {
       summarySections: [],
       mainListTitle: "Confirmed",
-      columnLabels: ["Scheduled", "Booking", "Status"],
+      columnLabels: columns,
       rows: byTab("confirmed"),
-      actionsColumnLabel: "Details",
+      actionsColumnLabel: "Actions",
       tableEmptyMessage: "Nothing confirmed yet.",
     },
     past: {
       summarySections: [],
       mainListTitle: "Past",
-      columnLabels: ["Date", "Booking", "Outcome"],
+      columnLabels: columns,
       rows: byTab("past"),
-      actionsColumnLabel: "Record",
+      actionsColumnLabel: "Actions",
       tableEmptyMessage: "No past bookings.",
     },
   };

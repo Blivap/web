@@ -15,6 +15,11 @@ import {
   meetupCodeHintStorageKey,
   meetupOtqrStorageKey,
 } from "@/lib/meetups/meetupSessionStorageKeys";
+import {
+  MEETUP_VERIFY_MEETING_CODE_PARAM,
+  meetupPendingVerifyCodeStorageKey,
+} from "@/lib/meetups/meetupVerifyQrUrl";
+import { normalizeMeetupSixDigitCode } from "@/lib/meetups/meetupSwapCodes";
 import { routes } from "@/config/routes";
 import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
 
@@ -22,6 +27,9 @@ export function MeetupBootstrapClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = searchParams.get("bookingId")?.trim() ?? "";
+  const pendingVerifyCode = normalizeMeetupSixDigitCode(
+    searchParams.get(MEETUP_VERIFY_MEETING_CODE_PARAM),
+  );
   const [error, setError] = useState<string | null>(null);
 
   const missingBooking = !bookingId;
@@ -79,10 +87,17 @@ export function MeetupBootstrapClient() {
             meetupChatBookingStashKey(parsed.sessionId),
             bookingId,
           );
+          if (pendingVerifyCode) {
+            sessionStorage.setItem(
+              meetupPendingVerifyCodeStorageKey(parsed.sessionId),
+              pendingVerifyCode,
+            );
+          }
         } catch {
           /* storage blocked */
         }
-        router.replace(`/bookings/meetup/${parsed.sessionId}`);
+        const sessionPath = `/bookings/meetup/${parsed.sessionId}`;
+        router.replace(sessionPath);
       } catch (e) {
         if (!cancelled) {
           setError(
@@ -95,7 +110,7 @@ export function MeetupBootstrapClient() {
     return () => {
       cancelled = true;
     };
-  }, [bookingId, missingBooking, router]);
+  }, [bookingId, missingBooking, pendingVerifyCode, router]);
 
   if (missingBooking) {
     return <MeetupPageSkeleton />;

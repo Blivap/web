@@ -53,5 +53,11 @@ export default function MeetupRepository() {
         data: payload,
       });
     },
+
+    cancel(sessionId: string): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.meetups.cancel(sessionId), {
+        method: "PATCH",
+      });
+    },
   };
 }

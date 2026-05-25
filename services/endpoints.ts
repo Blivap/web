@@ -83,6 +83,8 @@ export const endpoints = {
       `/meetups/${encodeURIComponent(sessionId)}/complete`,
     report: (sessionId: string) =>
       `/meetups/${encodeURIComponent(sessionId)}/report`,
+    cancel: (sessionId: string) =>
+      `/meetups/${encodeURIComponent(sessionId)}/cancel`,
   },
 
   /** Donation coordination chat (`donationId` = booking id). Live traffic uses Socket.IO `/chat`. */
