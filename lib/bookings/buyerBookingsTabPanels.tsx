@@ -8,7 +8,6 @@ import {
   BookingIconActions,
   BookingIconButton,
 } from "@/app/(users)/bookings/components/booking-icon-button.component";
-import { stashMeetupCodeFromBookingRow } from "@/lib/meetups/meetupSessionStorageKeys";
 import {
   bookingRowDetailPartsForViewer,
   formatScheduledShort,
@@ -120,9 +119,6 @@ export function buildBuyerBookingsTabPanels(
               ninOk
                 ? `/bookings/meetup?bookingId=${encodeURIComponent(b.id)}`
                 : undefined
-            }
-            onNavigate={() =>
-              stashMeetupCodeFromBookingRow(b.id, b.meetingCode)
             }
           />
           <BookingIconButton

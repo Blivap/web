@@ -143,18 +143,80 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
     (typeof meetingRawRoot === "number" && Number.isFinite(meetingRawRoot)
       ? String(meetingRawRoot).padStart(6, "0")
       : null);
-  if (!meetingCode && bookingRaw && typeof bookingRaw === "object") {
+  let requesterMeetingCode: string | null = null;
+  let donorMeetingCode: string | null = null;
+
+  if (bookingRaw && typeof bookingRaw === "object") {
     const b = bookingRaw as Record<string, unknown>;
     const mcRaw = b.meetingCode ?? b.meeting_code;
-    meetingCode =
-      pickString(mcRaw) ??
-      (typeof mcRaw === "number" && Number.isFinite(mcRaw)
-        ? String(mcRaw).padStart(6, "0")
+    if (!meetingCode) {
+      meetingCode =
+        pickString(mcRaw) ??
+        (typeof mcRaw === "number" && Number.isFinite(mcRaw)
+          ? String(mcRaw).padStart(6, "0")
+          : null);
+    }
+    const reqMc = pickString(
+      b.requesterMeetingCode ??
+        b.requester_meeting_code ??
+        b.requesterCode ??
+        b.requester_code ??
+        b.requesterVerificationCode ??
+        b.requester_verification_code,
+    );
+    requesterMeetingCode =
+      reqMc ??
+      (typeof b.requesterMeetingCode === "number" &&
+      Number.isFinite(b.requesterMeetingCode)
+        ? String(b.requesterMeetingCode).padStart(6, "0")
         : null);
+    const donMc = pickString(
+      b.donorMeetingCode ??
+        b.donor_meeting_code ??
+        b.donorCode ??
+        b.donor_code ??
+        b.donorVerificationCode ??
+        b.donor_verification_code,
+    );
+    donorMeetingCode =
+      donMc ??
+      (typeof b.donorMeetingCode === "number" &&
+      Number.isFinite(b.donorMeetingCode)
+        ? String(b.donorMeetingCode).padStart(6, "0")
+        : null);
+    if (!requesterMeetingCode || !donorMeetingCode) {
+      const codes = b.codes ?? b.verificationCodes ?? b.verification_codes;
+      if (codes && typeof codes === "object") {
+        const c = codes as Record<string, unknown>;
+        if (!requesterMeetingCode) {
+          const raw = c.requester ?? c.requesterCode ?? c.requester_code;
+          requesterMeetingCode =
+            pickString(raw) ??
+            (typeof raw === "number" && Number.isFinite(raw)
+              ? String(raw).padStart(6, "0")
+              : null);
+        }
+        if (!donorMeetingCode) {
+          const raw = c.donor ?? c.donorCode ?? c.donor_code;
+          donorMeetingCode =
+            pickString(raw) ??
+            (typeof raw === "number" && Number.isFinite(raw)
+              ? String(raw).padStart(6, "0")
+              : null);
+        }
+      }
+    }
   }
 
   const myMeetingRaw =
-    r.myMeetingCode ?? r.my_meeting_code ?? r.myCode ?? r.my_code;
+    r.myMeetingCode ??
+    r.my_meeting_code ??
+    r.myCode ??
+    r.my_code ??
+    r.viewerMeetingCode ??
+    r.viewer_meeting_code ??
+    r.currentUserMeetingCode ??
+    r.current_user_meeting_code;
   const myMeetingCode =
     pickString(myMeetingRaw) ??
     (typeof myMeetingRaw === "number" && Number.isFinite(myMeetingRaw)
@@ -170,20 +232,59 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
       : null);
 
   const requesterMeetingRaw =
-    r.requesterMeetingCode ?? r.requester_meeting_code;
-  const requesterMeetingCode =
-    pickString(requesterMeetingRaw) ??
-    (typeof requesterMeetingRaw === "number" &&
-    Number.isFinite(requesterMeetingRaw)
-      ? String(requesterMeetingRaw).padStart(6, "0")
-      : null);
+    r.requesterMeetingCode ??
+    r.requester_meeting_code ??
+    r.requesterVerificationCode ??
+    r.requester_verification_code;
+  if (!requesterMeetingCode) {
+    requesterMeetingCode =
+      pickString(requesterMeetingRaw) ??
+      (typeof requesterMeetingRaw === "number" &&
+      Number.isFinite(requesterMeetingRaw)
+        ? String(requesterMeetingRaw).padStart(6, "0")
+        : null);
+  }
 
-  const donorMeetingRaw = r.donorMeetingCode ?? r.donor_meeting_code;
-  const donorMeetingCode =
-    pickString(donorMeetingRaw) ??
-    (typeof donorMeetingRaw === "number" && Number.isFinite(donorMeetingRaw)
-      ? String(donorMeetingRaw).padStart(6, "0")
-      : null);
+  const donorMeetingRaw =
+    r.donorMeetingCode ??
+    r.donor_meeting_code ??
+    r.donorVerificationCode ??
+    r.donor_verification_code;
+  if (!donorMeetingCode) {
+    donorMeetingCode =
+      pickString(donorMeetingRaw) ??
+      (typeof donorMeetingRaw === "number" && Number.isFinite(donorMeetingRaw)
+        ? String(donorMeetingRaw).padStart(6, "0")
+        : null);
+  }
+
+  if (!requesterMeetingCode || !donorMeetingCode) {
+    const codes =
+      r.codes ?? r.verificationCodes ?? r.verification_codes ?? r.verification;
+    if (codes && typeof codes === "object") {
+      const c = codes as Record<string, unknown>;
+      if (!requesterMeetingCode) {
+        const raw =
+          c.requester ??
+          c.requesterCode ??
+          c.requester_code ??
+          c.requesterMeetingCode;
+        requesterMeetingCode =
+          pickString(raw) ??
+          (typeof raw === "number" && Number.isFinite(raw)
+            ? String(raw).padStart(6, "0")
+            : null);
+      }
+      if (!donorMeetingCode) {
+        const raw = c.donor ?? c.donorCode ?? c.donor_code ?? c.donorMeetingCode;
+        donorMeetingCode =
+          pickString(raw) ??
+          (typeof raw === "number" && Number.isFinite(raw)
+            ? String(raw).padStart(6, "0")
+            : null);
+      }
+    }
+  }
 
   let me = parseParticipant(r.me);
   let peer = parseParticipant(r.peer);
@@ -284,11 +385,35 @@ export function parseMeetupEnsureSessionBody(
     (typeof meetingRaw === "number" && Number.isFinite(meetingRaw)
       ? String(meetingRaw).padStart(6, "0")
       : null);
+  const myMeetingRaw =
+    o.myMeetingCode ?? o.my_meeting_code ?? o.viewerMeetingCode;
+  const myMeetingCode =
+    pickString(myMeetingRaw) ??
+    (typeof myMeetingRaw === "number" && Number.isFinite(myMeetingRaw)
+      ? String(myMeetingRaw).padStart(6, "0")
+      : null);
+  const requesterMeetingRaw =
+    o.requesterMeetingCode ?? o.requester_meeting_code;
+  const requesterMeetingCode =
+    pickString(requesterMeetingRaw) ??
+    (typeof requesterMeetingRaw === "number" &&
+    Number.isFinite(requesterMeetingRaw)
+      ? String(requesterMeetingRaw).padStart(6, "0")
+      : null);
+  const donorMeetingRaw = o.donorMeetingCode ?? o.donor_meeting_code;
+  const donorMeetingCode =
+    pickString(donorMeetingRaw) ??
+    (typeof donorMeetingRaw === "number" && Number.isFinite(donorMeetingRaw)
+      ? String(donorMeetingRaw).padStart(6, "0")
+      : null);
   const qrToken = pickString(o.qrToken ?? o.qr_token);
   return {
     alreadyExists,
     sessionId,
     meetingCode,
+    myMeetingCode,
+    requesterMeetingCode,
+    donorMeetingCode,
     qrToken,
   };
 }

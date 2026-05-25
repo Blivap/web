@@ -37,8 +37,9 @@ import {
   meetupCodeHintStorageKey,
 } from "@/lib/meetups/meetupSessionStorageKeys";
 import {
+  isOwnMeetupCodeForVerify,
   normalizeMeetupSixDigitCode,
-  resolveMyMeetupCode,
+  resolveMeetupSwapCodes,
 } from "@/lib/meetups/meetupSwapCodes";
 import {
   buildMeetupSwapCodeQrUrl,
@@ -349,10 +350,16 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     el.scrollTop = el.scrollHeight;
   }, [newestChatMessageId]);
 
-  const myMeetupCode = useMemo(
-    () => resolveMyMeetupCode(session, meetingHint, user?.id),
-    [session, meetingHint, user?.id],
+  const meetingHintForResolve =
+    sessionLoad === "ok" ? null : meetingHint;
+
+  const swapCodes = useMemo(
+    () =>
+      resolveMeetupSwapCodes(session, meetingHintForResolve, user?.id),
+    [session, meetingHintForResolve, user?.id],
   );
+
+  const myMeetupCode = swapCodes.myCode;
 
   const swapCodeQrUrl = useMemo(() => {
     if (!myMeetupCode) return null;
@@ -372,7 +379,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       setLocalError("Enter the other person's six-digit code.");
       return;
     }
-    if (myMeetupCode && digits === myMeetupCode) {
+    if (isOwnMeetupCodeForVerify(digits, swapCodes)) {
       setLocalError("Enter the other person's code, not your own.");
       return;
     }
@@ -383,7 +390,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     }
     showSnackbar("Verified — thank you.");
     setCodeInput("");
-  }, [codeInput, myMeetupCode, verifyCode, showSnackbar]);
+  }, [codeInput, swapCodes, verifyCode, showSnackbar]);
 
   const onScannedPeerCode = useCallback(
     async (decoded: string) => {
@@ -395,7 +402,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         showSnackbar(msg, "error");
         return;
       }
-      if (myMeetupCode && digits === myMeetupCode) {
+      if (isOwnMeetupCodeForVerify(digits, swapCodes)) {
         const msg = "Scan the other person's QR, not your own.";
         setLocalError(msg);
         showSnackbar(msg, "error");
@@ -407,7 +414,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       setCodeInput("");
       setPeerScannerOpen(false);
     },
-    [myMeetupCode, verifyCode, showSnackbar],
+    [swapCodes, verifyCode, showSnackbar],
   );
 
   const onConfirmDonation = useCallback(async () => {
@@ -505,7 +512,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     if (!digits) return;
 
     void (async () => {
-      if (myMeetupCode && digits === myMeetupCode) {
+      if (isOwnMeetupCodeForVerify(digits, swapCodes)) {
         const msg = "That QR is your own code. Scan the other person's QR.";
         setLocalError(msg);
         showSnackbar(msg, "error");
@@ -525,7 +532,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     sessionId,
     readOnly,
     gateSatisfied,
-    myMeetupCode,
+    swapCodes,
     verifyCode,
     showSnackbar,
   ]);
@@ -778,7 +785,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                   disabled={verifyBusy || !ninOk}
                   onClick={() => void onVerifyCode()}
                 >
-                  {verifyBusy ? <Spinner /> : "Verify"} {ninOk}
+                  {verifyBusy ? <Spinner /> : "Verify"}{" "}
                 </button>
               </div>
             </div>
@@ -877,13 +884,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             </span>
           ) : null}
         </div>
-        <p className="mt-1 text-xs text-text-secondary">
-          Live messages use Socket.IO{" "}
-          <span className="font-mono text-[11px]">/chat</span> with your{" "}
-          <strong className="font-medium text-text-primary">booking id</strong>{" "}
-          (not the session id in this page URL). There is no meetup HTTP API for
-          chat; verify code / QR / complete stay on /meetups.
-        </p>
+
         {chatStatusLine ? (
           <p className="mt-2 text-xs text-text-secondary">{chatStatusLine}</p>
         ) : null}

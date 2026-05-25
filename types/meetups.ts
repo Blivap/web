@@ -64,6 +64,9 @@ export type MeetupEnsureSessionResponse = {
   alreadyExists: boolean;
   sessionId: string;
   meetingCode: string | null;
+  myMeetingCode?: string | null;
+  requesterMeetingCode?: string | null;
+  donorMeetingCode?: string | null;
   qrToken: string | null;
 };
 

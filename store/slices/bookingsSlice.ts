@@ -9,6 +9,7 @@ import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
 import type { IResponse } from "@/types";
 import type { Booking, BookingListQuery } from "@/types/bookings";
+import { mergeBookingsList } from "@/lib/bookings/mergeBookingsList";
 import { logout } from "./authSlice";
 
 export type BookingListLoadState = "idle" | "loading" | "ok" | "error";
@@ -152,7 +153,9 @@ const bookingsSlice = createSlice({
       })
       .addCase(loadSentBookings.fulfilled, (state, action) => {
         state.sent.status = "ok";
-        state.sent.items = action.payload.bookings;
+        state.sent.items = action.meta.arg?.silent
+          ? mergeBookingsList(state.sent.items, action.payload.bookings)
+          : action.payload.bookings;
         state.hospitalNamesById = {
           ...state.hospitalNamesById,
           ...action.payload.hospitalNamesById,
@@ -174,7 +177,12 @@ const bookingsSlice = createSlice({
       })
       .addCase(loadReceivedBookings.fulfilled, (state, action) => {
         state.received.status = "ok";
-        state.received.items = action.payload.bookings;
+        state.received.items = action.meta.arg?.silent
+          ? mergeBookingsList(
+              state.received.items,
+              action.payload.bookings,
+            )
+          : action.payload.bookings;
         state.hospitalNamesById = {
           ...state.hospitalNamesById,
           ...action.payload.hospitalNamesById,
