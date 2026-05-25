@@ -45,8 +45,9 @@ export function useBookingsDonorFlowToggle() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [bookingFlow, setBookingFlow] =
-    useState<BookingFlow>(initialDonorBookingFlow);
+  const [bookingFlow, setBookingFlow] = useState<BookingFlow>(
+    initialDonorBookingFlow,
+  );
 
   useEffect(() => {
     if (readPersistedDonorFlow() === null) {

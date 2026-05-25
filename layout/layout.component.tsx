@@ -22,7 +22,6 @@ import {
 } from "react";
 import gsap from "gsap";
 import { Avatar } from "../components/ui/Avatar/avatar.component";
-import { FaBars } from "react-icons/fa";
 import { useLogout } from "@/hooks/auth/useLogout.hook";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 import { NotificationBell } from "../components/feedback/notification/notification.component";

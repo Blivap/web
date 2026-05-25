@@ -27,9 +27,10 @@ export function questionnaireRecordFromMineResponse(
   }
 
   if (Array.isArray(node)) {
-    const items = node
-      .map((x) => pickObject(x))
-      .filter(Boolean) as Record<string, unknown>[];
+    const items = node.map((x) => pickObject(x)).filter(Boolean) as Record<
+      string,
+      unknown
+    >[];
     if (items.length === 0) return null;
     const active = items.find(
       (r) => String(r.status ?? "").toLowerCase() === "active",
@@ -46,9 +47,7 @@ export function extractQuestionnaireCompatibilityWarning(
 ): string | null {
   if (!root) return null;
   const v =
-    root.compatibilityWarning ??
-    root.compatibility_warning ??
-    root.warning;
+    root.compatibilityWarning ?? root.compatibility_warning ?? root.warning;
   if (typeof v === "string" && v.trim()) return v.trim();
   return null;
 }
@@ -56,10 +55,7 @@ export function extractQuestionnaireCompatibilityWarning(
 export function extractQuestionnaireIdFromRecord(
   root: Record<string, unknown>,
 ): string | null {
-  if (
-    typeof root.questionnaireId === "string" &&
-    root.questionnaireId.trim()
-  ) {
+  if (typeof root.questionnaireId === "string" && root.questionnaireId.trim()) {
     return root.questionnaireId.trim();
   }
   if (

@@ -121,11 +121,7 @@ function applyDomTheme(resolved: ResolvedTheme) {
   document.documentElement.style.colorScheme = resolved;
 }
 
-export function ThemePreferenceProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function ThemePreferenceProvider({ children }: { children: ReactNode }) {
   const [preference, setPreferenceState] = useState<ThemePreference>("system");
   const [systemScheme, setSystemScheme] = useState<ResolvedTheme>("light");
   /** Until true, resolve "system" as light so first client paint matches SSR (no `window` / matchMedia on server). */
@@ -138,7 +134,6 @@ export function ThemePreferenceProvider({
     /* One-time client hydration from localStorage/system scheme. */
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sync theme state once on mount
     setPreferenceState(initialPreference);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync system scheme once on mount
     setSystemScheme(initialSystemScheme);
     setHasMounted(true);
   }, []);

@@ -85,6 +85,7 @@ export function DonorScreeningProfileStep({
 
   useEffect(() => {
     const d = serverDefaults;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate form from server defaults
     setBiologicalSex(
       d.biologicalSex && BIO_OPTIONS.some((o) => o.value === d.biologicalSex)
         ? d.biologicalSex
@@ -133,7 +134,8 @@ export function DonorScreeningProfileStep({
     const p: DonorScreeningProfilePayload = {};
     if (biologicalSex) p.biologicalSex = biologicalSex;
     if (orderedTypes.length > 0) p.activeDonationTypes = orderedTypes;
-    if (lactating !== "unspecified") p.isActivelyLactating = triToBool(lactating);
+    if (lactating !== "unspecified")
+      p.isActivelyLactating = triToBool(lactating);
     if (pregnant !== "unspecified") p.isCurrentlyPregnant = triToBool(pregnant);
     return p;
   }, [biologicalSex, orderedTypes, lactating, pregnant]);
@@ -158,9 +160,10 @@ export function DonorScreeningProfileStep({
         <p className="mt-1 text-sm text-text-secondary max-w-[640px]">
           This step is separate from blood booking activation. It captures
           clinical context and which donation pathways you want to explore
-          first. It powers compatibility checks and optional typed questionnaires
-          — it does not replace the legacy health questionnaire in the next
-          step, which is still required to request active donor status.
+          first. It powers compatibility checks and optional typed
+          questionnaires — it does not replace the legacy health questionnaire
+          in the next step, which is still required to request active donor
+          status.
         </p>
 
         <div
@@ -169,9 +172,7 @@ export function DonorScreeningProfileStep({
         >
           <Info className="size-4 shrink-0 text-primary" aria-hidden />
           <p className="text-xs leading-relaxed text-text-secondary">
-            <span className="font-semibold text-text-primary">
-              Two layers:
-            </span>{" "}
+            <span className="font-semibold text-text-primary">Two layers:</span>{" "}
             (1){" "}
             <span className="font-medium text-text-primary">Active donor</span>{" "}
             — profile + legacy questionnaire +{" "}
@@ -200,8 +201,8 @@ export function DonorScreeningProfileStep({
               Biological sex
             </p>
             <p className="mt-0.5 text-xs text-text-secondary">
-              Used for compatibility and AI context. This is not the same field as
-              gender on the legacy blood questionnaire.
+              Used for compatibility and AI context. This is not the same field
+              as gender on the legacy blood questionnaire.
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {BIO_OPTIONS.map((o) => (

@@ -5,12 +5,13 @@ import { useSearchParams } from "next/navigation";
 import { useStore } from "react-redux";
 import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
-import type {
-  BookingsShellTabItem,
-} from "@/app/(users)/bookings/components/bookings-shell.view";
+import type { BookingsShellTabItem } from "@/app/(users)/bookings/components/bookings-shell.view";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { RootState, AppDispatch } from "@/store/store";
-import { loadReceivedBookings, patchBookingInLists } from "@/store/slices/bookingsSlice";
+import {
+  loadReceivedBookings,
+  patchBookingInLists,
+} from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import {
   buildDonorBookingsTabPanels,
@@ -20,7 +21,10 @@ import {
 import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook";
 
 export type { DonorPanelKey } from "@/lib/bookings/donorBookingsTabPanels";
-export { DONOR_TAB_ORDER, donorTabForBooking } from "@/lib/bookings/donorBookingsTabPanels";
+export {
+  DONOR_TAB_ORDER,
+  donorTabForBooking,
+} from "@/lib/bookings/donorBookingsTabPanels";
 
 function scheduleReceivedBookingsResync(dispatch: AppDispatch) {
   window.setTimeout(() => {
@@ -71,14 +75,9 @@ export function useDonorBookings() {
 
   const hospitalLabel = useCallback(
     (hospitalId: string) =>
-      hospitalNamesById[hospitalId] ??
-      `Hospital ${hospitalId.slice(0, 8)}…`,
+      hospitalNamesById[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
     [hospitalNamesById],
   );
-
-  const refreshReceived = useCallback(() => {
-    void dispatch(loadReceivedBookings({ silent: true }));
-  }, [dispatch]);
 
   const acceptBooking = useCallback(
     async (id: string) => {
@@ -170,9 +169,7 @@ export function useDonorBookings() {
       if (status < 200 || status >= 300) {
         throw new Error("Could not send the report.");
       }
-      dispatch(
-        patchBookingInLists({ id, reportsCount: prevCount + 1 }),
-      );
+      dispatch(patchBookingInLists({ id, reportsCount: prevCount + 1 }));
       showSnackbar("Thanks — your report was submitted.");
       scheduleReceivedBookingsResync(dispatch);
     },

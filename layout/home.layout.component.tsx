@@ -35,18 +35,15 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
         ? randomBetween(10000, 18000)
         : randomBetween(12000, 22000);
       timeoutId = setTimeout(() => {
-        setBannerVisible((v) => !v);
+        setBannerVisible((v) => {
+          if (v) setIsBannerHovered(false);
+          return !v;
+        });
       }, duration);
     };
     scheduleToggle();
     return () => clearTimeout(timeoutId);
   }, [bannerVisible, isBannerHovered]);
-
-  useEffect(() => {
-    if (!bannerVisible) {
-      setIsBannerHovered(false);
-    }
-  }, [bannerVisible]);
 
   const isActive = (href: string) => {
     if (href === "/") return pathName === "/";

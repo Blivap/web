@@ -9,9 +9,7 @@ import {
   getApiMessageFromData,
   getAxiosErrorMessage,
 } from "@/lib/bookings/axiosErrorMessage";
-import {
-  parseChatMessagesResponse,
-} from "@/lib/chat/parseChatMessagesResponse";
+import { parseChatMessagesResponse } from "@/lib/chat/parseChatMessagesResponse";
 import type { DonationChatMessage } from "@/types/donation-chat";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -136,7 +134,7 @@ export function useDonationChat({
       : EMPTY_MESSAGES,
   );
   const nextCursor = useAppSelector((s) =>
-    donationId ? s.donationChat.rooms[donationId]?.nextCursor ?? null : null,
+    donationId ? (s.donationChat.rooms[donationId]?.nextCursor ?? null) : null,
   );
 
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -171,66 +169,69 @@ export function useDonationChat({
     }
   }, [donationId, dispatch]);
 
-  const fetchHistory = useCallback(async (opts?: { before?: string }) => {
-    const id = donationIdRef.current;
-    if (!id) return;
-    setHistoryLoading(true);
-    setHistoryError(null);
-    try {
-      const { status, data } = await $api.chat.messages(id, {
-        limit: 50,
-        ...(opts?.before ? { before: opts.before } : {}),
-      });
-      if (status === 403) {
-        setRoomClosed(true);
-        setRoomCloseReason(
-          getApiMessageFromData(data) ?? "This chat is closed.",
-        );
-        if (!opts?.before) {
-          dispatch(clearDonationChatMessages({ donationId: id }));
+  const fetchHistory = useCallback(
+    async (opts?: { before?: string }) => {
+      const id = donationIdRef.current;
+      if (!id) return;
+      setHistoryLoading(true);
+      setHistoryError(null);
+      try {
+        const { status, data } = await $api.chat.messages(id, {
+          limit: 50,
+          ...(opts?.before ? { before: opts.before } : {}),
+        });
+        if (status === 403) {
+          setRoomClosed(true);
+          setRoomCloseReason(
+            getApiMessageFromData(data) ?? "This chat is closed.",
+          );
+          if (!opts?.before) {
+            dispatch(clearDonationChatMessages({ donationId: id }));
+          }
+          return;
         }
-        return;
-      }
-      if (status < 200 || status >= 300) {
-        const msg =
-          getApiMessageFromData(data) ?? "Could not load chat history.";
-        if (!opts?.before) setHistoryError(msg);
-        return;
-      }
-      setRoomClosed(false);
-      setRoomCloseReason(null);
-      const { messages: chunk, nextCursor: cursor } =
-        parseChatMessagesResponse(data);
-      dispatch(
-        mergeDonationChatHistory({
-          donationId: id,
-          messages: chunk,
-          nextCursor: cursor,
-          prepend: Boolean(opts?.before),
-        }),
-      );
-    } catch (e) {
-      /** GET /chat/.../messages returns 403 when the room is closed; axios rejects non-2xx so this never hits `status === 403` above. */
-      if (axios.isAxiosError(e) && e.response?.status === 403) {
-        setRoomClosed(true);
-        setRoomCloseReason(
-          getApiMessageFromData(e.response.data) ?? "Chat is closed.",
-        );
-        if (!opts?.before) {
-          setHistoryError(null);
-          dispatch(clearDonationChatMessages({ donationId: id }));
+        if (status < 200 || status >= 300) {
+          const msg =
+            getApiMessageFromData(data) ?? "Could not load chat history.";
+          if (!opts?.before) setHistoryError(msg);
+          return;
         }
-        return;
-      }
-      if (!opts?.before) {
-        setHistoryError(
-          getAxiosErrorMessage(e, "Could not load chat history."),
+        setRoomClosed(false);
+        setRoomCloseReason(null);
+        const { messages: chunk, nextCursor: cursor } =
+          parseChatMessagesResponse(data);
+        dispatch(
+          mergeDonationChatHistory({
+            donationId: id,
+            messages: chunk,
+            nextCursor: cursor,
+            prepend: Boolean(opts?.before),
+          }),
         );
+      } catch (e) {
+        /** GET /chat/.../messages returns 403 when the room is closed; axios rejects non-2xx so this never hits `status === 403` above. */
+        if (axios.isAxiosError(e) && e.response?.status === 403) {
+          setRoomClosed(true);
+          setRoomCloseReason(
+            getApiMessageFromData(e.response.data) ?? "Chat is closed.",
+          );
+          if (!opts?.before) {
+            setHistoryError(null);
+            dispatch(clearDonationChatMessages({ donationId: id }));
+          }
+          return;
+        }
+        if (!opts?.before) {
+          setHistoryError(
+            getAxiosErrorMessage(e, "Could not load chat history."),
+          );
+        }
+      } finally {
+        setHistoryLoading(false);
       }
-    } finally {
-      setHistoryLoading(false);
-    }
-  }, [dispatch]);
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     if (!enabled || !donationId || !accessToken) {
@@ -310,7 +311,9 @@ export function useDonationChat({
       if (!roomId) return;
       if (!payload || typeof payload !== "object") {
         lastOutgoingOptimisticRef.current = null;
-        dispatch(stripDonationChatOptimistic({ donationId: roomId, all: true }));
+        dispatch(
+          stripDonationChatOptimistic({ donationId: roomId, all: true }),
+        );
         setRoomClosed(true);
         return;
       }
@@ -349,7 +352,9 @@ export function useDonationChat({
       if (isChatClosedSocketMeta(meta)) {
         if (roomId) {
           lastOutgoingOptimisticRef.current = null;
-          dispatch(stripDonationChatOptimistic({ donationId: roomId, all: true }));
+          dispatch(
+            stripDonationChatOptimistic({ donationId: roomId, all: true }),
+          );
         }
         setRoomClosed(true);
         const reason =
@@ -364,7 +369,9 @@ export function useDonationChat({
       if (isForbiddenChatSocketNoise(meta)) {
         if (roomId) {
           lastOutgoingOptimisticRef.current = null;
-          dispatch(stripDonationChatOptimistic({ donationId: roomId, all: true }));
+          dispatch(
+            stripDonationChatOptimistic({ donationId: roomId, all: true }),
+          );
         }
         setRoomClosed(true);
         setRoomCloseReason("Chat is closed.");

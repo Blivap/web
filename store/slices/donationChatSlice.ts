@@ -88,8 +88,12 @@ const donationChatSlice = createSlice({
         prepend: boolean;
       }>,
     ) => {
-      const { donationId, messages: chunk, nextCursor, prepend } =
-        action.payload;
+      const {
+        donationId,
+        messages: chunk,
+        nextCursor,
+        prepend,
+      } = action.payload;
       const room = getRoom(state, donationId);
       if (prepend) {
         const seen = new Set(room.messages.map((m) => m.id));
@@ -129,7 +133,10 @@ const donationChatSlice = createSlice({
 
     appendDonationChatOptimistic: (
       state,
-      action: PayloadAction<{ donationId: string; message: DonationChatMessage }>,
+      action: PayloadAction<{
+        donationId: string;
+        message: DonationChatMessage;
+      }>,
     ) => {
       const { donationId, message } = action.payload;
       const room = getRoom(state, donationId);

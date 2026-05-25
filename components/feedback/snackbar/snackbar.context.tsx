@@ -35,18 +35,21 @@ export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
   const [snackbar, setSnackbar] = useState<SnackbarState | null>(null);
   const nextIdRef = useRef(1);
 
-  const showSnackbar = useCallback((
-    message: string,
-    severity: SnackbarSeverity = "info",
-    duration: number = 3000,
-  ) => {
-    setSnackbar({
-      id: nextIdRef.current++,
-      message,
-      severity,
-      duration,
-    });
-  }, []);
+  const showSnackbar = useCallback(
+    (
+      message: string,
+      severity: SnackbarSeverity = "info",
+      duration: number = 3000,
+    ) => {
+      setSnackbar({
+        id: nextIdRef.current++,
+        message,
+        severity,
+        duration,
+      });
+    },
+    [],
+  );
 
   const hideSnackbar = useCallback(() => {
     setSnackbar(null);

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import debounce from "lodash/debounce";
-import { Search, Star, Droplet } from "lucide-react";
+import { Star, Droplet } from "lucide-react";
 import { Layout } from "../../../layout/layout.component";
 import Link from "next/link";
 import { $api } from "@/app/api";
@@ -270,6 +270,8 @@ export default function DonorsPage() {
   }, [page, debouncedSearch, activeBloodType]);
 
   useEffect(() => {
+    /* Fetch when filters change — async work is deferred inside loadDonors. */
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- load donors on mount/filter change
     void loadDonors();
   }, [loadDonors]);
 

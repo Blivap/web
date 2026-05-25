@@ -47,7 +47,10 @@ export default function MeetupRepository() {
       });
     },
 
-    report(sessionId: string, payload: MeetupReportPayload): Promise<IResponse<unknown>> {
+    report(
+      sessionId: string,
+      payload: MeetupReportPayload,
+    ): Promise<IResponse<unknown>> {
       return fetcher(endpoints.meetups.report(sessionId), {
         method: "POST",
         data: payload,

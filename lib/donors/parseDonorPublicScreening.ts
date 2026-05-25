@@ -1,4 +1,7 @@
-import type { DonorPublicScreening, DonorPublicScreeningQuestion } from "@/types/donors";
+import type {
+  DonorPublicScreening,
+  DonorPublicScreeningQuestion,
+} from "@/types/donors";
 
 function pickString(v: unknown): string | undefined {
   if (typeof v === "string" && v.trim()) return v.trim();

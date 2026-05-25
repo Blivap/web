@@ -30,7 +30,9 @@ export default function Terms() {
           </section>
 
           <section className="flex flex-col gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-4 text-[#111827] dark:border-white/10 dark:bg-[#111827] dark:text-white">
-            <h2 className="font-semibold text-base text-black dark:text-white">Eligibility</h2>
+            <h2 className="font-semibold text-base text-black dark:text-white">
+              Eligibility
+            </h2>
             <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
               Donors must meet the eligibility criteria we publish (including
               age, health, and location requirements for blood and sperm
@@ -81,7 +83,9 @@ export default function Terms() {
           </section>
 
           <section className="flex flex-col gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-4 text-[#111827] dark:border-white/10 dark:bg-[#111827] dark:text-white">
-            <h2 className="font-semibold text-base text-black dark:text-white">Contact</h2>
+            <h2 className="font-semibold text-base text-black dark:text-white">
+              Contact
+            </h2>
             <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
               For questions about these Terms and Conditions, contact us at{" "}
               <a

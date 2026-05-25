@@ -218,7 +218,8 @@ export function StepOne({
           <span className="font-medium text-text-primary">
             active donor activation
           </span>{" "}
-          (POST <span className="font-mono text-[11px]">/donors/questionnaire</span>
+          (POST{" "}
+          <span className="font-mono text-[11px]">/donors/questionnaire</span>
           ). It is separate from biological sex and donation-type intent on your
           screening profile. Answer each question once — after submit, answers
           stay locked until a retake is scheduled.
@@ -274,7 +275,9 @@ export function StepOne({
             )}
             <button
               type="submit"
-              disabled={isSubmitting || (!showNextAction && !allMedicalAnswered)}
+              disabled={
+                isSubmitting || (!showNextAction && !allMedicalAnswered)
+              }
               className="text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
             >
               {isSubmitting

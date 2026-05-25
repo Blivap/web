@@ -64,7 +64,7 @@ export const HomeComponent = () => {
   });
 
   const featuredNews = news?.[0];
-  const newsItems = news?.slice(1, 4) ?? [];
+  const newsItems = useMemo(() => news?.slice(1, 4) ?? [], [news]);
   const showNewsPlaceholder = !newsSectionNear || isLoading;
 
   useLayoutEffect(() => {
@@ -229,7 +229,9 @@ export const HomeComponent = () => {
     }
 
     const items = Array.from(
-      newsListRef.current.querySelectorAll<HTMLElement>("[data-home-news-list-item]"),
+      newsListRef.current.querySelectorAll<HTMLElement>(
+        "[data-home-news-list-item]",
+      ),
     );
 
     if (items.length === 0) return;
@@ -437,8 +439,12 @@ export const HomeComponent = () => {
                 href={item.href}
                 className="flex flex-col gap-1 hover:opacity-90 transition-opacity"
               >
-                <p className="text-sm font-semibold text-black dark:text-white">{item.title}</p>
-                <p className="text-xs text-[#6B7280] dark:text-slate-400">{item.desc}</p>
+                <p className="text-sm font-semibold text-black dark:text-white">
+                  {item.title}
+                </p>
+                <p className="text-xs text-[#6B7280] dark:text-slate-400">
+                  {item.desc}
+                </p>
               </Link>
             ))}
             <Link

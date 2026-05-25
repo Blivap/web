@@ -44,7 +44,11 @@ export function DonorBookingsFlowToggle() {
           </button>
         </div>
       </div>
-      {bookingFlow === "incoming" ? <DonorBookingsView /> : <BuyerBookingsView />}
+      {bookingFlow === "incoming" ? (
+        <DonorBookingsView />
+      ) : (
+        <BuyerBookingsView />
+      )}
     </div>
   );
 }

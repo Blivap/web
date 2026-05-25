@@ -2,19 +2,23 @@
 import { Layout } from "@/layout/layout.component";
 import { BookingRequestSentModal } from "@/components/ui/modal/booking-request-sent-modal.component";
 
-import {
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-  Suspense,
-} from "react";
+import { useState, useMemo, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
-import { CalendarClock, ChevronLeft, ChevronRight, Lightbulb, Loader2, MapPin } from "lucide-react";
+import {
+  CalendarClock,
+  ChevronLeft,
+  ChevronRight,
+  Lightbulb,
+  Loader2,
+  MapPin,
+} from "lucide-react";
 import { $api } from "@/app/api";
 import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
-import { getApiMessageFromData, getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
+import {
+  getApiMessageFromData,
+  getAxiosErrorMessage,
+} from "@/lib/bookings/axiosErrorMessage";
 import type { HospitalListItem } from "@/lib/hospitals/parseHospitalsListResponse";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { loadSentBookings } from "@/store/slices/bookingsSlice";
@@ -352,9 +356,11 @@ function ScheduleAppointmentPageContent() {
                 </p>
               </div>
               <p className="border-t border-border pt-4 text-sm leading-relaxed text-text-secondary dark:border-white/10">
-                <span className="font-semibold text-text-primary">Next steps:</span>{" "}
-                choose a hospital, then pick a date and time. You can adjust your
-                choices before you confirm.
+                <span className="font-semibold text-text-primary">
+                  Next steps:
+                </span>{" "}
+                choose a hospital, then pick a date and time. You can adjust
+                your choices before you confirm.
               </p>
             </div>
           </div>
@@ -430,53 +436,53 @@ function ScheduleAppointmentPageContent() {
               />
               <div className="mx-9 sm:mx-11">
                 <CarouselContent className="-ml-3 md:-ml-4">
-                {hospitals.map((h) => (
-                  <CarouselItem
-                    key={h.id}
-                    className="pl-3 md:pl-4 basis-[min(100%,280px)] sm:basis-[248px] lg:basis-[260px]"
-                  >
-                    <label
-                      className={`flex h-full min-h-[148px] cursor-pointer flex-col rounded-xl border-2 bg-white/90 p-4 shadow-sm transition-all dark:bg-[#1a1a22]/95 dark:shadow-none ${
-                        appointment.hospitalId === h.id
-                          ? "border-primary ring-2 ring-primary/25 dark:ring-primary/35"
-                          : "border-border hover:border-primary/45 hover:shadow-md dark:border-white/10 dark:hover:border-primary/40"
-                      }`}
+                  {hospitals.map((h) => (
+                    <CarouselItem
+                      key={h.id}
+                      className="pl-3 md:pl-4 basis-[min(100%,280px)] sm:basis-[248px] lg:basis-[260px]"
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="rounded-md bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-secondary dark:bg-white/10 dark:text-text-secondary">
-                          {h.distance ?? "—"}
-                        </span>
-                        <input
-                          type="radio"
-                          name="hospital"
-                          value={h.id}
-                          checked={appointment.hospitalId === h.id}
-                          onChange={() => {
-                            handleAppointmentChange("hospitalId", h.id);
-                          }}
-                          className="sr-only"
-                        />
-                        <span
-                          className={`flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                            appointment.hospitalId === h.id
-                              ? "border-primary bg-primary"
-                              : "border-border dark:border-white/25"
-                          }`}
-                        >
-                          {appointment.hospitalId === h.id ? (
-                            <span className="size-2 rounded-full bg-white" />
-                          ) : null}
-                        </span>
-                      </div>
-                      <p className="mt-3 text-sm font-semibold leading-snug text-text-primary">
-                        {h.name}
-                      </p>
-                      <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-text-secondary">
-                        {h.address}
-                      </p>
-                    </label>
-                  </CarouselItem>
-                ))}
+                      <label
+                        className={`flex h-full min-h-[148px] cursor-pointer flex-col rounded-xl border-2 bg-white/90 p-4 shadow-sm transition-all dark:bg-[#1a1a22]/95 dark:shadow-none ${
+                          appointment.hospitalId === h.id
+                            ? "border-primary ring-2 ring-primary/25 dark:ring-primary/35"
+                            : "border-border hover:border-primary/45 hover:shadow-md dark:border-white/10 dark:hover:border-primary/40"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="rounded-md bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-secondary dark:bg-white/10 dark:text-text-secondary">
+                            {h.distance ?? "—"}
+                          </span>
+                          <input
+                            type="radio"
+                            name="hospital"
+                            value={h.id}
+                            checked={appointment.hospitalId === h.id}
+                            onChange={() => {
+                              handleAppointmentChange("hospitalId", h.id);
+                            }}
+                            className="sr-only"
+                          />
+                          <span
+                            className={`flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                              appointment.hospitalId === h.id
+                                ? "border-primary bg-primary"
+                                : "border-border dark:border-white/25"
+                            }`}
+                          >
+                            {appointment.hospitalId === h.id ? (
+                              <span className="size-2 rounded-full bg-white" />
+                            ) : null}
+                          </span>
+                        </div>
+                        <p className="mt-3 text-sm font-semibold leading-snug text-text-primary">
+                          {h.name}
+                        </p>
+                        <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-text-secondary">
+                          {h.address}
+                        </p>
+                      </label>
+                    </CarouselItem>
+                  ))}
                 </CarouselContent>
               </div>
             </Carousel>

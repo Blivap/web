@@ -13,7 +13,9 @@ export function meetupUserIsRequester(
   return null;
 }
 
-export function meetupVerificationGateSatisfied(session: MeetupSession): boolean {
+export function meetupVerificationGateSatisfied(
+  session: MeetupSession,
+): boolean {
   if (session.verificationGateSatisfied === true) return true;
   if (session.status === "completed") return true;
   const reqAt = session.requesterCodeVerifiedAt;

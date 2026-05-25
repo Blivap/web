@@ -23,7 +23,7 @@ export const Snackbar = () => {
   const [displayedSnackbar, setDisplayedSnackbar] = useState(snackbar);
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  const portalTarget = typeof document !== "undefined" ? document.body : null;
   const dismissTimeoutRef = useRef<number | null>(null);
   const hideTimeoutRef = useRef<number | null>(null);
   const shellRef = useRef<HTMLDivElement>(null);
@@ -59,12 +59,14 @@ export const Snackbar = () => {
     if (!snackbar) return;
 
     clearTimers();
-    setDisplayedSnackbar(snackbar);
-    setIsClosing(false);
-    setIsVisible(false);
-
-    const raf = requestAnimationFrame(() => {
-      setIsVisible(true);
+    let raf = 0;
+    queueMicrotask(() => {
+      setDisplayedSnackbar(snackbar);
+      setIsClosing(false);
+      setIsVisible(false);
+      raf = requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
     });
 
     dismissTimeoutRef.current = window.setTimeout(
@@ -73,7 +75,7 @@ export const Snackbar = () => {
     );
 
     return () => {
-      cancelAnimationFrame(raf);
+      if (raf) cancelAnimationFrame(raf);
       clearTimers();
     };
   }, [clearTimers, closeSnackbar, snackbar]);
@@ -83,10 +85,6 @@ export const Snackbar = () => {
       clearTimers();
     };
   }, [clearTimers]);
-
-  useEffect(() => {
-    setPortalTarget(document.body);
-  }, []);
 
   useLayoutEffect(() => {
     const shell = shellRef.current;

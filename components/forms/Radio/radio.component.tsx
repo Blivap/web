@@ -20,9 +20,7 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
           inputProps.disabled ? "cursor-not-allowed opacity-60" : ""
         } ${labelClassName}`.trim()}
       >
-        <span
-          className="relative inline-flex size-[18px] shrink-0 rounded-full border-[1.5px] border-border bg-bg-primary has-focus-visible:ring-2 has-focus-visible:ring-ring/40 has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-white dark:border-white/25 dark:bg-[#1a1a22] dark:has-focus-visible:ring-offset-[#0a0a0a]"
-        >
+        <span className="relative inline-flex size-[18px] shrink-0 rounded-full border-[1.5px] border-border bg-bg-primary has-focus-visible:ring-2 has-focus-visible:ring-ring/40 has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-white dark:border-white/25 dark:bg-[#1a1a22] dark:has-focus-visible:ring-offset-[#0a0a0a]">
           <input
             ref={ref}
             type="radio"

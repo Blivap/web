@@ -123,9 +123,7 @@ type BookingsRowsTableProps = {
 };
 
 function bookingRowHighlightClass(highlight: boolean | undefined): string {
-  return highlight
-    ? "bg-primary/5 ring-2 ring-inset ring-primary/40"
-    : "";
+  return highlight ? "bg-primary/5 ring-2 ring-inset ring-primary/40" : "";
 }
 
 function BookingRowMeta({
@@ -156,11 +154,11 @@ function BookingRowMeta({
         </span>
       )}
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-text-primary">{title}</p>
+        <p className="truncate text-sm font-medium text-text-primary">
+          {title}
+        </p>
         {subtitle ? (
-          <p className="truncate text-xs text-text-tertiary">
-            {subtitle}
-          </p>
+          <p className="truncate text-xs text-text-tertiary">{subtitle}</p>
         ) : null}
       </div>
     </div>
@@ -341,7 +339,9 @@ function BookingsRowsTable({
                       <td className="py-3 align-middle">
                         <div className="flex flex-row flex-nowrap items-center justify-end gap-1">
                           {row.actionsSlot ?? (
-                            <span className="text-xs text-text-tertiary">—</span>
+                            <span className="text-xs text-text-tertiary">
+                              —
+                            </span>
                           )}
                         </div>
                       </td>

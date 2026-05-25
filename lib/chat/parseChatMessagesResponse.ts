@@ -69,8 +69,7 @@ export function parseDonationChatMessageRecord(
 ): DonationChatMessage | null {
   if (!raw || typeof raw !== "object") return null;
   const r = unwrapApiRecord(raw) ?? (raw as Record<string, unknown>);
-  const textRaw =
-    pickString(r.text ?? r.body ?? r.content ?? r.message) ?? "";
+  const textRaw = pickString(r.text ?? r.body ?? r.content ?? r.message) ?? "";
   const text = textRaw.trim();
   if (!text) return null;
 
@@ -103,11 +102,7 @@ export function parseDonationChatMessageRecord(
 
   const resolvedId =
     id ??
-    simpleStableId([
-      createdAt ?? "",
-      senderUserId ?? "",
-      text.slice(0, 200),
-    ]);
+    simpleStableId([createdAt ?? "", senderUserId ?? "", text.slice(0, 200)]);
 
   return {
     id: resolvedId,

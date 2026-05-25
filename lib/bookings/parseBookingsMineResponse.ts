@@ -1,4 +1,8 @@
-import type { Booking, BookingStatus, BookingsListMeta } from "@/types/bookings";
+import type {
+  Booking,
+  BookingStatus,
+  BookingsListMeta,
+} from "@/types/bookings";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 
 const VALID_STATUS = new Set<BookingStatus>([
@@ -36,8 +40,7 @@ function pickPersonFromRef(raw: unknown): {
 } {
   if (!raw || typeof raw !== "object") return {};
   const o = raw as Record<string, unknown>;
-  const first =
-    typeof o.firstname === "string" ? o.firstname.trim() : "";
+  const first = typeof o.firstname === "string" ? o.firstname.trim() : "";
   const last = typeof o.lastname === "string" ? o.lastname.trim() : "";
   const displayName = [first, last].filter(Boolean).join(" ").trim();
   const profileImage = pickString(o.profileImage ?? o.profile_image);
@@ -108,9 +111,7 @@ export function parseBookingRecord(raw: unknown): Booking | null {
   const scheduledAt = pickString(
     unwrapped.scheduledAt ?? r.scheduledAt ?? unwrapped.scheduled_at,
   );
-  const status = parseStatus(
-    unwrapped.status ?? r.status,
-  );
+  const status = parseStatus(unwrapped.status ?? r.status);
   if (!donorUserId || !requesterId || !hospitalId || !scheduledAt || !status) {
     return null;
   }
@@ -130,9 +131,7 @@ export function parseBookingRecord(raw: unknown): Booking | null {
       ? String(meetingRaw)
       : null);
   const bloodRequestId = pickString(
-    unwrapped.bloodRequestId ??
-      r.bloodRequestId ??
-      unwrapped.blood_request_id,
+    unwrapped.bloodRequestId ?? r.bloodRequestId ?? unwrapped.blood_request_id,
   );
   const respondedAt = pickString(
     unwrapped.respondedAt ?? r.respondedAt ?? unwrapped.responded_at,
@@ -189,7 +188,11 @@ function parseListMeta(body: unknown): BookingsListMeta | undefined {
   const page = Number(m.page);
   const limit = Number(m.limit);
   const total = Number(m.total);
-  if (!Number.isFinite(page) || !Number.isFinite(limit) || !Number.isFinite(total))
+  if (
+    !Number.isFinite(page) ||
+    !Number.isFinite(limit) ||
+    !Number.isFinite(total)
+  )
     return undefined;
   return { page, limit, total };
 }

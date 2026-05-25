@@ -111,10 +111,7 @@ export function LayoutBreadcrumbs({ className }: { className?: string }) {
   if (items.length === 0) return null;
 
   return (
-    <nav
-      aria-label="Breadcrumb"
-      className={cn("min-w-0", className)}
-    >
+    <nav aria-label="Breadcrumb" className={cn("min-w-0", className)}>
       <ol className="flex min-w-0 list-none flex-wrap items-center gap-1 text-xs sm:text-sm">
         {items.map((crumb, i) => (
           <li

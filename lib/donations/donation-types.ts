@@ -17,21 +17,30 @@ export const DONATION_TYPE_ENTRIES: DonationTypeEntry[] = [
     label: "Blood donation",
     summary:
       "Whole blood donation supports transfusions, surgery, and emergencies. Blivap can guide you through donor registration and screening for this pathway.",
-    integration: { kind: "blivap_blood", registerHref: "/donors/new?type=blood" },
+    integration: {
+      kind: "blivap_blood",
+      registerHref: "/donors/new?type=blood",
+    },
   },
   {
     slug: "plasma-donation",
     label: "Plasma donation",
     summary:
       "Plasma is used for clotting factors, immunoglobulins, and many therapies. Start with the blood donor path; staff will route you to apheresis plasma when eligible.",
-    integration: { kind: "blivap_blood", registerHref: "/donors/new?type=blood" },
+    integration: {
+      kind: "blivap_blood",
+      registerHref: "/donors/new?type=blood",
+    },
   },
   {
     slug: "platelet-donation",
     label: "Platelet donation",
     summary:
       "Platelets are often given to cancer and transplant patients. Registration typically begins through the blood donor program with apheresis scheduling afterward.",
-    integration: { kind: "blivap_blood", registerHref: "/donors/new?type=blood" },
+    integration: {
+      kind: "blivap_blood",
+      registerHref: "/donors/new?type=blood",
+    },
   },
   {
     slug: "bone-marrow-donation",
@@ -157,14 +166,20 @@ export const DONATION_TYPE_ENTRIES: DonationTypeEntry[] = [
     label: "Sperm donation",
     summary:
       "Sperm donation involves screening, consent, and often clinic-led cycles. Blivap offers a structured intake that feeds into review for this pathway.",
-    integration: { kind: "blivap_sperm", registerHref: "/donors/new?type=sperm" },
+    integration: {
+      kind: "blivap_sperm",
+      registerHref: "/donors/new?type=sperm",
+    },
   },
   {
     slug: "egg-ovum-donation",
     label: "Egg (ovum) donation",
     summary:
       "Egg donation requires hormonal stimulation, retrieval, and legal consent frameworks. Continue into the ovum donor intake supported in Blivap today.",
-    integration: { kind: "blivap_ovary", registerHref: "/donors/new?type=ovary" },
+    integration: {
+      kind: "blivap_ovary",
+      registerHref: "/donors/new?type=ovary",
+    },
   },
   {
     slug: "embryo-donation",

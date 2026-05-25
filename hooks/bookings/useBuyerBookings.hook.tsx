@@ -5,12 +5,13 @@ import { useSearchParams } from "next/navigation";
 import { useStore } from "react-redux";
 import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
-import type {
-  BookingsShellTabItem,
-} from "@/app/(users)/bookings/components/bookings-shell.view";
+import type { BookingsShellTabItem } from "@/app/(users)/bookings/components/bookings-shell.view";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { AppDispatch, RootState } from "@/store/store";
-import { loadSentBookings, patchBookingInLists } from "@/store/slices/bookingsSlice";
+import {
+  loadSentBookings,
+  patchBookingInLists,
+} from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import {
   buildBuyerBookingsTabPanels,
@@ -72,8 +73,7 @@ export function useBuyerBookings() {
 
   const hospitalLabel = useCallback(
     (hospitalId: string) =>
-      hospitalNamesById[hospitalId] ??
-      `Hospital ${hospitalId.slice(0, 8)}…`,
+      hospitalNamesById[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
     [hospitalNamesById],
   );
 

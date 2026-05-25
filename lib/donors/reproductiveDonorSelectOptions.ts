@@ -8,7 +8,10 @@ export const REPRODUCTIVE_EDUCATION_OPTIONS = [
   { value: "diploma", label: "Diploma / associate" },
   { value: "bachelors", label: "Bachelor’s degree" },
   { value: "masters", label: "Master’s degree" },
-  { value: "doctorate", label: "Doctorate / professional degree (MD, PhD, etc.)" },
+  {
+    value: "doctorate",
+    label: "Doctorate / professional degree (MD, PhD, etc.)",
+  },
   { value: "prefer_not", label: "Prefer not to say" },
 ] as const;
 
@@ -36,7 +39,10 @@ export const OVARY_CYCLE_OPTIONS = [
   { value: "regular", label: "Regular (roughly monthly)" },
   { value: "irregular", label: "Irregular" },
   { value: "none_menopause", label: "No periods (menopause / surgical)" },
-  { value: "hormonal_contraception", label: "Suppressed by hormonal contraception" },
+  {
+    value: "hormonal_contraception",
+    label: "Suppressed by hormonal contraception",
+  },
   { value: "not_sure", label: "Not sure" },
   { value: "prefer_not", label: "Prefer not to say" },
 ] as const;
@@ -44,7 +50,10 @@ export const OVARY_CYCLE_OPTIONS = [
 export const OVARY_PREGNANCY_HISTORY_OPTIONS = [
   { value: "none", label: "No prior pregnancy" },
   { value: "one_full_term", label: "One prior full-term pregnancy" },
-  { value: "multiple_full_term", label: "Multiple prior full-term pregnancies" },
+  {
+    value: "multiple_full_term",
+    label: "Multiple prior full-term pregnancies",
+  },
   { value: "miscarriage", label: "Prior miscarriage / loss" },
   { value: "termination", label: "Prior termination" },
   { value: "current_pregnant", label: "Currently pregnant" },
@@ -63,7 +72,10 @@ export const SPERM_MOTIVATION_OPTIONS = [
   { value: "family_friend", label: "Referred by family or friend" },
   { value: "research", label: "Interest in research / genetics" },
   { value: "legacy", label: "Personal legacy / meaning" },
-  { value: "other_coordinator", label: "Other — I will discuss with coordinator" },
+  {
+    value: "other_coordinator",
+    label: "Other — I will discuss with coordinator",
+  },
   { value: "prefer_not", label: "Prefer not to say" },
 ] as const;
 
@@ -72,7 +84,10 @@ export const OVARY_MOTIVATION_OPTIONS = [
   { value: "compensation", label: "Financial compensation" },
   { value: "family_friend", label: "Referred by family or friend" },
   { value: "known_recipient", label: "Known recipient (directed donation)" },
-  { value: "other_coordinator", label: "Other — I will discuss with coordinator" },
+  {
+    value: "other_coordinator",
+    label: "Other — I will discuss with coordinator",
+  },
   { value: "prefer_not", label: "Prefer not to say" },
 ] as const;
 
@@ -276,7 +291,9 @@ export const NON_NG_STATE_OPTIONS: Record<
     { value: "WI", label: "Wisconsin" },
     { value: "WY", label: "Wyoming" },
   ],
-  OTHER: [{ value: "Other region", label: "Region to be confirmed with coordinator" }],
+  OTHER: [
+    { value: "Other region", label: "Region to be confirmed with coordinator" },
+  ],
 };
 
 /** City / area choices keyed by country then state value (coarse lists). */
@@ -294,10 +311,21 @@ export const NON_NG_CITY_OPTIONS: Record<
       { value: "Kumasi", label: "Kumasi" },
       { value: "Other Ashanti", label: "Other (Ashanti)" },
     ],
-    Western: [{ value: "Takoradi", label: "Sekondi-Takoradi" }, { value: "Other Western", label: "Other (Western)" }],
-    Eastern: [{ value: "Koforidua", label: "Koforidua" }, { value: "Other Eastern", label: "Other (Eastern)" }],
-    Northern: [{ value: "Tamale", label: "Tamale" }, { value: "Other Northern", label: "Other (Northern)" }],
-    "Other GH": [{ value: "Other Ghana city", label: "Other (coordinator follow-up)" }],
+    Western: [
+      { value: "Takoradi", label: "Sekondi-Takoradi" },
+      { value: "Other Western", label: "Other (Western)" },
+    ],
+    Eastern: [
+      { value: "Koforidua", label: "Koforidua" },
+      { value: "Other Eastern", label: "Other (Eastern)" },
+    ],
+    Northern: [
+      { value: "Tamale", label: "Tamale" },
+      { value: "Other Northern", label: "Other (Northern)" },
+    ],
+    "Other GH": [
+      { value: "Other Ghana city", label: "Other (coordinator follow-up)" },
+    ],
   },
   KE: {
     Nairobi: [
@@ -305,9 +333,18 @@ export const NON_NG_CITY_OPTIONS: Record<
       { value: "Westlands", label: "Westlands" },
       { value: "Other Nairobi", label: "Other (Nairobi)" },
     ],
-    Mombasa: [{ value: "Mombasa Island", label: "Mombasa Island" }, { value: "Other Mombasa", label: "Other (Mombasa)" }],
-    Kisumu: [{ value: "Kisumu central", label: "Kisumu central" }, { value: "Other Kisumu", label: "Other (Kisumu)" }],
-    Nakuru: [{ value: "Nakuru town", label: "Nakuru town" }, { value: "Other Nakuru", label: "Other (Nakuru)" }],
+    Mombasa: [
+      { value: "Mombasa Island", label: "Mombasa Island" },
+      { value: "Other Mombasa", label: "Other (Mombasa)" },
+    ],
+    Kisumu: [
+      { value: "Kisumu central", label: "Kisumu central" },
+      { value: "Other Kisumu", label: "Other (Kisumu)" },
+    ],
+    Nakuru: [
+      { value: "Nakuru town", label: "Nakuru town" },
+      { value: "Other Nakuru", label: "Other (Nakuru)" },
+    ],
     "Other KE": [{ value: "Other Kenya city", label: "Other (Kenya)" }],
   },
   ZA: {
@@ -346,7 +383,10 @@ export const NON_NG_CITY_OPTIONS: Record<
       { value: "Edinburgh", label: "Edinburgh" },
       { value: "Other Scotland", label: "Other (Scotland)" },
     ],
-    Wales: [{ value: "Cardiff", label: "Cardiff" }, { value: "Other Wales", label: "Other (Wales)" }],
+    Wales: [
+      { value: "Cardiff", label: "Cardiff" },
+      { value: "Other Wales", label: "Other (Wales)" },
+    ],
     "Northern Ireland": [
       { value: "Belfast", label: "Belfast" },
       { value: "Other NI", label: "Other (Northern Ireland)" },
@@ -356,13 +396,21 @@ export const NON_NG_CITY_OPTIONS: Record<
     NON_NG_STATE_OPTIONS.US.map(({ value }) => [
       value,
       [
-        { value: `Major city (${value})`, label: `Largest metro in ${value} (coordinator may confirm)` },
+        {
+          value: `Major city (${value})`,
+          label: `Largest metro in ${value} (coordinator may confirm)`,
+        },
         { value: `Other city (${value})`, label: `Other city in ${value}` },
       ],
     ]),
   ) as Record<string, readonly { value: string; label: string }[]>,
   OTHER: {
-    "Other region": [{ value: "Coordinator follow-up", label: "To be confirmed with coordinator" }],
+    "Other region": [
+      {
+        value: "Coordinator follow-up",
+        label: "To be confirmed with coordinator",
+      },
+    ],
   },
 };
 

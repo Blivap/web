@@ -214,7 +214,10 @@ export default function Contact() {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="px-5 py-6 sm:px-6 sm:py-7">
+              <form
+                onSubmit={handleSubmit}
+                className="px-5 py-6 sm:px-6 sm:py-7"
+              >
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div>
                     <label

@@ -39,9 +39,7 @@ function parseParticipant(raw: unknown): MeetupParticipant {
     ...(role ? { role } : {}),
     ...(meetingCode ? { meetingCode } : {}),
     ...(() => {
-      const iv = pickBool(
-        o.identityVerified ?? o.identity_verified,
-      );
+      const iv = pickBool(o.identityVerified ?? o.identity_verified);
       return iv !== undefined ? { identityVerified: iv } : {};
     })(),
     ...(() => {
@@ -55,9 +53,7 @@ function parseParticipant(raw: unknown): MeetupParticipant {
       return mv !== undefined ? { meetupVerified: mv } : {};
     })(),
     ...(() => {
-      const dc = pickBool(
-        o.donationConfirmed ?? o.donation_confirmed,
-      );
+      const dc = pickBool(o.donationConfirmed ?? o.donation_confirmed);
       return dc !== undefined ? { donationConfirmed: dc } : {};
     })(),
   };
@@ -83,9 +79,8 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
   const chatEnabled = pickBool(r.chatEnabled ?? r.chat_enabled) ?? true;
 
   const requesterDonationConfirmed =
-    pickBool(
-      r.requesterDonationConfirmed ?? r.requester_donation_confirmed,
-    ) ?? false;
+    pickBool(r.requesterDonationConfirmed ?? r.requester_donation_confirmed) ??
+    false;
   const donorDonationConfirmed =
     pickBool(r.donorDonationConfirmed ?? r.donor_donation_confirmed) ?? false;
 
@@ -108,9 +103,7 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
   let reqId: string | null = requesterUserId;
   let donId: string | null = donorUserId;
   /** Chat + REST `/chat/:donationId/...` use the booking Mongo id — not the meetup session id. */
-  let bookingId =
-    pickString(r.bookingId ?? r.booking_id) ??
-    undefined;
+  let bookingId = pickString(r.bookingId ?? r.booking_id) ?? undefined;
   if (bookingRaw && typeof bookingRaw === "object") {
     const b = bookingRaw as Record<string, unknown>;
     if (!reqId) reqId = pickString(b.requesterId ?? b.requester_id);
@@ -246,9 +239,7 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
     ...(codeVerificationEnabled !== undefined
       ? { codeVerificationEnabled }
       : {}),
-    ...(qrVerificationEnabled !== undefined
-      ? { qrVerificationEnabled }
-      : {}),
+    ...(qrVerificationEnabled !== undefined ? { qrVerificationEnabled } : {}),
     requesterDonationConfirmed,
     donorDonationConfirmed,
     ...(verificationGateSatisfied !== undefined
