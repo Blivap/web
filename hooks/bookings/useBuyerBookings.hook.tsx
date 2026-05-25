@@ -9,6 +9,7 @@ import type { BookingsShellTabItem } from "@/app/(users)/bookings/components/boo
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { AppDispatch, RootState } from "@/store/store";
 import {
+  loadReceivedBookings,
   loadSentBookings,
   patchBookingInLists,
 } from "@/store/slices/bookingsSlice";
@@ -23,10 +24,13 @@ import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook"
 export type { BuyerPanelKey } from "@/lib/bookings/buyerBookingsTabPanels";
 export { BUYER_TAB_ORDER } from "@/lib/bookings/buyerBookingsTabPanels";
 
-function scheduleSentBookingsResync(dispatch: AppDispatch) {
+const BOOKINGS_POLL_MS = 20_000;
+
+function scheduleBookingsResync(dispatch: AppDispatch) {
   window.setTimeout(() => {
     void dispatch(loadSentBookings({ silent: true }));
-  }, 450);
+    void dispatch(loadReceivedBookings({ silent: true }));
+  }, 800);
 }
 
 export function useBuyerBookings() {
@@ -56,9 +60,19 @@ export function useBuyerBookings() {
   }, [loadData]);
 
   useEffect(() => {
+    if (!user?.id) return;
+    const timer = window.setInterval(() => {
+      void dispatch(loadSentBookings({ silent: true }));
+      void dispatch(loadReceivedBookings({ silent: true }));
+    }, BOOKINGS_POLL_MS);
+    return () => window.clearInterval(timer);
+  }, [dispatch, user?.id]);
+
+  useEffect(() => {
     const onVis = () => {
       if (document.visibilityState === "visible" && user?.id) {
         void dispatch(loadSentBookings({ silent: true }));
+        void dispatch(loadReceivedBookings({ silent: true }));
       }
     };
     document.addEventListener("visibilitychange", onVis);
@@ -96,7 +110,7 @@ export function useBuyerBookings() {
           return;
         }
         showSnackbar("Request withdrawn — booking cancelled.");
-        scheduleSentBookingsResync(dispatch);
+        scheduleBookingsResync(dispatch);
       } catch (e) {
         dispatch(patchBookingInLists({ id, status: prev }));
         showSnackbar(
@@ -149,7 +163,7 @@ export function useBuyerBookings() {
       }
       dispatch(patchBookingInLists({ id, reportsCount: prevCount + 1 }));
       showSnackbar("Thanks — your report was submitted.");
-      scheduleSentBookingsResync(dispatch);
+      scheduleBookingsResync(dispatch);
     },
     [dispatch, reportBookingId, showSnackbar, store],
   );

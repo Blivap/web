@@ -10,7 +10,6 @@ import {
 } from "@/lib/bookings/axiosErrorMessage";
 import { parseMeetupEnsureSessionBody } from "@/lib/meetups/parseMeetupResponses";
 import {
-  meetupBookingCodeStashKey,
   meetupChatBookingStashKey,
   meetupCodeHintStorageKey,
   meetupOtqrStorageKey,
@@ -67,16 +66,7 @@ export function MeetupBootstrapClient() {
               parsed.qrToken,
             );
           }
-          let codeHint = parsed.meetingCode;
-          if (!codeHint) {
-            const stashed = sessionStorage.getItem(
-              meetupBookingCodeStashKey(bookingId),
-            );
-            if (stashed) {
-              codeHint = stashed;
-              sessionStorage.removeItem(meetupBookingCodeStashKey(bookingId));
-            }
-          }
+          const codeHint = parsed.myMeetingCode;
           if (codeHint) {
             sessionStorage.setItem(
               meetupCodeHintStorageKey(parsed.sessionId),

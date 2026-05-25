@@ -77,6 +77,7 @@ function parseStatus(raw: unknown): BookingStatus | null {
   const s = pickString(raw);
   if (!s) return null;
   const lower = s.toLowerCase();
+  if (lower === "declined") return "rejected";
   if (VALID_STATUS.has(lower as BookingStatus)) return lower as BookingStatus;
   return null;
 }
