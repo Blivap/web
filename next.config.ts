@@ -8,11 +8,26 @@ const nextConfig: NextConfig = {
   // Allow any device to access the dev server
   allowedDevOrigins: ["*"],
 
+  // Serve manifest at both URLs (browsers/PWA often request manifest.webmanifest)
+  async rewrites() {
+    return [{ source: "/manifest.webmanifest", destination: "/manifest.json" }];
+  },
+
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "i.pinimg.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
         pathname: "/**",
       },
     ],

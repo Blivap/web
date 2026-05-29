@@ -1,23 +1,38 @@
+import { absoluteSiteUrl } from "@/lib/site-origin";
 import { MetadataRoute } from "next";
-import { config } from "./utils/config";
 
-const { url, env } = config;
-const siteUrl = env === "development" ? "http://localhost:3000" : url;
+/**
+ * Paths that must not be indexed (auth, account, transactional, or thin flows).
+ * Trailing slashes match subpaths in robots.txt (e.g. /donors/ blocks /donors/xyz).
+ */
+const DISALLOWED_PREFIXES = [
+  "/api/",
+  "/dashboard/",
+  "/overview/",
+  "/settings/",
+  "/wallet/",
+  "/history/",
+  "/donors/",
+  "/bookings/",
+  "/booking/",
+  "/schedule-appointment/",
+  "/verify-id/",
+  "/select_avatar/",
+  "/forgot-password/",
+  "/reset-password/",
+  "/verify-email/",
+  "/waitlist/",
+] as const;
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
-        disallow: ["/api/", "/dashboard/", "/settings/", "/wallet/"],
-      },
-      {
-        userAgent: "Googlebot",
-        allow: "/",
-        disallow: ["/api/", "/dashboard/", "/settings/", "/wallet/"],
+        allow: ["/api/og"],
+        disallow: [...DISALLOWED_PREFIXES],
       },
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: absoluteSiteUrl("/sitemap.xml"),
   };
 }

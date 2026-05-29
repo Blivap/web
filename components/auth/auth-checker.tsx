@@ -1,0 +1,83 @@
+"use client";
+
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useAppSelector } from "@/store/hooks";
+import { useCheckUser } from "@/hooks/auth/useCheckUser.hook";
+import { routes } from "@/config/routes";
+import { AuthLoader } from "./auth-loader.component";
+
+const VERIFY_EMAIL_PATH = routes.verifyEmail;
+
+/**
+ * Token is restored from the cookie in `StoreProvider`; session user is loaded via `useCheckUser` (GET /me).
+ * User is only considered authenticated after we have a valid user from the API.
+ * If the token is expired or invalid (401/403), logs out and redirects to /login.
+ * Unverified users (emailVerified === false) are only allowed on /verify-email.
+ * Verified users are redirected away from /verify-email and never see that page’s UI.
+ * Shows a custom loader while auth status is being checked (token present, /me in flight).
+ */
+export function AuthChecker({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const user = useAppSelector((state) => state.auth.user);
+  const { isChecking } = useCheckUser();
+
+  // Unverified users may only access the verify-email page — redirect and block content.
+  // If user has profileImage they've completed select_avatar, so send to dashboard not verify-email.
+  useEffect(() => {
+    if (
+      user &&
+      !user.emailVerified &&
+      !user.profileImage &&
+      pathname !== VERIFY_EMAIL_PATH
+    ) {
+      router.replace(VERIFY_EMAIL_PATH);
+    }
+    if (
+      user &&
+      !user.emailVerified &&
+      user.profileImage &&
+      pathname !== "/overview" &&
+      !pathname.startsWith("/overview/")
+    ) {
+      router.replace("/overview");
+    }
+  }, [user, pathname, router]);
+  useEffect(() => {
+    if (user?.emailVerified === true && pathname === VERIFY_EMAIL_PATH) {
+      router.replace(routes.overview);
+    }
+  }, [user, pathname, router]);
+
+  /* `emailVerified === true`: never mount verify-email content (before global auth loading branch). */
+  if (user?.emailVerified === true && pathname === VERIFY_EMAIL_PATH) {
+    return <AuthLoader />;
+  }
+
+  if (isChecking) {
+    return <AuthLoader />;
+  }
+
+  // Do not render dashboard or other pages for unverified users without profileImage; show loader until redirect
+  if (
+    user &&
+    !user.emailVerified &&
+    !user.profileImage &&
+    pathname !== VERIFY_EMAIL_PATH
+  ) {
+    return <AuthLoader />;
+  }
+  // Unverified but has profileImage (completed select_avatar): allow dashboard, block others until redirect
+  if (
+    user &&
+    !user.emailVerified &&
+    user.profileImage &&
+    pathname !== "/overview" &&
+    !pathname.startsWith("/overview/")
+  ) {
+    return <AuthLoader />;
+  }
+
+  return <>{children}</>;
+}

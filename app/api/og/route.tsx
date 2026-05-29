@@ -1,19 +1,95 @@
 import { ImageResponse } from "@vercel/og";
 
 export const runtime = "edge";
+export const alt = "Blivap — Give blood. Save lives.";
+export const contentType = "image/png";
+export const size = {
+  width: 1200,
+  height: 630,
+};
+
+const BRAND_PRIMARY = "#960018";
+const BRAND_SECONDARY = "#24afb5";
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function clampText(s: string, max: number): string {
+  const t = s.trim();
+  if (t.length <= max) return t;
+  return `${t.slice(0, max - 1)}…`;
+}
+
+/** Edge-safe base64 (no Node Buffer). */
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]!);
+  }
+  return btoa(binary);
+}
+
+async function loadOgLogoFromBundle(): Promise<string | null> {
+  const candidates = [
+    "../../../public/web-app-manifest-192x192.png",
+    "../../../public/web-app-manifest-512x512.png",
+  ] as const;
+
+  for (const relativePath of candidates) {
+    try {
+      const res = await fetch(new URL(relativePath, import.meta.url));
+      if (!res.ok) continue;
+      const buf = await res.arrayBuffer();
+      if (buf.byteLength === 0) continue;
+      return `data:image/png;base64,${arrayBufferToBase64(buf)}`;
+    } catch {
+      // try next candidate
+    }
+  }
+  return null;
+}
+
+async function loadOgLogoFromNetwork(requestUrl: URL): Promise<string | null> {
+  const bases = [
+    requestUrl.origin,
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+  ];
+
+  for (const base of bases) {
+    try {
+      const res = await fetch(`${base}/web-app-manifest-192x192.png`);
+      if (!res.ok) continue;
+      const buf = await res.arrayBuffer();
+      if (buf.byteLength === 0) continue;
+      return `data:image/png;base64,${arrayBufferToBase64(buf)}`;
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+async function resolveOgLogoDataUri(requestUrl: URL): Promise<string | null> {
+  return (
+    (await loadOgLogoFromBundle()) ?? (await loadOgLogoFromNetwork(requestUrl))
+  );
+}
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const hasTitle = searchParams.has("title");
-    const title = hasTitle
-      ? searchParams.get("title")?.slice(0, 100)
-      : "Blivap — Give Blood. Save Lives.";
+    const requestUrl = new URL(request.url);
+    const nameRaw = requestUrl.searchParams.get("name");
+    const appName = nameRaw ? clampText(safeDecode(nameRaw), 48) : "Blivap";
 
-    // Try to load fonts, but don't fail if they're not available
-    let fontData;
-    let fontDataBold;
+    const logoDataUri = await resolveOgLogoDataUri(requestUrl);
 
+    let fontData: ArrayBuffer | null = null;
     try {
       fontData = await fetch(
         new URL(
@@ -23,181 +99,118 @@ export async function GET(request: Request) {
       ).then((res) => res.arrayBuffer());
     } catch (e) {
       if (e instanceof Error) {
-        console.error("Error loading font:", e.message);
+        console.error("OG font load:", e.message);
       }
       fontData = null;
     }
 
-    try {
-      fontDataBold = await fetch(
-        new URL(
-          "../../../public/fonts/helvetica/Helvetica.woff",
-          import.meta.url,
-        ),
-      ).then((res) => res.arrayBuffer());
-    } catch (e) {
-      if (e instanceof Error) {
-        console.error("Error loading bold font:", e.message);
-      }
-      fontDataBold = null;
-    }
+    const fontFamily = fontData ? "BlivapHelvetica" : "system-ui";
 
     return new ImageResponse(
       <div
-        tw="flex w-full h-full items-center justify-center"
+        tw="flex w-full h-full flex-col"
         style={{
-          background: "linear-gradient(135deg, #960018 0%, #7A0013 100%)",
+          background:
+            "linear-gradient(160deg, #08060c 0%, #030308 55%, #05040a 100%)",
+          padding: 14,
+          boxSizing: "border-box",
         }}
       >
-        {/* Main Container */}
-        <div tw="flex flex-col w-full h-full items-center justify-center px-16 py-20 relative">
-          {/* Decorative Elements */}
-          <div
-            tw="absolute top-0 left-0 w-full h-full"
-            style={{
-              opacity: 0.1,
-              backgroundImage:
-                "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.2) 0%, transparent 50%)",
-            }}
-          />
+        <div
+          style={{
+            height: 9,
+            flexShrink: 0,
+            background: `linear-gradient(90deg, ${BRAND_SECONDARY} 0%, ${BRAND_PRIMARY} 42%, ${BRAND_SECONDARY} 100%)`,
+            opacity: 0.95,
+          }}
+        />
 
-          {/* Content */}
-          <div tw="flex flex-col items-center justify-center relative z-10">
-            {/* Logo/Brand Name */}
-            <div tw="flex items-center mb-8">
-              <div
-                tw="flex items-center justify-center"
-                style={{
-                  width: "120px",
-                  height: "120px",
-                  borderRadius: "60px",
-                  background: "rgba(255, 255, 255, 0.15)",
-                }}
-              >
-                <div
-                  tw="flex items-center justify-center"
+        <div
+          tw="flex flex-1 flex-row overflow-hidden items-center justify-center"
+          style={{
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderTop: "none",
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.04), 0 24px 80px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div tw="flex flex-col items-center justify-center shrink-0">
+            <div
+              tw="flex items-center justify-center shrink-0 overflow-hidden"
+              style={{
+                width: 200,
+                height: 200,
+                borderRadius: 36,
+              }}
+            >
+              {logoDataUri ? (
+                // eslint-disable-next-line @next/next/no-img-element -- OG ImageResponse requires native img for data URIs
+                <img
+                  src={logoDataUri}
+                  alt=""
+                  width={200}
+                  height={200}
                   style={{
-                    width: "100px",
-                    height: "100px",
-                    borderRadius: "50px",
-                    background: "rgba(255, 255, 255, 0.2)",
+                    width: 200,
+                    height: 200,
+                    borderRadius: 36,
+                    objectFit: "contain",
+                    objectPosition: "center",
+                    flexShrink: 0,
+                  }}
+                />
+              ) : (
+                <div
+                  tw="flex items-center justify-center shrink-0"
+                  style={{
+                    width: 200,
+                    height: 200,
+                    borderRadius: 36,
+                    fontFamily,
+                    fontSize: 96,
+                    fontWeight: 700,
+                    color: "#fff",
+                    background: `linear-gradient(155deg, ${BRAND_PRIMARY} 0%, #2a0610 100%)`,
                   }}
                 >
-                  <span tw="text-white text-5xl font-bold">B</span>
+                  B
                 </div>
-              </div>
+              )}
             </div>
-
-            {/* Main Title */}
-            <h1
-              tw="text-7xl font-bold text-white mb-6 text-center"
+            <span
               style={{
-                fontFamily: fontDataBold ? "Helvetica Bold" : "system-ui",
-                letterSpacing: "-0.02em",
-                textShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                fontFamily,
+                marginTop: 36,
+                fontSize: 72,
+                fontWeight: 700,
+                color: "#f6f6f8",
+                letterSpacing: "-0.035em",
+                lineHeight: 1,
               }}
             >
-              Blivap
-            </h1>
-
-            {/* Tagline */}
-            <p
-              tw="text-3xl text-white/90 mb-12 text-center max-w-4xl"
-              style={{
-                fontFamily: fontData ? "Helvetica" : "system-ui",
-                lineHeight: "1.4",
-                textShadow: "0 2px 10px rgba(0,0,0,0.2)",
-              }}
-            >
-              {title}
-            </p>
-
-            {/* Feature Pills */}
-            <div tw="flex flex-row gap-6 mb-12">
-              <div
-                tw="flex items-center px-6 py-3"
-                style={{
-                  borderRadius: "9999px",
-                  background: "rgba(255, 255, 255, 0.2)",
-                }}
-              >
-                <span tw="text-white text-xl font-semibold">
-                  💉 Blood Donation
-                </span>
-              </div>
-              <div
-                tw="flex items-center px-6 py-3 mx-6"
-                style={{
-                  borderRadius: "9999px",
-                  background: "rgba(255, 255, 255, 0.2)",
-                }}
-              >
-                <span tw="text-white text-xl font-semibold">❤️ Save Lives</span>
-              </div>
-              <div
-                tw="flex items-center px-6 py-3"
-                style={{
-                  borderRadius: "9999px",
-                  background: "rgba(255, 255, 255, 0.2)",
-                }}
-              >
-                <span tw="text-white text-xl font-semibold">🤝 Connect</span>
-              </div>
-            </div>
-
-            {/* Bottom Message */}
-            <div
-              tw="flex items-center justify-center px-8 py-4"
-              style={{
-                borderRadius: "16px",
-                background: "rgba(255, 255, 255, 0.15)",
-                border: "2px solid rgba(255, 255, 255, 0.3)",
-              }}
-            >
-              <p
-                tw="text-2xl text-white font-semibold"
-                style={{
-                  fontFamily: fontData ? "Helvetica" : "system-ui",
-                }}
-              >
-                Together we save lives and improve futures
-              </p>
-            </div>
+              {appName}
+            </span>
           </div>
-
-          {/* Bottom Accent */}
-          <div
-            tw="absolute bottom-0 left-0 w-full h-2"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%)",
-            }}
-          />
         </div>
       </div>,
       {
-        width: 1200,
-        height: 630,
-        fonts: [
-          ...(fontData
-            ? [
-                {
-                  name: "Helvetica",
-                  data: fontData,
-                  style: "normal" as const,
-                },
-              ]
-            : []),
-          ...(fontDataBold
-            ? [
-                {
-                  name: "Helvetica Bold",
-                  data: fontDataBold,
-                  style: "normal" as const,
-                },
-              ]
-            : []),
-        ],
+        ...size,
+        fonts: fontData
+          ? [
+              {
+                name: "BlivapHelvetica",
+                data: fontData,
+                style: "normal" as const,
+                weight: 400 as const,
+              },
+              {
+                name: "BlivapHelvetica",
+                data: fontData,
+                style: "normal" as const,
+                weight: 700 as const,
+              },
+            ]
+          : [],
       },
     );
   } catch (e) {

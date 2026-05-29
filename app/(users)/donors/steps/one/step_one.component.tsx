@@ -1,0 +1,307 @@
+"use client";
+
+import { useState } from "react";
+import { Info } from "lucide-react";
+import { Radio } from "@/components/forms/Radio";
+import type { DonorMedicalFormAnswers } from "@/types/donors";
+
+export type MedicalAnswers = DonorMedicalFormAnswers;
+
+export interface StepOneProps {
+  medical: MedicalAnswers;
+  handleMedicalChange: (name: string, value: string) => void;
+  active: boolean;
+  onSubmitQuestionnaire: () => void | Promise<void>;
+  onBack?: () => void;
+  isSubmitting?: boolean;
+  submitError?: string | null;
+  editable?: boolean;
+  completed?: boolean;
+}
+
+const MEDICAL_QUESTIONS: {
+  name: string;
+  label: string;
+  options: { value: string; label: string }[];
+}[] = [
+  {
+    name: "gender",
+    label: "What is your gender?",
+    options: [
+      { value: "male", label: "Male" },
+      { value: "female", label: "Female" },
+      { value: "other", label: "Other" },
+      { value: "prefer_not_to_say", label: "Prefer not to say" },
+    ],
+  },
+  {
+    name: "age_18_64",
+    label: "Are you between 18 and 64 years old?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+    ],
+  },
+  {
+    name: "weight_under_50kg",
+    label: "Do you weigh less than 50 kg?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+    ],
+  },
+  {
+    name: "organ_tissue_transplant",
+    label: "Have you ever had an organ or tissue transplant?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+    ],
+  },
+  {
+    name: "injected_drugs_doping",
+    label: "Have you ever injected drugs or doping?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+    ],
+  },
+  {
+    name: "diabetes",
+    label: "Do you have diabetes?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+    ],
+  },
+  {
+    name: "blood_transfusion",
+    label: "Have you had products or a blood transfusion?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+    ],
+  },
+  {
+    name: "chronic_condition",
+    label:
+      "Do you have a chronic or serious condition (or have you had one in the past)?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+    ],
+  },
+  {
+    name: "hepatitis_b_vaccine",
+    label:
+      "Have you received a preventative vaccine in the past 2 weeks to prevent hepatitis B?",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+    ],
+  },
+];
+
+const QUESTION_TOOLTIPS: Record<string, string> = {
+  gender:
+    "We use this to apply eligibility criteria that may differ by gender (e.g. haemoglobin thresholds).",
+  age_18_64:
+    "Donors must be 18–64 years old for their own safety and that of recipients.",
+  weight_under_50kg: "Donors under 50 kg may not donate for safety reasons.",
+  organ_tissue_transplant:
+    "Having received an organ or tissue transplant can affect eligibility.",
+  injected_drugs_doping:
+    "History of injected drugs or doping may permanently defer you from donating.",
+  diabetes:
+    "Some people with diabetes can donate; we need to know to assess eligibility.",
+  blood_transfusion:
+    "If you have had a blood transfusion we need to know for safety screening.",
+  chronic_condition:
+    "Chronic or serious conditions may affect whether it is safe for you to donate.",
+  hepatitis_b_vaccine:
+    "Recent hepatitis B vaccine can temporarily affect donation eligibility.",
+};
+
+function FirstStepQuestionRow({
+  name,
+  label,
+  options,
+  value,
+  onChange,
+  tooltip,
+  disabled = false,
+}: {
+  name: string;
+  label: string;
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  tooltip?: string;
+  disabled?: boolean;
+}) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const idBase = `medical-${name}`;
+  const tooltipText = tooltip ?? `More information about: ${label}`;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-start gap-2">
+        <label htmlFor={`${idBase}-0`} className="text-sm text-balck ">
+          {label}
+        </label>
+        <div
+          className="relative shrink-0"
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          <button
+            type="button"
+            className="w-4 h-4 rounded-full flex items-center justify-center text-primary hover:text-primary/70 transition-colors"
+            aria-label={`More info about ${label}`}
+          >
+            <Info size={16} />
+          </button>
+          {showTooltip && tooltipText && (
+            <div
+              className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-1 sm:px-3 py-2 text-[10px] sm:text-xs text-white bg-foundation-dark rounded-lg shadow-lg w-[140px] max-w-[240px] whitespace-normal z-50"
+              role="tooltip"
+            >
+              {tooltipText}
+              <span className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-foundation-dark" />
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-col gap-[10px]">
+        {options.map((opt, i) => (
+          <Radio
+            key={opt.value}
+            id={`${idBase}-${i}`}
+            name={name}
+            value={opt.value}
+            checked={value === opt.value}
+            onChange={() => onChange(opt.value)}
+            disabled={disabled}
+            labelClassName="text-xs text-text-primary"
+          >
+            {opt.label}
+          </Radio>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function StepOne({
+  medical,
+  handleMedicalChange,
+  active,
+  onSubmitQuestionnaire,
+  onBack,
+  isSubmitting = false,
+  submitError = null,
+  editable = true,
+  completed = false,
+}: StepOneProps) {
+  const allMedicalAnswered = MEDICAL_QUESTIONS.every((q) => medical[q.name]);
+  const isLocked = !editable;
+  const showNextAction = isLocked && completed;
+
+  return (
+    active && (
+      <>
+        <h2 className="text-lg font-semibold text-text-primary mb-2 mt-6 xl:mt-15">
+          Legacy blood health questionnaire
+        </h2>
+        <p className="text-sm text-text-secondary mb-1 max-w-[600px]">
+          This is the fixed yes/no flow required for{" "}
+          <span className="font-medium text-text-primary">
+            active donor activation
+          </span>{" "}
+          (POST{" "}
+          <span className="font-mono text-[11px]">/donors/questionnaire</span>
+          ). It is separate from biological sex and donation-type intent on your
+          screening profile. Answer each question once — after submit, answers
+          stay locked until a retake is scheduled.
+        </p>
+        <p className="text-sm text-text-secondary mb-1 mt-16">
+          Please complete the questions below.
+        </p>
+
+        {submitError && (
+          <p
+            className="text-sm text-red-600 dark:text-red-400 mt-4"
+            role="alert"
+          >
+            {submitError}
+          </p>
+        )}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void onSubmitQuestionnaire();
+          }}
+          className="flex flex-col gap-6"
+        >
+          {MEDICAL_QUESTIONS.map((q) => (
+            <FirstStepQuestionRow
+              key={q.name}
+              name={q.name}
+              label={q.label}
+              options={q.options}
+              value={medical[q.name] ?? ""}
+              onChange={(value) => handleMedicalChange(q.name, value)}
+              tooltip={QUESTION_TOOLTIPS[q.name]}
+              disabled={isLocked}
+            />
+          ))}
+
+          {isLocked && (
+            <p className="text-xs text-text-secondary">
+              Your saved questionnaire answers are shown. You can edit after
+              your retake is rescheduled.
+            </p>
+          )}
+
+          <div className="mt-4 flex items-center gap-3">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="text-sm font-medium py-2.5 px-5 rounded-md border border-border bg-white hover:bg-[#F9FAFB] dark:bg-transparent dark:hover:bg-white/5 transition-colors"
+              >
+                Back
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={
+                isSubmitting || (!showNextAction && !allMedicalAnswered)
+              }
+              className="text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
+            >
+              {isSubmitting
+                ? "Submitting…"
+                : showNextAction
+                  ? "Next"
+                  : "Submit questionnaire"}
+            </button>
+          </div>
+        </form>
+        <div className="border-[#960018] border-l-4 bg-[#FFE2E2] flex gap-4 p-4 mt-10 sm:mt-12.5 ">
+          <Info size={16} className="text-primary" />
+          <div className="flex flex-col gap-0.75">
+            <p className="text-xs font-semibold text-primary uppercase">
+              Confidentiality Note
+            </p>
+            <p className="text-xs text-[#5A403F]">
+              Your answers are protected under medical secrecy regulations.
+              High-integrity data ensures the safety of both donor and
+              recipient.
+            </p>
+          </div>
+        </div>
+      </>
+    )
+  );
+}

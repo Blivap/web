@@ -1,12 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono, Inter, Poppins } from "next/font/google";
 import localFont from "next/font/local";
-import "./globals.css";
-import { SnackbarProvider } from "./components/snackbar/snackbar.context";
-import { Snackbar } from "./components/snackbar/snackbar.component";
-import { config } from "./utils/config";
-import StoreProvider from "./store/provider";
-import { ProtectedRoute } from "./components/auth/protected-route";
+import "@/styles/globals.css";
+import { SnackbarProvider } from "@/components/feedback/snackbar/snackbar.context";
+import { Snackbar } from "@/components/feedback/snackbar/snackbar.component";
+import { ThemePreferenceProvider } from "@/hooks/theme/useThemePreference.hook";
+import { config } from "@/config/env";
+import StoreProvider from "../store/provider";
+import { StructuredData } from "@/components/seo/structured-data";
+import { AuthChecker } from "@/components/auth/auth-checker";
+import { AuthRoutesPrefetch } from "@/components/auth/auth-routes-prefetch";
+import { BlivapLogo } from "@/public/svg";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,9 +50,52 @@ const helvetica = localFont({
   display: "swap",
 });
 const { url, env } = config;
+const themeBootstrapScript = `
+(() => {
+  const preferenceKey = "blivap-theme";
+  const systemKey = "blivap-theme-system-scheme";
+  const currentSystem = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  let preference = "system";
+
+  try {
+    const storedPreference = localStorage.getItem(preferenceKey);
+    const storedSystem = localStorage.getItem(systemKey);
+
+    if (
+      (storedPreference === "light" || storedPreference === "dark" || storedPreference === "system")
+    ) {
+      preference = storedPreference;
+    }
+
+    if (
+      preference !== "system" &&
+      (storedSystem === "light" || storedSystem === "dark") &&
+      storedSystem !== currentSystem
+    ) {
+      preference = "system";
+      localStorage.setItem(preferenceKey, "system");
+    }
+
+    localStorage.setItem(systemKey, currentSystem);
+  } catch {}
+
+  const resolved =
+    preference === "dark" ? "dark" : preference === "light" ? "light" : currentSystem;
+
+  document.documentElement.classList.toggle("dark", resolved === "dark");
+  document.documentElement.style.colorScheme = resolved;
+})();
+`;
 
 const siteUrl = env === "development" ? "http://localhost:3000" : url;
-const ogImageUrl = `${siteUrl}/api/og`;
+// Ensure OG image URL is absolute
+const ogImageUrl = new URL("/api/og", siteUrl).toString();
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -70,10 +118,16 @@ export const metadata: Metadata = {
     "donor platform",
     "blood donor",
     "medical services",
+    "Nigeria blood donation",
+    "blood donor Nigeria",
+    "sperm donor Nigeria",
+    "medical platform",
   ],
-  authors: [{ name: "Blivap" }],
+  authors: [{ name: "Blivap", url: siteUrl }],
   creator: "Blivap",
   publisher: "Blivap",
+  applicationName: "Blivap",
+  referrer: "origin-when-cross-origin",
   formatDetection: {
     email: false,
     address: false,
@@ -82,6 +136,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
+    alternateLocale: ["en_NG"],
     url: siteUrl,
     siteName: "Blivap",
     title: "Blivap — Give Blood. Save Lives.",
@@ -109,9 +164,11 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
+      noimageindex: false,
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
@@ -122,10 +179,44 @@ export const metadata: Metadata = {
   },
   category: "Healthcare",
   classification: "Medical Services",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/logo.svg",
+        color: "#960018",
+      },
+    ],
+  },
   other: {
     "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-title": "Blivap",
     "mobile-web-app-capable": "yes",
+    "theme-color": "#960018",
+    "msapplication-TileColor": "#960018",
+    "msapplication-config": "/site.webmanifest",
+    // WhatsApp and other social media
+    "og:image:width": "1200",
+    "og:image:height": "630",
+    "og:image:type": "image/png",
+    "og:image:secure_url": ogImageUrl,
+    // LinkedIn
+    "linkedin:owner": "Blivap",
+    // Additional SEO
+    "geo.region": "NG",
+    "geo.placename": "Nigeria",
+    ICBM: "9.0820, 8.6753",
   },
 };
 
@@ -135,16 +226,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <StructuredData />
+        <meta name="apple-mobile-web-app-title" content="Blivap" />
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+      </head>
       <body
-        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased grow min-h-screen flex`}
+        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased text-sm min-h-screen w-full`}
       >
-        <StoreProvider>
-          <SnackbarProvider>
-            <ProtectedRoute>{children}</ProtectedRoute>
-            <Snackbar />
-          </SnackbarProvider>
-        </StoreProvider>
+        <ThemePreferenceProvider>
+          <StoreProvider>
+            <AuthRoutesPrefetch />
+            <AuthChecker>
+              <SnackbarProvider>
+                <Suspense
+                  fallback={
+                    <div className="flex justify-center items-center h-screen bg-white dark:bg-[#0B0D12]">
+                      <BlivapLogo />
+                    </div>
+                  }
+                >
+                  {children}
+                </Suspense>
+                <Snackbar />
+              </SnackbarProvider>
+            </AuthChecker>
+          </StoreProvider>
+        </ThemePreferenceProvider>
       </body>
     </html>
   );
