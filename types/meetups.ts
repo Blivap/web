@@ -86,3 +86,7 @@ export type MeetupReportPayload = {
   reason: string;
   details?: string;
 };
+
+export type MeetupTerminatePayload = {
+  reason: string;
+};

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import debounce from "lodash/debounce";
-import { Star, Droplet } from "lucide-react";
+import { Droplet } from "lucide-react";
 import { Layout } from "../../../layout/layout.component";
 import Link from "next/link";
 import { $api } from "@/app/api";
@@ -105,20 +105,9 @@ function DonorCard({
         />
       </div>
 
-      <div className="mb-4 flex items-center gap-4">
-        <div className="flex items-center gap-1">
-          <Star
-            className="size-3.5 fill-[#FACC15] text-[#FACC15]"
-            strokeWidth={1.5}
-          />
-          <span className="text-xs font-medium text-text-primary">
-            {donor.rating.toFixed(1)}
-          </span>
-        </div>
-        <div className="flex items-center gap-1 text-xs text-text-secondary">
-          <Droplet className="size-3.5 text-primary" />
-          <span>{donor.donations} donations</span>
-        </div>
+      <div className="mb-4 flex items-center gap-1 text-xs text-text-secondary">
+        <Droplet className="size-3.5 text-primary" />
+        <span>{donor.donations} donations</span>
       </div>
 
       <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">

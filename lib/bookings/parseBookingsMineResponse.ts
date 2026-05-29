@@ -141,6 +141,25 @@ export function parseBookingRecord(raw: unknown): Booking | null {
   const reportsRaw = unwrapped.reports ?? r.reports;
   const reportsCount = Array.isArray(reportsRaw) ? reportsRaw.length : 0;
 
+  const requesterHasRated = (() => {
+    const explicit =
+      unwrapped.requesterHasRated ??
+      r.requesterHasRated ??
+      unwrapped.requester_has_rated ??
+      r.requester_has_rated;
+    if (typeof explicit === "boolean") return explicit;
+    const ratedAt = pickString(
+      unwrapped.requesterRatedAt ??
+        r.requesterRatedAt ??
+        unwrapped.ratingSubmittedAt ??
+        r.rating_submitted_at,
+    );
+    if (ratedAt) return true;
+    const ratingObj = unwrapped.rating ?? r.rating ?? unwrapped.requesterRating;
+    if (ratingObj && typeof ratingObj === "object") return true;
+    return undefined;
+  })();
+
   return {
     id,
     donorUserId,
@@ -166,6 +185,8 @@ export function parseBookingRecord(raw: unknown): Booking | null {
       : {}),
     ...(hospitalDisplayName ? { hospitalName: hospitalDisplayName } : {}),
     ...(reportsCount > 0 ? { reportsCount } : {}),
+    ...(requesterHasRated === true ? { requesterHasRated: true } : {}),
+    ...(requesterHasRated === false ? { requesterHasRated: false } : {}),
   };
 }
 

@@ -48,7 +48,13 @@ import {
 } from "@/lib/meetups/meetupVerifyQrUrl";
 import { MeetupQrScanner } from "./meetup-qr-scanner.component";
 import { routes } from "@/config/routes";
+import { DonationRatingModal } from "@/app/(users)/bookings/components/donation-rating-modal.component";
 import { MeetupReportModal } from "./meetup-report-modal.component";
+import {
+  bookingNeedsRequesterRating,
+  isBookingRatedLocally,
+} from "@/lib/ratings/ratedBookingsStorage";
+import { patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
 import {
   AlertDialog,
@@ -267,7 +273,14 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const [chatDraft, setChatDraft] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
   const [terminateAlertOpen, setTerminateAlertOpen] = useState(false);
+  const [terminateReason, setTerminateReason] = useState("");
+  const [terminateReasonError, setTerminateReasonError] = useState<
+    string | null
+  >(null);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const ratingPromptedForBookingRef = useRef<string | null>(null);
+  const sentBookings = useAppSelector((s) => s.bookings.sent.items);
   /** Booking Mongo id stashed in bootstrap when opening from a booking row (fallback if GET session omits `bookingId`). */
   const stashedChatBookingId = useMemo(() => {
     try {
@@ -417,6 +430,48 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     [swapCodes, verifyCode, showSnackbar],
   );
 
+  const ratingDonorLabel = useMemo(() => {
+    const bid = donationChatBookingId;
+    if (!bid) return undefined;
+    const row = sentBookings.find((b) => b.id === bid);
+    if (row?.donorDisplayName?.trim()) return row.donorDisplayName.trim();
+    if (session?.donorUserId) return `Donor ${session.donorUserId.slice(0, 6)}`;
+    return undefined;
+  }, [donationChatBookingId, sentBookings, session?.donorUserId]);
+
+  const shouldPromptForRating = useCallback(
+    (bookingId: string | undefined) => {
+      if (!bookingId || isRequester !== true) return false;
+      if (isBookingRatedLocally(bookingId)) return false;
+      const row = sentBookings.find((b) => b.id === bookingId);
+      if (row && !bookingNeedsRequesterRating(row)) return false;
+      if (!row && session?.status?.toLowerCase() !== "completed") return false;
+      return session?.status?.toLowerCase() === "completed";
+    },
+    [isRequester, sentBookings, session?.status],
+  );
+
+  const openRatingModalIfNeeded = useCallback(
+    (bookingId: string | undefined) => {
+      if (!bookingId || !shouldPromptForRating(bookingId)) return;
+      if (ratingPromptedForBookingRef.current === bookingId) return;
+      ratingPromptedForBookingRef.current = bookingId;
+      setRatingModalOpen(true);
+    },
+    [shouldPromptForRating],
+  );
+
+  const onRatingSuccess = useCallback(() => {
+    const bid = donationChatBookingId;
+    if (bid) {
+      dispatch(
+        patchBookingInLists({ id: bid, requesterHasRated: true, status: "completed" }),
+      );
+    }
+    showSnackbar("Thanks for your rating.", "success");
+    void dispatch(loadSentBookings({ silent: true }));
+  }, [donationChatBookingId, dispatch, showSnackbar]);
+
   const onConfirmDonation = useCallback(async () => {
     if (!user?.id) return;
     setLocalError(null);
@@ -428,7 +483,31 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     showSnackbar("Your donation confirmation was recorded.");
     void dispatch(loadSentBookings({ silent: true }));
     void dispatch(loadReceivedBookings({ silent: true }));
-  }, [user, confirmDonation, showSnackbar, dispatch]);
+    if (isRequester === true) {
+      openRatingModalIfNeeded(donationChatBookingId);
+    }
+  }, [
+    user,
+    confirmDonation,
+    showSnackbar,
+    dispatch,
+    isRequester,
+    openRatingModalIfNeeded,
+    donationChatBookingId,
+  ]);
+
+  useEffect(() => {
+    if (sessionLoad !== "ok" || !session || isRequester !== true) return;
+    if (session.status?.toLowerCase() !== "completed") return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- prompt when session becomes completed after donor confirms
+    openRatingModalIfNeeded(donationChatBookingId);
+  }, [
+    sessionLoad,
+    session,
+    isRequester,
+    donationChatBookingId,
+    openRatingModalIfNeeded,
+  ]);
 
   const onSendChat = useCallback(async () => {
     const t = chatDraft.trim();
@@ -464,17 +543,42 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     [submitReport, showSnackbar],
   );
 
+  const onTerminateDialogOpenChange = useCallback((open: boolean) => {
+    setTerminateAlertOpen(open);
+    if (!open) {
+      setTerminateReason("");
+      setTerminateReasonError(null);
+    }
+  }, []);
+
   const onConfirmTerminateMeet = useCallback(async () => {
     if (readOnly) return;
+    const reason = terminateReason.trim();
+    if (!reason) {
+      setTerminateReasonError("Please enter a reason for termination.");
+      return;
+    }
+    setTerminateReasonError(null);
     setLocalError(null);
-    const res = await terminateMeet();
-    if (!res.ok) return;
+    const res = await terminateMeet(reason);
+    if (!res.ok) {
+      if (res.message) setTerminateReasonError(res.message);
+      return;
+    }
     setTerminateAlertOpen(false);
+    setTerminateReason("");
     showSnackbar("Meetup terminated.", "success");
     void dispatch(loadSentBookings({ silent: true }));
     void dispatch(loadReceivedBookings({ silent: true }));
     router.push(routes.bookings);
-  }, [readOnly, terminateMeet, showSnackbar, dispatch, router]);
+  }, [
+    readOnly,
+    terminateReason,
+    terminateMeet,
+    showSnackbar,
+    dispatch,
+    router,
+  ]);
 
   const myDonationDone = useMemo(() => {
     if (!session || !user?.id) return false;
@@ -1020,7 +1124,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
       <AlertDialog
         open={terminateAlertOpen}
-        onOpenChange={setTerminateAlertOpen}
+        onOpenChange={onTerminateDialogOpenChange}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1030,13 +1134,38 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               chat will stop. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div>
+            <label
+              htmlFor="terminate-reason"
+              className="mb-1.5 block text-sm font-medium text-text-primary"
+            >
+              Reason for termination
+            </label>
+            <textarea
+              id="terminate-reason"
+              rows={3}
+              value={terminateReason}
+              disabled={terminateBusy}
+              placeholder="e.g. Donor could not attend, safety concern, wrong location…"
+              className="w-full resize-y rounded-lg border border-border bg-white px-3 py-2 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-60 dark:border-white/10 dark:bg-[#1a1a22]"
+              onChange={(e) => {
+                setTerminateReason(e.target.value);
+                if (terminateReasonError) setTerminateReasonError(null);
+              }}
+            />
+            {terminateReasonError ? (
+              <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">
+                {terminateReasonError}
+              </p>
+            ) : null}
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={terminateBusy}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/25 dark:bg-destructive/90"
-              disabled={terminateBusy}
+              disabled={terminateBusy || !terminateReason.trim()}
               onClick={(e) => {
                 e.preventDefault();
                 void onConfirmTerminateMeet();
@@ -1053,6 +1182,16 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         onClose={() => setReportOpen(false)}
         onSubmit={onReport}
       />
+
+      {donationChatBookingId ? (
+        <DonationRatingModal
+          open={ratingModalOpen}
+          onClose={() => setRatingModalOpen(false)}
+          bookingId={donationChatBookingId}
+          donorLabel={ratingDonorLabel}
+          onSuccess={onRatingSuccess}
+        />
+      ) : null}
     </div>
   );
 }

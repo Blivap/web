@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { BlivapLogo } from "@/public/svg";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -19,12 +20,12 @@ function ResetPasswordForm() {
   return (
     <AuthLayout>
       <div className="flex w-full max-w-132 flex-col gap-15">
-        <div className="flex items-center gap-2.5">
-          <Image src="/logo.svg" alt="Logo" width={45} height={45} />
-          <p className="text-[20px] font-semibold text-[#19181F] dark:text-white">
-            Blivap
+        <Link href="/" className="w-fit" data-login-logo>
+          <p className="flex justify-center font-semibold font-helvetica text-primary text-5xl tracking-tight">
+            <BlivapLogo fill="#960018" className="size-17" />
+            <span className="-mt-1 -ml-4">livap</span>
           </p>
-        </div>
+        </Link>
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-6">
             <p className="text-2xl font-semibold text-[#100F14] dark:text-white lg:text-[32px]">

@@ -19,6 +19,7 @@ type InputProps = {
   onBlur?: FocusEventHandler<HTMLInputElement>;
   labelClassName?: string;
   inputClassName?: string;
+  icon?: React.ReactNode;
   containerClassName?: string;
 } & DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export const Input = (props: InputProps) => {
@@ -35,6 +36,7 @@ export const Input = (props: InputProps) => {
     labelClassName,
     inputClassName,
     containerClassName,
+    icon,
     ...rest
   } = props;
   return (
@@ -52,13 +54,14 @@ export const Input = (props: InputProps) => {
       <div className="grid gap-px">
         <div
           className={classNames(
-            "flex w-full items-center gap-2 rounded-md border border-[#66666659] bg-white px-4 dark:border-white/12 dark:bg-[#111827]",
+            "flex w-full items-center gap-2 rounded-md overflow-hidden border border-[#66666659] bg-white  dark:border-white/12 dark:bg-[#111827]",
             { "border-red-500": error },
           )}
         >
+          {icon && <div className="pl-4">{icon}</div>}
           <input
             className={classNames(
-              "w-full bg-transparent py-2.5 text-base font-medium text-[#100F14] outline-none placeholder:text-xs placeholder:text-[#9794AA] dark:text-white dark:placeholder:text-slate-500",
+              "w-full bg-transparent py-2.5 px-4 text-base font-medium text-[#100F14] outline-none placeholder:text-xs placeholder:text-[#9794AA] dark:text-white dark:placeholder:text-slate-500",
               inputClassName,
             )}
             type={
@@ -79,7 +82,7 @@ export const Input = (props: InputProps) => {
             <button
               type="button"
               onClick={() => setTogglePassword((prev) => !prev)}
-              className="cursor-pointer text-[#6B7280] transition-colors dark:text-slate-400"
+              className="cursor-pointer text-[#6B7280] transition-colors dark:text-slate-400 pr-4"
             >
               {toggelePassword ? <BsEye size={16} /> : <BsEyeSlash size={16} />}
             </button>

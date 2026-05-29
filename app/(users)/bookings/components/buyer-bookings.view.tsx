@@ -2,6 +2,7 @@
 
 import { BookingsShellSkeleton, BookingsShell } from "./bookings-shell.view";
 import { BookingReportModal } from "./booking-report-modal.component";
+import { DonationRatingModal } from "./donation-rating-modal.component";
 import { useBuyerBookings } from "@/hooks/bookings/useBuyerBookings.hook";
 
 export function BuyerBookingsView() {
@@ -15,6 +16,10 @@ export function BuyerBookingsView() {
     submitReport,
     shellTabs,
     skeletonTabLabels,
+    ratingOpen,
+    activePending,
+    closeRating,
+    handleRatingSuccess,
   } = useBuyerBookings();
 
   if (!user?.id) {
@@ -55,6 +60,15 @@ export function BuyerBookingsView() {
         onSubmit={submitReport}
       />
       <BookingsShell defaultTab="sent" tabs={shellTabs} />
+      {activePending ? (
+        <DonationRatingModal
+          open={ratingOpen}
+          onClose={closeRating}
+          bookingId={activePending.bookingId}
+          donorLabel={activePending.donorLabel}
+          onSuccess={handleRatingSuccess}
+        />
+      ) : null}
     </>
   );
 }

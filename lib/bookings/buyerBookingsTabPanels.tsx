@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Bell, Flag, Send, Undo2, Video, X } from "lucide-react";
+import { Bell, Flag, Send, Star, Undo2, Video, X } from "lucide-react";
+import { bookingNeedsRequesterRating } from "@/lib/ratings/ratedBookingsStorage";
 import type {
   BookingsShellRow,
   BookingsTabPanel,
@@ -47,6 +48,7 @@ export type BuyerBookingsTabPanelsInput = {
   withdrawBooking: (id: string) => void;
   remindDonor: (id: string) => void;
   setReportBookingId: (id: string | null) => void;
+  openRatingForBooking: (id: string) => void;
 };
 
 export function buildBuyerBookingsTabPanels(
@@ -62,6 +64,7 @@ export function buildBuyerBookingsTabPanels(
     withdrawBooking,
     remindDonor,
     setReportBookingId,
+    openRatingForBooking,
   } = input;
 
   const mapRow = (b: Booking, ctx: BuyerPanelKey): BookingsShellRow => {
@@ -150,12 +153,39 @@ export function buildBuyerBookingsTabPanels(
       </BookingIconActions>
     );
 
+    const pastActions = () => {
+      const canRate =
+        b.status === "completed" && bookingNeedsRequesterRating(b);
+      return (
+        <BookingIconActions>
+          {canRate ? (
+            <BookingIconButton
+              label="Rate donor"
+              icon={<Star className="size-4" />}
+              variant="primary"
+              onClick={() => openRatingForBooking(b.id)}
+            />
+          ) : null}
+          <BookingIconButton
+            label="Report issue"
+            icon={<Flag className="size-3.5" />}
+            variant="ghost"
+            onClick={() => setReportBookingId(b.id)}
+          />
+        </BookingIconActions>
+      );
+    };
+
     if (ctx === "sent") {
       if (b.status === "pending") actionsSlot = pendingActions();
       else if (b.status === "accepted") actionsSlot = confirmedActions();
-      else actionsSlot = reportOnly();
+      else if (b.status === "completed" && bookingNeedsRequesterRating(b)) {
+        actionsSlot = pastActions();
+      } else actionsSlot = reportOnly();
     } else if (ctx === "confirmed" && b.status === "accepted") {
       actionsSlot = confirmedActions();
+    } else if (ctx === "past" && b.status === "completed") {
+      actionsSlot = pastActions();
     } else {
       actionsSlot = reportOnly();
     }

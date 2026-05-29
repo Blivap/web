@@ -8,6 +8,7 @@ import {
   Gem,
   HeartPulse,
   MapPin,
+  Pencil,
   Search,
   Sparkles,
   Star,
@@ -33,6 +34,7 @@ import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import { DonorCooldownDisplay } from "../donors/components/donor-cooldown-display.component";
 import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
 import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component";
+import { Button } from "@/components/ui/button";
 
 const BECOME_DONOR_CARDS = [
   {
@@ -186,13 +188,18 @@ export default function OverviewPage() {
               src={user?.profileImage}
             />
             <div className="min-w-0 flex flex-col gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                  Signed in
-                </p>
-                <h1 className="mt-0.5 truncate text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
-                  {user?.firstname} {user?.lastname}
-                </h1>
+              <div className="flex  gap-2">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                    Signed in
+                  </p>
+                  <h1 className="mt-0.5 truncate text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
+                    {user?.firstname} {user?.lastname}
+                  </h1>
+                </div>
+                <Button variant="link" size="icon-xs" href={routes.settings}>
+                  <Pencil className="size-4" aria-hidden />
+                </Button>
               </div>
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
                 <div className="flex min-w-0 flex-col gap-0.5">
@@ -214,12 +221,6 @@ export default function OverviewPage() {
               </div>
             </div>
           </div>
-          <Link
-            href={routes.settings}
-            className="shrink-0 self-start rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/4 dark:border-white/10 dark:hover:bg-white/6 sm:self-auto"
-          >
-            Edit profile
-          </Link>
         </div>
 
         {/* Tabs: shadcn-style Radix tabs + ?tab= sync */}

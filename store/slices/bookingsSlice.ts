@@ -122,6 +122,7 @@ const bookingsSlice = createSlice({
             | "meetingCode"
             | "slotEndAt"
             | "reportsCount"
+            | "requesterHasRated"
           >
         >
       >,

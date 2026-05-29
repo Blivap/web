@@ -22,6 +22,8 @@ import {
   parseDonorDetailResponse,
   type DonorDetail,
 } from "@/lib/donors/parseDonorsListResponse";
+import { parseDonorRatingsResponse } from "@/lib/ratings/parseDonorRatingsResponse";
+import type { DonorRatingsSummary } from "@/types/ratings";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
 import { Button } from "@/components/ui/button";
 import { DonorProfilePageSkeleton } from "./components/donor-profile-page-skeleton.component";
@@ -103,12 +105,23 @@ export default function DonorDetailsPage() {
     "idle" | "loading" | "ok" | "error" | "not_found"
   >("loading");
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [ratingsSummary, setRatingsSummary] = useState<DonorRatingsSummary | null>(
+    null,
+  );
 
   const loadDonor = useCallback(async () => {
     setLoadState("loading");
     setFetchError(null);
+    setRatingsSummary(null);
     try {
-      const { data, status } = await $api.donors.getById(donorId);
+      const [detailRes, ratingsRes] = await Promise.all([
+        $api.donors.getById(donorId),
+        $api.donors.ratings(donorId).catch(() => ({
+          status: 0,
+          data: undefined,
+        })),
+      ]);
+      const { data, status } = detailRes;
       if (status < 200 || status >= 300 || data === undefined) {
         setDonor(null);
         setLoadState("error");
@@ -122,9 +135,19 @@ export default function DonorDetailsPage() {
         return;
       }
       setDonor(parsed);
+      if (
+        ratingsRes.status >= 200 &&
+        ratingsRes.status < 300 &&
+        ratingsRes.data !== undefined
+      ) {
+        setRatingsSummary(parseDonorRatingsResponse(ratingsRes.data));
+      } else {
+        setRatingsSummary({ averageRating: 0, ratingCount: 0 });
+      }
       setLoadState("ok");
     } catch (e) {
       setDonor(null);
+      setRatingsSummary(null);
       if (axios.isAxiosError(e) && e.response?.status === 404) {
         setLoadState("not_found");
         return;
@@ -220,15 +243,36 @@ export default function DonorDetailsPage() {
                       Donor profile
                     </h1>
                     <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-text-secondary">
-                      <span className="inline-flex items-center gap-1">
+                      <span
+                        className="inline-flex items-center gap-1"
+                        aria-label={
+                          ratingsSummary && ratingsSummary.ratingCount > 0
+                            ? `${ratingsSummary.averageRating.toFixed(1)} out of 5, ${ratingsSummary.ratingCount} ratings`
+                            : "No ratings yet"
+                        }
+                      >
                         <Star
                           className="size-4 fill-amber-400 text-amber-400"
                           aria-hidden
                         />
-                        <span className="font-medium text-text-primary">
-                          {donor.rating.toFixed(1)}
-                        </span>
-                        <span className="text-text-tertiary">/ 5</span>
+                        {ratingsSummary && ratingsSummary.ratingCount > 0 ? (
+                          <>
+                            <span className="font-medium text-text-primary">
+                              {ratingsSummary.averageRating.toFixed(1)}
+                            </span>
+                            <span className="text-text-tertiary">/ 5</span>
+                            <span className="text-text-tertiary">
+                              · {ratingsSummary.ratingCount}{" "}
+                              {ratingsSummary.ratingCount === 1
+                                ? "rating"
+                                : "ratings"}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-text-tertiary">
+                            No ratings yet
+                          </span>
+                        )}
                       </span>
                       <span className="text-text-tertiary">·</span>
                       <span>

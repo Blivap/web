@@ -220,30 +220,42 @@ export function useMeetupSession(sessionId: string | undefined) {
     [sessionId, session, refreshSession],
   );
 
-  const terminateMeet = useCallback(async () => {
-    if (!sessionId) return { ok: false as const, message: "Missing session." };
-    setTerminateBusy(true);
-    try {
-      const { status, data } = await $api.meetups.cancel(sessionId);
-      if (status < 200 || status >= 300) {
-        const message =
-          getApiMessageFromData(data) ?? "Could not terminate this meetup.";
+  const terminateMeet = useCallback(
+    async (reason: string) => {
+      const trimmed = reason.trim();
+      if (!trimmed) {
+        return {
+          ok: false as const,
+          message: "Please enter a reason for termination.",
+        };
+      }
+      if (!sessionId) return { ok: false as const, message: "Missing session." };
+      setTerminateBusy(true);
+      try {
+        const { status, data } = await $api.meetups.terminate(sessionId, {
+          reason: trimmed,
+        });
+        if (status < 200 || status >= 300) {
+          const message =
+            getApiMessageFromData(data) ?? "Could not terminate this meetup.";
+          showSnackbar(message, "error");
+          return { ok: false as const, message };
+        }
+        await refreshSession();
+        return { ok: true as const };
+      } catch (e) {
+        const message = getAxiosErrorMessage(
+          e,
+          "Could not terminate this meetup. Try again.",
+        );
         showSnackbar(message, "error");
         return { ok: false as const, message };
+      } finally {
+        setTerminateBusy(false);
       }
-      await refreshSession();
-      return { ok: true as const };
-    } catch (e) {
-      const message = getAxiosErrorMessage(
-        e,
-        "Could not terminate this meetup. Try again.",
-      );
-      showSnackbar(message, "error");
-      return { ok: false as const, message };
-    } finally {
-      setTerminateBusy(false);
-    }
-  }, [sessionId, refreshSession, showSnackbar]);
+    },
+    [sessionId, refreshSession, showSnackbar],
+  );
 
   const submitReport = useCallback(
     async (payload: MeetupReportPayload) => {

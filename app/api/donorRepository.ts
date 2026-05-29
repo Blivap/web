@@ -25,6 +25,10 @@ export default function DonorRepository() {
       return fetcher(endpoints.donors.detail(id), { method: "GET" });
     },
 
+    ratings(donorId: string): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.donors.ratings(donorId), { method: "GET" });
+    },
+
     register(
       payload: DonorRegisterPayload,
     ): Promise<IResponse<{ message?: string }>> {

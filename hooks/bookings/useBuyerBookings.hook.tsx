@@ -13,6 +13,7 @@ import {
   loadSentBookings,
   patchBookingInLists,
 } from "@/store/slices/bookingsSlice";
+import { usePendingDonationRating } from "@/hooks/ratings/usePendingDonationRating.hook";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import {
   buildBuyerBookingsTabPanels,
@@ -49,6 +50,34 @@ export function useBuyerBookings() {
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [remindingId, setRemindingId] = useState<string | null>(null);
   const [reportBookingId, setReportBookingId] = useState<string | null>(null);
+
+  const {
+    ratingOpen,
+    activePending,
+    openRatingForBooking,
+    closeRating,
+    onRatingSuccess,
+  } = usePendingDonationRating(
+    bookings,
+    user?.id,
+    loadState === "ok" && Boolean(user?.id),
+  );
+
+  const handleRatingSuccess = useCallback(() => {
+    const bid = activePending?.bookingId;
+    if (bid) {
+      dispatch(
+        patchBookingInLists({
+          id: bid,
+          requesterHasRated: true,
+          status: "completed",
+        }),
+      );
+    }
+    onRatingSuccess();
+    showSnackbar("Thanks for your rating.", "success");
+    void dispatch(loadSentBookings({ silent: true }));
+  }, [activePending?.bookingId, dispatch, onRatingSuccess, showSnackbar]);
 
   const loadData = useCallback(() => {
     if (!user?.id) return Promise.resolve();
@@ -180,6 +209,7 @@ export function useBuyerBookings() {
         withdrawBooking: (id) => void withdrawBooking(id),
         remindDonor: (id) => void remindDonor(id),
         setReportBookingId,
+        openRatingForBooking,
       }),
     [
       bookings,
@@ -191,6 +221,7 @@ export function useBuyerBookings() {
       withdrawBooking,
       remindDonor,
       setReportBookingId,
+      openRatingForBooking,
     ],
   );
 
@@ -227,5 +258,9 @@ export function useBuyerBookings() {
     submitReport,
     shellTabs,
     skeletonTabLabels,
+    ratingOpen,
+    activePending,
+    closeRating,
+    handleRatingSuccess,
   };
 }

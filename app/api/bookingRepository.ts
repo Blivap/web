@@ -7,6 +7,7 @@ import type {
   ReportBookingPayload,
   RespondBookingPayload,
 } from "@/types/bookings";
+import type { BookingRatingPayload } from "@/types/ratings";
 import { toBookingsListQueryString } from "@/lib/bookings/bookingsListQuery";
 
 export default function BookingRepository() {
@@ -79,6 +80,16 @@ export default function BookingRepository() {
     /** Optional PATCH — sends another notification to the donor (rebuzz). No body. */
     remind(id: string): Promise<IResponse<unknown>> {
       return fetcher(endpoints.bookings.remind(id), { method: "PATCH" });
+    },
+
+    submitRating(
+      bookingId: string,
+      payload: BookingRatingPayload,
+    ): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.bookings.rating(bookingId), {
+        method: "POST",
+        data: payload,
+      });
     },
   };
 }

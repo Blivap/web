@@ -17,7 +17,7 @@ export function useResetPassword() {
     try {
       const { status, message, error } = await $api.auth.resetPassword(payload);
       if (status >= 200 && status < 300) {
-        showSnackbar(message ?? "Password reset successfully.", "success");
+        showSnackbar("Password reset successfully.", "success");
         router.replace("/login");
         return true;
       }
