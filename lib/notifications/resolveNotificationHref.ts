@@ -42,6 +42,9 @@ export function resolveNotificationHref(
     case "verification_rejected":
       return routes.verifyId();
 
+    case "donor_approved":
+      return routes.donors;
+
     default:
       return null;
   }

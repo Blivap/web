@@ -6,7 +6,10 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Checkbox } from "@/components/forms/checkbox/checkbox.component";
-import type { DonationTypeEntry } from "@/lib/donations/donation-types";
+import {
+  isDonorRegistrationEnabled,
+  type DonationTypeEntry,
+} from "@/lib/donations/donation-types";
 import {
   questionnaireDonationTypeForSlug,
   withDonationTypeQuery,
@@ -112,6 +115,8 @@ export function DonationTypeFlow({ entry }: Props) {
   };
 
   if (blivap) {
+    const registrationEnabled = isDonorRegistrationEnabled(entry);
+
     return (
       <div className="flex w-full flex-1 flex-col gap-6 sm:p-6">
         <div className="flex flex-col gap-4">
@@ -183,14 +188,20 @@ export function DonationTypeFlow({ entry }: Props) {
               >
                 Back
               </Button>
-              <Button
-                href={withDonationTypeQuery(
-                  blivap.registerHref,
-                  resolvedQuestionnaireDonationType,
-                )}
-              >
-                Open registration
-              </Button>
+              {registrationEnabled ? (
+                <Button
+                  href={withDonationTypeQuery(
+                    blivap.registerHref,
+                    resolvedQuestionnaireDonationType,
+                  )}
+                >
+                  Open registration
+                </Button>
+              ) : (
+                <Button type="button" disabled className="w-full sm:w-auto">
+                  Coming soon
+                </Button>
+              )}
             </div>
           </div>
         )}
@@ -256,9 +267,10 @@ export function DonationTypeFlow({ entry }: Props) {
           <Button
             type="button"
             onClick={() => setInterestStep(2)}
+            disabled
             className="w-full sm:w-auto"
           >
-            Continue
+            Coming soon
           </Button>
         </div>
       ) : null}

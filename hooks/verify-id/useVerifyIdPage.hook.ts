@@ -1,7 +1,6 @@
 "use client";
 
 import Cookies from "js-cookie";
-import { routes } from "@/config/routes";
 import { navigateOutAfterSuccess } from "@/lib/navigation/navigateOutAfterSuccess";
 import { useNin } from "@/hooks/nin/useNin.hooks";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
@@ -10,7 +9,6 @@ import {
   startTransition,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type DragEvent,
@@ -27,6 +25,7 @@ export function useVerifyIdPage() {
   const [mounted, setMounted] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const { showSnackbar } = useSnackbar();
   const token = useAppSelector((s) => s.auth.token);
@@ -55,32 +54,55 @@ export function useVerifyIdPage() {
       : undefined;
   const hasSession = Boolean(token || cookieToken);
 
-  const alreadyVerified = user?.nationalIdentificationNumberVerified === true;
+  const isVerified = user?.nationalIdentificationNumberVerified === true;
 
-  /**
-   * Session resolving or user already has NIN verified — block the form (loader),
-   * then redirect verified users to overview.
-   */
+  /** Session still resolving — block the form until profile is loaded. */
   const awaitingProfile = hasSession && user === null;
-  const showGateLoader = !mounted || awaitingProfile || alreadyVerified;
+  const showGateLoader = !mounted || awaitingProfile;
 
   useEffect(() => {
-    if (!mounted || !user) return;
-    if (user.nationalIdentificationNumberVerified === true) {
-      router.replace(routes.overview);
+    if (!selectedFile) {
+      setPreviewUrl(null);
+      return;
     }
-  }, [mounted, user, router]);
 
-  const previewUrl = useMemo(() => {
-    if (!selectedFile) return null;
-    return URL.createObjectURL(selectedFile);
-  }, [selectedFile]);
+    let cancelled = false;
+    let objectUrl: string | null = null;
 
-  useEffect(() => {
+    void (async () => {
+      try {
+        const pdfjs = await import("pdfjs-dist");
+        pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+          "pdfjs-dist/build/pdf.worker.min.mjs",
+          import.meta.url,
+        ).toString();
+
+        const pdf = await pdfjs.getDocument({
+          data: await selectedFile.arrayBuffer(),
+        }).promise;
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement("canvas");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const context = canvas.getContext("2d");
+        if (!context) return;
+
+        await page.render({ canvas, canvasContext: context, viewport }).promise;
+        if (cancelled) return;
+
+        objectUrl = canvas.toDataURL("image/png");
+        setPreviewUrl(objectUrl);
+      } catch {
+        if (!cancelled) setPreviewUrl(null);
+      }
+    })();
+
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      cancelled = true;
+      if (objectUrl?.startsWith("blob:")) URL.revokeObjectURL(objectUrl);
     };
-  }, [previewUrl]);
+  }, [selectedFile]);
 
   const clearFile = useCallback(() => {
     clearNinError();
@@ -123,6 +145,7 @@ export function useVerifyIdPage() {
 
   return {
     showGateLoader,
+    isVerified,
     isDragging,
     setIsDragging,
     selectedFile,

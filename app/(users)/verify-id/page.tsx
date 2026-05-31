@@ -4,13 +4,17 @@ import { AuthLoader } from "@/components/auth/auth-loader.component";
 import { Layout } from "@/layout/layout.component";
 import { Button } from "@/components/button/button.component";
 import classNames from "classnames";
-import { Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { Suspense } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { CheckCheck } from "lucide-react";
+import { routes } from "@/config/routes";
 import {
   formatFileSize,
   useVerifyIdPage,
 } from "@/hooks/verify-id/useVerifyIdPage.hook";
+import { useRouter } from "next/navigation";
 
 function IdCardGood() {
   return (
@@ -52,9 +56,32 @@ const dontItems = [
   "Not all corners are visible",
 ];
 
+function VerifyIdVerifiedState() {
+  return (
+    <div className="flex flex-col items-center gap-6  bg-white px-6 py-14 text-center dark:border-white/10 dark:bg-[#1a1a22] sm:px-10 sm:py-16">
+      <div className="flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+        <CheckCheck className="size-8" aria-hidden />
+      </div>
+      <div className="flex flex-col gap-2">
+        <h2 className="text-xl font-semibold text-text-primary">
+          Identity verified
+        </h2>
+        <p className="text-sm text-text-secondary">Your NIN is on file.</p>
+      </div>
+      <Link
+        href={routes.donors}
+        className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary/90"
+      >
+        Donors
+      </Link>
+    </div>
+  );
+}
+
 function VerifyIdContent() {
   const {
     showGateLoader,
+    isVerified,
     isDragging,
     setIsDragging,
     selectedFile,
@@ -68,11 +95,28 @@ function VerifyIdContent() {
     onDrop,
     handleConfirmNin,
   } = useVerifyIdPage();
-
+  const router = useRouter();
   if (showGateLoader) {
     return (
       <Layout>
         <AuthLoader />
+      </Layout>
+    );
+  }
+
+  if (isVerified) {
+    return (
+      <Layout>
+        <div
+          onClick={() => router.back()}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <ArrowLeft className="size-4 text-primary" aria-hidden />
+          <p className="text-primary">Back</p>
+        </div>
+        <div className="flex justify-center items-center w-full h-full">
+          <VerifyIdVerifiedState />
+        </div>
       </Layout>
     );
   }
@@ -84,25 +128,7 @@ function VerifyIdContent() {
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
             Verify Identity
           </h1>
-          <p className="mt-4 text-sm sm:text-[15px] leading-relaxed text-text-primary font-normal max-w-[640px]">
-            You meet the most important medical requirements. Fantastic! Enter
-            your personal information and schedule your first appointment, you
-            won&apos;t donate yet, but we test your blood. This way, we&apos;ll
-            be sure it&apos;s safe to donate. We&apos;ll also ask additional
-            questions. it&apos;s possible that, based on these, you may
-            unfortunately not be suitable as a donor? Contact us at 234 3683 839
-            2422
-          </p>
         </header>
-
-        <section className="mb-8 md:mb-10">
-          <h2 className="text-base font-bold text-text-primary">
-            Enter your personal details
-          </h2>
-          <p className="mt-2 text-sm text-text-primary">
-            Enter your personal details as stated on your NIN Card
-          </p>
-        </section>
 
         <section className="mb-6 md:mb-8">
           <h2 className="text-base font-bold text-text-primary">
@@ -236,14 +262,20 @@ function VerifyIdContent() {
                   ({formatFileSize(selectedFile.size)})
                 </span>
               </p>
-              <div className="overflow-hidden rounded-md border border-[#E8C4C8] bg-white dark:border-white/15 dark:bg-[#1a1a22]">
+              <div className="overflow-hidden relative max-h-[400px] min-h-[220px] rounded-md border border-[#E8C4C8] bg-white dark:border-white/15 dark:bg-[#1a1a22]">
                 {previewUrl ? (
-                  <iframe
-                    title="Document preview"
+                  <Image
                     src={previewUrl}
-                    className="max-h-[320px] min-h-[220px] w-full border-0 bg-[#fafafa] dark:bg-[#0f0f12]"
+                    alt="Document preview"
+                    fill
+                    unoptimized
+                    className="object-fill"
                   />
-                ) : null}
+                ) : (
+                  <div className="flex h-full min-h-[220px] w-full items-center justify-center bg-[#fafafa] text-xs text-[#757575] dark:bg-[#0f0f12]">
+                    Generating preview…
+                  </div>
+                )}
               </div>
               <div className="flex flex-wrap gap-3 mt-4">
                 <Button
