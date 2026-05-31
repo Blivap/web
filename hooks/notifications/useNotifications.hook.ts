@@ -79,12 +79,17 @@ export function useNotifications({
       } = await $api.notifications.list({ skip: 0, limit: PAGE_SIZE });
       const list = data?.data;
       if (status >= 200 && status < 300 && Array.isArray(list)) {
-        if (list.length === 0) {
+        const visible = list.filter(
+          (n) => n.isDeleted !== true,
+        );
+        if (visible.length === 0) {
           setRows([]);
           setHasMore(false);
           return;
         }
-        setRows((current) => (silent ? mergePollResult(current, list) : list));
+        setRows((current) =>
+          silent ? mergePollResult(current, visible) : visible,
+        );
         setHasMore(list.length === PAGE_SIZE);
         return;
       }
@@ -147,7 +152,8 @@ export function useNotifications({
       });
       const list = data?.data;
       if (status >= 200 && status < 300 && Array.isArray(list)) {
-        setRows((r) => [...r, ...list]);
+        const visible = list.filter((n) => n.isDeleted !== true);
+        setRows((r) => [...r, ...visible]);
         setHasMore(list.length === PAGE_SIZE);
         return;
       }

@@ -74,22 +74,11 @@ function DonorCard({
             <p className="text-xs font-semibold text-text-primary">
               {donor.userId?.slice(0, 6)}
             </p>
-            <div className="flex flex-wrap gap-1">
-              {donor.activeDonationTypes.length === 0 ? (
-                <span className="text-[11px] text-text-tertiary">—</span>
-              ) : (
-                donor.activeDonationTypes.slice(0, 3).map((type) => (
-                  <span
-                    key={type}
-                    className="inline-flex max-w-full truncate rounded-full border border-border bg-[#F4F4F5] px-2 py-0.5 text-[10px] font-medium text-text-secondary dark:border-white/10 dark:bg-white/8 dark:text-text-secondary"
-                  >
-                    {donationTypeLabel(type)}
-                  </span>
-                ))
-              )}
-              {donor.activeDonationTypes.length > 3 ? (
-                <span className="text-[11px] text-text-tertiary">...</span>
-              ) : null}
+            <div className="mb-3">
+              <DonorCooldownDisplay
+                cooldownEndsAt={donor.cooldownEndsAt}
+                variant={isOwner ? "owner" : "public"}
+              />
             </div>
           </div>
         </div>
@@ -97,17 +86,22 @@ function DonorCard({
           <span className="uppercase">{donor.bloodType}</span>
         </div>
       </div>
-
-      <div className="mb-3">
-        <DonorCooldownDisplay
-          cooldownEndsAt={donor.cooldownEndsAt}
-          variant={isOwner ? "owner" : "public"}
-        />
-      </div>
-
-      <div className="mb-4 flex items-center gap-1 text-xs text-text-secondary">
-        <Droplet className="size-3.5 text-primary" />
-        <span>{donor.donations} donations</span>
+      <div className="flex flex-wrap gap-1">
+        {donor.activeDonationTypes.length === 0 ? (
+          <span className="text-[11px] text-text-tertiary">—</span>
+        ) : (
+          donor.activeDonationTypes.slice(0, 3).map((type) => (
+            <span
+              key={type}
+              className="inline-flex max-w-full truncate rounded-full border border-border bg-[#F4F4F5] px-2 py-0.5 text-[10px] font-medium text-text-secondary dark:border-white/10 dark:bg-white/8 dark:text-text-secondary"
+            >
+              {donationTypeLabel(type)}
+            </span>
+          ))
+        )}
+        {donor.activeDonationTypes.length > 3 ? (
+          <span className="text-[11px] text-text-tertiary">...</span>
+        ) : null}
       </div>
 
       <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">

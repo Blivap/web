@@ -13,6 +13,7 @@ import {
   Sparkles,
   Star,
   Users,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { Layout } from "../../../layout/layout.component";
@@ -21,7 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 import {
   DONATION_TYPE_ENTRIES,
-  type DonationTypeEntry,
+  isDonorRegistrationEnabled,
 } from "@/lib/donations/donation-types";
 import {
   donationPathwayOverviewHref,
@@ -29,12 +30,18 @@ import {
 } from "@/lib/donations/donation-pathway-questionnaire-type";
 import { donorDetailPath, routes } from "@/config/routes";
 import { $api } from "@/app/api";
-import { parseDonorRecord } from "@/lib/donors/parseDonorsListResponse";
+import {
+  parseDonorRecord,
+  parseDonorsListResponse,
+} from "@/lib/donors/parseDonorsListResponse";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import { DonorCooldownDisplay } from "../donors/components/donor-cooldown-display.component";
 import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
+import type { Donor } from "../donors/donors.data";
+import { SCREENING_DONATION_TYPE_OPTIONS } from "@/lib/donors/screeningDonationTypes";
 import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component";
 import { Button } from "@/components/ui/button";
+import { OverviewNotificationsTab } from "./components/overview-notifications-tab.component";
 
 const BECOME_DONOR_CARDS = [
   {
@@ -57,75 +64,18 @@ const BECOME_DONOR_CARDS = [
   },
 ];
 
-const ACTIVE_DONORS = [
-  {
-    id: "012834",
-    packs: "2 packs",
-    bloodType: "O+",
-    rating: 4.8,
-    donations: 4,
-    location: "Abuja, Nigeria",
-  },
-  {
-    id: "012835",
-    packs: "1 pack",
-    bloodType: "A+",
-    rating: 4.9,
-    donations: 2,
-    location: "Lagos, Nigeria",
-  },
-  {
-    id: "012836",
-    packs: "3 packs",
-    bloodType: "B+",
-    rating: 4.7,
-    donations: 6,
-    location: "Abuja, Nigeria",
-  },
-  {
-    id: "012837",
-    packs: "2 packs",
-    bloodType: "O-",
-    rating: 5.0,
-    donations: 3,
-    location: "Port Harcourt, Nigeria",
-  },
-  {
-    id: "012884",
-    packs: "2 packs",
-    bloodType: "O+",
-    rating: 4.8,
-    donations: 4,
-    location: "Abuja, Nigeria",
-  },
-  {
-    id: "012809",
-    packs: "1 pack",
-    bloodType: "A+",
-    rating: 4.9,
-    donations: 2,
-    location: "Lagos, Nigeria",
-  },
-  {
-    id: "012808",
-    packs: "3 packs",
-    bloodType: "B+",
-    rating: 4.7,
-    donations: 6,
-    location: "Abuja, Nigeria",
-  },
-  {
-    id: "012807",
-    packs: "2 packs",
-    bloodType: "O-",
-    rating: 5.0,
-    donations: 3,
-    location: "Port Harcourt, Nigeria",
-  },
-];
+const OVERVIEW_DONORS_LIMIT = 8;
 
-function isLiveBlivapPathway(entry: DonationTypeEntry): boolean {
-  return entry.integration.kind !== "interest_only";
+const DONATION_TYPE_LABELS = new Map(
+  SCREENING_DONATION_TYPE_OPTIONS.map((o) => [o.value, o.label]),
+);
+
+function donationTypeLabel(type: string): string {
+  return (
+    DONATION_TYPE_LABELS.get(
+      type as (typeof SCREENING_DONATION_TYPE_OPTIONS)[number]["value"],
+    ) ?? type.replace(/_/g, " ")
+  );
 }
 
 const pathwayFilterChipBase =
@@ -140,6 +90,10 @@ export default function OverviewPage() {
   const [pathwayFilter, setPathwayFilter] = useState<
     "all" | "live" | "interest"
   >("all");
+  const [activeDonors, setActiveDonors] = useState<Donor[]>([]);
+  const [activeDonorsLoadState, setActiveDonorsLoadState] = useState<
+    "idle" | "loading" | "ok" | "error"
+  >("idle");
 
   useEffect(() => {
     let cancelled = false;
@@ -160,11 +114,38 @@ export default function OverviewPage() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      setActiveDonorsLoadState("loading");
+      try {
+        const { data, status } = await $api.donors.list({
+          page: 1,
+          limit: OVERVIEW_DONORS_LIMIT,
+        });
+        if (cancelled) return;
+        if (status < 200 || status >= 300 || data === undefined) {
+          setActiveDonorsLoadState("error");
+          return;
+        }
+        const parsed = parseDonorsListResponse(data);
+        setActiveDonors(parsed.donors);
+        setActiveDonorsLoadState("ok");
+      } catch {
+        if (!cancelled) setActiveDonorsLoadState("error");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const filteredPathways = useMemo(() => {
     const q = pathwaySearch.trim().toLowerCase();
     return DONATION_TYPE_ENTRIES.filter((entry) => {
-      if (pathwayFilter === "live" && !isLiveBlivapPathway(entry)) return false;
-      if (pathwayFilter === "interest" && isLiveBlivapPathway(entry))
+      if (pathwayFilter === "live" && !isDonorRegistrationEnabled(entry))
+        return false;
+      if (pathwayFilter === "interest" && isDonorRegistrationEnabled(entry))
         return false;
       if (
         q &&
@@ -270,10 +251,9 @@ export default function OverviewPage() {
                           Ready to register as a donor?
                         </h2>
                         <p className="max-w-xl text-sm leading-relaxed text-text-secondary">
-                          Start with the pathway that fits you. Blood donation
-                          uses the full verification flow today; sperm and ovum
-                          use guided intake—everything else opens an interest
-                          checklist for upcoming programs.
+                          Start with blood, sperm, or ovum donor registration.
+                          Other pathways are listed for reference and will open
+                          as Blivap expands.
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-3">
@@ -415,8 +395,8 @@ export default function OverviewPage() {
                           {(
                             [
                               ["all", "All"],
-                              ["live", "Live in Blivap"],
-                              ["interest", "Interest only"],
+                              ["live", "Open now"],
+                              ["interest", "Coming soon"],
                             ] as const
                           ).map(([value, label]) => (
                             <button
@@ -444,31 +424,55 @@ export default function OverviewPage() {
                       ) : (
                         <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
                           {filteredPathways.map((entry) => {
-                            const live = isLiveBlivapPathway(entry);
+                            const registrationEnabled =
+                              isDonorRegistrationEnabled(entry);
+                            const itemClassName =
+                              "flex items-start gap-3 rounded-xl border border-border bg-[#FAFAFA] px-3.5 py-3 text-left text-sm dark:border-white/10 dark:bg-white/5";
+                            const itemContent = (
+                              <>
+                                <span
+                                  className={`mt-1.5 size-2 shrink-0 rounded-full ${
+                                    registrationEnabled
+                                      ? "bg-primary"
+                                      : "bg-text-tertiary/40"
+                                  }`}
+                                  aria-hidden
+                                />
+                                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                                  <span className="font-medium leading-snug text-text-primary">
+                                    {entry.label}
+                                  </span>
+                                  <span className="text-[11px] font-medium uppercase tracking-wide text-text-tertiary">
+                                    {registrationEnabled
+                                      ? "Open for registration"
+                                      : "Coming soon"}
+                                  </span>
+                                </span>
+                                {registrationEnabled ? (
+                                  <ChevronRight className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
+                                ) : null}
+                              </>
+                            );
+
                             return (
                               <li key={entry.slug}>
-                                <Link
-                                  href={donationPathwayOverviewHref(entry.slug)}
-                                  className="flex items-start gap-3 rounded-xl border border-border bg-[#FAFAFA] px-3.5 py-3 text-left text-sm transition hover:border-primary/30 hover:bg-white hover:shadow-sm dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
-                                >
-                                  <span
-                                    className={`mt-1.5 size-2 shrink-0 rounded-full ${
-                                      live
-                                        ? "bg-primary"
-                                        : "bg-text-tertiary/40"
-                                    }`}
-                                    aria-hidden
-                                  />
-                                  <span className="flex min-w-0 flex-1 flex-col gap-1">
-                                    <span className="font-medium leading-snug text-text-primary">
-                                      {entry.label}
-                                    </span>
-                                    <span className="text-[11px] font-medium uppercase tracking-wide text-text-tertiary">
-                                      {live ? "Live flow" : "Interest flow"}
-                                    </span>
-                                  </span>
-                                  <ChevronRight className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
-                                </Link>
+                                {registrationEnabled ? (
+                                  <Link
+                                    href={donationPathwayOverviewHref(
+                                      entry.slug,
+                                    )}
+                                    className={`${itemClassName} transition hover:border-primary/30 hover:bg-white hover:shadow-sm dark:hover:bg-white/10`}
+                                  >
+                                    {itemContent}
+                                  </Link>
+                                ) : (
+                                  <div
+                                    className={`${itemClassName} cursor-not-allowed opacity-60`}
+                                    aria-disabled="true"
+                                  >
+                                    {itemContent}
+                                  </div>
+                                )}
                               </li>
                             );
                           })}
@@ -501,125 +505,169 @@ export default function OverviewPage() {
                       </Link>
                     </div>
                     <div className="max-h-[380px] overflow-y-auto">
-                      {ACTIVE_DONORS.map((donor, index) => {
-                        const cooldown = resolveDonorCooldown(
-                          "cooldownEndsAt" in donor
-                            ? (donor.cooldownEndsAt as string | undefined)
-                            : undefined,
-                        );
-                        const bookingBlocked = cooldown.isActive;
-                        return (
-                          <div
-                            key={donor.id}
-                            className={`flex flex-col gap-4 px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:px-6 ${
-                              index > 0
-                                ? "border-t border-border dark:border-white/10"
-                                : ""
-                            }`}
-                          >
-                            <div className="flex min-w-0 flex-1 items-center gap-3">
-                              <Avatar className="size-11!" />
-                              <div className="min-w-0 flex flex-col gap-1.5">
+                      {activeDonorsLoadState === "loading" ? (
+                        <p className="px-5 py-8 text-center text-sm text-text-secondary sm:px-6">
+                          Loading donors…
+                        </p>
+                      ) : activeDonorsLoadState === "error" ? (
+                        <p className="px-5 py-8 text-center text-sm text-text-secondary sm:px-6">
+                          Could not load donors. Please try again later.
+                        </p>
+                      ) : activeDonors.length === 0 ? (
+                        <p className="px-5 py-8 text-center text-sm text-text-secondary sm:px-6">
+                          No donors available yet.
+                        </p>
+                      ) : (
+                        activeDonors.map((donor, index) => {
+                          const isOwner =
+                            !!user?.id &&
+                            !!donor.userId &&
+                            donor.userId === user.id;
+                          const cooldown = resolveDonorCooldown(
+                            donor.cooldownEndsAt,
+                          );
+                          const bookingBlocked =
+                            cooldown.isActive && !isOwner;
+                          const profileHref = isOwner
+                            ? routes.settings
+                            : donorDetailPath(donor.id);
+                          return (
+                            <div
+                              key={donor.id}
+                              className={`flex flex-col gap-4 px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:px-6 ${
+                                index > 0
+                                  ? "border-t border-border dark:border-white/10"
+                                  : ""
+                              }`}
+                            >
+                              <div className="flex min-w-0 flex-1 items-center gap-3">
+                                <Avatar
+                                  className="size-11!"
+                                  src={donor.profileImage ?? undefined}
+                                />
+                                <div className="min-w-0 flex flex-col gap-1.5">
+                                  <Link
+                                    href={profileHref}
+                                    className="truncate text-sm font-semibold text-text-primary hover:text-primary hover:underline"
+                                  >
+                                    {donor.userId?.slice(0, 6) ?? donor.id}
+                                  </Link>
+                                  <div className="flex flex-wrap gap-1">
+                                    {donor.activeDonationTypes.length === 0 ? (
+                                      <span className="text-xs text-text-secondary">
+                                        —
+                                      </span>
+                                    ) : (
+                                      donor.activeDonationTypes
+                                        .slice(0, 2)
+                                        .map((type) => (
+                                          <span
+                                            key={type}
+                                            className="inline-flex max-w-full truncate rounded-full border border-border bg-[#F4F4F5] px-2 py-0.5 text-[10px] font-medium text-text-secondary dark:border-white/10 dark:bg-white/8"
+                                          >
+                                            {donationTypeLabel(type)}
+                                          </span>
+                                        ))
+                                    )}
+                                    {donor.activeDonationTypes.length > 2 ? (
+                                      <span className="text-[11px] text-text-tertiary">
+                                        …
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                  <DonorCooldownDisplay
+                                    cooldownEndsAt={donor.cooldownEndsAt}
+                                    variant={isOwner ? "owner" : "public"}
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                <span className="rounded-full bg-[#FCE7E7] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary dark:bg-primary/25">
+                                  {donor.bloodType}
+                                </span>
+                                {donor.rating > 0 ? (
+                                  <div className="flex items-center gap-1 text-sm text-text-secondary">
+                                    <Star
+                                      className="size-4 fill-amber-400 text-amber-400"
+                                      aria-hidden
+                                    />
+                                    <span>{donor.rating.toFixed(1)}</span>
+                                  </div>
+                                ) : null}
+                                <div className="flex items-center gap-1 text-sm text-text-secondary">
+                                  <DropletIcon
+                                    className="size-3.5 text-primary"
+                                    aria-hidden
+                                  />
+                                  <span>{donor.donations} donations</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-sm text-text-secondary">
+                                  <MapPin
+                                    className="size-3.5 shrink-0"
+                                    aria-hidden
+                                  />
+                                  <span className="truncate">
+                                    {donor.location}, {donor.country}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex w-full shrink-0 gap-2 sm:ml-auto sm:w-auto">
                                 <Link
-                                  href={donorDetailPath(donor.id)}
-                                  className="truncate text-sm font-semibold text-text-primary hover:text-primary hover:underline"
+                                  href={profileHref}
+                                  className="inline-flex flex-1 items-center justify-center rounded-lg border border-border px-4 py-2 text-xs font-medium text-text-primary transition hover:bg-primary/4 dark:border-white/10 sm:flex-none"
                                 >
-                                  Donor {donor.id}
+                                  {isOwner ? "Settings" : "View profile"}
                                 </Link>
-                                <span className="text-xs text-text-secondary">
-                                  {donor.packs}
-                                </span>
-                                <DonorCooldownDisplay
-                                  cooldownEndsAt={
-                                    "cooldownEndsAt" in donor
-                                      ? (donor.cooldownEndsAt as
-                                          | string
-                                          | undefined)
-                                      : undefined
-                                  }
-                                  variant="public"
-                                />
+                                {bookingBlocked ? (
+                                  <span
+                                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-border bg-[#F4F4F5] px-4 py-2 text-xs font-medium text-text-tertiary sm:flex-none dark:border-white/10 dark:bg-white/8"
+                                    aria-disabled
+                                  >
+                                    Booking paused
+                                  </span>
+                                ) : isOwner ? null : (
+                                  <Link
+                                    href={routes.scheduleAppointment(donor.id)}
+                                    className="inline-flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary/90 sm:flex-none"
+                                  >
+                                    Book
+                                  </Link>
+                                )}
                               </div>
                             </div>
-                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                              <span className="rounded-full bg-[#FCE7E7] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary dark:bg-primary/25">
-                                {donor.bloodType}
-                              </span>
-                              <div className="flex items-center gap-1 text-sm text-text-secondary">
-                                <Star
-                                  className="size-4 fill-amber-400 text-amber-400"
-                                  aria-hidden
-                                />
-                                <span>{donor.rating}</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-sm text-text-secondary">
-                                <DropletIcon
-                                  className="size-3.5 text-primary"
-                                  aria-hidden
-                                />
-                                <span>{donor.donations} donations</span>
-                              </div>
-                              <div className="flex items-center gap-1.5 text-sm text-text-secondary">
-                                <MapPin
-                                  className="size-3.5 shrink-0"
-                                  aria-hidden
-                                />
-                                <span className="truncate">
-                                  {donor.location}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex w-full shrink-0 gap-2 sm:ml-auto sm:w-auto">
-                              <Link
-                                href={donorDetailPath(donor.id)}
-                                className="inline-flex flex-1 items-center justify-center rounded-lg border border-border px-4 py-2 text-xs font-medium text-text-primary transition hover:bg-primary/4 dark:border-white/10 sm:flex-none"
-                              >
-                                View profile
-                              </Link>
-                              {bookingBlocked ? (
-                                <span
-                                  className="inline-flex flex-1 items-center justify-center rounded-lg border border-border bg-[#F4F4F5] px-4 py-2 text-xs font-medium text-text-tertiary sm:flex-none dark:border-white/10 dark:bg-white/8"
-                                  aria-disabled
-                                >
-                                  Booking paused
-                                </span>
-                              ) : (
-                                <Link
-                                  href={routes.scheduleAppointment(donor.id)}
-                                  className="inline-flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary/90 sm:flex-none"
-                                >
-                                  Book
-                                </Link>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })
+                      )}
                     </div>
                   </section>
                 </div>
               </TabsContent>
 
               <TabsContent value="payment" className="mt-0">
-                <section className="flex flex-col gap-4">
-                  <h2 className="text-lg font-bold text-text-primary">
-                    Payment
-                  </h2>
-                  <p className="text-text-secondary">
-                    Payment settings and history will appear here.
-                  </p>
+                <section className="overflow-hidden rounded-2xl border border-[#DADADA] bg-white dark:border-white/10 dark:bg-[#1a1a22]">
+                  <div className="flex flex-col items-center gap-4 px-6 py-14 text-center sm:px-10 sm:py-16">
+                    <div className="flex size-14 items-center justify-center rounded-2xl bg-[#F9E8EE] text-primary dark:bg-primary/20">
+                      <Wallet className="size-7" aria-hidden />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <span className="mx-auto inline-flex w-fit rounded-full border border-border bg-[#F4F4F5] px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-text-tertiary dark:border-white/10 dark:bg-white/8">
+                        Upcoming
+                      </span>
+                      <h2 className="text-lg font-semibold text-text-primary">
+                        Payment
+                      </h2>
+                      <p className="max-w-md text-sm leading-relaxed text-text-secondary">
+                        Payment settings, payout history, and wallet features
+                        are on the way. You&apos;ll manage compensation here
+                        once this is live.
+                      </p>
+                    </div>
+                  </div>
                 </section>
               </TabsContent>
 
               <TabsContent value="notifications" className="mt-0">
-                <section className="flex flex-col gap-4">
-                  <h2 className="text-lg font-bold text-text-primary">
-                    Notifications
-                  </h2>
-                  <p className="text-text-secondary">
-                    Your notifications will appear here.
-                  </p>
-                </section>
+                <OverviewNotificationsTab />
               </TabsContent>
             </Tabs>
           </Suspense>

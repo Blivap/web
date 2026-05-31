@@ -6,23 +6,10 @@ import { useEffect, useRef, useState } from "react";
 import { FiBell } from "react-icons/fi";
 import { Check, CheckCheck } from "lucide-react";
 import { useNotifications } from "@/hooks/notifications/useNotifications.hook";
+import { formatNotificationTime } from "@/lib/notifications/formatNotificationTime";
 import { useAppSelector } from "@/store/hooks";
 
 export type { NotificationItem } from "@/hooks/notifications/useNotifications.hook";
-
-function formatNotificationTime(createdAt: string): string {
-  const date = new Date(createdAt);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
-}
 
 export const NotificationBell = () => {
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
