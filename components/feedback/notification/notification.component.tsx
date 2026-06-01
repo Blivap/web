@@ -88,11 +88,12 @@ export const NotificationBell = () => {
         size={18}
         className="stroke-2 text-sm text-[#374151] dark:text-white/85"
       />
+
       <span
         ref={panelRef}
         onClick={(e) => e.stopPropagation()}
         className={classNames(
-          "absolute top-10 left-0 flex h-[400px] w-[280px] flex-1 flex-col origin-top-right rounded-xl border border-[#DADADA] bg-white p-3 shadow-[2px_3px_5px_#00000014] md:left-auto md:-right-1 md:w-[350px] dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)]",
+          "absolute top-10 right-0  flex h-[400px] w-[280px] flex-1 flex-col origin-top-right rounded-xl border border-[#DADADA] bg-white p-3 shadow-[2px_3px_5px_#00000014] md:left-auto md:-right-1 md:w-[350px] dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)]",
           isOpen ? "pointer-events-auto" : "pointer-events-none",
         )}
         style={{ visibility: "hidden", opacity: 0, transform: "scale(0.96)" }}
