@@ -4,17 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
-import type { LucideIcon } from "lucide-react";
 import {
   ArrowLeft,
-  ArrowRight,
-  Award,
-  ClipboardCheck,
   Droplet,
   Info,
   MapPin,
   ShieldCheck,
-  Star,
 } from "lucide-react";
 import { Layout } from "@/layout/layout.component";
 import { $api } from "@/app/api";
@@ -22,8 +17,6 @@ import {
   parseDonorDetailResponse,
   type DonorDetail,
 } from "@/lib/donors/parseDonorsListResponse";
-import { parseDonorRatingsResponse } from "@/lib/ratings/parseDonorRatingsResponse";
-import type { DonorRatingsSummary } from "@/types/ratings";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
 import { Button } from "@/components/button/button.component";
 import { DonorProfilePageSkeleton } from "./components/donor-profile-page-skeleton.component";
@@ -35,61 +28,26 @@ import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
 const cardClass =
   "rounded-2xl border border-border bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#14141a] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]";
 
-function shortRef(id: string, len = 8): string {
-  const t = id.trim();
-  if (t.length <= len) return t;
-  return `${t.slice(0, len)}…`;
-}
-
-function ReliabilityBar({ value }: { value: number }) {
-  const pct = Math.min(100, Math.max(0, value));
-  return (
-    <div
-      className="h-2.5 w-full overflow-hidden rounded-full bg-[#ECECEE] dark:bg-white/10"
-      role="progressbar"
-      aria-valuenow={pct}
-      aria-valuemin={0}
-      aria-valuemax={100}
-    >
-      <div
-        className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out"
-        style={{ width: `${pct}%` }}
-      />
-    </div>
-  );
-}
-
-function StatTile({
+function ProfileStat({
   label,
   value,
   hint,
-  icon: Icon,
 }: {
   label: string;
   value: string | number;
   hint?: string;
-  icon: LucideIcon;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-[#FAFAFB] p-4 dark:border-white/10 dark:bg-white/4">
-      <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/18">
-          <Icon className="size-4" strokeWidth={2} aria-hidden />
-        </span>
-        <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-text-tertiary">
-            {label}
-          </p>
-          <p className="mt-0.5 text-lg font-semibold tabular-nums text-text-primary">
-            {value}
-          </p>
-          {hint ? (
-            <p className="mt-0.5 text-[11px] leading-snug text-text-tertiary">
-              {hint}
-            </p>
-          ) : null}
-        </div>
-      </div>
+    <div className="rounded-lg border border-border bg-[#FAFAFB] px-3 py-2.5 dark:border-white/10 dark:bg-white/4">
+      <dt className="text-[10px] font-semibold uppercase tracking-wide text-text-tertiary">
+        {label}
+      </dt>
+      <dd className="mt-0.5 text-base font-semibold tabular-nums text-text-primary">
+        {value}
+      </dd>
+      {hint ? (
+        <p className="mt-0.5 text-[11px] text-text-tertiary">{hint}</p>
+      ) : null}
     </div>
   );
 }
@@ -105,23 +63,12 @@ export default function DonorDetailsPage() {
     "idle" | "loading" | "ok" | "error" | "not_found"
   >("loading");
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [ratingsSummary, setRatingsSummary] = useState<DonorRatingsSummary | null>(
-    null,
-  );
 
   const loadDonor = useCallback(async () => {
     setLoadState("loading");
     setFetchError(null);
-    setRatingsSummary(null);
     try {
-      const [detailRes, ratingsRes] = await Promise.all([
-        $api.donors.getById(donorId),
-        $api.donors.ratings(donorId).catch(() => ({
-          status: 0,
-          data: undefined,
-        })),
-      ]);
-      const { data, status } = detailRes;
+      const { data, status } = await $api.donors.getById(donorId);
       if (status < 200 || status >= 300 || data === undefined) {
         setDonor(null);
         setLoadState("error");
@@ -135,19 +82,9 @@ export default function DonorDetailsPage() {
         return;
       }
       setDonor(parsed);
-      if (
-        ratingsRes.status >= 200 &&
-        ratingsRes.status < 300 &&
-        ratingsRes.data !== undefined
-      ) {
-        setRatingsSummary(parseDonorRatingsResponse(ratingsRes.data));
-      } else {
-        setRatingsSummary({ averageRating: 0, ratingCount: 0 });
-      }
       setLoadState("ok");
     } catch (e) {
       setDonor(null);
-      setRatingsSummary(null);
       if (axios.isAxiosError(e) && e.response?.status === 404) {
         setLoadState("not_found");
         return;
@@ -174,6 +111,17 @@ export default function DonorDetailsPage() {
     !!user?.id && !!donor?.userId && donor.userId === user.id;
   const cooldown = resolveDonorCooldown(donor?.cooldownEndsAt);
   const bookingBlocked = cooldown.isActive && !isOwnProfile;
+  const ratingsSummary = donor?.ratings;
+  const ratingLabel =
+    ratingsSummary && ratingsSummary.ratingCount > 0
+      ? `${ratingsSummary.averageRating.toFixed(1)} / 5`
+      : "No ratings";
+  const ratingHint =
+    ratingsSummary && ratingsSummary.ratingCount > 0
+      ? `${ratingsSummary.ratingCount} ${
+          ratingsSummary.ratingCount === 1 ? "rating" : "ratings"
+        }`
+      : undefined;
 
   return (
     <Layout>
@@ -214,136 +162,73 @@ export default function DonorDetailsPage() {
           </div>
         ) : donor ? (
           <div className="flex flex-col gap-6">
-            <div
-              className={`${cardClass} overflow-hidden bg-linear-to-br from-[#FFF8F7] via-white to-[#FAFAFB] p-0 dark:from-[#1a1416] dark:via-[#14141a] dark:to-[#101014]`}
-            >
-              <div className="flex flex-col gap-6 p-5 sm:flex-row sm:items-start sm:gap-8 sm:p-8">
-                <div className="relative shrink-0">
-                  <Avatar
-                    className="size-28 ring-4 ring-white shadow-lg dark:ring-[#1a1a22] sm:size-32!"
-                    src={donor.profileImageUrl ?? undefined}
-                  />
-                  {donor.isActiveDonor ? (
-                    <span className="absolute -bottom-1 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-800 shadow-sm dark:border-emerald-800/60 dark:bg-emerald-950/80 dark:text-emerald-200">
-                      <ShieldCheck className="size-3" aria-hidden />
-                      Active
-                    </span>
-                  ) : null}
-                </div>
+            <div className={cardClass}>
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+                <Avatar
+                  className="size-20 shrink-0 ring-2 ring-primary/10 ring-offset-2 ring-offset-white dark:ring-offset-[#14141a] sm:size-24!"
+                  src={donor.profileImageUrl ?? undefined}
+                />
                 <div className="min-w-0 flex-1 space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-sm font-bold text-primary dark:border-primary/35 dark:bg-primary/15">
-                      <Droplet className="size-4" aria-hidden />
-                      {donor.bloodType}
-                    </span>
-                    <span className="font-mono text-[11px] text-text-tertiary">
-                      Ref {shortRef(donor.id)}
-                    </span>
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">
-                      Donor profile
-                    </h1>
-                    <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-text-secondary">
-                      <span
-                        className="inline-flex items-center gap-1"
-                        aria-label={
-                          ratingsSummary && ratingsSummary.ratingCount > 0
-                            ? `${ratingsSummary.averageRating.toFixed(1)} out of 5, ${ratingsSummary.ratingCount} ratings`
-                            : "No ratings yet"
-                        }
-                      >
-                        <Star
-                          className="size-4 fill-amber-400 text-amber-400"
-                          aria-hidden
-                        />
-                        {ratingsSummary && ratingsSummary.ratingCount > 0 ? (
-                          <>
-                            <span className="font-medium text-text-primary">
-                              {ratingsSummary.averageRating.toFixed(1)}
-                            </span>
-                            <span className="text-text-tertiary">/ 5</span>
-                            <span className="text-text-tertiary">
-                              · {ratingsSummary.ratingCount}{" "}
-                              {ratingsSummary.ratingCount === 1
-                                ? "rating"
-                                : "ratings"}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-text-tertiary">
-                            No ratings yet
-                          </span>
-                        )}
-                      </span>
-                      <span className="text-text-tertiary">·</span>
-                      <span>
-                        {donor.donations}{" "}
-                        {donor.donations === 1 ? "donation" : "donations"}{" "}
-                        recorded
-                      </span>
-                      {donor.packs > 0 ? (
-                        <>
-                          <span className="text-text-tertiary">·</span>
-                          <span>
-                            {donor.packs} blood{" "}
-                            {donor.packs === 1 ? "pack" : "packs"}
-                          </span>
-                        </>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 space-y-1">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">
+                        Donor profile
+                      </p>
+                      <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-text-primary">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-base font-bold text-primary dark:bg-primary/15">
+                          <Droplet className="size-4" aria-hidden />
+                          {donor.bloodType}
+                        </span>
+                      </h1>
+                      {locationLine ? (
+                        <p className="flex items-center gap-1.5 text-sm text-text-secondary">
+                          <MapPin
+                            className="size-3.5 shrink-0 text-text-tertiary"
+                            aria-hidden
+                          />
+                          {locationLine}
+                        </p>
                       ) : null}
-                    </p>
-                  </div>
-                  <DonorCooldownDisplay
-                    cooldownEndsAt={donor.cooldownEndsAt}
-                    variant={isOwnProfile ? "owner" : "public"}
-                    className="max-w-md"
-                  />
-                  {donor.reliabilityScore != null ? (
-                    <div className="max-w-md space-y-2">
-                      <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="font-semibold uppercase tracking-wide text-text-tertiary">
-                          Reliability
-                        </span>
-                        <span className="font-mono font-semibold text-text-primary">
-                          {donor.reliabilityScore}
-                          <span className="text-text-tertiary">/100</span>
-                        </span>
-                      </div>
-                      <ReliabilityBar value={donor.reliabilityScore} />
                     </div>
-                  ) : null}
-                  {locationLine ? (
-                    <p className="flex items-start gap-2 text-sm text-text-secondary">
-                      <MapPin
-                        className="mt-0.5 size-4 shrink-0 text-primary"
-                        aria-hidden
+                    <div className="flex flex-wrap items-center gap-2">
+                      {donor.isActiveDonor ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/80 dark:text-emerald-200">
+                          <ShieldCheck className="size-3" aria-hidden />
+                          Active donor
+                        </span>
+                      ) : null}
+                      <DonorCooldownDisplay
+                        cooldownEndsAt={donor.cooldownEndsAt}
+                        variant={isOwnProfile ? "owner" : "public"}
                       />
-                      <span>{locationLine}</span>
-                    </p>
-                  ) : null}
+                    </div>
+                  </div>
+
+                  <dl className="grid grid-cols-2 gap-2 border-t border-border pt-4 sm:grid-cols-4 dark:border-white/10">
+                    <ProfileStat
+                      label="Rating"
+                      value={ratingLabel}
+                      hint={ratingHint}
+                    />
+                    <ProfileStat
+                      label="Donations"
+                      value={donor.successfulDonationCount ?? donor.donations}
+                    />
+                    <ProfileStat
+                      label="Bookings"
+                      value={donor.completedBookings ?? 0}
+                    />
+                    {donor.reliabilityScore != null ? (
+                      <ProfileStat
+                        label="Reliability"
+                        value={`${donor.reliabilityScore}/100`}
+                      />
+                    ) : (
+                      <ProfileStat label="Blood packs" value={donor.packs} />
+                    )}
+                  </dl>
                 </div>
               </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <StatTile
-                icon={ClipboardCheck}
-                label="Completed bookings"
-                value={donor.completedBookings ?? 0}
-                hint="Finished screening visits"
-              />
-              <StatTile
-                icon={Award}
-                label="Successful donations"
-                value={donor.successfulDonationCount ?? donor.donations}
-                hint="Donations completed via Blivap"
-              />
-              <StatTile
-                icon={Droplet}
-                label="Blood packs"
-                value={donor.packs}
-                hint="Eligible packs on profile"
-              />
             </div>
 
             <div className={cardClass}>
@@ -438,8 +323,7 @@ export default function DonorDetailsPage() {
                   }
                   className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold"
                 >
-                  Continue with donation
-                  <ArrowRight className="size-4" aria-hidden />
+                  Continue 
                 </Button>
               )}
             </div>
