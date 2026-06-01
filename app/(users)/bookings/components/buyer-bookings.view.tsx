@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/button/button.component";
 import { BookingsShellSkeleton, BookingsShell } from "./bookings-shell.view";
-import { BookingReportModal } from "./booking-report-modal.component";
 import { DonationRatingModal } from "./donation-rating-modal.component";
 import { useBuyerBookings } from "@/hooks/bookings/useBuyerBookings.hook";
 
@@ -12,9 +11,6 @@ export function BuyerBookingsView() {
     loadState,
     loadError,
     loadData,
-    reportBookingId,
-    setReportBookingId,
-    submitReport,
     shellTabs,
     skeletonTabLabels,
     ratingOpen,
@@ -57,12 +53,6 @@ export function BuyerBookingsView() {
 
   return (
     <>
-      <BookingReportModal
-        open={reportBookingId !== null}
-        bookingId={reportBookingId}
-        onClose={() => setReportBookingId(null)}
-        onSubmit={submitReport}
-      />
       <BookingsShell defaultTab="sent" tabs={shellTabs} />
       {activeRatingBooking ? (
         <DonationRatingModal

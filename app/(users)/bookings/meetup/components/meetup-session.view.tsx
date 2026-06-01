@@ -1141,14 +1141,16 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       </section>
 
       <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => setReportOpen(true)}
-          disabled={reportBusy}
-        >
-          Report meetup
-        </Button>
+        {isRequester === false ? (
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => setReportOpen(true)}
+            disabled={reportBusy}
+          >
+            Report meetup
+          </Button>
+        ) : null}
         <Button
           variant="outline"
           type="button"

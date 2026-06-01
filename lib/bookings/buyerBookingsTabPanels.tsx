@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Bell, Flag, Send, Star, Undo2, Video, X } from "lucide-react";
+import { Bell, Send, Star, Undo2, Video, X } from "lucide-react";
 import { bookingNeedsRequesterRating } from "@/lib/ratings/ratedBookingsStorage";
 import type {
   BookingsShellRow,
@@ -46,7 +46,6 @@ export type BuyerBookingsTabPanelsInput = {
   remindingId: string | null;
   withdrawBooking: (id: string) => void;
   remindDonor: (id: string) => void;
-  setReportBookingId: (id: string | null) => void;
   openRatingForBooking: (id: string) => void;
 };
 
@@ -61,7 +60,6 @@ export function buildBuyerBookingsTabPanels(
     remindingId,
     withdrawBooking,
     remindDonor,
-    setReportBookingId,
     openRatingForBooking,
   } = input;
 
@@ -92,13 +90,6 @@ export function buildBuyerBookingsTabPanels(
             disabled={busy}
             onClick={() => remindDonor(b.id)}
           />
-          <BookingIconButton
-            label="Report issue"
-            icon={<Flag className="size-3.5" />}
-            variant="ghost"
-            disabled={busy}
-            onClick={() => setReportBookingId(b.id)}
-          />
         </BookingIconActions>
       );
     };
@@ -125,46 +116,21 @@ export function buildBuyerBookingsTabPanels(
             disabled={busy}
             onClick={() => withdrawBooking(b.id)}
           />
-          <BookingIconButton
-            label="Report issue"
-            icon={<Flag className="size-3.5" />}
-            variant="ghost"
-            disabled={busy}
-            onClick={() => setReportBookingId(b.id)}
-          />
         </BookingIconActions>
       );
     };
 
-    const reportOnly = () => (
-      <BookingIconActions>
-        <BookingIconButton
-          label="Report issue"
-          icon={<Flag className="size-3.5" />}
-          variant="ghost"
-          onClick={() => setReportBookingId(b.id)}
-        />
-      </BookingIconActions>
-    );
-
     const pastActions = () => {
       const canRate =
         b.status === "completed" && bookingNeedsRequesterRating(b);
+      if (!canRate) return null;
       return (
         <BookingIconActions>
-          {canRate ? (
-            <BookingIconButton
-              label="Rate donor"
-              icon={<Star className="size-4" />}
-              variant="primary"
-              onClick={() => openRatingForBooking(b.id)}
-            />
-          ) : null}
           <BookingIconButton
-            label="Report issue"
-            icon={<Flag className="size-3.5" />}
-            variant="ghost"
-            onClick={() => setReportBookingId(b.id)}
+            label="Rate donor"
+            icon={<Star className="size-4" />}
+            variant="primary"
+            onClick={() => openRatingForBooking(b.id)}
           />
         </BookingIconActions>
       );
@@ -175,13 +141,13 @@ export function buildBuyerBookingsTabPanels(
       else if (b.status === "accepted") actionsSlot = confirmedActions();
       else if (b.status === "completed" && bookingNeedsRequesterRating(b)) {
         actionsSlot = pastActions();
-      } else actionsSlot = reportOnly();
+      } else actionsSlot = null;
     } else if (ctx === "confirmed" && b.status === "accepted") {
       actionsSlot = confirmedActions();
     } else if (ctx === "past" && b.status === "completed") {
       actionsSlot = pastActions();
     } else {
-      actionsSlot = reportOnly();
+      actionsSlot = null;
     }
 
     return {
