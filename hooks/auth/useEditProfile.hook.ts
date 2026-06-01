@@ -45,7 +45,7 @@ export function useEditProfile() {
               : (apiUser?.profileImage ?? currentUser?.profileImage ?? null),
         } as IUser;
         dispatch(setUser(mergedUser));
-        showSnackbar(message ?? "Profile updated.", "success");
+        showSnackbar("Profile updated.");
         return mergedUser;
       }
       showSnackbar(error ?? message ?? "Update failed.", "error");
