@@ -1,14 +1,13 @@
 "use client";
 
+import { Button } from "@/components/button/button.component";
 import { Modal } from "@/components/ui/modal/modal.component";
+import { Textarea } from "@/components/ui/textarea";
 import { useSubmitBookingRating } from "@/hooks/ratings/useSubmitBookingRating.hook";
 import { Star } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 const COMMENT_MAX = 500;
-
-const fieldClass =
-  "w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/10 dark:bg-[#1a1a22]";
 
 export type DonationRatingModalProps = {
   open: boolean;
@@ -74,11 +73,13 @@ export function DonationRatingModal({
           aria-label="Star rating"
         >
           {[1, 2, 3, 4, 5].map((n) => (
-            <button
+            <Button
               key={n}
               type="button"
+              variant="ghost"
+              size="icon"
               disabled={busy}
-              className="rounded-md p-1 transition hover:bg-[#F4F4F5] disabled:opacity-50 dark:hover:bg-white/8"
+              className="rounded-md p-1"
               aria-label={`${n} star${n === 1 ? "" : "s"}`}
               aria-pressed={score >= n}
               onClick={() => {
@@ -94,21 +95,23 @@ export function DonationRatingModal({
                 }`}
                 strokeWidth={1.5}
               />
-            </button>
+            </Button>
           ))}
         </div>
 
-        <label className="mt-4 block text-xs font-medium text-text-primary">
-          Comment (optional)
-        </label>
-        <textarea
-          className={`${fieldClass} mt-1 min-h-[88px] resize-y`}
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Share what went well or what could improve"
-          maxLength={COMMENT_MAX}
-          disabled={busy}
-        />
+        <div className="mt-4 flex flex-col gap-2">
+          <p className="text-xs font-medium text-[#9794AA] dark:text-slate-400">
+            Comment (optional)
+          </p>
+          <Textarea
+            name="comment"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Share what went well or what could improve"
+            maxLength={COMMENT_MAX}
+            disabled={busy}
+          />
+        </div>
         <p className="mt-1 text-[11px] text-text-tertiary">
           {comment.length}/{COMMENT_MAX}
         </p>
@@ -123,22 +126,24 @@ export function DonationRatingModal({
         ) : null}
 
         <div className="mt-6 flex flex-wrap justify-end gap-2">
-          <button
+          <Button
             type="button"
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-[#F9FAFB] disabled:opacity-50 dark:border-white/10 dark:hover:bg-white/6"
+            variant="outline"
+            size="sm"
             onClick={onClose}
             disabled={busy}
           >
             Not now
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-50"
+            size="sm"
             onClick={() => void handleSubmit()}
             disabled={busy || score < 1}
+            loading={busy}
           >
             {busy ? "Submitting…" : "Submit rating"}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

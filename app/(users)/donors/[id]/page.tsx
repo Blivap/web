@@ -25,7 +25,7 @@ import {
 import { parseDonorRatingsResponse } from "@/lib/ratings/parseDonorRatingsResponse";
 import type { DonorRatingsSummary } from "@/types/ratings";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button/button.component";
 import { DonorProfilePageSkeleton } from "./components/donor-profile-page-skeleton.component";
 import { useAppSelector } from "@/store/hooks";
 import { routes } from "@/config/routes";
@@ -202,13 +202,15 @@ export default function DonorDetailsPage() {
             <p className="text-sm font-semibold text-text-primary">
               {fetchError ?? "Something went wrong."}
             </p>
-            <button
+            <Button
               type="button"
+              variant="link"
+              size="xs"
+              className="mt-3 h-auto p-0 text-xs"
               onClick={() => void loadDonor()}
-              className="mt-3 text-xs font-medium text-primary hover:underline"
             >
               Try again
-            </button>
+            </Button>
           </div>
         ) : donor ? (
           <div className="flex flex-col gap-6">

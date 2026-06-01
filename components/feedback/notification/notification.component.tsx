@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/button/button.component";
 import classNames from "classnames";
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
@@ -103,17 +104,19 @@ export const NotificationBell = () => {
             Notifications
           </p>
           {unreadCount > 0 && (
-            <button
+            <Button
               type="button"
+              variant="link"
+              size="xs"
+              className="h-auto gap-1 p-0 text-xs"
               onClick={(e) => {
                 e.stopPropagation();
                 void markAllAsRead();
               }}
-              className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 dark:hover:text-primary"
             >
               <CheckCheck size={14} />
               Mark all as read
-            </button>
+            </Button>
           )}
         </div>
         {error && (
@@ -162,34 +165,39 @@ export const NotificationBell = () => {
                       </p>
                     </div>
                     {!n.read && (
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="shrink-0 text-primary"
                         onClick={(e) => {
                           e.stopPropagation();
                           void markAsRead(n.id);
                         }}
-                        className="shrink-0 rounded-md p-1.5 text-primary hover:bg-[#E5E7EB] dark:hover:bg-white/10"
                         title="Mark as read"
                         aria-label={`Mark "${n.title}" as read`}
                       >
                         <Check size={14} />
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>
               ))}
               {hasMore && (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="xs"
+                  className="mt-1 w-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     void loadMore();
                   }}
                   disabled={isLoadingMore}
-                  className="mt-1 w-full rounded-lg py-2 text-xs font-medium text-primary hover:bg-[#F3F4F6] disabled:opacity-50 dark:hover:bg-white/10"
+                  loading={isLoadingMore}
                 >
                   {isLoadingMore ? "Loading…" : "Load more"}
-                </button>
+                </Button>
               )}
             </div>
           )}

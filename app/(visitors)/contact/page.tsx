@@ -1,6 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button/button.component";
+import { Input } from "@/components/forms/inputs/input.component";
+import { Textarea } from "@/components/ui/textarea";
 import { HomeLayout } from "@/layout/home.layout.component";
 import {
   Clock3,
@@ -219,61 +221,48 @@ export default function Contact() {
                 className="px-5 py-6 sm:px-6 sm:py-7"
               >
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor="contact-name"
-                      className="mb-1.5 block text-sm font-medium text-black dark:text-white"
-                    >
-                      Name
-                    </label>
-                    <input
-                      id="contact-name"
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      className="w-full rounded-2xl border border-[#E2E8F0] bg-[#FCFCFD] px-4 py-3 text-sm text-black outline-none transition placeholder:text-[#9CA3AF] focus:border-primary focus:ring-4 focus:ring-primary/8 dark:border-white/10 dark:bg-[#0F172A] dark:text-white dark:placeholder:text-slate-500"
-                      placeholder="Your full name"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="contact-email"
-                      className="mb-1.5 block text-sm font-medium text-black dark:text-white"
-                    >
-                      Email
-                    </label>
-                    <input
-                      id="contact-email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      className="w-full rounded-2xl border border-[#E2E8F0] bg-[#FCFCFD] px-4 py-3 text-sm text-black outline-none transition placeholder:text-[#9CA3AF] focus:border-primary focus:ring-4 focus:ring-primary/8 dark:border-white/10 dark:bg-[#0F172A] dark:text-white dark:placeholder:text-slate-500"
-                      placeholder="you@example.com"
-                      required
-                    />
-                  </div>
+                  <Input
+                    name="name"
+                    id="contact-name"
+                    label="Name"
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    placeholder="Your full name"
+                    required
+                  />
+                  <Input
+                    name="email"
+                    id="contact-email"
+                    label="Email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    placeholder="you@example.com"
+                    required
+                  />
                 </div>
 
-                <div className="mt-5">
+                <div className="mt-5 flex flex-col gap-2">
                   <label
                     htmlFor="contact-message"
-                    className="mb-1.5 block text-sm font-medium text-black dark:text-white"
+                    className="text-sm font-medium text-black dark:text-white"
                   >
                     Message
                   </label>
-                  <textarea
+                  <Textarea
                     id="contact-message"
+                    name="message"
                     rows={5}
                     value={formData.message}
                     onChange={(e) =>
                       setFormData({ ...formData, message: e.target.value })
                     }
-                    className="w-full resize-none rounded-2xl border border-[#E2E8F0] bg-[#FCFCFD] px-4 py-3 text-sm text-black outline-none transition placeholder:text-[#9CA3AF] focus:border-primary focus:ring-4 focus:ring-primary/8 dark:border-white/10 dark:bg-[#0F172A] dark:text-white dark:placeholder:text-slate-500"
+                    className="rounded-2xl focus:ring-4 focus:ring-primary/8"
                     placeholder="Tell us how we can help."
                     required
                   />

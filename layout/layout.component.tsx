@@ -35,7 +35,7 @@ import {
 } from "@/hooks/theme/useThemePreference.hook";
 import { ProfileThemeCycleRow } from "./theme-profile-submenu.component";
 import { SelectAvatarModal } from "@/components/select-avatar/select-avatar-modal.component";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button/button.component";
 import { BlivapLogo } from "@/public/svg";
 import { LayoutBreadcrumbs } from "./layout-breadcrumbs.component";
 
@@ -137,10 +137,11 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
             ref={profileContainerRef}
             className="relative flex items-center gap-3 order-2 md:order-1 w-full"
           >
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => setIsProfileMenuOpen((prev) => !prev)}
-              className="flex items-center justify-between w-full gap-3 cursor-pointer rounded-full border border-transparent hover:border-[#E5E7EB] dark:hover:border-white/15 pr-2 transition-colors"
+              className="flex h-auto w-full items-center justify-between gap-3 rounded-full border border-transparent px-0 pr-2 hover:border-[#E5E7EB] dark:hover:border-white/15"
             >
               <div
                 className="flex items-center gap-2"
@@ -168,7 +169,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
                   },
                 )}
               />
-            </button>
+            </Button>
             <div
               className={classNames(
                 "absolute top-full left-0 mt-3 origin-top-right md:left-auto md:right-auto",
@@ -216,14 +217,15 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
                     <Settings size={16} />
                     Settings
                   </Link>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     onClick={handleLogout}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/6 hover:text-primary transition-colors text-left"
+                    className="h-auto w-full justify-start gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-[#374151] dark:text-white/85"
                   >
                     <LogOut size={16} />
                     Logout
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

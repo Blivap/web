@@ -32,7 +32,6 @@ export function donorTabForBooking(b: Booking): DonorPanelKey {
 
 export type DonorBookingsTabPanelsInput = {
   bookings: Booking[];
-  hospitalLabel: (hospitalId: string) => string;
   user: IUser | null;
   highlightBookingId: string;
   mutatingId: string | null;
@@ -46,7 +45,6 @@ export function buildDonorBookingsTabPanels(
 ): Record<DonorPanelKey, BookingsTabPanel> {
   const {
     bookings,
-    hospitalLabel,
     user,
     highlightBookingId,
     mutatingId,
@@ -57,11 +55,7 @@ export function buildDonorBookingsTabPanels(
 
   const mapRow = (b: Booking, tab: DonorPanelKey): BookingsShellRow => {
     const pill = statusToPill(b.status);
-    const parts = bookingRowDetailPartsForViewer(
-      b,
-      "donor",
-      hospitalLabel(b.hospitalId),
-    );
+    const parts = bookingRowDetailPartsForViewer(b, "donor");
     const ninOk = user?.nationalIdentificationNumberVerified === true;
 
     let actionsSlot: ReactNode;

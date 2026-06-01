@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Info } from "lucide-react";
 import { Radio } from "@/components/forms/Radio";
+import { Button } from "@/components/button/button.component";
 import type { DonorMedicalFormAnswers } from "@/types/donors";
 
 export type MedicalAnswers = DonorMedicalFormAnswers;
@@ -154,13 +155,15 @@ function FirstStepQuestionRow({
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
-          <button
+          <Button
             type="button"
-            className="w-4 h-4 rounded-full flex items-center justify-center text-primary hover:text-primary/70 transition-colors"
+            variant="ghost"
+            size="icon-sm"
+            className="size-4 rounded-full p-0 text-primary hover:text-primary/70"
             aria-label={`More info about ${label}`}
           >
             <Info size={16} />
-          </button>
+          </Button>
           {showTooltip && tooltipText && (
             <div
               className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-1 sm:px-3 py-2 text-[10px] sm:text-xs text-white bg-foundation-dark rounded-lg shadow-lg w-[140px] max-w-[240px] whitespace-normal z-50"
@@ -265,27 +268,29 @@ export function StepOne({
 
           <div className="mt-4 flex items-center gap-3">
             {onBack && (
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={onBack}
-                className="text-sm font-medium py-2.5 px-5 rounded-md border border-border bg-white hover:bg-[#F9FAFB] dark:bg-transparent dark:hover:bg-white/5 transition-colors"
+                className="w-fit rounded-md py-2.5 px-5 text-sm font-medium"
               >
                 Back
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               type="submit"
               disabled={
                 isSubmitting || (!showNextAction && !allMedicalAnswered)
               }
-              className="text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
+              loading={isSubmitting}
+              className="w-fit py-2.5 px-5 text-sm font-medium"
             >
               {isSubmitting
                 ? "Submitting…"
                 : showNextAction
                   ? "Next"
                   : "Submit questionnaire"}
-            </button>
+            </Button>
           </div>
         </form>
         <div className="border-[#960018] border-l-4 bg-[#FFE2E2] flex gap-4 p-4 mt-10 sm:mt-12.5 ">

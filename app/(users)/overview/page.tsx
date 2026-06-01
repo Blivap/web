@@ -40,7 +40,8 @@ import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
 import type { Donor } from "../donors/donors.data";
 import { SCREENING_DONATION_TYPE_OPTIONS } from "@/lib/donors/screeningDonationTypes";
 import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button/button.component";
+import { Input } from "@/components/forms/inputs/input.component";
 import { OverviewNotificationsTab } from "./components/overview-notifications-tab.component";
 
 const BECOME_DONOR_CARDS = [
@@ -372,21 +373,23 @@ export default function OverviewPage() {
                         </p>
                       </div>
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-                        <div className="relative min-w-0 flex-1">
-                          <Search
-                            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-tertiary"
-                            aria-hidden
-                          />
-                          <input
-                            type="search"
-                            value={pathwaySearch}
-                            onChange={(e) => setPathwaySearch(e.target.value)}
-                            placeholder="Search pathways…"
-                            className="w-full rounded-xl border border-border bg-[#F7F7F8] py-2.5 pl-10 pr-3 text-sm text-text-primary outline-none transition placeholder:text-text-tertiary focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/10 dark:bg-white/5"
-                            autoComplete="off"
-                            aria-label="Search donation pathways"
-                          />
-                        </div>
+                        <Input
+                          name="pathwaySearch"
+                          type="search"
+                          value={pathwaySearch}
+                          onChange={(e) => setPathwaySearch(e.target.value)}
+                          placeholder="Search pathways…"
+                          autoComplete="off"
+                          aria-label="Search donation pathways"
+                          icon={
+                            <Search
+                              className="size-4 text-text-tertiary"
+                              aria-hidden
+                            />
+                          }
+                          containerClassName="min-w-0 flex-1"
+                          inputClassName="rounded-xl border-0 bg-[#F7F7F8] py-2.5 text-sm focus:ring-2 focus:ring-primary/15 dark:bg-white/5"
+                        />
                         <div
                           className="flex flex-wrap gap-2"
                           role="group"
@@ -399,9 +402,13 @@ export default function OverviewPage() {
                               ["interest", "Coming soon"],
                             ] as const
                           ).map(([value, label]) => (
-                            <button
+                            <Button
                               key={value}
                               type="button"
+                              variant={
+                                pathwayFilter === value ? "default" : "outline"
+                              }
+                              size="xs"
                               onClick={() => setPathwayFilter(value)}
                               className={`${pathwayFilterChipBase} ${
                                 pathwayFilter === value
@@ -410,7 +417,7 @@ export default function OverviewPage() {
                               }`}
                             >
                               {label}
-                            </button>
+                            </Button>
                           ))}
                         </div>
                       </div>

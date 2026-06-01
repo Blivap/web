@@ -1,6 +1,9 @@
 "use client";
 
+import { Button } from "@/components/button/button.component";
+import { Input } from "@/components/forms/inputs/input.component";
 import { Modal } from "@/components/ui/modal/modal.component";
+import { Textarea } from "@/components/ui/textarea";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
@@ -11,9 +14,6 @@ export type BookingReportModalProps = {
   onClose: () => void;
   onSubmit: (payload: { reason: string; details?: string }) => Promise<void>;
 };
-
-const fieldClass =
-  "w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/10 dark:bg-[#1a1a22]";
 
 export function BookingReportModal({
   open,
@@ -76,29 +76,30 @@ export function BookingReportModal({
           Describe what went wrong. Our team reviews reports according to
           platform rules.
         </p>
-        <label className="mt-4 block text-xs font-medium text-text-primary">
-          Reason <span className="text-red-600">*</span>
-        </label>
-        <input
-          type="text"
-          className={`${fieldClass} mt-1`}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          placeholder="Short summary"
-          maxLength={500}
-          disabled={submitting}
-        />
-        <label className="mt-3 block text-xs font-medium text-text-primary">
-          Details (optional)
-        </label>
-        <textarea
-          className={`${fieldClass} mt-1 min-h-[88px] resize-y`}
-          value={details}
-          onChange={(e) => setDetails(e.target.value)}
-          placeholder="Additional context"
-          maxLength={4000}
-          disabled={submitting}
-        />
+        <div className="mt-4 flex flex-col gap-3">
+          <Input
+            name="reason"
+            label="Reason *"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Short summary"
+            maxLength={500}
+            disabled={submitting}
+          />
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-medium text-[#9794AA] dark:text-slate-400">
+              Details (optional)
+            </p>
+            <Textarea
+              name="details"
+              value={details}
+              onChange={(e) => setDetails(e.target.value)}
+              placeholder="Additional context"
+              maxLength={4000}
+              disabled={submitting}
+            />
+          </div>
+        </div>
         {error ? (
           <p
             className="mt-2 text-sm text-red-600 dark:text-red-400"
@@ -108,22 +109,24 @@ export function BookingReportModal({
           </p>
         ) : null}
         <div className="mt-6 flex flex-wrap justify-end gap-2">
-          <button
+          <Button
             type="button"
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-[#F9FAFB] disabled:opacity-50 dark:border-white/10 dark:hover:bg-white/6"
+            variant="outline"
+            size="sm"
             onClick={onClose}
             disabled={submitting}
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-50"
+            size="sm"
             onClick={() => void handleSubmit()}
             disabled={submitting}
+            loading={submitting}
           >
             {submitting ? "Sending…" : "Submit report"}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>
