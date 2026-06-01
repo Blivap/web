@@ -52,7 +52,6 @@ export function useBuyerBookings() {
 
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [remindingId, setRemindingId] = useState<string | null>(null);
-  const [reportBookingId, setReportBookingId] = useState<string | null>(null);
   const [ratingOpen, setRatingOpen] = useState(false);
   const [ratingBookingId, setRatingBookingId] = useState<string | null>(null);
 
@@ -199,25 +198,6 @@ export function useBuyerBookings() {
     [refreshSent, showSnackbar],
   );
 
-  const submitReport = useCallback(
-    async (payload: { reason: string; details?: string }) => {
-      if (!reportBookingId) return;
-      const id = reportBookingId;
-      const row =
-        store.getState().bookings.sent.items.find((b) => b.id === id) ??
-        store.getState().bookings.received.items.find((b) => b.id === id);
-      const prevCount = row?.reportsCount ?? 0;
-      const { status } = await $api.bookings.report(id, payload);
-      if (status < 200 || status >= 300) {
-        throw new Error("Could not send the report.");
-      }
-      dispatch(patchBookingInLists({ id, reportsCount: prevCount + 1 }));
-      showSnackbar("Thanks — your report was submitted.");
-      scheduleBookingsResync(dispatch);
-    },
-    [dispatch, reportBookingId, showSnackbar, store],
-  );
-
   const tabPanels = useMemo(
     () =>
       buildBuyerBookingsTabPanels({
@@ -228,7 +208,6 @@ export function useBuyerBookings() {
         remindingId,
         withdrawBooking: (id) => void withdrawBooking(id),
         remindDonor: (id) => void remindDonor(id),
-        setReportBookingId,
         openRatingForBooking,
       }),
     [
@@ -239,7 +218,6 @@ export function useBuyerBookings() {
       remindingId,
       withdrawBooking,
       remindDonor,
-      setReportBookingId,
       openRatingForBooking,
     ],
   );
@@ -272,9 +250,6 @@ export function useBuyerBookings() {
     loadState,
     loadError,
     loadData,
-    reportBookingId,
-    setReportBookingId,
-    submitReport,
     shellTabs,
     skeletonTabLabels,
     ratingOpen,
