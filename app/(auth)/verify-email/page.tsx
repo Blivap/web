@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthLoader } from "@/components/auth/auth-loader.component";
+import { Button } from "@/components/button/button.component";
 import { Input } from "@/components/forms/inputs/input.component";
 import { AuthLayout } from "@/layout/auth.layout.component";
 import { useVerifyEmail } from "@/hooks/auth/useVerifyEmail.hook";
@@ -106,36 +107,42 @@ export default function VerifyEmailPage() {
                     name="emailValidationToken"
                     placeholder="Paste token from email"
                   />
-                  <button
+                  <Button
                     type="submit"
+                    className="w-full"
                     disabled={!isValid || isLoading}
-                    className="w-full disabled:bg-primary/50 disabled:cursor-not-allowed bg-primary text-white py-[12.5px] rounded-lg font-semibold text-base hover:bg-primary/85 active:bg-primary transition duration-200"
+                    loading={isLoading}
                   >
                     {isLoading ? "Verifying..." : "Verify email"}
-                  </button>
+                  </Button>
                 </form>
                 <p className="text-base text-[#49475A] dark:text-slate-400">
                   Didn&apos;t receive the email?{" "}
-                  <button
+                  <Button
                     type="button"
+                    variant="link"
+                    size="xs"
+                    className="h-auto p-0 font-semibold"
                     disabled={isResending}
+                    loading={isResending}
                     onClick={() =>
                       values.emailValidationToken
                         ? resendLink({ email: user?.email ?? "" })
                         : undefined
                     }
-                    className="font-semibold text-primary underline disabled:opacity-50 cursor-pointer"
                   >
                     {isResending ? "Sending..." : "Resend"}
-                  </button>
+                  </Button>
                 </p>
-                <button
-                  className="flex w-fit items-center gap-2 rounded-md border border-primary px-4 py-2 text-base text-[#49475A] transition-colors duration-200 cursor-pointer hover:bg-primary/5 active:bg-transparent dark:text-slate-300 dark:hover:bg-primary/10"
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-fit gap-2 text-base text-[#49475A] dark:text-slate-300"
                   onClick={handleLogout}
                 >
                   <LogOut size={16} />
                   Logout
-                </button>
+                </Button>
               </div>
             )}
           </Formik>

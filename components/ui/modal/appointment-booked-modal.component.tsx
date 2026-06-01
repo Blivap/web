@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/button/button.component";
+import { Input } from "@/components/forms/inputs/input.component";
 import { Check } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Modal } from "./modal.component";
@@ -77,15 +78,14 @@ export function AppointmentBookedModal({
         >
           Enter Code
         </label>
-        <input
-          id="appointment-booking-code"
-          type="text"
+        <Input
           name="bookingCode"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="Enter code"
           autoComplete="one-time-code"
-          className="w-full rounded-md border border-border bg-white px-4 py-3 text-center text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 dark:border-white/10 dark:bg-[#14141a]"
+          inputClassName="text-center"
+          containerClassName="max-w-md mx-auto w-full"
         />
         <p className="mt-1 text-center text-xs leading-relaxed text-text-secondary">
           We sent a code to your email. Please enter the code here to confirm

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ThemePreference } from "@/hooks/theme/useThemePreference.hook";
+import { Button } from "@/components/button/button.component";
 import classNames from "classnames";
 import { Monitor, Moon, Sun } from "lucide-react";
 
@@ -32,15 +33,16 @@ export function ProfileThemeCycleRow({
   onCycle,
 }: ProfileThemeCycleRowProps) {
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       onClick={(e) => {
         e.stopPropagation();
         onCycle();
       }}
       title="Cycles theme: Auto → Dark → Light"
       aria-label={`Theme: ${preferenceLabel(preference)}. Activate to cycle to the next option.`}
-      className={classNames(rowSurfaceClass, "flex flex-col gap-0.5")}
+      className={classNames(rowSurfaceClass, "flex h-auto flex-col gap-0.5")}
     >
       <span className="flex w-full items-center gap-2">
         <PreferenceIcon preference={preference} />
@@ -48,6 +50,6 @@ export function ProfileThemeCycleRow({
           Theme: {preferenceLabel(preference)}
         </span>
       </span>
-    </button>
+    </Button>
   );
 }

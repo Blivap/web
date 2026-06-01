@@ -185,8 +185,9 @@ function VerifyIdContent() {
             }}
           />
           {!selectedFile ? (
-            <button
+            <Button
               type="button"
+              variant="outline"
               onDragOver={(e) => {
                 e.preventDefault();
                 setIsDragging(true);
@@ -195,7 +196,7 @@ function VerifyIdContent() {
               onDrop={onDrop}
               onClick={openFilePicker}
               className={classNames(
-                "w-full cursor-pointer rounded-lg border border-transparent bg-[#FFEBEE] px-6 py-12 text-center transition-colors dark:bg-primary/15",
+                "h-auto w-full cursor-pointer rounded-lg border-transparent bg-[#FFEBEE] px-6 py-12 text-center transition-colors hover:bg-[#FFEBEE] dark:bg-primary/15 dark:hover:bg-primary/15",
                 isDragging &&
                   "bg-[#FFE0E5] ring-2 ring-primary/40 dark:bg-primary/25",
               )}
@@ -238,7 +239,7 @@ function VerifyIdContent() {
                 </p>
                 <p className="text-xs text-[#757575]">PDF only</p>
               </div>
-            </button>
+            </Button>
           ) : (
             <div
               onDragOver={(e) => {

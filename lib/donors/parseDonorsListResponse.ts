@@ -8,6 +8,8 @@ import type { DonorPublicScreening } from "@/types/donors";
 import { parseDonorPublicScreening } from "@/lib/donors/parseDonorPublicScreening";
 import { pickCooldownEndsAt } from "@/lib/donors/donorCooldown";
 import { normalizeDonationTypesList } from "@/lib/donors/screeningDonationTypes";
+import { parseDonorProfileRatings } from "@/lib/ratings/parseDonorRatingsResponse";
+import type { DonorRatingsSummary } from "@/types/ratings";
 
 export type DonorDetail = Donor & {
   profileImageUrl?: string | null;
@@ -18,6 +20,8 @@ export type DonorDetail = Donor & {
   isActiveDonor?: boolean;
   /** AI / typed screening summary when present on GET /donors/:id */
   screening?: DonorPublicScreening | null;
+  /** Pre-aggregated ratings from GET /donors/:id (not computed client-side). */
+  ratings?: DonorRatingsSummary;
 };
 
 const VALID_BLOOD = new Set(
@@ -199,17 +203,9 @@ export function parseDonorRecord(raw: unknown): Donor | null {
 
   const { location, country } = areaStringsFromRecord(merged);
 
-  const rawRating = pickNumber(merged.rating ?? merged.averageRating, 0);
-  const reliabilityRaw = pickNumber(
-    merged.reliabilityScore ?? merged.score,
-    -1,
-  );
+  const rawRating = pickNumber(merged.rating ?? merged.averageRating, -1);
   const rating =
-    rawRating > 0
-      ? Math.min(5, rawRating)
-      : reliabilityRaw >= 0
-        ? Math.min(5, reliabilityRaw / 20)
-        : 0;
+    rawRating >= 0 ? Math.min(5, Math.max(0, rawRating)) : 0;
 
   const donations = Math.max(
     0,
@@ -281,6 +277,7 @@ export function parseDonorDetailResponse(body: unknown): DonorDetail | null {
   const screening = parseDonorPublicScreening(
     merged.screening ?? merged.publicScreening,
   );
+  const ratings = parseDonorProfileRatings(merged);
 
   return {
     ...donor,
@@ -292,6 +289,7 @@ export function parseDonorDetailResponse(body: unknown): DonorDetail | null {
       ? { isActiveDonor: merged.isActiveDonor }
       : {}),
     ...(screening ? { screening } : {}),
+    ratings,
   };
 }
 

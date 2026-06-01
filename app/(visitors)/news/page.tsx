@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { formatNewsPublishedDate } from "@/lib/news-date";
 import { HomeLayout } from "@/layout/home.layout.component";
 import { NewsFallbackImage } from "@/components/image/news-fallback-image.component";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button/button.component";
+import { Input } from "@/components/forms/inputs/input.component";
 import {
   ArrowRight,
   Clock3,
@@ -267,51 +268,49 @@ export default function News() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {hasFilterOverrides ? (
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={resetFilters}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-3.5 py-2 text-sm font-medium text-[#4B5563] transition-colors hover:border-primary/30 hover:text-primary dark:border-white/10 dark:bg-[#0F172A] dark:text-slate-300 dark:hover:border-primary/30 dark:hover:text-primary"
+                    className="rounded-xl px-3.5 py-2"
                   >
                     Clear all
-                  </button>
+                  </Button>
                 ) : null}
-                <button
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={() => void refetch()}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D1D5DB] bg-white px-4 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:border-primary hover:text-primary dark:border-white/10 dark:bg-[#0F172A] dark:text-slate-300 dark:hover:border-primary dark:hover:text-primary"
+                  className="gap-2 rounded-xl px-4 py-2.5"
                 >
                   <RefreshCw
                     size={15}
                     className={isLoading ? "animate-spin" : ""}
                   />
                   Refresh
-                </button>
+                </Button>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col gap-5 px-4 py-4 sm:px-5 sm:py-5">
-            <div className="relative w-full">
-              <Search
-                size={16}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] dark:text-slate-500"
-              />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => {
-                  setCurrentPage(1);
-                  setQuery(e.target.value);
-                }}
-                maxLength={200}
-                placeholder={
-                  selectedCategory
-                    ? `Search ${selectedCategoryLabel.toLowerCase()} headlines and summaries`
-                    : "Search headlines and summaries"
-                }
-                className="w-full rounded-2xl border border-[#E2E8F0] bg-[#FCFCFD] py-3 pl-11 pr-4 text-sm text-black outline-none transition placeholder:text-[#9CA3AF] focus:border-primary focus:ring-4 focus:ring-primary/8 dark:border-white/10 dark:bg-[#0F172A] dark:text-white dark:placeholder:text-slate-500"
-              />
-            </div>
+            <Input
+              name="newsSearch"
+              value={query}
+              onChange={(e) => {
+                setCurrentPage(1);
+                setQuery(e.target.value);
+              }}
+              maxLength={200}
+              placeholder={
+                selectedCategory
+                  ? `Search ${selectedCategoryLabel.toLowerCase()} headlines and summaries`
+                  : "Search headlines and summaries"
+              }
+              icon={<Search size={16} className="text-[#9CA3AF] dark:text-slate-500" />}
+            />
 
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9CA3AF] dark:text-slate-500">
@@ -359,23 +358,29 @@ export default function News() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {NEWS_CATEGORIES.map((category) => (
-                    <button
+                    <Button
                       key={category.value}
                       type="button"
+                      variant={
+                        selectedCategory === category.value
+                          ? "default"
+                          : "outline"
+                      }
+                      size="xs"
                       onClick={() => {
                         setCurrentPage(1);
                         setSelectedCategory((current) =>
                           current === category.value ? "" : category.value,
                         );
                       }}
-                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium ${
                         selectedCategory === category.value
-                          ? "bg-primary text-white shadow-[0_6px_18px_rgba(150,0,24,0.18)]"
-                          : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-primary/40 hover:text-primary dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-primary/40 dark:hover:text-primary"
+                          ? "shadow-[0_6px_18px_rgba(150,0,24,0.18)]"
+                          : ""
                       }`}
                     >
                       {category.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -393,23 +398,25 @@ export default function News() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {NEWS_LANGUAGES.map((language) => (
-                      <button
+                      <Button
                         key={language.value}
                         type="button"
+                        variant={
+                          selectedLanguage === language.value
+                            ? "secondary"
+                            : "outline"
+                        }
+                        size="xs"
                         onClick={() => {
                           setCurrentPage(1);
                           setSelectedLanguage((current) =>
                             current === language.value ? "" : language.value,
                           );
                         }}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                          selectedLanguage === language.value
-                            ? "bg-foundation-dark text-white"
-                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-foundation-dark/30 hover:text-foundation-dark dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-primary/30 dark:hover:text-white"
-                        }`}
+                        className="rounded-full px-3 py-1.5 text-xs font-medium"
                       >
                         {language.label}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -426,23 +433,25 @@ export default function News() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {NEWS_COUNTRIES.map((country) => (
-                      <button
+                      <Button
                         key={country.value}
                         type="button"
+                        variant={
+                          selectedCountry === country.value
+                            ? "secondary"
+                            : "outline"
+                        }
+                        size="xs"
                         onClick={() => {
                           setCurrentPage(1);
                           setSelectedCountry((current) =>
                             current === country.value ? "" : country.value,
                           );
                         }}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                          selectedCountry === country.value
-                            ? "bg-secondary text-white"
-                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-secondary/40 hover:text-secondary dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-secondary/40 dark:hover:text-secondary"
-                        }`}
+                        className="rounded-full px-3 py-1.5 text-xs font-medium"
                       >
                         {country.label}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -459,23 +468,25 @@ export default function News() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {NEWS_TIMEFRAMES.map((timeframe) => (
-                      <button
+                      <Button
                         key={timeframe.label}
                         type="button"
+                        variant={
+                          selectedTimeframe === timeframe.value
+                            ? "default"
+                            : "outline"
+                        }
+                        size="xs"
                         onClick={() => {
                           setCurrentPage(1);
                           setSelectedTimeframe((current) =>
                             current === timeframe.value ? "" : timeframe.value,
                           );
                         }}
-                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                          selectedTimeframe === timeframe.value
-                            ? "bg-primary text-white"
-                            : "border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-primary/40 hover:text-primary dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-primary/40 dark:hover:text-primary"
-                        }`}
+                        className="rounded-full px-3 py-1.5 text-xs font-medium"
                       >
                         {timeframe.label}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -492,13 +503,13 @@ export default function News() {
             <p className="max-w-xl text-sm text-[#6B7280] dark:text-slate-400">
               {error}
             </p>
-            <button
+            <Button
               type="button"
+              className="w-fit"
               onClick={() => void refetch()}
-              className="w-fit rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
             >
               Try again
-            </button>
+            </Button>
           </section>
         ) : isLoading && news.length === 0 ? (
           <>
@@ -513,14 +524,16 @@ export default function News() {
             <p className="mt-2 text-sm text-[#6B7280] dark:text-slate-400">
               Try a different keyword or adjust the other filters.
             </p>
-            <button
+            <Button
               type="button"
+              variant="link"
+              size="sm"
               onClick={resetFilters}
-              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+              className="mt-4 h-auto gap-2 p-0"
             >
               Clear filters
               <ArrowRight size={14} />
-            </button>
+            </Button>
           </section>
         ) : (
           <>
@@ -638,24 +651,28 @@ export default function News() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={() =>
                       setCurrentPage((prev) => Math.max(1, prev - 1))
                     }
                     disabled={currentPage === 1 || isLoading}
-                    className="rounded-lg border border-[#D1D5DB] bg-white px-3 py-2 text-sm font-medium text-[#374151] transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-primary dark:hover:text-primary"
+                    className="rounded-lg px-3 py-2"
                   >
                     Previous
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={() => setCurrentPage((prev) => prev + 1)}
                     disabled={isLoading || news.length < 10}
-                    className="rounded-lg border border-[#D1D5DB] bg-white px-3 py-2 text-sm font-medium text-[#374151] transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-primary dark:hover:text-primary"
+                    className="rounded-lg px-3 py-2"
                   >
                     Next
-                  </button>
+                  </Button>
                 </div>
               </div>
 

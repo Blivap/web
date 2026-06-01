@@ -1,6 +1,7 @@
 "use client";
 
 import { Radio } from "@/components/forms/Radio";
+import { Input } from "@/components/forms/inputs/input.component";
 import type { DonorBloodType } from "@/types/donors";
 import { BLOOD_TYPES } from "../../donors.data";
 import { DONOR_COUNTRIES, NIGERIA_STATES } from "@/lib/donors/location-options";
@@ -16,9 +17,6 @@ import {
 const REGISTER_BLOOD_TYPES = BLOOD_TYPES.filter(
   (t): t is DonorBloodType => t !== "All",
 );
-
-const selectClassName =
-  "w-full text-sm border border-border rounded-lg px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 bg-white dark:bg-[#1a1a22] text-text-primary";
 
 export type DonorBasicsValues = {
   bloodType: DonorBloodType | "";
@@ -142,37 +140,40 @@ export function DonorBasicsStep({
             </div>
 
             <div>
-              <label
-                htmlFor="donor-state"
-                className="block text-xs font-medium text-text-primary mb-1"
-              >
-                State / region *
-              </label>
               {isNigeria ? (
-                <Select
-                  value={values.state || undefined}
-                  onValueChange={(v) => onChange("state", v)}
-                  disabled={!values.country || isLocked}
-                >
-                  <SelectTrigger id="donor-state" className="w-full">
-                    <SelectValue placeholder="Select state" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {NIGERIA_STATES.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <>
+                  <label
+                    htmlFor="donor-state"
+                    className="block text-xs font-medium text-text-primary mb-1"
+                  >
+                    State / region *
+                  </label>
+                  <Select
+                    value={values.state || undefined}
+                    onValueChange={(v) => onChange("state", v)}
+                    disabled={!values.country || isLocked}
+                  >
+                    <SelectTrigger id="donor-state" className="w-full">
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {NIGERIA_STATES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </>
               ) : (
-                <input
+                <Input
                   id="donor-state"
+                  name="state"
+                  label="State / region *"
                   type="text"
                   placeholder="State or region"
                   value={values.state}
                   onChange={(e) => onChange("state", e.target.value)}
-                  className={selectClassName}
                   disabled={isLocked}
                 />
               )}
@@ -181,37 +182,27 @@ export function DonorBasicsStep({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label
-                htmlFor="donor-city"
-                className="block text-xs font-medium text-text-primary mb-1"
-              >
-                City / town *
-              </label>
-              <input
+              <Input
                 id="donor-city"
+                name="city"
+                label="City / town *"
                 type="text"
                 placeholder={isNigeria ? "e.g. Ikeja" : "City or town"}
                 value={values.city}
                 onChange={(e) => onChange("city", e.target.value)}
-                className={selectClassName}
                 disabled={isLocked}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="donor-area"
-                className="block text-xs font-medium text-text-primary mb-1"
-              >
-                Area *
-              </label>
-              <input
+              <Input
                 id="donor-area"
+                name="area"
+                label="Area *"
                 type="text"
                 placeholder={isNigeria ? "e.g. Allen" : "Area / district"}
                 value={values.area}
                 onChange={(e) => onChange("area", e.target.value)}
-                className={selectClassName}
                 disabled={isLocked}
               />
             </div>

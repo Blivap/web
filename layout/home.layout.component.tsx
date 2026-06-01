@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button/button.component";
 import { BlivapLogo } from "@/public/svg";
 import classNames from "classnames";
 import { gsap } from "gsap";
@@ -157,13 +157,16 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
               <span className="-mt-1 -ml-2">livap</span>
             </p>
           </div>
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={closeDrawer}
-            className="rounded-md p-1.5 text-text-primary transition-colors hover:bg-[#F3F4F6] dark:text-white dark:hover:bg-white/8"
+            className="rounded-md p-1.5"
             aria-label="Close menu"
           >
             <X size={18} />
-          </button>
+          </Button>
         </div>
         <div className="flex flex-col gap-0">
           {navItems.map((e) => {
@@ -334,17 +337,19 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                 : "opacity-0 pointer-events-none",
             )}
           >
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={(e) => {
                 e.preventDefault();
                 setBannerVisible(false);
               }}
-              className="absolute top-2 right-2 rounded-full p-1 text-[#6B7280] transition-colors hover:bg-[#E5E7EB] hover:text-black dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+              className="absolute top-2 right-2 rounded-full p-1 text-[#6B7280] dark:text-slate-400"
               aria-label="Close banner"
             >
               <X size={16} />
-            </button>
+            </Button>
             <div className="flex flex-col gap-1.5">
               <p className="text-sm font-semibold leading-snug text-black dark:text-white">
                 Save lives and earn with your blood or sperm

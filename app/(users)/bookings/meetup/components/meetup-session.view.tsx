@@ -50,10 +50,7 @@ import { MeetupQrScanner } from "./meetup-qr-scanner.component";
 import { routes } from "@/config/routes";
 import { DonationRatingModal } from "@/app/(users)/bookings/components/donation-rating-modal.component";
 import { MeetupReportModal } from "./meetup-report-modal.component";
-import {
-  bookingNeedsRequesterRating,
-  isBookingRatedLocally,
-} from "@/lib/ratings/ratedBookingsStorage";
+import { isBookingRatedLocally } from "@/lib/ratings/ratedBookingsStorage";
 import { patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
 import {
@@ -67,16 +64,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import { Input } from "@/components/forms/inputs/input.component";
+import { Textarea } from "@/components/ui/textarea";
 
 const cardClass =
   "rounded-xl border border-border bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#1a1a22]";
-const inputClass =
-  "w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/10 dark:bg-[#1a1a22]";
-const btnPrimary =
-  "inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-50";
-const btnSecondary =
-  "inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-[#F9FAFB] disabled:opacity-50 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6";
 
 export type MeetupSessionViewProps = {
   sessionId: string;
@@ -335,6 +327,16 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     [user, resolveIsRequester],
   );
 
+  /** Donors must never see the post-donation rating prompt. */
+  const isDonorViewer = useMemo(() => {
+    if (!user?.id || !session) return false;
+    if (session.donorUserId === user.id) return true;
+    return session.me.role?.toLowerCase() === "donor";
+  }, [user?.id, session]);
+
+  const canPromptRequesterRating =
+    isRequester === true && !isDonorViewer;
+
   const sortedChatMessages = useMemo(() => {
     return [...donationChat.messages].sort((a, b) => {
       const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -363,12 +365,10 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     el.scrollTop = el.scrollHeight;
   }, [newestChatMessageId]);
 
-  const meetingHintForResolve =
-    sessionLoad === "ok" ? null : meetingHint;
+  const meetingHintForResolve = sessionLoad === "ok" ? null : meetingHint;
 
   const swapCodes = useMemo(
-    () =>
-      resolveMeetupSwapCodes(session, meetingHintForResolve, user?.id),
+    () => resolveMeetupSwapCodes(session, meetingHintForResolve, user?.id),
     [session, meetingHintForResolve, user?.id],
   );
 
@@ -439,16 +439,34 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     return undefined;
   }, [donationChatBookingId, sentBookings, session?.donorUserId]);
 
+  const meetupDonationComplete = useMemo(() => {
+    if (!session) return false;
+    if (session.status?.toLowerCase() === "completed") return true;
+    return (
+      session.requesterDonationConfirmed === true &&
+      session.donorDonationConfirmed === true
+    );
+  }, [session]);
+
+  const chatAndDonationComplete = useMemo(() => {
+    if (!meetupDonationComplete) return false;
+    if (donationChat.roomClosed) return true;
+    // Chat socket may lag; completed meetup implies donation chat is done.
+    return session?.status?.toLowerCase() === "completed";
+  }, [meetupDonationComplete, donationChat.roomClosed, session?.status]);
+
   const shouldPromptForRating = useCallback(
     (bookingId: string | undefined) => {
-      if (!bookingId || isRequester !== true) return false;
+      if (!bookingId || !canPromptRequesterRating) return false;
+      if (!chatAndDonationComplete) return false;
       if (isBookingRatedLocally(bookingId)) return false;
+
       const row = sentBookings.find((b) => b.id === bookingId);
-      if (row && !bookingNeedsRequesterRating(row)) return false;
-      if (!row && session?.status?.toLowerCase() !== "completed") return false;
-      return session?.status?.toLowerCase() === "completed";
+      if (row?.requesterHasRated === true) return false;
+
+      return true;
     },
-    [isRequester, sentBookings, session?.status],
+    [canPromptRequesterRating, chatAndDonationComplete, sentBookings],
   );
 
   const openRatingModalIfNeeded = useCallback(
@@ -465,7 +483,11 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     const bid = donationChatBookingId;
     if (bid) {
       dispatch(
-        patchBookingInLists({ id: bid, requesterHasRated: true, status: "completed" }),
+        patchBookingInLists({
+          id: bid,
+          requesterHasRated: true,
+          status: "completed",
+        }),
       );
     }
     showSnackbar("Thanks for your rating.", "success");
@@ -483,28 +505,30 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     showSnackbar("Your donation confirmation was recorded.");
     void dispatch(loadSentBookings({ silent: true }));
     void dispatch(loadReceivedBookings({ silent: true }));
-    if (isRequester === true) {
-      openRatingModalIfNeeded(donationChatBookingId);
-    }
-  }, [
-    user,
-    confirmDonation,
-    showSnackbar,
-    dispatch,
-    isRequester,
-    openRatingModalIfNeeded,
-    donationChatBookingId,
-  ]);
+  }, [user, confirmDonation, showSnackbar, dispatch]);
 
   useEffect(() => {
-    if (sessionLoad !== "ok" || !session || isRequester !== true) return;
-    if (session.status?.toLowerCase() !== "completed") return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- prompt when session becomes completed after donor confirms
+    if (!canPromptRequesterRating) {
+      setRatingModalOpen(false);
+      return;
+    }
+    void dispatch(loadSentBookings({ silent: true }));
+  }, [canPromptRequesterRating, dispatch]);
+
+  useEffect(() => {
+    if (!donationChat.roomClosed) return;
+    void refreshSession();
+  }, [donationChat.roomClosed, refreshSession]);
+
+  useEffect(() => {
+    if (sessionLoad !== "ok" || !session || !canPromptRequesterRating) return;
+    if (!chatAndDonationComplete) return;
     openRatingModalIfNeeded(donationChatBookingId);
   }, [
     sessionLoad,
     session,
-    isRequester,
+    canPromptRequesterRating,
+    chatAndDonationComplete,
     donationChatBookingId,
     openRatingModalIfNeeded,
   ]);
@@ -731,13 +755,15 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         <p className="text-sm font-medium text-text-primary">
           {sessionError ?? "This meetup could not be loaded."}
         </p>
-        <button
+        <Button
           type="button"
-          className={`${btnSecondary} mt-4`}
+          variant="outline"
+          size="sm"
+          className="mt-4"
           onClick={() => void refreshSession()}
         >
           Try again
-        </button>
+        </Button>
       </div>
     );
   }
@@ -869,28 +895,30 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               <p className="mt-0.5 text-xs text-text-secondary">
                 Ask them to share their digits or let you scan their QR.
               </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={6}
-                  className={`${inputClass} max-w-44 font-mono tracking-widest`}
-                  placeholder="000000"
+              <div className="mt-2 flex flex-wrap items-end gap-2">
+                <Input
+                  name="meetupCode"
                   value={codeInput}
                   onChange={(e) =>
                     setCodeInput(e.target.value.replace(/\D/g, "").slice(0, 6))
                   }
+                  placeholder="000000"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
                   disabled={verifyBusy || !ninOk}
+                  containerClassName="max-w-44"
+                  inputClassName="font-mono tracking-widest"
                 />
-                <button
+                <Button
                   type="button"
-                  className={btnPrimary}
+                  size="sm"
                   disabled={verifyBusy || !ninOk}
+                  loading={verifyBusy}
                   onClick={() => void onVerifyCode()}
                 >
-                  {verifyBusy ? <Spinner /> : "Verify"}{" "}
-                </button>
+                  Verify
+                </Button>
               </div>
             </div>
           ) : null}
@@ -931,14 +959,16 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             </li>
           </ul>
           {!myDonationDone ? (
-            <button
+            <Button
               type="button"
-              className={`${btnPrimary} mt-4`}
+              size="sm"
+              className="mt-4"
               disabled={confirmBusy || isRequester === null}
+              loading={confirmBusy}
               onClick={() => void onConfirmDonation()}
             >
-              {confirmBusy ? "Saving…" : "I confirm the donation"}
-            </button>
+              I confirm the donation
+            </Button>
           ) : null}
         </section>
       ) : null}
@@ -973,14 +1003,16 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
           !readOnly &&
           !donationChat.roomClosed &&
           !donationChat.arrivedRecorded ? (
-            <button
+            <Button
               type="button"
-              className={btnSecondary}
+              variant="outline"
+              size="sm"
               disabled={donationChat.arrivedBusy}
+              loading={donationChat.arrivedBusy}
               onClick={() => void onMarkArrived()}
             >
-              {donationChat.arrivedBusy ? "Saving…" : "I'm here (arrived)"}
-            </button>
+              I&apos;m here (arrived)
+            </Button>
           ) : null}
           {donationChat.arrivedRecorded ? (
             <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
@@ -1062,18 +1094,22 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
           )}
         </div>
         {donationChat.nextCursor ? (
-          <button
+          <Button
             type="button"
-            className={`${btnSecondary} mt-2 text-xs`}
+            variant="outline"
+            size="xs"
+            className="mt-2"
             onClick={() => donationChat.loadOlderMessages()}
             disabled={donationChat.historyLoading}
+            loading={donationChat.historyLoading}
           >
             Load older
-          </button>
+          </Button>
         ) : null}
         <div className="mt-3 flex flex-col items-center gap-2 sm:flex-row">
-          <textarea
-            className={`${inputClass} min-h-[72px] flex-1 sm:min-h-[10px] max-h-[40px] resize-none`}
+          <Textarea
+            name="chatDraft"
+            className="min-h-[44px] max-h-[120px] flex-1 py-2 text-sm"
             placeholder={
               chatComposerDisabled
                 ? donationChat.roomClosed
@@ -1089,12 +1125,14 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               donationChat.onComposerTyping();
             }}
             disabled={chatComposerDisabled}
+            rows={1}
           />
           <Button
             type="button"
             size="icon-lg"
-            className={`${btnPrimary} shrink-0`}
+            className="shrink-0"
             disabled={chatComposerDisabled || donationChat.sendBusy}
+            loading={donationChat.sendBusy}
             onClick={() => void onSendChat()}
           >
             <SendIcon className="size-4" aria-hidden />
@@ -1103,24 +1141,23 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       </section>
 
       <div className="flex flex-wrap gap-2">
-        <button
+        <Button
+          variant="outline"
           type="button"
-          className={btnSecondary}
           onClick={() => setReportOpen(true)}
           disabled={reportBusy}
         >
           Report meetup
-        </button>
+        </Button>
+        <Button
+          variant="outline"
+          type="button"
+          disabled={readOnly || terminateBusy}
+          onClick={() => setTerminateAlertOpen(true)}
+        >
+          Terminate meet
+        </Button>
       </div>
-
-      <button
-        type="button"
-        className={`${btnSecondary} w-full border-red-200 text-red-700 hover:bg-red-50 dark:border-red-900/50 dark:text-red-300 dark:hover:bg-red-950/40`}
-        disabled={readOnly || terminateBusy}
-        onClick={() => setTerminateAlertOpen(true)}
-      >
-        Terminate meet
-      </button>
 
       <AlertDialog
         open={terminateAlertOpen}
@@ -1141,13 +1178,14 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             >
               Reason for termination
             </label>
-            <textarea
+            <Textarea
               id="terminate-reason"
+              name="terminateReason"
               rows={3}
               value={terminateReason}
               disabled={terminateBusy}
               placeholder="e.g. Donor could not attend, safety concern, wrong location…"
-              className="w-full resize-y rounded-lg border border-border bg-white px-3 py-2 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-60 dark:border-white/10 dark:bg-[#1a1a22]"
+              aria-invalid={terminateReasonError ? true : undefined}
               onChange={(e) => {
                 setTerminateReason(e.target.value);
                 if (terminateReasonError) setTerminateReasonError(null);
@@ -1183,7 +1221,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         onSubmit={onReport}
       />
 
-      {donationChatBookingId ? (
+      {donationChatBookingId && canPromptRequesterRating ? (
         <DonationRatingModal
           open={ratingModalOpen}
           onClose={() => setRatingModalOpen(false)}

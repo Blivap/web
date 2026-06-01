@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/button/button.component";
 import { Input } from "@/components/forms/inputs/input.component";
 import { AuthLayout } from "@/layout/auth.layout.component";
 import { useResetPassword } from "@/hooks/auth/useResetPassword.hook";
@@ -81,13 +82,14 @@ function ResetPasswordForm() {
                   type="password"
                   placeholder="Enter new password"
                 />
-                <button
+                <Button
                   type="submit"
+                  className="w-full"
                   disabled={!isValid || isLoading || !hasValidLink}
-                  className="w-full disabled:bg-primary/50 disabled:cursor-not-allowed bg-primary text-white py-[12.5px] rounded-lg font-semibold text-base hover:bg-primary/85 active:bg-primary transition duration-200"
+                  loading={isLoading}
                 >
                   {isLoading ? "Resetting..." : "Reset password"}
-                </button>
+                </Button>
               </form>
             )}
           </Formik>

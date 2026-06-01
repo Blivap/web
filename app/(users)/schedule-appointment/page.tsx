@@ -30,6 +30,7 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { Button } from "@/components/button/button.component";
 
 export interface AppointmentDetails {
   hospitalId: string;
@@ -408,13 +409,15 @@ function ScheduleAppointmentPageContent() {
               <p className="text-sm text-text-primary">
                 {hospitalsError ?? "Could not load hospitals."}
               </p>
-              <button
+              <Button
                 type="button"
+                variant="link"
+                size="xs"
+                className="mt-3 h-auto p-0 text-xs"
                 onClick={() => void loadHospitals()}
-                className="mt-3 text-xs font-medium text-primary hover:underline"
               >
                 Try again
-              </button>
+              </Button>
             </div>
           ) : hospitals.length === 0 ? (
             <p className="text-center text-sm text-text-secondary">
@@ -500,35 +503,39 @@ function ScheduleAppointmentPageContent() {
               </label>
               <div className="w-full">
                 <div className="flex items-center justify-between mb-3">
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() =>
                       setCalendarMonth((prev) => {
                         const d = new Date(prev.year, prev.month - 1);
                         return { year: d.getFullYear(), month: d.getMonth() };
                       })
                     }
-                    className="rounded p-1 text-text-primary hover:bg-[#F3F4F6] dark:hover:bg-white/10"
+                    className="rounded p-1"
                     aria-label="Previous month"
                   >
                     <ChevronLeft size={16} strokeWidth={0.8} />
-                  </button>
+                  </Button>
                   <span className="text-sm font-medium text-text-primary capitalize">
                     {monthLabel}
                   </span>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() =>
                       setCalendarMonth((prev) => {
                         const d = new Date(prev.year, prev.month + 1);
                         return { year: d.getFullYear(), month: d.getMonth() };
                       })
                     }
-                    className="rounded p-1 text-text-primary hover:bg-[#F3F4F6] dark:hover:bg-white/10"
+                    className="rounded p-1"
                     aria-label="Next month"
                   >
                     <ChevronRight size={16} strokeWidth={0.8} />
-                  </button>
+                  </Button>
                 </div>
                 <div className="grid grid-cols-7 gap-1 text-center">
                   {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
@@ -614,13 +621,14 @@ function ScheduleAppointmentPageContent() {
           </p>
         ) : null}
 
-        <button
+        <Button
           type="submit"
           disabled={!canConfirmAppointment || isSendingBooking}
-          className="text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
+          loading={isSendingBooking}
+          className="w-fit py-2.5 px-5 text-sm font-medium"
         >
           {isSendingBooking ? "Sending…" : "Confirm"}
-        </button>
+        </Button>
       </form>
 
       <BookingRequestSentModal

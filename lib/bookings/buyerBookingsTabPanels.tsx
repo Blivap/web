@@ -40,7 +40,6 @@ const sentPanelBanner = (
 
 export type BuyerBookingsTabPanelsInput = {
   bookings: Booking[];
-  hospitalLabel: (hospitalId: string) => string;
   user: IUser | null;
   highlightBookingId: string;
   mutatingId: string | null;
@@ -56,7 +55,6 @@ export function buildBuyerBookingsTabPanels(
 ): Record<BuyerPanelKey, BookingsTabPanel> {
   const {
     bookings,
-    hospitalLabel,
     user,
     highlightBookingId,
     mutatingId,
@@ -69,11 +67,7 @@ export function buildBuyerBookingsTabPanels(
 
   const mapRow = (b: Booking, ctx: BuyerPanelKey): BookingsShellRow => {
     const pill = statusToPill(b.status);
-    const parts = bookingRowDetailPartsForViewer(
-      b,
-      "requester",
-      hospitalLabel(b.hospitalId),
-    );
+    const parts = bookingRowDetailPartsForViewer(b, "requester");
     const ninOk = user?.nationalIdentificationNumberVerified === true;
 
     let actionsSlot: ReactNode;

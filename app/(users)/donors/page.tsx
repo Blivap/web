@@ -28,6 +28,7 @@ import { DonorCooldownDisplay } from "./components/donor-cooldown-display.compon
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
 import { routes } from "@/config/routes";
+import { Button } from "@/components/button/button.component";
 
 const DONATION_TYPE_LABELS = new Map(
   SCREENING_DONATION_TYPE_OPTIONS.map((o) => [o.value, o.label]),
@@ -326,13 +327,15 @@ export default function DonorsPage() {
               <p className="font-medium text-text-primary">
                 {fetchError ?? "Could not load donors. Please try again."}
               </p>
-              <button
+              <Button
                 type="button"
+                variant="link"
+                size="xs"
+                className="mt-3 h-auto p-0 text-xs"
                 onClick={() => void loadDonors()}
-                className="mt-3 text-xs font-medium text-primary hover:underline"
               >
                 Try again
-              </button>
+              </Button>
             </div>
           ) : (
             <DonorsPaginatedGrid

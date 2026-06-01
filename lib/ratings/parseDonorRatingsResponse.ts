@@ -15,7 +15,7 @@ function pickNumber(v: unknown, fallback = 0): number {
   return fallback;
 }
 
-function parseRatingItem(raw: unknown): DonorRatingItem | null {
+export function parseRatingItem(raw: unknown): DonorRatingItem | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const score = pickNumber(r.score ?? r.rating ?? r.stars, -1);
@@ -45,6 +45,58 @@ function coerceRatingsArray(raw: unknown): unknown[] {
     if (Array.isArray(n.items)) return n.items;
   }
   return [];
+}
+
+function parseRatingsItems(raw: unknown): DonorRatingItem[] {
+  const items = coerceRatingsArray(raw);
+  const parsedItems: DonorRatingItem[] = [];
+  for (const item of items) {
+    const row = parseRatingItem(item);
+    if (row) parsedItems.push(row);
+  }
+  return parsedItems;
+}
+
+/** Normalizes rating fields embedded in GET /donors/:id — uses API aggregates as-is. */
+export function parseDonorProfileRatings(
+  record: Record<string, unknown>,
+): DonorRatingsSummary {
+  const averageRaw = pickNumber(
+    record.averageRating ??
+      record.average_rating ??
+      record.avgRating ??
+      record.avg,
+    -1,
+  );
+  const ratingCount = Math.max(
+    0,
+    Math.round(
+      pickNumber(
+        record.ratingCount ??
+          record.rating_count ??
+          record.ratingsCount ??
+          record.reviewCount,
+      ),
+    ),
+  );
+
+  const itemsRaw =
+    record.recentRatings ??
+    record.recent_ratings ??
+    record.ratings ??
+    [];
+  const parsedItems = Array.isArray(itemsRaw)
+    ? parseRatingsItems(itemsRaw)
+    : [];
+
+  const averageRating =
+    averageRaw >= 0 ? Math.min(5, Math.max(0, averageRaw)) : 0;
+
+  return {
+    averageRating,
+    ratingCount,
+    ...(parsedItems.length > 0 ? { ratings: parsedItems } : {}),
+  };
 }
 
 /** Normalizes GET /donors/:id/ratings — aggregates and optional review list. */
@@ -77,11 +129,7 @@ export function parseDonorRatingsResponse(body: unknown): DonorRatingsSummary {
     ? coerceRatingsArray(body)
     : coerceRatingsArray(r);
 
-  const parsedItems: DonorRatingItem[] = [];
-  for (const item of items) {
-    const row = parseRatingItem(item);
-    if (row) parsedItems.push(row);
-  }
+  const parsedItems = parseRatingsItems(items);
 
   let averageRating =
     averageRaw >= 0 ? Math.min(5, Math.max(0, averageRaw)) : 0;

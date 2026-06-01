@@ -9,12 +9,12 @@ import type { BookingsShellTabItem } from "@/app/(users)/bookings/components/boo
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { AppDispatch, RootState } from "@/store/store";
 import {
-  loadReceivedBookings,
   loadSentBookings,
   patchBookingInLists,
 } from "@/store/slices/bookingsSlice";
-import { usePendingDonationRating } from "@/hooks/ratings/usePendingDonationRating.hook";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
+import { bookingNeedsRequesterRating } from "@/lib/ratings/ratedBookingsStorage";
+import type { Booking } from "@/types/bookings";
 import {
   buildBuyerBookingsTabPanels,
   BUYER_TAB_ORDER,
@@ -27,10 +27,14 @@ export { BUYER_TAB_ORDER } from "@/lib/bookings/buyerBookingsTabPanels";
 
 const BOOKINGS_POLL_MS = 20_000;
 
+function donorLabelFromBooking(b: Booking): string {
+  if (b.donorDisplayName?.trim()) return b.donorDisplayName.trim();
+  return `Donor ${b.donorUserId.slice(0, 6)}`;
+}
+
 function scheduleBookingsResync(dispatch: AppDispatch) {
   window.setTimeout(() => {
     void dispatch(loadSentBookings({ silent: true }));
-    void dispatch(loadReceivedBookings({ silent: true }));
   }, 800);
 }
 
@@ -40,7 +44,6 @@ export function useBuyerBookings() {
   const store = useStore<RootState>();
   const user = useAppSelector((s) => s.auth.user);
   const bookings = useAppSelector((s) => s.bookings.sent.items);
-  const hospitalNamesById = useAppSelector((s) => s.bookings.hospitalNamesById);
   const loadState = useAppSelector((s) => s.bookings.sent.status);
   const loadError = useAppSelector((s) => s.bookings.sent.error);
 
@@ -50,21 +53,43 @@ export function useBuyerBookings() {
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [remindingId, setRemindingId] = useState<string | null>(null);
   const [reportBookingId, setReportBookingId] = useState<string | null>(null);
+  const [ratingOpen, setRatingOpen] = useState(false);
+  const [ratingBookingId, setRatingBookingId] = useState<string | null>(null);
 
-  const {
-    ratingOpen,
-    activePending,
-    openRatingForBooking,
-    closeRating,
-    onRatingSuccess,
-  } = usePendingDonationRating(
-    bookings,
-    user?.id,
-    loadState === "ok" && Boolean(user?.id),
+  const openRatingForBooking = useCallback(
+    (id: string) => {
+      const b = bookings.find((row) => row.id === id);
+      if (!b || !user?.id || b.requesterId !== user.id) return;
+      if (!bookingNeedsRequesterRating(b)) return;
+      setRatingBookingId(id);
+      setRatingOpen(true);
+    },
+    [bookings, user?.id],
+  );
+
+  const closeRating = useCallback(() => {
+    setRatingOpen(false);
+    setRatingBookingId(null);
+  }, []);
+
+  const activeRatingBooking = useMemo(
+    () =>
+      ratingBookingId
+        ? bookings.find((b) => b.id === ratingBookingId)
+        : undefined,
+    [bookings, ratingBookingId],
+  );
+
+  const activeRatingDonorLabel = useMemo(
+    () =>
+      activeRatingBooking
+        ? donorLabelFromBooking(activeRatingBooking)
+        : "",
+    [activeRatingBooking],
   );
 
   const handleRatingSuccess = useCallback(() => {
-    const bid = activePending?.bookingId;
+    const bid = ratingBookingId;
     if (bid) {
       dispatch(
         patchBookingInLists({
@@ -74,10 +99,10 @@ export function useBuyerBookings() {
         }),
       );
     }
-    onRatingSuccess();
+    closeRating();
     showSnackbar("Thanks for your rating.", "success");
     void dispatch(loadSentBookings({ silent: true }));
-  }, [activePending?.bookingId, dispatch, onRatingSuccess, showSnackbar]);
+  }, [ratingBookingId, dispatch, closeRating, showSnackbar]);
 
   const loadData = useCallback(() => {
     if (!user?.id) return Promise.resolve();
@@ -85,14 +110,17 @@ export function useBuyerBookings() {
   }, [dispatch, user?.id]);
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    if (!user?.id) return;
+    const status = store.getState().bookings.sent.status;
+    void dispatch(
+      loadSentBookings(status === "ok" ? { silent: true } : undefined),
+    );
+  }, [dispatch, user?.id, store]);
 
   useEffect(() => {
     if (!user?.id) return;
     const timer = window.setInterval(() => {
       void dispatch(loadSentBookings({ silent: true }));
-      void dispatch(loadReceivedBookings({ silent: true }));
     }, BOOKINGS_POLL_MS);
     return () => window.clearInterval(timer);
   }, [dispatch, user?.id]);
@@ -101,7 +129,6 @@ export function useBuyerBookings() {
     const onVis = () => {
       if (document.visibilityState === "visible" && user?.id) {
         void dispatch(loadSentBookings({ silent: true }));
-        void dispatch(loadReceivedBookings({ silent: true }));
       }
     };
     document.addEventListener("visibilitychange", onVis);
@@ -113,12 +140,6 @@ export function useBuyerBookings() {
     [bookings],
   );
   useBookingDeepLinkHighlight(highlightBookingId, loadState, rowIdsFingerprint);
-
-  const hospitalLabel = useCallback(
-    (hospitalId: string) =>
-      hospitalNamesById[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
-    [hospitalNamesById],
-  );
 
   const refreshSent = useCallback(() => {
     void dispatch(loadSentBookings({ silent: true }));
@@ -201,7 +222,6 @@ export function useBuyerBookings() {
     () =>
       buildBuyerBookingsTabPanels({
         bookings,
-        hospitalLabel,
         user,
         highlightBookingId,
         mutatingId,
@@ -213,7 +233,6 @@ export function useBuyerBookings() {
       }),
     [
       bookings,
-      hospitalLabel,
       user,
       highlightBookingId,
       mutatingId,
@@ -259,7 +278,8 @@ export function useBuyerBookings() {
     shellTabs,
     skeletonTabLabels,
     ratingOpen,
-    activePending,
+    activeRatingBooking,
+    activeRatingDonorLabel,
     closeRating,
     handleRatingSuccess,
   };

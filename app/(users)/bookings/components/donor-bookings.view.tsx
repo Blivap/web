@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/button/button.component";
 import { BookingsShellSkeleton, BookingsShell } from "./bookings-shell.view";
 import { BookingReportModal } from "./booking-report-modal.component";
 import { useDonorBookings } from "@/hooks/bookings/useDonorBookings.hook";
@@ -35,13 +36,15 @@ export function DonorBookingsView() {
         <p className="text-sm font-medium text-text-primary">
           {loadError ?? "Something went wrong."}
         </p>
-        <button
+        <Button
           type="button"
+          variant="link"
+          size="xs"
+          className="mt-3 h-auto p-0 text-xs"
           onClick={() => void loadData()}
-          className="mt-3 text-xs font-medium text-primary hover:underline"
         >
           Try again
-        </button>
+        </Button>
       </div>
     );
   }

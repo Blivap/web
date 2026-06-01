@@ -40,7 +40,8 @@ import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
 import type { Donor } from "../donors/donors.data";
 import { SCREENING_DONATION_TYPE_OPTIONS } from "@/lib/donors/screeningDonationTypes";
 import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button/button.component";
+import { Input } from "@/components/forms/inputs/input.component";
 import { OverviewNotificationsTab } from "./components/overview-notifications-tab.component";
 
 const BECOME_DONOR_CARDS = [
@@ -238,78 +239,7 @@ export default function OverviewPage() {
               </TabsList>
 
               <TabsContent value="overview" className="mt-0">
-                <div className="flex flex-col gap-8 lg:gap-10">
-                  {/* Quick actions + highlight */}
-                  <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:items-stretch">
-                    <section className="flex flex-col justify-between gap-5 overflow-hidden rounded-2xl border border-[#DADADA] bg-linear-to-br from-[#FDF2F6] via-white to-white p-6 dark:border-white/10 dark:from-primary/10 dark:via-[#1a1a22] dark:to-[#1a1a22] sm:p-7">
-                      <div className="flex flex-col gap-3">
-                        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary shadow-sm dark:bg-white/10">
-                          <Sparkles className="size-3.5" aria-hidden />
-                          Get started
-                        </div>
-                        <h2 className="text-xl font-semibold leading-tight text-text-primary sm:text-2xl">
-                          Ready to register as a donor?
-                        </h2>
-                        <p className="max-w-xl text-sm leading-relaxed text-text-secondary">
-                          Start with blood, sperm, or ovum donor registration.
-                          Other pathways are listed for reference and will open
-                          as Blivap expands.
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        <Link
-                          href={withDonationTypeQuery(
-                            "/donors/new?type=blood",
-                            "whole_blood",
-                          )}
-                          className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90"
-                        >
-                          <Droplet className="size-4 shrink-0" aria-hidden />
-                          Blood donor
-                        </Link>
-                        <Link
-                          href={withDonationTypeQuery(
-                            "/donors/new?type=sperm",
-                            "sperm_egg_gametes",
-                          )}
-                          className="inline-flex items-center gap-2 rounded-lg border border-primary/35 bg-white/90 px-5 py-3 text-sm font-semibold text-primary transition hover:bg-white dark:border-primary/40 dark:bg-white/10 dark:hover:bg-white/15"
-                        >
-                          Sperm donor
-                        </Link>
-                        <Link
-                          href={withDonationTypeQuery(
-                            "/donors/new?type=ovary",
-                            "sperm_egg_gametes",
-                          )}
-                          className="inline-flex items-center gap-2 rounded-lg border border-border bg-white/80 px-5 py-3 text-sm font-semibold text-text-primary transition hover:bg-white dark:border-white/10 dark:bg-white/10 dark:hover:bg-white/15"
-                        >
-                          Ovum donor
-                        </Link>
-                      </div>
-                    </section>
-
-                    <aside className="flex flex-col justify-between gap-4 rounded-2xl border border-[#DADADA] bg-white p-6 dark:border-white/10 dark:bg-[#1a1a22]">
-                      <div className="flex flex-col gap-2">
-                        <div className="flex size-11 items-center justify-center rounded-xl bg-[#F9E8EE] text-primary dark:bg-primary/20">
-                          <HeartPulse className="size-5" aria-hidden />
-                        </div>
-                        <h3 className="text-base font-semibold text-text-primary">
-                          Explore every pathway
-                        </h3>
-                        <p className="text-sm leading-relaxed text-text-secondary">
-                          Browse the full directory, filter what is live in
-                          Blivap today, and open a guided flow for each type.
-                        </p>
-                      </div>
-                      <Link
-                        href="#donation-pathways"
-                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-border py-3 text-sm font-medium text-text-primary transition hover:border-primary/25 hover:bg-primary/3 dark:border-white/10"
-                      >
-                        Jump to pathways
-                        <ChevronRight className="size-4" aria-hidden />
-                      </Link>
-                    </aside>
-                  </div>
+                <div className="flex flex-col gap-8 lg:gap-10">                
 
                   {/* Become a donor — compact cards */}
                   <section className="overflow-hidden rounded-2xl border border-[#DADADA] bg-white dark:border-white/10 dark:bg-[#1a1a22]">
@@ -372,21 +302,23 @@ export default function OverviewPage() {
                         </p>
                       </div>
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-                        <div className="relative min-w-0 flex-1">
-                          <Search
-                            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-tertiary"
-                            aria-hidden
-                          />
-                          <input
-                            type="search"
-                            value={pathwaySearch}
-                            onChange={(e) => setPathwaySearch(e.target.value)}
-                            placeholder="Search pathways…"
-                            className="w-full rounded-xl border border-border bg-[#F7F7F8] py-2.5 pl-10 pr-3 text-sm text-text-primary outline-none transition placeholder:text-text-tertiary focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/10 dark:bg-white/5"
-                            autoComplete="off"
-                            aria-label="Search donation pathways"
-                          />
-                        </div>
+                        <Input
+                          name="pathwaySearch"
+                          type="search"
+                          value={pathwaySearch}
+                          onChange={(e) => setPathwaySearch(e.target.value)}
+                          placeholder="Search pathways…"
+                          autoComplete="off"
+                          aria-label="Search donation pathways"
+                          icon={
+                            <Search
+                              className="size-4 text-text-tertiary"
+                              aria-hidden
+                            />
+                          }
+                          containerClassName="min-w-0 flex-1"
+                          inputClassName="rounded-xl border-0 bg-[#F7F7F8] py-2.5 text-sm focus:ring-2 focus:ring-primary/15 dark:bg-white/5"
+                        />
                         <div
                           className="flex flex-wrap gap-2"
                           role="group"
@@ -399,9 +331,13 @@ export default function OverviewPage() {
                               ["interest", "Coming soon"],
                             ] as const
                           ).map(([value, label]) => (
-                            <button
+                            <Button
                               key={value}
                               type="button"
+                              variant={
+                                pathwayFilter === value ? "default" : "outline"
+                              }
+                              size="xs"
                               onClick={() => setPathwayFilter(value)}
                               className={`${pathwayFilterChipBase} ${
                                 pathwayFilter === value
@@ -410,7 +346,7 @@ export default function OverviewPage() {
                               }`}
                             >
                               {label}
-                            </button>
+                            </Button>
                           ))}
                         </div>
                       </div>

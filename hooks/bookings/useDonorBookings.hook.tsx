@@ -10,7 +10,6 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { RootState, AppDispatch } from "@/store/store";
 import {
   loadReceivedBookings,
-  loadSentBookings,
   patchBookingInLists,
 } from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
@@ -33,7 +32,6 @@ const BOOKINGS_POLL_MS = 20_000;
 function scheduleBookingsResync(dispatch: AppDispatch) {
   window.setTimeout(() => {
     void dispatch(loadReceivedBookings({ silent: true }));
-    void dispatch(loadSentBookings({ silent: true }));
   }, 800);
 }
 
@@ -46,7 +44,6 @@ export function useDonorBookings() {
   const searchParams = useSearchParams();
   const user = useAppSelector((s) => s.auth.user);
   const bookings = useAppSelector((s) => s.bookings.received.items);
-  const hospitalNamesById = useAppSelector((s) => s.bookings.hospitalNamesById);
   const loadState = useAppSelector((s) => s.bookings.received.status);
   const loadError = useAppSelector((s) => s.bookings.received.error);
 
@@ -56,7 +53,6 @@ export function useDonorBookings() {
     if (!user?.id) return;
     const timer = window.setInterval(() => {
       void dispatch(loadReceivedBookings({ silent: true }));
-      void dispatch(loadSentBookings({ silent: true }));
     }, BOOKINGS_POLL_MS);
     return () => window.clearInterval(timer);
   }, [dispatch, user?.id]);
@@ -70,14 +66,17 @@ export function useDonorBookings() {
   }, [dispatch, user?.id]);
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    if (!user?.id) return;
+    const status = store.getState().bookings.received.status;
+    void dispatch(
+      loadReceivedBookings(status === "ok" ? { silent: true } : undefined),
+    );
+  }, [dispatch, user?.id, store]);
 
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState === "visible" && user?.id) {
         void dispatch(loadReceivedBookings({ silent: true }));
-        void dispatch(loadSentBookings({ silent: true }));
       }
     };
     document.addEventListener("visibilitychange", onVis);
@@ -89,12 +88,6 @@ export function useDonorBookings() {
     [bookings],
   );
   useBookingDeepLinkHighlight(highlightBookingId, loadState, rowIdsFingerprint);
-
-  const hospitalLabel = useCallback(
-    (hospitalId: string) =>
-      hospitalNamesById[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
-    [hospitalNamesById],
-  );
 
   const acceptBooking = useCallback(
     async (id: string) => {
@@ -166,9 +159,7 @@ export function useDonorBookings() {
         if (serverPatch) {
           dispatch(patchBookingInLists({ id, ...serverPatch }));
         }
-        showSnackbar(
-          "You declined this booking. The requester may choose another time or donor.",
-        );
+        showSnackbar("Booking declined.", "success");
         const params = new URLSearchParams(searchParams.toString());
         params.set("tab", "past");
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
@@ -211,7 +202,6 @@ export function useDonorBookings() {
     () =>
       buildDonorBookingsTabPanels({
         bookings,
-        hospitalLabel,
         user,
         highlightBookingId,
         mutatingId,
@@ -221,7 +211,6 @@ export function useDonorBookings() {
       }),
     [
       bookings,
-      hospitalLabel,
       user,
       highlightBookingId,
       mutatingId,

@@ -33,10 +33,9 @@ export function SelectAvatarModal() {
   const open = requiresAvatar || isModalOpen;
 
   useEffect(() => {
-    if (!avatars) {
-      void getAvatars();
-    }
-  }, [avatars, getAvatars]);
+    if (!open || avatars !== null) return;
+    void getAvatars();
+  }, [open, avatars, getAvatars]);
 
   useEffect(() => {
     if (!requiresAvatar || autoOpenedRef.current) return;

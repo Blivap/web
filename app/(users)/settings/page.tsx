@@ -8,7 +8,6 @@ import { editProfileSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import { useEffect, useMemo, useRef } from "react";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
-import { useSelectAvatar } from "@/hooks/select-avatar/useSelectAvatar.hook";
 import { useAvatarModal } from "@/hooks/select-avatar/useAvatarModal.hook";
 import { FaPencilAlt } from "react-icons/fa";
 import { Button } from "@/components/button/button.component";
@@ -32,13 +31,7 @@ export default function SettingsPage() {
     isProfileLoading,
     isPasswordResetRequesting,
   } = useSettings();
-  const { avatars, getAvatars } = useSelectAvatar();
   const { open: openAvatarModal } = useAvatarModal();
-  useEffect(() => {
-    if (!avatars) {
-      void getAvatars();
-    }
-  }, [avatars, getAvatars]);
   const setProfileImageRef = useRef<(field: string, value: string) => void>(
     () => {},
   );
@@ -129,9 +122,10 @@ export default function SettingsPage() {
                           src={values.profileImage || user?.profileImage}
                           className="size-20 sm:size-34 border-[3px] border-primary"
                         />
-                        <button
+                        <Button
                           type="button"
-                          className="absolute right-3 bottom-3 translate-x-1/4 translate-y-1/4 flex items-center justify-center size-7 rounded-full bg-black text-white border-2 border-white shadow-md"
+                          size="icon-sm"
+                          className="absolute right-3 bottom-3 translate-x-1/4 translate-y-1/4 size-7 rounded-full bg-black text-white border-2 border-white shadow-md hover:bg-black/90"
                           aria-label="Change profile picture"
                           onClick={() => {
                             dispatch(
@@ -145,7 +139,7 @@ export default function SettingsPage() {
                           }}
                         >
                           <FaPencilAlt size={12} />
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -248,13 +242,15 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="pt-2">
-                    <button
+                    <Button
                       type="submit"
+                      size="sm"
+                      className="rounded-md px-5 text-xs font-semibold"
                       disabled={isProfileLoading}
-                      className="inline-flex items-center justify-center px-5 py-2 rounded-md bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:bg-primary/50 disabled:cursor-not-allowed transition-colors"
+                      loading={isProfileLoading}
                     >
                       {isProfileLoading ? "Updating..." : "Update Profile"}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               );

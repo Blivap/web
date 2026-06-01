@@ -15,7 +15,9 @@ import {
   withDonationTypeQuery,
 } from "@/lib/donations/donation-pathway-questionnaire-type";
 import { normalizeDonationTypeForApi } from "@/lib/donors/screeningDonationTypes";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button/button.component";
+import { Input } from "@/components/forms/inputs/input.component";
+import { Textarea } from "@/components/ui/textarea";
 
 const linkPrimaryClass =
   "inline-flex items-center justify-center rounded-md py-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#14141a] bg-primary text-white hover:bg-primary/90";
@@ -35,9 +37,6 @@ type InterestStepValues = {
 
 const cardClass =
   "rounded-xl border border-[#DADADA] bg-white p-5 sm:p-6 dark:border-white/10 dark:bg-[#1a1a22]";
-
-const inputClass =
-  "w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-white/10 dark:bg-[#1a1a22]";
 
 function isBlivapIntegration(entry: DonationTypeEntry["integration"]) {
   return (
@@ -277,34 +276,24 @@ export function DonationTypeFlow({ entry }: Props) {
 
       {interestStep === 2 ? (
         <div className={`flex flex-col gap-5 ${cardClass}`}>
+          <Input
+            name="donation-interest-region"
+            id="donation-interest-region"
+            label="City or region (optional)"
+            value={interestForm.cityRegion}
+            onChange={(e) =>
+              setInterestForm((p) => ({ ...p, cityRegion: e.target.value }))
+            }
+            placeholder="e.g. Lagos, Nigeria"
+            autoComplete="address-level2"
+          />
           <div className="flex flex-col gap-2">
-            <label
-              htmlFor="donation-interest-region"
-              className="text-sm font-medium text-text-primary"
-            >
-              City or region (optional)
-            </label>
-            <input
-              id="donation-interest-region"
-              className={inputClass}
-              value={interestForm.cityRegion}
-              onChange={(e) =>
-                setInterestForm((p) => ({ ...p, cityRegion: e.target.value }))
-              }
-              placeholder="e.g. Lagos, Nigeria"
-              autoComplete="address-level2"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="donation-interest-notes"
-              className="text-sm font-medium text-text-primary"
-            >
+            <p className="text-sm font-medium text-text-primary">
               Notes (optional)
-            </label>
-            <textarea
+            </p>
+            <Textarea
               id="donation-interest-notes"
-              className={`${inputClass} min-h-[100px] resize-y`}
+              name="donation-interest-notes"
               value={interestForm.notes}
               onChange={(e) =>
                 setInterestForm((p) => ({ ...p, notes: e.target.value }))

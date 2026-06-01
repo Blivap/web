@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Camera, CameraOff } from "lucide-react";
+import { Button } from "@/components/button/button.component";
 import { cn } from "@/lib/utils";
 
 type MeetupQrScannerProps = {
@@ -108,25 +109,29 @@ export function MeetupQrScanner({
     <div className={cn("space-y-3", className)}>
       <div className="flex flex-wrap items-center gap-2">
         {active ? (
-          <button
+          <Button
             type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-[#F9FAFB] disabled:opacity-50 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6"
+            variant="outline"
+            size="sm"
             disabled={controlsDisabled}
             onClick={() => void stopScanner()}
+            className="gap-2"
           >
             <CameraOff className="size-4" aria-hidden />
             Stop scanner
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-[#F9FAFB] disabled:opacity-50 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6"
+            variant="outline"
+            size="sm"
             disabled={controlsDisabled}
             onClick={() => void startScanner()}
+            className="gap-2"
           >
             <Camera className="size-4" aria-hidden />
             {starting ? "Starting camera…" : "Open scanner"}
-          </button>
+          </Button>
         )}
       </div>
 
