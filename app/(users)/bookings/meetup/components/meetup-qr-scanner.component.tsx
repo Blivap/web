@@ -340,7 +340,7 @@ export function MeetupQrScanner({
         id={regionId}
         className={cn(
           "w-full overflow-hidden rounded-lg border border-border bg-black/90 dark:border-white/10",
-          showRegion ? "min-h-[200px] min-w-[200px]" : "hidden",
+          showRegion ? "min-h-[200px] min-w-[150px]" : "hidden",
         )}
         aria-hidden={!showRegion}
       />
