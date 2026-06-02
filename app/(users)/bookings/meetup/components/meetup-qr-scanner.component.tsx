@@ -12,8 +12,6 @@ import { Camera, CameraOff } from "lucide-react";
 import { Button } from "@/components/button/button.component";
 import { cn } from "@/lib/utils";
 
-const LOG = "[MEETUP_QR_DEBUG][scanner]";
-
 type MeetupQrScannerProps = {
   disabled?: boolean;
   busy?: boolean;
@@ -48,25 +46,11 @@ export function MeetupQrScanner({
 
   const stopLocalTracks = useCallback(() => {
     const root = document.getElementById(regionId);
-    if (!root) {
-      console.info(LOG, "stopLocalTracks: no root", { regionId });
-      return;
-    }
+    if (!root) return;
     const video = root.querySelector("video");
-    if (!video) {
-      console.info(LOG, "stopLocalTracks: no video element", { regionId });
-      return;
-    }
+    if (!video) return;
     const stream = video.srcObject;
-    if (!(stream instanceof MediaStream)) {
-      console.info(LOG, "stopLocalTracks: no srcObject on video");
-      return;
-    }
-    const tracks = stream.getTracks();
-    console.info(LOG, "stopLocalTracks: stopping tracks", {
-      count: tracks.length,
-      states: tracks.map((t) => `${t.kind}:${t.readyState}`),
-    });
+    if (!(stream instanceof MediaStream)) return;
     stream.getTracks().forEach((track) => {
       try {
         track.stop();
@@ -80,11 +64,6 @@ export function MeetupQrScanner({
   const stopScanner = useCallback(
     async (opts?: { notifyParent?: boolean }) => {
       const notifyParent = opts?.notifyParent === true;
-      console.info(LOG, "stopScanner called", {
-        notifyParent,
-        hadInstance: Boolean(scannerRef.current),
-        wasScanning: scannerRef.current?.isScanning ?? false,
-      });
       const instance = scannerRef.current;
       scannerRef.current = null;
       handledRef.current = false;
@@ -94,27 +73,20 @@ export function MeetupQrScanner({
         try {
           if (instance.isScanning) {
             await instance.stop();
-            console.info(LOG, "stopScanner: instance.stop() ok");
-          } else {
-            console.info(LOG, "stopScanner: instance not scanning");
           }
-        } catch (e) {
-          console.warn(LOG, "stopScanner: instance.stop() failed", e);
+        } catch {
+          /* ignore stop errors */
         }
         try {
           await instance.clear();
-          console.info(LOG, "stopScanner: instance.clear() ok");
-        } catch (e) {
-          console.warn(LOG, "stopScanner: instance.clear() failed", e);
+        } catch {
+          /* ignore clear errors */
         }
-      } else {
-        console.info(LOG, "stopScanner: no instance to stop");
       }
 
       stopLocalTracks();
       setActive(false);
       if (notifyParent) {
-        console.info(LOG, "stopScanner: calling onStop (parent -> QR view)");
         onStopRef.current?.();
       }
     },
@@ -131,13 +103,6 @@ export function MeetupQrScanner({
   }, []);
 
   useLayoutEffect(() => {
-    console.info(LOG, "mount", {
-      autoStart,
-      disabled,
-      busy,
-      regionId,
-      hasRegionEl: Boolean(regionRef.current),
-    });
     if (!autoStart || disabled || busy) return;
     void startScanner();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when scanner opens
@@ -154,19 +119,9 @@ export function MeetupQrScanner({
   }, [active, regionId]);
 
   const startScanner = useCallback(async () => {
-    if (disabled || busy || startInFlightRef.current) {
-      console.info(LOG, "startScanner skipped", {
-        disabled,
-        busy,
-        inFlight: startInFlightRef.current,
-      });
-      return;
-    }
-    if (scannerRef.current?.isScanning) {
-      console.info(LOG, "startScanner skipped: already scanning");
-      return;
-    }
-    console.info(LOG, "startScanner begin", { regionId });
+    if (disabled || busy || startInFlightRef.current) return;
+    if (scannerRef.current?.isScanning) return;
+
     startInFlightRef.current = true;
     setError(null);
     setStarting(true);
@@ -174,7 +129,6 @@ export function MeetupQrScanner({
 
     try {
       const { Html5Qrcode } = await import("html5-qrcode");
-      console.info(LOG, "html5-qrcode module loaded");
       if (scannerRef.current) {
         await stopScannerRef.current({ notifyParent: false });
       }
@@ -199,10 +153,6 @@ export function MeetupQrScanner({
       > = [];
       try {
         const cameras = await Html5Qrcode.getCameras();
-        console.info(LOG, "getCameras", {
-          count: cameras?.length ?? 0,
-          labels: cameras?.map((c) => c.label) ?? [],
-        });
         if (Array.isArray(cameras) && cameras.length > 0) {
           const ordered = [...cameras].sort((a, b) => {
             const al = (a.label ?? "").toLowerCase();
@@ -226,16 +176,9 @@ export function MeetupQrScanner({
 
       let startError: unknown = null;
       let started = false;
-      console.info(LOG, "camera candidates", {
-        count: cameraCandidates.length,
-        ids: cameraCandidates.filter((c) => typeof c === "string").slice(0, 3),
-      });
 
       for (let i = 0; i < cameraCandidates.length; i++) {
         const camera = cameraCandidates[i];
-        const label =
-          typeof camera === "string" ? camera : JSON.stringify(camera);
-        console.info(LOG, "trying camera", { index: i, label });
         try {
           await instance.start(
             camera,
@@ -243,9 +186,6 @@ export function MeetupQrScanner({
             (decodedText) => {
               if (handledRef.current) return;
               handledRef.current = true;
-              console.info(LOG, "QR decoded", {
-                preview: decodedText.slice(0, 80),
-              });
               void (async () => {
                 await stopScannerRef.current({ notifyParent: false });
                 await onScanRef.current(decodedText);
@@ -255,35 +195,18 @@ export function MeetupQrScanner({
               /* no match this frame */
             },
           );
-          console.info(LOG, "instance.start success", { label });
           started = true;
           break;
         } catch (candidateError) {
-          const errMsg =
-            candidateError instanceof Error
-              ? candidateError.message
-              : String(candidateError);
-          console.warn(LOG, "instance.start failed", {
-            index: i,
-            label,
-            err: errMsg,
-            name:
-              candidateError instanceof Error ? candidateError.name : undefined,
-          });
           startError = candidateError;
         }
       }
 
       if (!started) {
-        const errMsg =
-          startError instanceof Error ? startError.message : String(startError);
-        console.error(LOG, "all camera candidates failed", { err: errMsg });
         throw startError ?? new Error("Could not open scanner camera.");
       }
-      console.info(LOG, "startScanner success", { active: true });
       setActive(true);
     } catch (e) {
-      console.error(LOG, "startScanner threw", e);
       await stopScannerRef.current({ notifyParent: false });
       const message =
         e instanceof Error
@@ -293,7 +216,6 @@ export function MeetupQrScanner({
     } finally {
       startInFlightRef.current = false;
       setStarting(false);
-      console.info(LOG, "startScanner end");
     }
   }, [busy, disabled, regionId]);
 
@@ -308,10 +230,7 @@ export function MeetupQrScanner({
             variant="outline"
             size="sm"
             disabled={controlsDisabled}
-            onClick={() => {
-              console.info(LOG, "Stop button clicked");
-              void stopScanner({ notifyParent: true });
-            }}
+            onClick={() => void stopScanner({ notifyParent: true })}
             className="gap-2"
           >
             <CameraOff className="size-4" aria-hidden />
@@ -323,10 +242,7 @@ export function MeetupQrScanner({
             variant="outline"
             size="sm"
             disabled={controlsDisabled}
-            onClick={() => {
-              console.info(LOG, "Open scanner button clicked");
-              void startScanner();
-            }}
+            onClick={() => void startScanner()}
             className="gap-2"
           >
             <Camera className="size-4" aria-hidden />

@@ -911,13 +911,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                       type="button"
                       variant="outline"
                       disabled={verifyBusy || !ninOk}
-                      onClick={() => {
-                        console.info(
-                          "[MEETUP_QR_DEBUG][session] open scanner",
-                          { peerScannerOpen: true },
-                        );
-                        setPeerScannerOpen(true);
-                      }}
+                      onClick={() => setPeerScannerOpen(true)}
                     >
                       <ScanIcon className="size-4" aria-hidden />
                     </Button>
