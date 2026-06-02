@@ -152,28 +152,34 @@ html.dark body {
   scrollbar-color: var(--color-primary) #27272f;
 }
 
+* {
+  scrollbar-gutter: stable;
+}
+
 *::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 *::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  background: transparent;
   border-radius: 9999px;
+  margin-block: 6px;
 }
 
 html.dark *::-webkit-scrollbar-track {
-  background: #27272f;
+  background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
   background: var(--color-primary);
-  border: 2px solid #f3f4f6;
+  border: 2px solid transparent;
+  background-clip: content-box;
   border-radius: 9999px;
 }
 
 html.dark *::-webkit-scrollbar-thumb {
-  border-color: #27272f;
+  border-color: transparent;
 }
 
 *::-webkit-scrollbar-thumb:hover {
@@ -181,11 +187,11 @@ html.dark *::-webkit-scrollbar-thumb {
 }
 
 *::-webkit-scrollbar-corner {
-  background: #f3f4f6;
+  background: transparent;
 }
 
 html.dark *::-webkit-scrollbar-corner {
-  background: #27272f;
+  background: transparent;
 }
 
 @keyframes authLoaderDot {
@@ -218,21 +224,25 @@ html.dark .custom-scrollbar {
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 2px;
-  height: 2px;
+  width: 6px;
+  height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  background: transparent;
   border-radius: 9999px;
+  margin-block: 4px;
 }
 
 html.dark .custom-scrollbar::-webkit-scrollbar-track {
-  background: #27272f;
+  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--color-primary);
+  border: 1px solid transparent;
+  background-clip: content-box;
+  border-radius: 9999px;
 }
 
 .dark {
