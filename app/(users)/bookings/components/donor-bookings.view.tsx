@@ -4,6 +4,7 @@ import { Button } from "@/components/button/button.component";
 import { BookingsShellSkeleton, BookingsShell } from "./bookings-shell.view";
 import { BookingReportModal } from "./booking-report-modal.component";
 import { useDonorBookings } from "@/hooks/bookings/useDonorBookings.hook";
+import { CalendarDays } from "lucide-react";
 
 export function DonorBookingsView() {
   const {
@@ -20,9 +21,17 @@ export function DonorBookingsView() {
 
   if (!user?.id) {
     return (
-      <p className="text-sm text-text-secondary">
-        Sign in to see your bookings.
-      </p>
+      <div className="rounded-2xl border border-border bg-white p-6 text-center shadow-sm dark:border-white/10 dark:bg-[#1a1a22]">
+        <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
+          <CalendarDays className="size-5" aria-hidden />
+        </div>
+        <h3 className="mt-3 text-base font-semibold text-text-primary">
+          Your donor bookings
+        </h3>
+        <p className="mt-1 text-sm text-text-secondary">
+          Sign in to view and manage your booking requests.
+        </p>
+      </div>
     );
   }
 

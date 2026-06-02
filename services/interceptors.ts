@@ -15,6 +15,7 @@ export async function intercept<T = unknown>(
     const res = await request;
     if (res.status === 401) {
       dispatchLogoutOn401();
+      window.location.reload();
       throw new Error(res.statusText || "Unauthorized");
     }
     return res;

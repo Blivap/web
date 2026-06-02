@@ -10,14 +10,7 @@ import {
 } from "lucide-react";
 import { routes } from "@/config/routes";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Modal } from "@/components/ui/modal/modal.component";
 
 export type BookingRequestSentModalProps = {
   open: boolean;
@@ -55,18 +48,13 @@ export function BookingRequestSentModal({
   const hasSummary = Boolean(scheduledLabel || hospitalName);
 
   return (
-    <Dialog
+    <Modal
       open={open}
-      onOpenChange={(next) => {
-        if (!next) onClose();
-      }}
+      onClose={onClose}
+      closeOnBackdropClick={false}
+      className="max-w-md gap-0 p-0! sm:max-w-md"
     >
-      <DialogContent
-        showCloseButton={false}
-        className="max-w-md gap-0 p-0 sm:max-w-md"
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-      >
+      <div className="w-full">
         <div className="border-b border-primary/10 bg-linear-to-br from-primary/10 via-white to-white px-6 py-6 dark:from-primary/20 dark:via-[#1a1a22] dark:to-[#1a1a22] sm:px-7">
           <div className="flex items-start justify-between gap-4">
             <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_12px_28px_rgba(150,0,24,0.28)]">
@@ -77,15 +65,15 @@ export function BookingRequestSentModal({
               Request sent
             </span>
           </div>
-          <DialogHeader className="mt-5 space-y-2">
-            <DialogTitle className="text-xl sm:text-2xl">
+          <div className="mt-5 space-y-2">
+            <h3 className="text-xl font-semibold text-text-primary sm:text-2xl">
               Appointment request submitted
-            </DialogTitle>
-            <DialogDescription className="text-sm leading-relaxed">
+            </h3>
+            <p className="text-sm leading-relaxed text-text-secondary">
               Your screening visit is pending. We&apos;ll notify you when the
               donor responds.
-            </DialogDescription>
-          </DialogHeader>
+            </p>
+          </div>
         </div>
 
         <div className="space-y-5 px-6 py-5 sm:px-7">
@@ -144,20 +132,26 @@ export function BookingRequestSentModal({
           </div>
         </div>
 
-        <DialogFooter className="border-t border-border bg-[#FAFAFB] px-6 py-4 sm:justify-between dark:border-white/10 dark:bg-white/4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full sm:w-auto"
-            asChild
-          >
-            <Link href={routes.bookings}>View bookings</Link>
-          </Button>
-          <Button type="button" className="w-full sm:w-auto" onClick={onClose}>
-            Done
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <div className="border-t border-border bg-[#FAFAFB] px-6 py-4 dark:border-white/10 dark:bg-white/4">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full sm:w-auto"
+              asChild
+            >
+              <Link href={routes.bookings}>View bookings</Link>
+            </Button>
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              onClick={onClose}
+            >
+              Done
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Modal>
   );
 }
