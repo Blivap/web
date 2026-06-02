@@ -15,26 +15,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   PropsWithChildren,
-  useEffect,
-  useRef,
   useState,
   ReactElement,
 } from "react";
-import gsap from "gsap";
-import { Avatar } from "../components/ui/Avatar/avatar.component";
-import { useLogout } from "@/hooks/auth/useLogout.hook";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 import { NotificationBell } from "../components/feedback/notification/notification.component";
 import { PushNotificationRegistrar } from "../components/feedback/notification/push-registrar.component";
 import { useNotificationNavigationListener } from "@/hooks/notifications/useNotificationNavigationListener.hook";
-import { ChevronDown, Info, LogOut, Menu, Settings } from "lucide-react";
+import { Info, Menu } from "lucide-react";
 import { routes } from "@/config/routes";
-import {
-  nextThemePreference,
-  useThemePreference,
-} from "@/hooks/theme/useThemePreference.hook";
-import { ProfileThemeCycleRow } from "./theme-profile-submenu.component";
+import { useThemePreference } from "@/hooks/theme/useThemePreference.hook";
 import { SelectAvatarModal } from "@/components/select-avatar/select-avatar-modal.component";
+import { ProfileAccountMenu } from "./profile-account-menu.component";
 import { Button } from "@/components/button/button.component";
 import { BlivapLogo } from "@/public/svg";
 import { LayoutBreadcrumbs } from "./layout-breadcrumbs.component";
@@ -53,55 +45,9 @@ interface NavItem {
 export const Layout = (props: PropsWithChildren<unknown>) => {
   useNotificationNavigationListener();
   const [drawer, setDrawer] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const { preference, resolved, setPreference } = useThemePreference();
-  const { handleLogout } = useLogout();
+  const { resolved, setPreference } = useThemePreference();
   const closeDrawer = () => setDrawer(false);
   const { user } = useDashboard();
-  const profileMenuRef = useRef<HTMLDivElement>(null);
-  const profileContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isProfileMenuOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        profileContainerRef.current &&
-        !profileContainerRef.current.contains(e.target as Node)
-      ) {
-        setIsProfileMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isProfileMenuOpen]);
-
-  useEffect(() => {
-    const el = profileMenuRef.current;
-    if (!el) return;
-    if (isProfileMenuOpen) {
-      el.style.visibility = "visible";
-      gsap.to(el, {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        duration: 0.2,
-        ease: "power2.out",
-        overwrite: true,
-      });
-    } else {
-      gsap.to(el, {
-        opacity: 0,
-        scale: 0.96,
-        y: -6,
-        duration: 0.15,
-        ease: "power2.in",
-        overwrite: true,
-        onComplete: () => {
-          if (el) el.style.visibility = "hidden";
-        },
-      });
-    }
-  }, [isProfileMenuOpen]);
 
   return (
     <div className="bg-[#f8f8f8] dark:bg-[#0a0a0a] h-screen grow flex transition-colors duration-200">
@@ -132,104 +78,8 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           },
         )}
       >
-        <div className="relative z-100 flex items-center justify-between gap-4 md:w-full">
-          <div
-            ref={profileContainerRef}
-            className="relative flex items-center gap-3 order-2 md:order-1 w-full"
-          >
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setIsProfileMenuOpen((prev) => !prev)}
-              className="flex h-auto w-full items-center justify-between gap-3 rounded-full border border-transparent px-0 pr-2 hover:border-[#E5E7EB] dark:hover:border-white/15"
-            >
-              <div
-                className="flex items-center gap-2"
-                key={user?.id || "no-user"}
-              >
-                <Avatar
-                  className="sm:size-10! size-9!"
-                  src={user?.profileImage}
-                />
-                <div className="flex flex-col text-left">
-                  <p className="text-[#000000] dark:text-white font-medium text-sm">
-                    {user?.id?.slice(0, 6) ?? "User"}
-                  </p>
-                  <p className="text-xs text-[#6B7280] dark:text-white/55">
-                    Donor
-                  </p>
-                </div>
-              </div>
-              <ChevronDown
-                size={16}
-                className={classNames(
-                  "text-[#374151] dark:text-white/80 transition-transform duration-200",
-                  {
-                    "rotate-180": isProfileMenuOpen,
-                  },
-                )}
-              />
-            </Button>
-            <div
-              className={classNames(
-                "absolute top-full left-0 mt-3 origin-top-right md:left-auto md:right-auto",
-                // When closed the menu is invisible but still has layout; without
-                // this the wrapper sits above NavLinks and eats clicks.
-                isProfileMenuOpen
-                  ? "pointer-events-auto"
-                  : "pointer-events-none",
-              )}
-            >
-              <div
-                ref={profileMenuRef}
-                className={classNames(
-                  "relative w-65 bg-white dark:bg-[#1a1a22] rounded-xl border border-[#DADADA] dark:border-white/10 shadow-[2px_4px_10px_#00000014] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)] p-2 transition-colors duration-200",
-                  isProfileMenuOpen
-                    ? "pointer-events-auto"
-                    : "pointer-events-none",
-                )}
-                style={{
-                  visibility: "hidden",
-                  opacity: 0,
-                  transform: "translateY(-6px) scale(0.96)",
-                }}
-              >
-                <div className="px-3 py-2 border-b border-[#F3F4F6] dark:border-white/10">
-                  <p className="text-sm font-medium text-black dark:text-white">
-                    {user?.id?.slice(0, 6) ?? "User"}
-                  </p>
-                  <p className="text-xs text-[#6B7280] dark:text-white/55">
-                    Donor account
-                  </p>
-                </div>
-                <div className="flex flex-col pt-2">
-                  <ProfileThemeCycleRow
-                    preference={preference}
-                    onCycle={() =>
-                      setPreference(nextThemePreference(preference))
-                    }
-                  />
-                  <Link
-                    href="/settings"
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-[#374151] dark:text-white/85 hover:bg-[#F9FAFB] dark:hover:bg-white/6 hover:text-primary transition-colors"
-                    onClick={() => setIsProfileMenuOpen(false)}
-                  >
-                    <Settings size={16} />
-                    Settings
-                  </Link>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={handleLogout}
-                    className="h-auto w-full justify-start gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-[#374151] dark:text-white/85"
-                  >
-                    <LogOut size={16} />
-                    Logout
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="relative z-100 hidden items-center justify-between gap-4 md:flex md:w-full">
+          <ProfileAccountMenu className="order-2 w-full md:order-1" />
         </div>
 
         <NavLinks onLinkClick={closeDrawer} darkShell={resolved === "dark"} />
@@ -254,7 +104,12 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       {/* Topbar */}
       <div className="fixed top-0 left-0 right-0 md:left-63 z-60 bg-white dark:bg-[#111118] border-b border-[#DADADA] dark:border-white/10 transition-colors duration-200">
         <div className="flex w-full min-w-0 items-center justify-between gap-3 py-3.5 px-5 md:gap-4 md:px-9">
-          <LayoutBreadcrumbs className="min-w-0 flex-1" />
+          <ProfileAccountMenu
+            variant="compact"
+            menuAlign="left"
+            className="shrink-0 md:hidden"
+          />
+          <LayoutBreadcrumbs className="hidden min-w-0 flex-1 md:flex" />
           <div className="flex shrink-0 items-center gap-3">
             <NotificationBell />
             <Button

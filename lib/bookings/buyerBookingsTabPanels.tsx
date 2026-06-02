@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Bell, Send, Star, Undo2, Video, X } from "lucide-react";
+import { Bell, MessageCircle, Send, Star, Undo2, X } from "lucide-react";
 import { bookingNeedsRequesterRating } from "@/lib/ratings/ratedBookingsStorage";
 import type {
   BookingsShellRow,
@@ -100,7 +100,7 @@ export function buildBuyerBookingsTabPanels(
         <BookingIconActions hint={!ninOk ? "Verify NIN for meetup" : undefined}>
           <BookingIconButton
             label="Open meetup"
-            icon={<Video className="size-4" />}
+            icon={<MessageCircle className="size-4" />}
             variant="primary"
             disabled={!ninOk}
             href={

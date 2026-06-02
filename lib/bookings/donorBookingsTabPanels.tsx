@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Check, Flag, Video, X } from "lucide-react";
+import { Check, Flag, MessageCircle, X } from "lucide-react";
 import type {
   BookingsShellRow,
   BookingsTabPanel,
@@ -92,7 +92,7 @@ export function buildDonorBookingsTabPanels(
         <BookingIconActions hint={!ninOk ? "Verify NIN for meetup" : undefined}>
           <BookingIconButton
             label="Open meetup"
-            icon={<Video className="size-4" />}
+            icon={<MessageCircle className="size-4" />}
             variant="primary"
             disabled={!ninOk}
             href={

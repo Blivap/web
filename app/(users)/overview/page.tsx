@@ -2,11 +2,13 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import {
+  Bell,
   ChevronRight,
   Droplet,
   DropletIcon,
   Gem,
   HeartPulse,
+  LayoutDashboard,
   MapPin,
   Pencil,
   Search,
@@ -217,24 +219,30 @@ export default function OverviewPage() {
               omitSearchParamWhenValue="overview"
               className="flex flex-col gap-8"
             >
-              <TabsList className="h-auto w-full justify-start gap-1 rounded-xl border border-[#DADADA] bg-[#F4F4F5] p-1 dark:border-white/10 dark:bg-white/5 sm:inline-flex sm:w-auto">
+              <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-xl border border-[#DADADA] bg-[#F4F4F5] p-1 dark:border-white/10 dark:bg-white/5 sm:inline-flex sm:w-auto sm:grid-cols-none">
                 <TabsTrigger
                   value="overview"
-                  className="rounded-lg border-0 px-4 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm dark:data-[state=active]:bg-[#1a1a22]"
+                  aria-label="Overview"
+                  className="rounded-lg border-0 px-2 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm sm:px-4 dark:data-[state=active]:bg-[#1a1a22]"
                 >
-                  Overview
+                  <LayoutDashboard className="size-5 sm:hidden" aria-hidden />
+                  <span className="hidden sm:inline">Overview</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="payment"
-                  className="rounded-lg border-0 px-4 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm dark:data-[state=active]:bg-[#1a1a22]"
+                  aria-label="Payment"
+                  className="rounded-lg border-0 px-2 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm sm:px-4 dark:data-[state=active]:bg-[#1a1a22]"
                 >
-                  Payment
+                  <Wallet className="size-5 sm:hidden" aria-hidden />
+                  <span className="hidden sm:inline">Payment</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="notifications"
-                  className="rounded-lg border-0 px-4 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm dark:data-[state=active]:bg-[#1a1a22]"
+                  aria-label="Notifications"
+                  className="rounded-lg border-0 px-2 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm sm:px-4 dark:data-[state=active]:bg-[#1a1a22]"
                 >
-                  Notifications
+                  <Bell className="size-5 sm:hidden" aria-hidden />
+                  <span className="hidden sm:inline">Notifications</span>
                 </TabsTrigger>
               </TabsList>
 
