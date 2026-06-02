@@ -1165,7 +1165,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             Load older
           </Button>
         ) : null}
-        <div className="mt-3 flex flex-col items-center gap-2 sm:flex-row">
+        <div className="mt-3 flex items-center gap-2 flex-row">
           <Textarea
             name="chatDraft"
             className="min-h-[44px] max-h-[120px] flex-1 py-2 text-sm"
