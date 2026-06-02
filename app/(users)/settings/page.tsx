@@ -161,7 +161,7 @@ export default function SettingsPage() {
                           placeholder="First name"
                           label={undefined}
                           labelClassName="text-[11px]"
-                          inputClassName="py-1.5 text-xs"
+                          inputClassName="py-1.5 "
                           containerClassName="gap-1"
                         />
                       </div>
@@ -178,7 +178,7 @@ export default function SettingsPage() {
                           placeholder="Last name"
                           label={undefined}
                           labelClassName="text-[11px]"
-                          inputClassName="py-1.5 text-xs"
+                          inputClassName="py-1.5 "
                           containerClassName="gap-1"
                         />
                       </div>
@@ -210,7 +210,7 @@ export default function SettingsPage() {
                         error={errors.dateOfBirth}
                         label="Date of birth"
                         labelClassName="text-[11px] font-medium text-[#111827] dark:text-white/90"
-                        inputClassName="py-1.5 text-xs"
+                        inputClassName="py-1.5"
                         containerClassName="gap-1"
                         placeholder="DD-MM-YYYY"
                         max={new Date().toISOString().slice(0, 10)}
@@ -232,7 +232,7 @@ export default function SettingsPage() {
                         aria-readonly="true"
                         label={undefined}
                         labelClassName="text-[11px]"
-                        inputClassName="py-1.5 text-xs bg-[#F9FAFB] dark:bg-white/5"
+                        inputClassName="py-1.5 bg-[#F9FAFB] dark:bg-white/5"
                         containerClassName="gap-1"
                       />
                       <p className="text-[10px] text-[#6B7280] dark:text-white/50">
