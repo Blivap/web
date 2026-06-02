@@ -66,7 +66,7 @@ export function MeetupBootstrapClient() {
               parsed.qrToken,
             );
           }
-          const codeHint = parsed.myMeetingCode;
+          const codeHint = parsed.myMeetingCode ?? parsed.meetingCode;
           if (codeHint) {
             sessionStorage.setItem(
               meetupCodeHintStorageKey(parsed.sessionId),

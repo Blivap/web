@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useDonationChat } from "@/hooks/chat/useDonationChat.hook";
 import { useMeetupSession } from "@/hooks/meetups/useMeetupSession.hook";
+import { $api } from "@/app/api";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   loadReceivedBookings,
@@ -36,6 +37,7 @@ import {
   meetupChatBookingStashKey,
   meetupCodeHintStorageKey,
 } from "@/lib/meetups/meetupSessionStorageKeys";
+import { parseMeetupEnsureSessionBody } from "@/lib/meetups/parseMeetupResponses";
 import {
   isOwnMeetupCodeForVerify,
   normalizeMeetupSixDigitCode,
@@ -53,19 +55,10 @@ import { MeetupReportModal } from "./meetup-report-modal.component";
 import { isBookingRatedLocally } from "@/lib/ratings/ratedBookingsStorage";
 import { patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/forms/inputs/input.component";
 import { Textarea } from "@/components/ui/textarea";
+import { Modal } from "@/components/ui/modal/modal.component";
 
 const cardClass =
   "rounded-xl border border-border bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#1a1a22]";
@@ -252,11 +245,10 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
   const [codeInput, setCodeInput] = useState("");
   const [peerScannerOpen, setPeerScannerOpen] = useState(false);
-  const [meetingHint] = useState(() => {
+  const [meetingHint, setMeetingHint] = useState<string | null>(() => {
     try {
       const k = meetupCodeHintStorageKey(sessionId);
       const mc = sessionStorage.getItem(k);
-      if (mc) sessionStorage.removeItem(k);
       return mc;
     } catch {
       return null;
@@ -272,7 +264,9 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const [localError, setLocalError] = useState<string | null>(null);
   const [ratingModalOpen, setRatingModalOpen] = useState(false);
   const ratingPromptedForBookingRef = useRef<string | null>(null);
+  const codeHydrateAttemptRef = useRef<string | null>(null);
   const sentBookings = useAppSelector((s) => s.bookings.sent.items);
+  const receivedBookings = useAppSelector((s) => s.bookings.received.items);
   /** Booking Mongo id stashed in bootstrap when opening from a booking row (fallback if GET session omits `bookingId`). */
   const stashedChatBookingId = useMemo(() => {
     try {
@@ -365,25 +359,45 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     el.scrollTop = el.scrollHeight;
   }, [newestChatMessageId]);
 
-  const meetingHintForResolve = sessionLoad === "ok" ? null : meetingHint;
-
   const swapCodes = useMemo(
-    () => resolveMeetupSwapCodes(session, meetingHintForResolve, user?.id),
-    [session, meetingHintForResolve, user?.id],
+    () => resolveMeetupSwapCodes(session, meetingHint, user?.id),
+    [session, meetingHint, user?.id],
   );
 
-  const myMeetupCode = swapCodes.myCode;
+  const bookingMeetingCode = useMemo(() => {
+    const bookingId = session?.bookingId ?? stashedChatBookingId ?? null;
+    if (!bookingId) return null;
+    const sentMatch = sentBookings.find((b) => b.id === bookingId);
+    const receivedMatch = receivedBookings.find((b) => b.id === bookingId);
+    return normalizeMeetupSixDigitCode(
+      sentMatch?.meetingCode ?? receivedMatch?.meetingCode ?? null,
+    );
+  }, [
+    session?.bookingId,
+    stashedChatBookingId,
+    sentBookings,
+    receivedBookings,
+  ]);
+
+  const myMeetupCode = swapCodes.myCode ?? bookingMeetingCode;
 
   const swapCodeQrUrl = useMemo(() => {
     if (!myMeetupCode) return null;
+    if (typeof window === "undefined") return null;
     const bookingId = session?.bookingId ?? stashedChatBookingId;
-    if (!bookingId || typeof window === "undefined") return null;
-    return buildMeetupSwapCodeQrUrl(
-      window.location.origin,
-      bookingId,
-      myMeetupCode,
-    );
-  }, [myMeetupCode, session?.bookingId, stashedChatBookingId]);
+    if (bookingId) {
+      return buildMeetupSwapCodeQrUrl(
+        window.location.origin,
+        bookingId,
+        myMeetupCode,
+      );
+    }
+    // Fallback: still render QR with current meetup session path when booking id
+    // is absent from payload/storage.
+    const sessionPath = `/bookings/meetup/${encodeURIComponent(sessionId)}`;
+    const params = new URLSearchParams({ verifyMeetupCode: myMeetupCode });
+    return `${window.location.origin}${sessionPath}?${params.toString()}`;
+  }, [myMeetupCode, session?.bookingId, stashedChatBookingId, sessionId]);
 
   const onVerifyCode = useCallback(async () => {
     setLocalError(null);
@@ -623,6 +637,43 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     session.codeVerificationEnabled !== false &&
     !readOnly &&
     !gateSatisfied;
+
+  useEffect(() => {
+    if (sessionLoad !== "ok" || !session) return;
+    if (swapCodes.myCode) return;
+    const bookingId = session.bookingId ?? stashedChatBookingId ?? null;
+    if (!bookingId) return;
+    if (codeHydrateAttemptRef.current === bookingId) return;
+    codeHydrateAttemptRef.current = bookingId;
+
+    void (async () => {
+      try {
+        const { status, data } = await $api.meetups.ensureSession(bookingId);
+        if (status < 200 || status >= 300) return;
+        const parsed = parseMeetupEnsureSessionBody(data);
+        const hydratedCode = normalizeMeetupSixDigitCode(
+          parsed?.myMeetingCode ?? parsed?.meetingCode ?? null,
+        );
+        if (!hydratedCode) return;
+        setMeetingHint(hydratedCode);
+        try {
+          sessionStorage.setItem(meetupCodeHintStorageKey(sessionId), hydratedCode);
+        } catch {
+          /* storage blocked */
+        }
+      } catch {
+        /* best-effort code hydration */
+      }
+    })();
+  }, [
+    sessionLoad,
+    session,
+    swapCodes.myCode,
+    stashedChatBookingId,
+    sentBookings,
+    receivedBookings,
+    sessionId,
+  ]);
 
   useEffect(() => {
     if (sessionLoad !== "ok" || !session || readOnly || gateSatisfied) return;
@@ -1161,19 +1212,21 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         </Button>
       </div>
 
-      <AlertDialog
+      <Modal
         open={terminateAlertOpen}
-        onOpenChange={onTerminateDialogOpenChange}
+        onClose={() => onTerminateDialogOpenChange(false)}
+        className="w-full max-w-lg items-stretch px-0 py-0 pr-0 sm:pr-0"
       >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Terminate this meetup?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This ends the meetup for both parties. Verification and donation
-              chat will stop. This cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div>
+        <div className="w-full p-6">
+          <h3 className="text-lg font-semibold text-text-primary">
+            Terminate this meetup?
+          </h3>
+          <p className="mt-1 text-sm text-text-secondary">
+            This ends the meetup for both parties. Verification and donation
+            chat will stop. This cannot be undone.
+          </p>
+
+          <div className="mt-4">
             <label
               htmlFor="terminate-reason"
               className="mb-1.5 block text-sm font-medium text-text-primary"
@@ -1199,23 +1252,28 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               </p>
             ) : null}
           </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={terminateBusy}>
+
+          <div className="mt-6 flex flex-wrap justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onTerminateDialogOpenChange(false)}
+              disabled={terminateBusy}
+            >
               Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/25 dark:bg-destructive/90"
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
               disabled={terminateBusy || !terminateReason.trim()}
-              onClick={(e) => {
-                e.preventDefault();
-                void onConfirmTerminateMeet();
-              }}
+              loading={terminateBusy}
+              onClick={() => void onConfirmTerminateMeet()}
             >
               {terminateBusy ? "Terminating…" : "Terminate meet"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <MeetupReportModal
         open={reportOpen}

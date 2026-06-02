@@ -70,26 +70,47 @@ export function MeetupQrScanner({
       await stopScanner();
       const instance = new Html5Qrcode(regionId);
       scannerRef.current = instance;
+      const scanConfig = {
+        fps: 10,
+        qrbox: { width: 240, height: 240 },
+        aspectRatio: 1,
+      };
 
-      await instance.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 240, height: 240 },
-          aspectRatio: 1,
-        },
-        (decodedText) => {
-          if (handledRef.current) return;
-          handledRef.current = true;
-          void (async () => {
-            await stopScanner();
-            await onScan(decodedText);
-          })();
-        },
-        () => {
-          /* no match this frame */
-        },
-      );
+      // Camera constraints are not uniformly supported across devices/browsers.
+      // Try environment, then user-facing, then broad camera access.
+      const cameraCandidates: Array<
+        string | { facingMode: "environment" | "user" | { ideal: "environment" } }
+      > = [{ facingMode: "environment" }, { facingMode: "user" }, { facingMode: { ideal: "environment" } }];
+
+      let startError: unknown = null;
+      let started = false;
+      for (const camera of cameraCandidates) {
+        try {
+          await instance.start(
+            camera,
+            scanConfig,
+            (decodedText) => {
+              if (handledRef.current) return;
+              handledRef.current = true;
+              void (async () => {
+                await stopScanner();
+                await onScan(decodedText);
+              })();
+            },
+            () => {
+              /* no match this frame */
+            },
+          );
+          started = true;
+          break;
+        } catch (candidateError) {
+          startError = candidateError;
+        }
+      }
+
+      if (!started) {
+        throw startError ?? new Error("Could not open scanner camera.");
+      }
       setActive(true);
     } catch (e) {
       await stopScanner();
