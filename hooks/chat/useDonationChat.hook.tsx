@@ -492,7 +492,7 @@ export function useDonationChat({
     (text: string) => {
       const id = donationId;
       const s = socketRef.current;
-      if (!id || !s?.connected || roomClosed) {
+      if (!id || !s?.connected) {
         return { ok: false as const, message: "Chat is not available." };
       }
       const trimmed = text.trim();
@@ -526,14 +526,14 @@ export function useDonationChat({
       window.setTimeout(() => setSendBusy(false), 1500);
       return { ok: true as const };
     },
-    [donationId, roomClosed, dispatch],
+    [donationId, dispatch],
   );
 
   const notifyTyping = useCallback(
     (typing: boolean) => {
       const id = donationId;
       const s = socketRef.current;
-      if (!id || !s?.connected || roomClosed) return;
+      if (!id || !s?.connected) return;
       const t = accessTokenRef.current;
       s.emit("chat:typing", {
         donationId: id,
@@ -541,18 +541,17 @@ export function useDonationChat({
         ...(t ? { token: t, accessToken: t } : {}),
       });
     },
-    [donationId, roomClosed],
+    [donationId],
   );
 
   const onComposerTyping = useCallback(() => {
-    if (roomClosed) return;
     notifyTyping(true);
     if (typingEmitTimerRef.current) clearTimeout(typingEmitTimerRef.current);
     typingEmitTimerRef.current = setTimeout(() => {
       notifyTyping(false);
       typingEmitTimerRef.current = null;
     }, 1200);
-  }, [notifyTyping, roomClosed]);
+  }, [notifyTyping]);
 
   const markArrived = useCallback(async () => {
     if (!donationId) {

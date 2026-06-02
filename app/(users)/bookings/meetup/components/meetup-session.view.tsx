@@ -328,8 +328,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     return session.me.role?.toLowerCase() === "donor";
   }, [user?.id, session]);
 
-  const canPromptRequesterRating =
-    isRequester === true && !isDonorViewer;
+  const canPromptRequesterRating = isRequester === true && !isDonorViewer;
 
   const sortedChatMessages = useMemo(() => {
     return [...donationChat.messages].sort((a, b) => {
@@ -444,6 +443,10 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     [swapCodes, verifyCode, showSnackbar],
   );
 
+  const onPeerScannerStop = useCallback(() => {
+    setPeerScannerOpen(false);
+  }, []);
+
   const ratingDonorLabel = useMemo(() => {
     const bid = donationChatBookingId;
     if (!bid) return undefined;
@@ -468,6 +471,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     // Chat socket may lag; completed meetup implies donation chat is done.
     return session?.status?.toLowerCase() === "completed";
   }, [meetupDonationComplete, donationChat.roomClosed, session?.status]);
+  const chatLocked = readOnly || meetupDonationComplete;
 
   const shouldPromptForRating = useCallback(
     (bookingId: string | undefined) => {
@@ -657,7 +661,10 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         if (!hydratedCode) return;
         setMeetingHint(hydratedCode);
         try {
-          sessionStorage.setItem(meetupCodeHintStorageKey(sessionId), hydratedCode);
+          sessionStorage.setItem(
+            meetupCodeHintStorageKey(sessionId),
+            hydratedCode,
+          );
         } catch {
           /* storage blocked */
         }
@@ -717,8 +724,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   ]);
 
   const chatComposerDisabled =
-    readOnly ||
-    donationChat.roomClosed ||
+    chatLocked ||
     !ninOk ||
     !donationChat.socketConnected ||
     donationChat.sendBusy;
@@ -732,7 +738,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       return "Chat needs your booking id (same value as in /chat/:donationId). Refresh or open meetup again from the booking row if this stays empty.";
     }
     if (!token) return "Sign in again to use donation chat.";
-    if (donationChat.roomClosed) {
+    if (chatLocked) {
       return (
         donationChat.roomCloseReason?.trim() ||
         "This donation chat is closed — you cannot send new messages."
@@ -748,7 +754,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     session?.chatEnabled,
     donationChatBookingId,
     token,
-    donationChat.roomClosed,
+    chatLocked,
     donationChat.roomCloseReason,
     donationChat.socketConnected,
     donationChatEnabled,
@@ -757,7 +763,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
   const donationChatStatusBadge = useMemo(() => {
     if (sessionLoad !== "ok" || !donationChatBookingId || !token) return null;
-    if (donationChat.roomClosed) {
+    if (chatLocked) {
       return {
         label: "Closed",
         className:
@@ -790,7 +796,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     sessionLoad,
     donationChatBookingId,
     token,
-    donationChat.roomClosed,
+    chatLocked,
     donationChat.historyError,
     donationChat.socketConnected,
     donationChatEnabled,
@@ -893,35 +899,40 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             Verify at the hospital
           </h2>
           <p className="mt-1 text-xs text-text-secondary">
-            Each of you has a unique six-digit code. Share yours (or your QR);
-            enter or scan the other person&apos;s code. Both must verify before
-            donation confirmation unlocks.
+            Both must verify before donation confirmation unlocks.
           </p>
 
           {myMeetupCode ? (
-            <div className="mt-4 rounded-lg border border-border bg-[#FAFAFB] p-3 dark:border-white/10 dark:bg-black/20">
+            <div className="mt-4 rounded-lg border border-border bg-[#FAFAFB] p-3 dark:border-white/10 dark:bg-black/20 sm:hidden">
               {swapCodeQrUrl ? (
-                <div className="mt-4  pt-4 ">
+                <div className="mt-4 pt-4 ">
                   {!peerScannerOpen ? (
                     <Button
                       type="button"
                       variant="outline"
                       disabled={verifyBusy || !ninOk}
-                      onClick={() => setPeerScannerOpen(true)}
+                      onClick={() => {
+                        console.info(
+                          "[MEETUP_QR_DEBUG][session] open scanner",
+                          { peerScannerOpen: true },
+                        );
+                        setPeerScannerOpen(true);
+                      }}
                     >
                       <ScanIcon className="size-4" aria-hidden />
                     </Button>
                   ) : null}
-                  <div className="mt-3 flex flex-col gap-6 justify-center rounded-lg bg-white p-4 dark:bg-white w-fit">
+                  <div className="mt-3 flex flex-col gap-6 justify-center items-center rounded-lg bg-white p-4 dark:bg-white w-full">
                     <p className="text-xs font-medium text-text-primary">
                       {peerScannerOpen ? "Scan their QR" : "Your QR"}
                     </p>
                     {peerScannerOpen ? (
                       <MeetupQrScanner
-                        className="mt-3"
+                        className="mt-3 w-full"
                         autoStart
                         disabled={verifyBusy || !ninOk}
                         busy={verifyBusy}
+                        onStop={onPeerScannerStop}
                         onScan={onScannedPeerCode}
                       />
                     ) : (
@@ -1051,8 +1062,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
           </div>
           {ninOk &&
           donationChatBookingId &&
-          !readOnly &&
-          !donationChat.roomClosed &&
+          !chatLocked &&
           !donationChat.arrivedRecorded ? (
             <Button
               type="button"
@@ -1096,9 +1106,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             <p className="text-xs text-text-secondary">Loading messages…</p>
           ) : sortedChatMessages.length === 0 ? (
             <p className="text-xs text-text-secondary">
-              {donationChat.roomClosed
-                ? "No messages to show."
-                : "No messages yet."}
+              {chatLocked ? "No messages to show." : "No messages yet."}
             </p>
           ) : (
             sortedChatMessages.map((m) => {
@@ -1163,7 +1171,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             className="min-h-[44px] max-h-[120px] flex-1 py-2 text-sm"
             placeholder={
               chatComposerDisabled
-                ? donationChat.roomClosed
+                ? chatLocked
                   ? "This chat is closed."
                   : !donationChat.socketConnected
                     ? "Waiting for chat connection…"
