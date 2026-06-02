@@ -234,9 +234,7 @@ export function MeetupQrScanner({
       for (let i = 0; i < cameraCandidates.length; i++) {
         const camera = cameraCandidates[i];
         const label =
-          typeof camera === "string"
-            ? camera
-            : JSON.stringify(camera);
+          typeof camera === "string" ? camera : JSON.stringify(camera);
         console.info(LOG, "trying camera", { index: i, label });
         try {
           await instance.start(
@@ -269,7 +267,8 @@ export function MeetupQrScanner({
             index: i,
             label,
             err: errMsg,
-            name: candidateError instanceof Error ? candidateError.name : undefined,
+            name:
+              candidateError instanceof Error ? candidateError.name : undefined,
           });
           startError = candidateError;
         }
@@ -277,9 +276,7 @@ export function MeetupQrScanner({
 
       if (!started) {
         const errMsg =
-          startError instanceof Error
-            ? startError.message
-            : String(startError);
+          startError instanceof Error ? startError.message : String(startError);
         console.error(LOG, "all camera candidates failed", { err: errMsg });
         throw startError ?? new Error("Could not open scanner camera.");
       }
@@ -343,7 +340,7 @@ export function MeetupQrScanner({
         id={regionId}
         className={cn(
           "w-full overflow-hidden rounded-lg border border-border bg-black/90 dark:border-white/10",
-          showRegion ? "min-h-[260px] min-w-[260px]" : "hidden",
+          showRegion ? "min-h-[200px] min-w-[200px]" : "hidden",
         )}
         aria-hidden={!showRegion}
       />
