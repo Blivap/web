@@ -13,11 +13,7 @@ import {
 import classNames from "classnames";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  PropsWithChildren,
-  useState,
-  ReactElement,
-} from "react";
+import { PropsWithChildren, useState, ReactElement } from "react";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 import { NotificationBell } from "../components/feedback/notification/notification.component";
 import { PushNotificationRegistrar } from "../components/feedback/notification/push-registrar.component";
@@ -69,7 +65,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       {/* Sidebar */}
       <div
         className={classNames(
-          "flex flex-col gap-10 w-full max-w-57.5 md:max-w-63 bg-white dark:bg-[#111118] border-r border-[#DADADA] dark:border-white/10 fixed left-0 h-full pt-4 px-4 md:pl-8 transition-transform duration-200 ease-out z-50",
+          "flex flex-col gap-10 w-full max-w-57.5 md:max-w-63 bg-white dark:bg-[#111118] border-r border-[#DADADA] dark:border-white/10 fixed left-0 h-full pt-24 md:pt-4 px-4 md:pl-8 transition-transform duration-200 ease-out z-50",
           {
             // On mobile: completely hidden when closed (-translate-x-full), visible when open (translate-x-0)
             // On desktop: always visible (md:translate-x-0 overrides)
@@ -113,12 +109,12 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           <div className="flex shrink-0 items-center gap-3">
             <NotificationBell />
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setDrawer((prev) => !prev)}
-              className="h-fit rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-1 text-text-primary transition-colors hover:bg-[#F3F4F6] md:hidden dark:border-white/10 dark:bg-[#1A1A22] dark:text-white dark:hover:bg-white/8"
               aria-label="Toggle menu"
+              className=" "
             >
-              <Menu size={24} className="size-6" />
+              <Menu size={16} className="size-4" />
             </Button>
           </div>
         </div>
