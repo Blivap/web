@@ -348,7 +348,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               aria-expanded={open}
               aria-controls={listboxId}
               className={classNames(
-                "w-full min-w-0 bg-transparent py-2.5 text-left text-sm font-medium text-[#100F14] outline-none dark:text-white",
+                "w-full min-w-0 bg-transparent py-2.5 text-left text-base font-medium text-[#100F14] outline-none dark:text-white",
                 !displayText && "text-[#9794AA] dark:text-slate-500",
                 inputClassName,
                 className,
