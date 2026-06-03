@@ -245,46 +245,6 @@ export default function OverviewPage() {
 
               <TabsContent value="overview" className="mt-0">
                 <div className="flex min-w-0 flex-col gap-8 lg:gap-10">
-                  {/* Become a donor — compact cards */}
-                  <section className="overflow-hidden rounded-2xl border border-[#DADADA] bg-white dark:border-white/10 dark:bg-[#1a1a22]">
-                    <div className="flex flex-col gap-1 border-b border-border px-5 py-5 sm:px-6 dark:border-white/10">
-                      <h2 className="text-lg font-semibold text-text-primary">
-                        Become a donor
-                      </h2>
-                      <p className="text-sm text-text-secondary">
-                        Three supported registration journeys—tap a card to
-                        continue.
-                      </p>
-                    </div>
-                    <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
-                      {BECOME_DONOR_CARDS.map((card) => {
-                        const Icon = card.icon;
-                        return (
-                          <Link
-                            key={card.title}
-                            href={card.href}
-                            className="group flex flex-col gap-4 rounded-xl border border-transparent bg-[#F7F7F8] p-4 transition-all hover:border-primary/20 hover:bg-white hover:shadow-md dark:bg-white/5 dark:hover:border-primary/25 dark:hover:bg-white/8"
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#F9E8EE] text-primary transition group-hover:scale-[1.02] dark:bg-primary/20">
-                                <Icon className="size-5" aria-hidden />
-                              </div>
-                              <ChevronRight className="size-5 shrink-0 text-text-tertiary transition group-hover:translate-x-0.5 group-hover:text-primary" />
-                            </div>
-                            <div className="flex flex-col gap-1.5">
-                              <p className="font-semibold leading-snug text-text-primary">
-                                {card.title}
-                              </p>
-                              <p className="text-sm leading-relaxed text-text-secondary">
-                                {card.subtitle}
-                              </p>
-                            </div>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </section>
-
                   {/* Pathways directory */}
                   <section
                     id="donation-pathways"
@@ -292,15 +252,10 @@ export default function OverviewPage() {
                   >
                     <div className="shrink-0 space-y-4 border-b border-border px-5 py-5 sm:px-6 dark:border-white/10">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                          <h2 className="text-lg font-semibold text-text-primary">
-                            Donation pathways
-                          </h2>
-                          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-text-secondary">
-                            Search or filter, then select a type to open its
-                            step-by-step flow.
-                          </p>
-                        </div>
+                        <h2 className="text-lg font-semibold text-text-primary">
+                          Donation pathways
+                        </h2>
+
                         <p className="text-xs font-medium text-text-tertiary">
                           {filteredPathways.length} shown
                         </p>
@@ -321,7 +276,7 @@ export default function OverviewPage() {
                             />
                           }
                           containerClassName="min-w-0 flex-1"
-                          inputClassName="rounded-xl border-0 bg-[#F7F7F8] py-2.5 text-sm focus:ring-2 focus:ring-primary/15 dark:bg-white/5"
+                          inputClassName="rounded-xl border-0 bg-[#F7F7F8] py-2.5 dark:bg-white/5"
                         />
                         <div
                           className="flex flex-wrap gap-2"

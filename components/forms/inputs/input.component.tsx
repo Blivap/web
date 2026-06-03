@@ -61,7 +61,7 @@ export const Input = (props: InputProps) => {
           {icon && <div className="pl-4">{icon}</div>}
           <input
             className={classNames(
-              "w-full bg-transparent py-2.5 px-4 text-base font-medium text-[#100F14] outline-none placeholder:text-xs placeholder:text-[#9794AA] dark:text-white dark:placeholder:text-slate-500",
+              "w-full bg-transparent py-2.5 px-4 text-base font-medium text-[#100F14] outline-none placeholder:text-base placeholder:text-[#9794AA] dark:text-white dark:placeholder:text-slate-500",
               inputClassName,
             )}
             type={
