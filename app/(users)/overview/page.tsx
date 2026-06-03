@@ -42,6 +42,7 @@ import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component
 import { Button } from "@/components/button/button.component";
 import { Input } from "@/components/forms/inputs/input.component";
 import { OverviewNotificationsTab } from "./components/overview-notifications-tab.component";
+import { Skeleton } from "@/components/ui/skeleton.component";
 
 const BECOME_DONOR_CARDS = [
   {
@@ -190,7 +191,7 @@ export default function OverviewPage() {
                 <div className="flex min-w-0 flex-col gap-0.5 sm:border-l sm:border-border sm:pl-6 dark:border-white/10">
                   <span className="text-text-secondary">Cooldown</span>
                   {myCooldownEndsAt === undefined ? (
-                    <span className="text-xs text-text-tertiary">Loading…</span>
+                    <Skeleton className="w-40 h-6 rounded-full" />
                   ) : (
                     <DonorCooldownDisplay
                       cooldownEndsAt={myCooldownEndsAt}

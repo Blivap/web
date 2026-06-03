@@ -4,13 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
-import {
-  ArrowLeft,
-  Droplet,
-  Info,
-  MapPin,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft, Droplet, Info, MapPin, ShieldCheck } from "lucide-react";
 import { Layout } from "@/layout/layout.component";
 import { $api } from "@/app/api";
 import {
@@ -114,7 +108,7 @@ export default function DonorDetailsPage() {
   const ratingsSummary = donor?.ratings;
   const ratingLabel =
     ratingsSummary && ratingsSummary.ratingCount > 0
-      ? `${ratingsSummary.averageRating.toFixed(1)} / 5`
+      ? `${ratingsSummary.averageRating.toFixed(1)}`
       : "No ratings";
   const ratingHint =
     ratingsSummary && ratingsSummary.ratingCount > 0
@@ -221,7 +215,7 @@ export default function DonorDetailsPage() {
                     {donor.reliabilityScore != null ? (
                       <ProfileStat
                         label="Reliability"
-                        value={`${donor.reliabilityScore}/100`}
+                        value={`${donor.reliabilityScore}`}
                       />
                     ) : (
                       <ProfileStat label="Blood packs" value={donor.packs} />
@@ -323,7 +317,7 @@ export default function DonorDetailsPage() {
                   }
                   className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold"
                 >
-                  Continue 
+                  Continue
                 </Button>
               )}
             </div>
