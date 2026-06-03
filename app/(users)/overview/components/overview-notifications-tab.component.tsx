@@ -18,6 +18,7 @@ export function OverviewNotificationsTab() {
     hasMore,
     isLoading,
     isLoadingMore,
+    isMarkingAllAsRead,
     error,
     loadMore,
     markAsRead,
@@ -41,6 +42,8 @@ export function OverviewNotificationsTab() {
             variant="outline"
             size="sm"
             className="w-fit gap-1.5"
+            disabled={isMarkingAllAsRead}
+            loading={isMarkingAllAsRead}
             onClick={() => void markAllAsRead()}
           >
             <CheckCheck className="size-4" aria-hidden />

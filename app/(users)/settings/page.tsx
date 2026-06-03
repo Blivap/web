@@ -125,7 +125,7 @@ export default function SettingsPage() {
                         <Button
                           type="button"
                           size="icon-sm"
-                          className="absolute right-3 bottom-3 translate-x-1/4 translate-y-1/4 size-7 rounded-full bg-black text-white border-2 border-white shadow-md hover:bg-black/90"
+                          className="absolute right-3 bottom-3 translate-x-1/4 translate-y-1/4 size-7 p-2 rounded-full bg-black text-white border-2 border-white shadow-md hover:bg-black/90"
                           aria-label="Change profile picture"
                           onClick={() => {
                             dispatch(
@@ -138,7 +138,7 @@ export default function SettingsPage() {
                             openAvatarModal();
                           }}
                         >
-                          <FaPencilAlt size={12} />
+                          <FaPencilAlt size={12} className="size-3 " />
                         </Button>
                       </div>
                     </div>

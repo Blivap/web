@@ -63,6 +63,7 @@ export function useNotifications({
   const [hasMore, setHasMore] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadFirstPage = useCallback(async (opts?: { silent?: boolean }) => {
@@ -190,34 +191,35 @@ export function useNotifications({
   }, []);
 
   const markAllAsRead = useCallback(async () => {
+    const hasUnread = rows.some((n) => n.readAt == null);
+    if (!hasUnread || isMarkingAllAsRead) return;
+
     setError(null);
-    let unreadIds: string[] = [];
+    setIsMarkingAllAsRead(true);
+    let previous: InAppNotification[] = [];
 
     setRows((r) => {
-      unreadIds = r.filter((n) => n.readAt == null).map((n) => n.id);
-      if (unreadIds.length === 0) return r;
+      previous = r;
       const now = new Date().toISOString();
       return r.map((n) => (n.readAt == null ? { ...n, readAt: now } : n));
     });
 
-    if (unreadIds.length === 0) return;
-
     try {
-      const results = await Promise.all(
-        unreadIds.map((id) => $api.notifications.markRead(id)),
-      );
-      const failed = results.some(
-        (res) => res.status < 200 || res.status >= 300,
-      );
-      if (failed) {
-        await loadFirstPage();
-        setError("Some notifications could not be marked as read.");
+      const { status, error: apiError } =
+        await $api.notifications.markAllRead();
+      if (status < 200 || status >= 300) {
+        setRows(previous);
+        setError(apiError ?? "Could not mark all notifications as read.");
+        return;
       }
+      await loadFirstPage({ silent: true });
     } catch {
-      await loadFirstPage();
+      setRows(previous);
       setError("Could not mark all notifications as read.");
+    } finally {
+      setIsMarkingAllAsRead(false);
     }
-  }, [loadFirstPage]);
+  }, [rows, isMarkingAllAsRead, loadFirstPage]);
 
   const items = rows.map(toViewItem);
   const unreadCount = rows.filter((n) => n.readAt == null).length;
@@ -229,6 +231,7 @@ export function useNotifications({
     hasMore,
     isLoading,
     isLoadingMore,
+    isMarkingAllAsRead,
     error,
     refetch,
     loadMore,

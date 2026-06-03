@@ -24,6 +24,7 @@ export const NotificationBell = () => {
     hasMore,
     isLoading,
     isLoadingMore,
+    isMarkingAllAsRead,
     error,
     refetch,
     loadMore,
@@ -109,6 +110,8 @@ export const NotificationBell = () => {
               variant="link"
               size="xs"
               className="h-auto gap-1 p-0 text-xs"
+              disabled={isMarkingAllAsRead}
+              loading={isMarkingAllAsRead}
               onClick={(e) => {
                 e.stopPropagation();
                 void markAllAsRead();

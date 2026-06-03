@@ -98,6 +98,7 @@ export const endpoints = {
   notifications: {
     list: "/notifications",
     read: (id: string) => `/notifications/${encodeURIComponent(id)}/read`,
+    markAllRead: "/notifications/mark-all-read",
     pushSubscriptions: {
       fcm: "/notifications/push-subscriptions/fcm",
       web: "/notifications/push-subscriptions/web",
