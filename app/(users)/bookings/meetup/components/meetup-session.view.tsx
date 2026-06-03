@@ -1023,7 +1023,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               loading={confirmBusy}
               onClick={() => void onConfirmDonation()}
             >
-              I confirm the donation
+              Confirm donation
             </Button>
           ) : null}
         </section>
@@ -1162,7 +1162,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         <div className="mt-3 flex items-center gap-2 flex-row">
           <Textarea
             name="chatDraft"
-            className="min-h-[44px] max-h-[120px] flex-1 py-2 text-sm"
+            className="min-h-[44px] max-h-[120px] flex-1 py-2"
             placeholder={
               chatComposerDisabled
                 ? chatLocked
