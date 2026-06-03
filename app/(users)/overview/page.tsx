@@ -5,15 +5,12 @@ import {
   Bell,
   ChevronRight,
   Droplet,
-  DropletIcon,
   Gem,
   HeartPulse,
   LayoutDashboard,
-  MapPin,
   Pencil,
   Search,
   Sparkles,
-  Star,
   Users,
   Wallet,
 } from "lucide-react";
@@ -30,7 +27,7 @@ import {
   donationPathwayOverviewHref,
   withDonationTypeQuery,
 } from "@/lib/donations/donation-pathway-questionnaire-type";
-import { donorDetailPath, routes } from "@/config/routes";
+import { routes } from "@/config/routes";
 import { $api } from "@/app/api";
 import {
   parseDonorRecord,
@@ -38,8 +35,8 @@ import {
 } from "@/lib/donors/parseDonorsListResponse";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import { DonorCooldownDisplay } from "../donors/components/donor-cooldown-display.component";
-import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
 import type { Donor } from "../donors/donors.data";
+import { OverviewActiveDonorCard } from "./components/overview-active-donor-card.component";
 import { SCREENING_DONATION_TYPE_OPTIONS } from "@/lib/donors/screeningDonationTypes";
 import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component";
 import { Button } from "@/components/button/button.component";
@@ -165,8 +162,8 @@ export default function OverviewPage() {
     <Layout>
       <div className="flex flex-col gap-10 md:gap-14">
         {/* Header: Welcome, account info, avatar */}
-        <div className="mt-4 flex flex-col gap-6 rounded-2xl border border-[#DADADA] bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)] sm:flex-row sm:items-center sm:justify-between sm:p-7 dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
-          <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+        <div className="mt-4 flex min-w-0 flex-col gap-6 rounded-2xl border border-[#DADADA] bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)] sm:p-6 lg:flex-row lg:items-center lg:justify-between lg:p-7 dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+          <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:gap-5 lg:gap-6">
             <Avatar
               className="size-16 shrink-0 ring-2 ring-primary/15 ring-offset-2 ring-offset-white dark:ring-offset-[#1a1a22] sm:size-20!"
               src={user?.profileImage}
@@ -185,12 +182,12 @@ export default function OverviewPage() {
                   <Pencil className="size-4" aria-hidden />
                 </Button>
               </div>
-              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+              <div className="flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2 lg:flex-nowrap">
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <span className="text-text-secondary">Email</span>
                   <CopyableTextLabel value={user?.email ?? ""} />
                 </div>
-                <div className="flex min-w-0 flex-col gap-0.5 border-l border-border pl-6 dark:border-white/10">
+                <div className="flex min-w-0 flex-col gap-0.5 sm:border-l sm:border-border sm:pl-6 dark:border-white/10">
                   <span className="text-text-secondary">Cooldown</span>
                   {myCooldownEndsAt === undefined ? (
                     <span className="text-xs text-text-tertiary">Loading…</span>
@@ -219,36 +216,35 @@ export default function OverviewPage() {
               omitSearchParamWhenValue="overview"
               className="flex flex-col gap-8"
             >
-              <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-xl border border-[#DADADA] bg-[#F4F4F5] p-1 dark:border-white/10 dark:bg-white/5 sm:inline-flex sm:w-auto sm:grid-cols-none">
+              <TabsList className="grid h-auto w-full min-w-0 grid-cols-3 gap-1 rounded-xl border border-[#DADADA] bg-[#F4F4F5] p-1 dark:border-white/10 dark:bg-white/5 md:inline-flex md:w-auto md:grid-cols-none">
                 <TabsTrigger
                   value="overview"
                   aria-label="Overview"
-                  className="rounded-lg border-0 px-2 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm sm:px-4 dark:data-[state=active]:bg-[#1a1a22]"
+                  className="rounded-lg border-0 px-2 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm md:px-4 dark:data-[state=active]:bg-[#1a1a22]"
                 >
-                  <LayoutDashboard className="size-5 sm:hidden" aria-hidden />
-                  <span className="hidden sm:inline">Overview</span>
+                  <LayoutDashboard className="size-5 md:hidden" aria-hidden />
+                  <span className="hidden md:inline">Overview</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="payment"
                   aria-label="Payment"
-                  className="rounded-lg border-0 px-2 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm sm:px-4 dark:data-[state=active]:bg-[#1a1a22]"
+                  className="rounded-lg border-0 px-2 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm md:px-4 dark:data-[state=active]:bg-[#1a1a22]"
                 >
-                  <Wallet className="size-5 sm:hidden" aria-hidden />
-                  <span className="hidden sm:inline">Payment</span>
+                  <Wallet className="size-5 md:hidden" aria-hidden />
+                  <span className="hidden md:inline">Payment</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="notifications"
                   aria-label="Notifications"
-                  className="rounded-lg border-0 px-2 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm sm:px-4 dark:data-[state=active]:bg-[#1a1a22]"
+                  className="rounded-lg border-0 px-2 py-2.5 text-sm font-medium shadow-none data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm md:px-4 dark:data-[state=active]:bg-[#1a1a22]"
                 >
-                  <Bell className="size-5 sm:hidden" aria-hidden />
-                  <span className="hidden sm:inline">Notifications</span>
+                  <Bell className="size-5 md:hidden" aria-hidden />
+                  <span className="hidden md:inline">Notifications</span>
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="mt-0">
-                <div className="flex flex-col gap-8 lg:gap-10">                
-
+                <div className="flex min-w-0 flex-col gap-8 lg:gap-10">
                   {/* Become a donor — compact cards */}
                   <section className="overflow-hidden rounded-2xl border border-[#DADADA] bg-white dark:border-white/10 dark:bg-[#1a1a22]">
                     <div className="flex flex-col gap-1 border-b border-border px-5 py-5 sm:px-6 dark:border-white/10">
@@ -260,7 +256,7 @@ export default function OverviewPage() {
                         continue.
                       </p>
                     </div>
-                    <div className="grid gap-3 p-4 sm:grid-cols-3 sm:p-5">
+                    <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
                       {BECOME_DONOR_CARDS.map((card) => {
                         const Icon = card.icon;
                         return (
@@ -292,7 +288,7 @@ export default function OverviewPage() {
                   {/* Pathways directory */}
                   <section
                     id="donation-pathways"
-                    className="flex max-h-[min(78vh,600px)] scroll-mt-24 flex-col overflow-hidden rounded-2xl border border-[#DADADA] bg-white dark:border-white/10 dark:bg-[#1a1a22]"
+                    className="flex max-h-none scroll-mt-24 flex-col overflow-hidden rounded-2xl border border-[#DADADA] bg-white md:max-h-[min(65vh,520px)] lg:max-h-[min(78vh,600px)] dark:border-white/10 dark:bg-[#1a1a22]"
                   >
                     <div className="shrink-0 space-y-4 border-b border-border px-5 py-5 sm:px-6 dark:border-white/10">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -309,7 +305,7 @@ export default function OverviewPage() {
                           {filteredPathways.length} shown
                         </p>
                       </div>
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-3 lg:gap-4">
                         <Input
                           name="pathwaySearch"
                           type="search"
@@ -366,7 +362,7 @@ export default function OverviewPage() {
                           filter.
                         </p>
                       ) : (
-                        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                        <ul className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
                           {filteredPathways.map((entry) => {
                             const registrationEnabled =
                               isDonorRegistrationEnabled(entry);
@@ -445,142 +441,39 @@ export default function OverviewPage() {
                         href={routes.donors}
                         className="mt-2 text-sm font-medium text-primary hover:underline sm:mt-0"
                       >
-                        Browse directory
+                        View All
                       </Link>
                     </div>
-                    <div className="max-h-[380px] overflow-y-auto">
+                    <div className="p-4 sm:p-5">
                       {activeDonorsLoadState === "loading" ? (
-                        <p className="px-5 py-8 text-center text-sm text-text-secondary sm:px-6">
-                          Loading donors…
-                        </p>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <div
+                              key={`donor-sk-${i}`}
+                              className="h-40 animate-pulse rounded-xl bg-[#F4F4F5] dark:bg-white/8"
+                              aria-hidden
+                            />
+                          ))}
+                        </div>
                       ) : activeDonorsLoadState === "error" ? (
-                        <p className="px-5 py-8 text-center text-sm text-text-secondary sm:px-6">
+                        <p className="py-10 text-center text-sm text-text-secondary">
                           Could not load donors. Please try again later.
                         </p>
                       ) : activeDonors.length === 0 ? (
-                        <p className="px-5 py-8 text-center text-sm text-text-secondary sm:px-6">
+                        <p className="py-10 text-center text-sm text-text-secondary">
                           No donors available yet.
                         </p>
                       ) : (
-                        activeDonors.map((donor, index) => {
-                          const isOwner =
-                            !!user?.id &&
-                            !!donor.userId &&
-                            donor.userId === user.id;
-                          const cooldown = resolveDonorCooldown(
-                            donor.cooldownEndsAt,
-                          );
-                          const bookingBlocked =
-                            cooldown.isActive && !isOwner;
-                          const profileHref = isOwner
-                            ? routes.settings
-                            : donorDetailPath(donor.id);
-                          return (
-                            <div
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                          {activeDonors.map((donor) => (
+                            <OverviewActiveDonorCard
                               key={donor.id}
-                              className={`flex flex-col gap-4 px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:px-6 ${
-                                index > 0
-                                  ? "border-t border-border dark:border-white/10"
-                                  : ""
-                              }`}
-                            >
-                              <div className="flex min-w-0 flex-1 items-center gap-3">
-                                <Avatar
-                                  className="size-11!"
-                                  src={donor.profileImage ?? undefined}
-                                />
-                                <div className="min-w-0 flex flex-col gap-1.5">
-                                  <Link
-                                    href={profileHref}
-                                    className="truncate text-sm font-semibold text-text-primary hover:text-primary hover:underline"
-                                  >
-                                    {donor.userId?.slice(0, 6) ?? donor.id}
-                                  </Link>
-                                  <div className="flex flex-wrap gap-1">
-                                    {donor.activeDonationTypes.length === 0 ? (
-                                      <span className="text-xs text-text-secondary">
-                                        —
-                                      </span>
-                                    ) : (
-                                      donor.activeDonationTypes
-                                        .slice(0, 2)
-                                        .map((type) => (
-                                          <span
-                                            key={type}
-                                            className="inline-flex max-w-full truncate rounded-full border border-border bg-[#F4F4F5] px-2 py-0.5 text-[10px] font-medium text-text-secondary dark:border-white/10 dark:bg-white/8"
-                                          >
-                                            {donationTypeLabel(type)}
-                                          </span>
-                                        ))
-                                    )}
-                                    {donor.activeDonationTypes.length > 2 ? (
-                                      <span className="text-[11px] text-text-tertiary">
-                                        …
-                                      </span>
-                                    ) : null}
-                                  </div>
-                                  <DonorCooldownDisplay
-                                    cooldownEndsAt={donor.cooldownEndsAt}
-                                    variant={isOwner ? "owner" : "public"}
-                                  />
-                                </div>
-                              </div>
-                              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                                <span className="rounded-full bg-[#FCE7E7] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary dark:bg-primary/25">
-                                  {donor.bloodType}
-                                </span>
-                                {donor.rating > 0 ? (
-                                  <div className="flex items-center gap-1 text-sm text-text-secondary">
-                                    <Star
-                                      className="size-4 fill-amber-400 text-amber-400"
-                                      aria-hidden
-                                    />
-                                    <span>{donor.rating.toFixed(1)}</span>
-                                  </div>
-                                ) : null}
-                                <div className="flex items-center gap-1 text-sm text-text-secondary">
-                                  <DropletIcon
-                                    className="size-3.5 text-primary"
-                                    aria-hidden
-                                  />
-                                  <span>{donor.donations} donations</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-sm text-text-secondary">
-                                  <MapPin
-                                    className="size-3.5 shrink-0"
-                                    aria-hidden
-                                  />
-                                  <span className="truncate">
-                                    {donor.location}, {donor.country}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex w-full shrink-0 gap-2 sm:ml-auto sm:w-auto">
-                                <Link
-                                  href={profileHref}
-                                  className="inline-flex flex-1 items-center justify-center rounded-lg border border-border px-4 py-2 text-xs font-medium text-text-primary transition hover:bg-primary/4 dark:border-white/10 sm:flex-none"
-                                >
-                                  {isOwner ? "Settings" : "View profile"}
-                                </Link>
-                                {bookingBlocked ? (
-                                  <span
-                                    className="inline-flex flex-1 items-center justify-center rounded-lg border border-border bg-[#F4F4F5] px-4 py-2 text-xs font-medium text-text-tertiary sm:flex-none dark:border-white/10 dark:bg-white/8"
-                                    aria-disabled
-                                  >
-                                    Booking paused
-                                  </span>
-                                ) : isOwner ? null : (
-                                  <Link
-                                    href={routes.scheduleAppointment(donor.id)}
-                                    className="inline-flex flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary/90 sm:flex-none"
-                                  >
-                                    Book
-                                  </Link>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })
+                              donor={donor}
+                              currentUserId={user?.id}
+                              donationTypeLabel={donationTypeLabel}
+                            />
+                          ))}
+                        </div>
                       )}
                     </div>
                   </section>
