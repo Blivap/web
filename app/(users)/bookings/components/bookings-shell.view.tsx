@@ -654,9 +654,6 @@ export function BookingsShell({
   return (
     <div className="flex flex-col gap-4 sm:gap-5">
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
-          Bookings
-        </h1>
         {subtitle ? (
           <p className="max-w-xl text-xs text-text-secondary sm:text-sm">
             {subtitle}

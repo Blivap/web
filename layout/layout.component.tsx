@@ -112,7 +112,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
               variant="outline"
               onClick={() => setDrawer((prev) => !prev)}
               aria-label="Toggle menu"
-              className=" "
+              className="md:hidden"
             >
               <Menu size={16} className="size-4" />
             </Button>

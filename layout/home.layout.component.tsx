@@ -208,12 +208,12 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
 
       {/* Top Navigation Bar */}
       <div className="fixed top-0 z-40 flex w-full items-center justify-center border-b border-transparent bg-[#F4F2FF] px-2 sm:pb-0 py-2.5 dark:border-white/8 dark:bg-[#0F1117]/95 sm:px-6 sm:py-3 md:px-8 3xl:px-0">
-        <div className="flex items-center justify-between w-full max-w-[1440px]">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between w-full max-w-360">
+          <div className="flex items-center gap-3 ">
             <Button
               variant="ghost"
               onClick={() => setDrawerOpen((prev) => !prev)}
-              className="h-fit rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-1 text-text-primary transition-colors hover:bg-[#F3F4F6] lg:hidden dark:border-white/10 dark:bg-[#1A1A22] dark:text-white dark:hover:bg-white/8"
+              className="h-fit rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-1 text-text-primary transition-colors hover:bg-[#F3F4F6] lg:hidden dark:border-white/10 dark:bg-[#1A1A22] dark:text-white dark:hover:bg-white/8 hdden"
               aria-label="Toggle menu"
             >
               <Menu size={24} className="size-6" />

@@ -223,7 +223,7 @@ export function useDonorBookings() {
   const tabLabels = useMemo(
     () =>
       ({
-        pending: "Needs your answer",
+        pending: "Pending",
         confirmed: "Confirmed",
         past: "Past",
       }) satisfies Record<DonorPanelKey, string>,
