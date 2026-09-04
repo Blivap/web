@@ -6,9 +6,7 @@ import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";
 
 const GENERIC_ERROR = "Something went wrong. Please try again.";
-
-const isPdfFile = (file: File) =>
-  file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+const NIN_LENGTH = 11;
 
 export const useNin = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,25 +15,27 @@ export const useNin = () => {
 
   const clearError = useCallback(() => setError(null), []);
 
-  /** Client-side PDF check; sets error message if invalid. */
-  const assertPdfFile = useCallback((file: File): boolean => {
-    if (!isPdfFile(file)) {
-      setError("Only PDF files are allowed");
+  /** Client-side NIN check; sets error message if invalid. */
+  const assertNin = useCallback((nin: string): boolean => {
+    const digits = nin.replace(/\D/g, "");
+    if (digits.length !== NIN_LENGTH) {
+      setError("Enter your 11-digit NIN");
       return false;
     }
     return true;
   }, []);
 
-  const verifyNinDocument = useCallback(
-    async (file: File): Promise<boolean> => {
+  const verifyNin = useCallback(
+    async (nin: string): Promise<boolean> => {
       setError(null);
-      if (!assertPdfFile(file)) {
+      const digits = nin.replace(/\D/g, "");
+      if (!assertNin(digits)) {
         return false;
       }
 
       setIsLoading(true);
       try {
-        const { status } = await $api.nin.verifyNinDocument(file);
+        const { status } = await $api.nin.verifyNin(digits);
         if (status === 200 || status === 201) {
           const me = await $api.auth.me();
           if (me.status >= 200 && me.status < 300 && me.data) {
@@ -52,9 +52,9 @@ export const useNin = () => {
         if (e instanceof AxiosError) {
           const status = e.response?.status;
           if (status === 400) {
-            setError("Only PDF files are allowed");
+            setError("Enter a valid 11-digit NIN");
           } else if (status === 422) {
-            setError("Your NIN document does not match your account details");
+            setError("Your NIN does not match your account details");
           } else if (status !== undefined && status >= 500) {
             setError(GENERIC_ERROR);
           } else {
@@ -69,14 +69,14 @@ export const useNin = () => {
         setIsLoading(false);
       }
     },
-    [assertPdfFile, dispatch],
+    [assertNin, dispatch],
   );
 
   return {
     isLoading,
     error,
     clearError,
-    assertPdfFile,
-    verifyNinDocument,
+    assertNin,
+    verifyNin,
   };
 };
