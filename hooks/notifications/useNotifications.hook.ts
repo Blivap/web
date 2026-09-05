@@ -80,9 +80,7 @@ export function useNotifications({
       } = await $api.notifications.list({ skip: 0, limit: PAGE_SIZE });
       const list = data?.data;
       if (status >= 200 && status < 300 && Array.isArray(list)) {
-        const visible = list.filter(
-          (n) => n.isDeleted !== true,
-        );
+        const visible = list.filter((n) => n.isDeleted !== true);
         if (visible.length === 0) {
           setRows([]);
           setHasMore(false);

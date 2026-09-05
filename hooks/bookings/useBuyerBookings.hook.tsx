@@ -81,9 +81,7 @@ export function useBuyerBookings() {
 
   const activeRatingDonorLabel = useMemo(
     () =>
-      activeRatingBooking
-        ? donorLabelFromBooking(activeRatingBooking)
-        : "",
+      activeRatingBooking ? donorLabelFromBooking(activeRatingBooking) : "",
     [activeRatingBooking],
   );
 

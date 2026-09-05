@@ -251,6 +251,7 @@ export function useScheduleAppointment() {
       donorUserId,
       hospitals,
       isSendingBooking,
+      showSnackbar,
       user?.nationalIdentificationNumberVerified,
     ],
   );

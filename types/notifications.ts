@@ -6,7 +6,8 @@ export type NotificationEventType =
   | "booking_accepted"
   | "booking_rejected"
   | "verification_approved"
-  | "verification_rejected";
+  | "verification_rejected"
+  | "profile_mismatch";
 
 export type InAppNotification = {
   id: string;

@@ -26,7 +26,9 @@ export type BookingRowDetailParts = {
 function hospitalFallbackFromId(hospitalId: string): string {
   const t = hospitalId.trim();
   if (!t) return "Hospital";
-  return t.length > SHORT_ID_LEN ? `Hospital ${t.slice(0, SHORT_ID_LEN)}…` : `Hospital ${t}`;
+  return t.length > SHORT_ID_LEN
+    ? `Hospital ${t.slice(0, SHORT_ID_LEN)}…`
+    : `Hospital ${t}`;
 }
 
 export function bookingRowDetailPartsForViewer(
@@ -34,7 +36,8 @@ export function bookingRowDetailPartsForViewer(
   viewer: "donor" | "requester",
 ): BookingRowDetailParts {
   const when = formatScheduledLabel(b.scheduledAt);
-  const hospital = b.hospitalName?.trim() || hospitalFallbackFromId(b.hospitalId);
+  const hospital =
+    b.hospitalName?.trim() || hospitalFallbackFromId(b.hospitalId);
   if (viewer === "donor") {
     const who =
       b.requesterDisplayName?.trim() ||

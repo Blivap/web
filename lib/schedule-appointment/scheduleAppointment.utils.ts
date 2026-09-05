@@ -1,6 +1,4 @@
-import {
-  SCHEDULE_APPOINTMENT_DIAMOND_ROW_SIZES,
-} from "./scheduleAppointment.constants";
+import { SCHEDULE_APPOINTMENT_DIAMOND_ROW_SIZES } from "./scheduleAppointment.constants";
 
 export type ScheduleAppointmentDetails = {
   hospitalId: string;
@@ -39,7 +37,10 @@ export function isCalendarDayInPast(dateStr: string): boolean {
   return new Date(dateStr) < new Date(new Date().setHours(0, 0, 0, 0));
 }
 
-export function buildCalendarDays(year: number, month: number): (number | null)[] {
+export function buildCalendarDays(
+  year: number,
+  month: number,
+): (number | null)[] {
   const first = new Date(year, month, 1);
   const last = new Date(year, month + 1, 0);
   const startPad = (first.getDay() + 6) % 7;
@@ -60,7 +61,11 @@ export function formatCalendarMonthLabel(year: number, month: number): string {
   });
 }
 
-export function formatDateIso(year: number, month: number, day: number): string {
+export function formatDateIso(
+  year: number,
+  month: number,
+  day: number,
+): string {
   return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 

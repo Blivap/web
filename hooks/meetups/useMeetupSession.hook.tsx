@@ -229,7 +229,8 @@ export function useMeetupSession(sessionId: string | undefined) {
           message: "Please enter a reason for termination.",
         };
       }
-      if (!sessionId) return { ok: false as const, message: "Missing session." };
+      if (!sessionId)
+        return { ok: false as const, message: "Missing session." };
       setTerminateBusy(true);
       try {
         const { status, data } = await $api.meetups.terminate(sessionId, {

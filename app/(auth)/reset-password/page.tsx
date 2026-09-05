@@ -6,7 +6,6 @@ import { AuthLayout } from "@/layout/auth.layout.component";
 import { useResetPassword } from "@/hooks/auth/useResetPassword.hook";
 import { resetPasswordSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
-import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";

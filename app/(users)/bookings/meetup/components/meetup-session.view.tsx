@@ -262,8 +262,9 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     string | null
   >(null);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [ratingModalOpen, setRatingModalOpen] = useState(false);
-  const ratingPromptedForBookingRef = useRef<string | null>(null);
+  /** Booking id the requester dismissed the rating modal for (avoids effect-driven setState). */
+  const [ratingDismissedForBookingId, setRatingDismissedForBookingId] =
+    useState<string | null>(null);
   const codeHydrateAttemptRef = useRef<string | null>(null);
   const sentBookings = useAppSelector((s) => s.bookings.sent.items);
   const receivedBookings = useAppSelector((s) => s.bookings.received.items);
@@ -487,14 +488,13 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     [canPromptRequesterRating, chatAndDonationComplete, sentBookings],
   );
 
-  const openRatingModalIfNeeded = useCallback(
-    (bookingId: string | undefined) => {
-      if (!bookingId || !shouldPromptForRating(bookingId)) return;
-      if (ratingPromptedForBookingRef.current === bookingId) return;
-      ratingPromptedForBookingRef.current = bookingId;
-      setRatingModalOpen(true);
-    },
-    [shouldPromptForRating],
+  const ratingModalOpen = Boolean(
+    donationChatBookingId &&
+    canPromptRequesterRating &&
+    sessionLoad === "ok" &&
+    session &&
+    shouldPromptForRating(donationChatBookingId) &&
+    ratingDismissedForBookingId !== donationChatBookingId,
   );
 
   const onRatingSuccess = useCallback(() => {
@@ -526,10 +526,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   }, [user, confirmDonation, showSnackbar, dispatch]);
 
   useEffect(() => {
-    if (!canPromptRequesterRating) {
-      setRatingModalOpen(false);
-      return;
-    }
+    if (!canPromptRequesterRating) return;
     void dispatch(loadSentBookings({ silent: true }));
   }, [canPromptRequesterRating, dispatch]);
 
@@ -537,19 +534,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     if (!donationChat.roomClosed) return;
     void refreshSession();
   }, [donationChat.roomClosed, refreshSession]);
-
-  useEffect(() => {
-    if (sessionLoad !== "ok" || !session || !canPromptRequesterRating) return;
-    if (!chatAndDonationComplete) return;
-    openRatingModalIfNeeded(donationChatBookingId);
-  }, [
-    sessionLoad,
-    session,
-    canPromptRequesterRating,
-    chatAndDonationComplete,
-    donationChatBookingId,
-    openRatingModalIfNeeded,
-  ]);
 
   const onSendChat = useCallback(async () => {
     const t = chatDraft.trim();
@@ -1286,7 +1270,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       {donationChatBookingId && canPromptRequesterRating ? (
         <DonationRatingModal
           open={ratingModalOpen}
-          onClose={() => setRatingModalOpen(false)}
+          onClose={() => setRatingDismissedForBookingId(donationChatBookingId)}
           bookingId={donationChatBookingId}
           donorLabel={ratingDonorLabel}
           onSuccess={onRatingSuccess}

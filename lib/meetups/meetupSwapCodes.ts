@@ -18,7 +18,9 @@ export type MeetupSwapCodes = {
 };
 
 function sessionHasDistinctRoleCodes(session: MeetupSession): boolean {
-  const requesterCode = normalizeMeetupSixDigitCode(session.requesterMeetingCode);
+  const requesterCode = normalizeMeetupSixDigitCode(
+    session.requesterMeetingCode,
+  );
   const donorCode = normalizeMeetupSixDigitCode(session.donorMeetingCode);
   if (requesterCode && donorCode && requesterCode !== donorCode) return true;
 
@@ -77,7 +79,13 @@ export function resolveMeetupSwapCodes(
     peerCode = peerCode ?? requesterCode;
   }
 
-  if (!myCode && hint && isReq === true && requesterCode && hint === requesterCode) {
+  if (
+    !myCode &&
+    hint &&
+    isReq === true &&
+    requesterCode &&
+    hint === requesterCode
+  ) {
     myCode = requesterCode;
   }
   if (!myCode && hint && isReq === false && donorCode && hint === donorCode) {

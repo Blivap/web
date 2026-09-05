@@ -309,7 +309,12 @@ export default function News() {
                   ? `Search ${selectedCategoryLabel.toLowerCase()} headlines and summaries`
                   : "Search headlines and summaries"
               }
-              icon={<Search size={16} className="text-[#9CA3AF] dark:text-slate-500" />}
+              icon={
+                <Search
+                  size={16}
+                  className="text-[#9CA3AF] dark:text-slate-500"
+                />
+              }
             />
 
             <div className="flex flex-wrap items-center gap-2">

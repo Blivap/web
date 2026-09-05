@@ -204,8 +204,7 @@ export function parseDonorRecord(raw: unknown): Donor | null {
   const { location, country } = areaStringsFromRecord(merged);
 
   const rawRating = pickNumber(merged.rating ?? merged.averageRating, -1);
-  const rating =
-    rawRating >= 0 ? Math.min(5, Math.max(0, rawRating)) : 0;
+  const rating = rawRating >= 0 ? Math.min(5, Math.max(0, rawRating)) : 0;
 
   const donations = Math.max(
     0,

@@ -160,10 +160,7 @@ const bookingsSlice = createSlice({
       .addCase(loadReceivedBookings.fulfilled, (state, action) => {
         state.received.status = "ok";
         state.received.items = action.meta.arg?.silent
-          ? mergeBookingsList(
-              state.received.items,
-              action.payload.bookings,
-            )
+          ? mergeBookingsList(state.received.items, action.payload.bookings)
           : action.payload.bookings;
       })
       .addCase(loadReceivedBookings.rejected, (state, action) => {

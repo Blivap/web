@@ -5,7 +5,6 @@ import { AuthLayout } from "@/layout/auth.layout.component";
 import { useForgotPassword } from "@/hooks/auth/useForgotPassword.hook";
 import { forgotPasswordSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
-import Image from "next/image";
 import Link from "next/link";
 import { BlivapLogo } from "@/public/svg";
 import { Button } from "@/components/ui/button";

@@ -42,6 +42,9 @@ export function resolveNotificationHref(
     case "verification_rejected":
       return routes.verifyId();
 
+    case "profile_mismatch":
+      return routes.settings;
+
     case "donor_approved":
       return routes.donors;
 

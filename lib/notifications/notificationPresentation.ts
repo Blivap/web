@@ -73,6 +73,8 @@ const BY_TYPE: Record<string, NotificationPresentation> = {
   },
 };
 
-export function notificationPresentation(type: string): NotificationPresentation {
+export function notificationPresentation(
+  type: string,
+): NotificationPresentation {
   return BY_TYPE[type] ?? DEFAULT_PRESENTATION;
 }

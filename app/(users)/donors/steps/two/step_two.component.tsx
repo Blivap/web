@@ -165,9 +165,7 @@ export function StepTwo({
             label="Postal code"
             type="text"
             value={personal.postalCode}
-            onChange={(e) =>
-              handlePersonalChange("postalCode", e.target.value)
-            }
+            onChange={(e) => handlePersonalChange("postalCode", e.target.value)}
             placeholder="Postal code"
             inputClassName="text-sm py-2.5"
           />
@@ -202,9 +200,7 @@ export function StepTwo({
             label="Street name *"
             type="text"
             value={personal.streetName}
-            onChange={(e) =>
-              handlePersonalChange("streetName", e.target.value)
-            }
+            onChange={(e) => handlePersonalChange("streetName", e.target.value)}
             placeholder="Street name*"
             required
             inputClassName="text-sm py-2.5"

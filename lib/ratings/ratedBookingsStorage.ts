@@ -30,13 +30,11 @@ export function markBookingRatedLocally(bookingId: string): void {
   writeIds(ids);
 }
 
-export function bookingNeedsRequesterRating(
-  booking: {
-    id: string;
-    status: string;
-    requesterHasRated?: boolean;
-  },
-): boolean {
+export function bookingNeedsRequesterRating(booking: {
+  id: string;
+  status: string;
+  requesterHasRated?: boolean;
+}): boolean {
   if (booking.status !== "completed") return false;
   if (booking.requesterHasRated === true) return false;
   if (isBookingRatedLocally(booking.id)) return false;

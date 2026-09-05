@@ -81,10 +81,7 @@ export function parseDonorProfileRatings(
   );
 
   const itemsRaw =
-    record.recentRatings ??
-    record.recent_ratings ??
-    record.ratings ??
-    [];
+    record.recentRatings ?? record.recent_ratings ?? record.ratings ?? [];
   const parsedItems = Array.isArray(itemsRaw)
     ? parseRatingsItems(itemsRaw)
     : [];

@@ -4,13 +4,9 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   Bell,
   ChevronRight,
-  Droplet,
-  Gem,
-  HeartPulse,
   LayoutDashboard,
   Pencil,
   Search,
-  Sparkles,
   Users,
   Wallet,
 } from "lucide-react";
@@ -23,10 +19,7 @@ import {
   DONATION_TYPE_ENTRIES,
   isDonorRegistrationEnabled,
 } from "@/lib/donations/donation-types";
-import {
-  donationPathwayOverviewHref,
-  withDonationTypeQuery,
-} from "@/lib/donations/donation-pathway-questionnaire-type";
+import { donationPathwayOverviewHref } from "@/lib/donations/donation-pathway-questionnaire-type";
 import { routes } from "@/config/routes";
 import { $api } from "@/app/api";
 import {
@@ -43,27 +36,6 @@ import { Button } from "@/components/button/button.component";
 import { Input } from "@/components/forms/inputs/input.component";
 import { OverviewNotificationsTab } from "./components/overview-notifications-tab.component";
 import { Skeleton } from "@/components/ui/skeleton.component";
-
-const BECOME_DONOR_CARDS = [
-  {
-    icon: Droplet,
-    title: "Register as a blood donor",
-    subtitle: "Save lives with your blood",
-    href: withDonationTypeQuery("/donors/new?type=blood", "whole_blood"),
-  },
-  {
-    icon: Gem,
-    title: "Register as a sperm donor",
-    subtitle: "Help families with your sperm",
-    href: withDonationTypeQuery("/donors/new?type=sperm", "sperm_egg_gametes"),
-  },
-  {
-    icon: Gem,
-    title: "Register as an ovary donor",
-    subtitle: "Give the gift of life with your egg",
-    href: withDonationTypeQuery("/donors/new?type=ovary", "sperm_egg_gametes"),
-  },
-];
 
 const OVERVIEW_DONORS_LIMIT = 8;
 

@@ -1,6 +1,10 @@
 import { Skeleton } from "@/components/ui/skeleton.component";
 
-function NotificationRowSkeleton({ showBorderTop }: { showBorderTop?: boolean }) {
+function NotificationRowSkeleton({
+  showBorderTop,
+}: {
+  showBorderTop?: boolean;
+}) {
   return (
     <div
       className={`flex gap-4 px-5 py-4 sm:px-6 ${

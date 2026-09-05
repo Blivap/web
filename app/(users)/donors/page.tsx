@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import debounce from "lodash/debounce";
-import { Droplet } from "lucide-react";
 import { Layout } from "../../../layout/layout.component";
 import Link from "next/link";
 import { $api } from "@/app/api";

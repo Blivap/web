@@ -33,15 +33,21 @@ function isBlivapIntegration(entry: DonationTypeEntry["integration"]) {
   );
 }
 
-function pathwayIcon(entry: DonationTypeEntry) {
-  switch (entry.integration.kind) {
+function PathwayIcon({
+  kind,
+  className,
+}: {
+  kind: DonationTypeEntry["integration"]["kind"];
+  className?: string;
+}) {
+  switch (kind) {
     case "blivap_blood":
-      return Droplet;
+      return <Droplet className={className} aria-hidden />;
     case "blivap_sperm":
     case "blivap_ovary":
-      return Gem;
+      return <Gem className={className} aria-hidden />;
     default:
-      return HeartPulse;
+      return <HeartPulse className={className} aria-hidden />;
   }
 }
 
@@ -75,7 +81,6 @@ export function DonationTypeFlow({ entry }: Props) {
   );
 
   const registrationEnabled = isDonorRegistrationEnabled(entry);
-  const Icon = pathwayIcon(entry);
   const registerHref =
     blivap &&
     withDonationTypeQuery(
@@ -96,7 +101,7 @@ export function DonationTypeFlow({ entry }: Props) {
       <header className="flex w-full min-w-0 flex-col gap-5 border-b border-border pb-8 dark:border-white/10">
         <div className="flex min-w-0 items-start gap-4">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#F9E8EE] text-primary dark:bg-primary/20">
-            <Icon className="size-5" aria-hidden />
+            <PathwayIcon kind={entry.integration.kind} className="size-5" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">
