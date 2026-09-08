@@ -4,10 +4,21 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { useCheckUser } from "@/hooks/auth/useCheckUser.hook";
-import { routes } from "@/config/routes";
+import { publicRoutes, routes } from "@/config/routes";
 import { AuthLoader } from "./auth-loader.component";
 
 const VERIFY_EMAIL_PATH = routes.verifyEmail;
+
+function normalizePath(pathname: string): string {
+  return pathname.length > 1 && pathname.endsWith("/")
+    ? pathname.slice(0, -1)
+    : pathname;
+}
+
+function isPublicAppPath(pathname: string): boolean {
+  const path = normalizePath(pathname);
+  return publicRoutes.includes(path);
+}
 
 /**
  * Token is restored from the cookie in `StoreProvider`; session user is loaded via `useCheckUser` (GET /me).
@@ -21,7 +32,29 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const user = useAppSelector((state) => state.auth.user);
+  const token = useAppSelector((state) => state.auth.token);
   const { isChecking } = useCheckUser();
+
+  // Clear one-shot redirect guard once we're on login
+  useEffect(() => {
+    if (pathname === routes.login) {
+      try {
+        sessionStorage.removeItem("blivap:auth:redirecting-login");
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [pathname]);
+
+  // Protected route with no session after check finished → login
+  useEffect(() => {
+    if (isChecking) return;
+    if (!pathname || isPublicAppPath(pathname)) return;
+    if (pathname === VERIFY_EMAIL_PATH) return;
+    if (user) return;
+    if (token) return; // /me still resolving or about to retry
+    router.replace(routes.login);
+  }, [isChecking, pathname, user, token, router]);
 
   // Unverified users may only access the verify-email page — redirect and block content.
   // If user has profileImage they've completed select_avatar, so send to dashboard not verify-email.
@@ -75,6 +108,17 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     user.profileImage &&
     pathname !== "/overview" &&
     !pathname.startsWith("/overview/")
+  ) {
+    return <AuthLoader />;
+  }
+
+  // Protected shell: hold content while redirecting an empty session to login
+  if (
+    pathname &&
+    !isPublicAppPath(pathname) &&
+    pathname !== VERIFY_EMAIL_PATH &&
+    !user &&
+    !token
   ) {
     return <AuthLoader />;
   }

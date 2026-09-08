@@ -3,8 +3,10 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { $api } from "@/app/api";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setUser, logout } from "@/store/slices/authSlice";
+import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";
+import { forceSessionEnd } from "@/lib/auth/forceSessionEnd";
+import { isJwtExpired } from "@/lib/auth/isJwtExpired";
 import Cookies from "js-cookie";
 
 export const useCheckUser = () => {
@@ -18,51 +20,64 @@ export const useCheckUser = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      // Check if we have a token (from Redux or cookie) but no user
       const cookieToken = Cookies.get("auth_token");
-      const hasToken = token || cookieToken;
+      const hasToken = Boolean(token || cookieToken);
+      const activeToken = token || cookieToken || "";
 
-      if (hasToken && !user && !hasCheckedRef.current) {
-        hasCheckedRef.current = true;
-        setIsChecking(true);
-        try {
-          const { data, status } = await $api.auth.me();
-          if (status >= 200 && status < 300 && data) {
-            const userPayload = normalizeUser(data);
-            if (userPayload) {
-              dispatch(setUser(userPayload));
-            } else {
-              hasCheckedRef.current = false;
-            }
+      if (!hasToken) {
+        hasCheckedRef.current = false;
+        return;
+      }
+
+      // Cookie/JWT already past exp — clear and send to login before calling /me
+      if (activeToken && isJwtExpired(activeToken)) {
+        forceSessionEnd({
+          replace: (path) => router.replace(path),
+        });
+        return;
+      }
+
+      if (user || hasCheckedRef.current) return;
+
+      hasCheckedRef.current = true;
+      setIsChecking(true);
+      try {
+        const { data, status } = await $api.auth.me();
+        if (status >= 200 && status < 300 && data) {
+          const userPayload = normalizeUser(data);
+          if (userPayload) {
+            dispatch(setUser(userPayload));
           } else {
-            dispatch(logout());
             hasCheckedRef.current = false;
-            router.replace("/login");
+            forceSessionEnd({
+              replace: (path) => router.replace(path),
+            });
+          }
+        } else {
+          hasCheckedRef.current = false;
+          forceSessionEnd({
+            replace: (path) => router.replace(path),
+          });
+        }
+      } catch (error: unknown) {
+        hasCheckedRef.current = false;
+        if (error instanceof AxiosError) {
+          const status = error.response?.status;
+          if (status === 401 || status === 403) {
+            // Interceptor may already redirect; ensure session is cleared
+            forceSessionEnd({
+              replace: (path) => router.replace(path),
+            });
             return;
           }
-        } catch (error: unknown) {
-          if (error instanceof AxiosError) {
-            const status = error.response?.status;
-            if (status === 401 || status === 403) {
-              dispatch(logout());
-              hasCheckedRef.current = false;
-              router.replace("/login");
-              return;
-            }
-          }
-          hasCheckedRef.current = false;
-        } finally {
-          setIsChecking(false);
         }
+        // Network blip: allow a later retry without logging the user out
+      } finally {
+        setIsChecking(false);
       }
     };
 
-    // Reset ref when token or user changes (for refresh scenarios)
-    if (!token && !Cookies.get("auth_token")) {
-      hasCheckedRef.current = false;
-    }
-
-    checkUser();
+    void checkUser();
   }, [token, isAuthenticated, user, dispatch, router]);
 
   return { isChecking };
