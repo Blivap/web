@@ -40,6 +40,13 @@ jobs:
           yarn lint
           npx tsc --noEmit
           yarn build
+        env:
+          NEXT_PUBLIC_BASE_URL: ${{ vars.NEXT_PUBLIC_BASE_URL || 'https://blivap.com' }}
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL || 'https://api.ci.invalid' }}
+          NEXT_PUBLIC_ENV: ${{ vars.NEXT_PUBLIC_ENV || 'test' }}
+          NEXT_PUBLIC_ENABLE_NOTIFICATIONS: ${{ vars.NEXT_PUBLIC_ENABLE_NOTIFICATIONS || 'false' }}
+          NEXT_PUBLIC_AUTH_TOKEN_KEY: ${{ vars.NEXT_PUBLIC_AUTH_TOKEN_KEY || 'auth_token' }}
+          NEXT_PUBLIC_APP_NAME: ${{ vars.NEXT_PUBLIC_APP_NAME || 'Blivap' }}
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
