@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { useCheckUser } from "@/hooks/auth/useCheckUser.hook";
@@ -20,6 +20,15 @@ function isPublicAppPath(pathname: string): boolean {
   return publicRoutes.includes(path);
 }
 
+/** Client snapshot is true; server snapshot is false — no useEffect setState. */
+function useHasMounted(): boolean {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
+
 /**
  * Token is restored from the cookie in `StoreProvider`; session user is loaded via `useCheckUser` (GET /me).
  * User is only considered authenticated after we have a valid user from the API.
@@ -34,6 +43,8 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
   const user = useAppSelector((state) => state.auth.user);
   const token = useAppSelector((state) => state.auth.token);
   const { isChecking } = useCheckUser();
+  /** Avoid auth-gated UI until after hydrate (cookie/token only exist on the client). */
+  const hasMounted = useHasMounted();
 
   // Clear one-shot redirect guard once we're on login
   useEffect(() => {
@@ -48,13 +59,13 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
 
   // Protected route with no session after check finished → login
   useEffect(() => {
-    if (isChecking) return;
+    if (!hasMounted || isChecking) return;
     if (!pathname || isPublicAppPath(pathname)) return;
     if (pathname === VERIFY_EMAIL_PATH) return;
     if (user) return;
     if (token) return; // /me still resolving or about to retry
     router.replace(routes.login);
-  }, [isChecking, pathname, user, token, router]);
+  }, [hasMounted, isChecking, pathname, user, token, router]);
 
   // Unverified users may only access the verify-email page — redirect and block content.
   // If user has profileImage they've completed select_avatar, so send to dashboard not verify-email.
@@ -112,14 +123,16 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     return <AuthLoader />;
   }
 
-  // Protected shell: hold content while redirecting an empty session to login
-  if (
-    pathname &&
-    !isPublicAppPath(pathname) &&
-    pathname !== VERIFY_EMAIL_PATH &&
-    !user &&
-    !token
-  ) {
+  const isProtectedPath =
+    Boolean(pathname) &&
+    !isPublicAppPath(pathname!) &&
+    pathname !== VERIFY_EMAIL_PATH;
+
+  /*
+   * Protected routes: same AuthLoader on server + first client paint (hasMounted=false),
+   * then keep showing it until session is resolved. Avoids hydration mismatch from cookies.
+   */
+  if (isProtectedPath && (!hasMounted || (!user && !token))) {
     return <AuthLoader />;
   }
 
