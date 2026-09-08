@@ -77,7 +77,7 @@ export function OverviewActiveDonorCard({
         </p>
       ) : null}
 
-      <div className=" mt-auto">
+      <div className="mt-auto">
         {bookingBlocked ? (
           <Button
             type="button"

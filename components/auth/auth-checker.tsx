@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { useCheckUser } from "@/hooks/auth/useCheckUser.hook";
@@ -34,6 +34,12 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
   const user = useAppSelector((state) => state.auth.user);
   const token = useAppSelector((state) => state.auth.token);
   const { isChecking } = useCheckUser();
+  /** Avoid auth-gated UI until after hydrate (cookie/token only exist on the client). */
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // Clear one-shot redirect guard once we're on login
   useEffect(() => {
@@ -48,13 +54,13 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
 
   // Protected route with no session after check finished → login
   useEffect(() => {
-    if (isChecking) return;
+    if (!hasMounted || isChecking) return;
     if (!pathname || isPublicAppPath(pathname)) return;
     if (pathname === VERIFY_EMAIL_PATH) return;
     if (user) return;
     if (token) return; // /me still resolving or about to retry
     router.replace(routes.login);
-  }, [isChecking, pathname, user, token, router]);
+  }, [hasMounted, isChecking, pathname, user, token, router]);
 
   // Unverified users may only access the verify-email page — redirect and block content.
   // If user has profileImage they've completed select_avatar, so send to dashboard not verify-email.
@@ -112,14 +118,16 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     return <AuthLoader />;
   }
 
-  // Protected shell: hold content while redirecting an empty session to login
-  if (
-    pathname &&
-    !isPublicAppPath(pathname) &&
-    pathname !== VERIFY_EMAIL_PATH &&
-    !user &&
-    !token
-  ) {
+  const isProtectedPath =
+    Boolean(pathname) &&
+    !isPublicAppPath(pathname!) &&
+    pathname !== VERIFY_EMAIL_PATH;
+
+  /*
+   * Protected routes: same AuthLoader on server + first client paint (hasMounted=false),
+   * then keep showing it until session is resolved. Avoids hydration mismatch from cookies.
+   */
+  if (isProtectedPath && (!hasMounted || (!user && !token))) {
     return <AuthLoader />;
   }
 
