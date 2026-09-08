@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { useCheckUser } from "@/hooks/auth/useCheckUser.hook";
@@ -20,6 +20,15 @@ function isPublicAppPath(pathname: string): boolean {
   return publicRoutes.includes(path);
 }
 
+/** Client snapshot is true; server snapshot is false — no useEffect setState. */
+function useHasMounted(): boolean {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
+
 /**
  * Token is restored from the cookie in `StoreProvider`; session user is loaded via `useCheckUser` (GET /me).
  * User is only considered authenticated after we have a valid user from the API.
@@ -35,11 +44,7 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
   const token = useAppSelector((state) => state.auth.token);
   const { isChecking } = useCheckUser();
   /** Avoid auth-gated UI until after hydrate (cookie/token only exist on the client). */
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
+  const hasMounted = useHasMounted();
 
   // Clear one-shot redirect guard once we're on login
   useEffect(() => {
