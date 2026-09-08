@@ -276,7 +276,8 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
             : null);
       }
       if (!donorMeetingCode) {
-        const raw = c.donor ?? c.donorCode ?? c.donor_code ?? c.donorMeetingCode;
+        const raw =
+          c.donor ?? c.donorCode ?? c.donor_code ?? c.donorMeetingCode;
         donorMeetingCode =
           pickString(raw) ??
           (typeof raw === "number" && Number.isFinite(raw)

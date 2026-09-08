@@ -1,6 +1,14 @@
+"use client";
+
+import { Button } from "@/components/button/button.component";
+import { Input } from "@/components/forms/inputs/input.component";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function WaitList() {
+  const [topEmail, setTopEmail] = useState("");
+  const [footerEmail, setFooterEmail] = useState("");
+
   return (
     <div className="mx-auto max-w-[1277px] px-2 pt-2.5 text-[#111827] dark:text-white">
       <div className="flex items-center justify-between">
@@ -27,25 +35,30 @@ export default function WaitList() {
           </div>
           <div className="mt-6 flex w-full rounded-[40px] border border-border bg-white shadow-sm dark:border-white/10 dark:bg-[#111827] dark:shadow-[0_24px_60px_rgba(0,0,0,0.28)] md:mt-[187px]">
             <form className="ml-7 flex w-full items-center gap-4" action="">
-              <Image
-                src="/icons/outline-email.svg"
-                alt="icon"
-                width={32}
-                height={32}
-              />
-              <input
-                className="min-w-0 w-full bg-transparent text-[#111827] outline-none placeholder:text-[#9CA3AF] dark:text-white dark:placeholder:text-slate-500"
-                type="text"
+              <Input
+                name="waitlist-email-top"
+                type="email"
+                value={topEmail}
+                onChange={(e) => setTopEmail(e.target.value)}
                 placeholder="Your email address"
-                name=""
-                id=""
+                icon={
+                  <Image
+                    src="/icons/outline-email.svg"
+                    alt=""
+                    width={32}
+                    height={32}
+                    aria-hidden
+                  />
+                }
+                containerClassName="min-w-0 flex-1 border-0 bg-transparent shadow-none"
+                inputClassName="bg-transparent text-[#111827] placeholder:text-[#9CA3AF] dark:text-white dark:placeholder:text-slate-500"
               />
-              <button
+              <Button
                 type="submit"
-                className="rounded-[40px] bg-primary px-8 py-5 text-base leading-[27px] text-nowrap text-text-inverse transition-colors hover:bg-primary/90"
+                className="rounded-[40px] px-8 py-5 text-base leading-[27px] text-nowrap"
               >
                 Get Early Access
-              </button>
+              </Button>
             </form>
           </div>
         </div>
@@ -174,25 +187,30 @@ export default function WaitList() {
               className="ml-2 flex w-full items-center gap-4 md:ml-7"
               action=""
             >
-              <Image
-                src="/icons/outline-email.svg"
-                alt="icon"
-                width={32}
-                height={32}
-              />
-              <input
-                className="min-w-0 w-full bg-transparent text-[#111827] outline-none placeholder:text-[#9CA3AF] dark:text-white dark:placeholder:text-slate-500"
-                type="text"
+              <Input
+                name="waitlist-email-footer"
+                type="email"
+                value={footerEmail}
+                onChange={(e) => setFooterEmail(e.target.value)}
                 placeholder="Your email address"
-                name=""
-                id=""
+                icon={
+                  <Image
+                    src="/icons/outline-email.svg"
+                    alt=""
+                    width={32}
+                    height={32}
+                    aria-hidden
+                  />
+                }
+                containerClassName="min-w-0 flex-1 border-0 bg-transparent shadow-none"
+                inputClassName="bg-transparent text-[#111827] placeholder:text-[#9CA3AF] dark:text-white dark:placeholder:text-slate-500"
               />
-              <button
+              <Button
                 type="submit"
-                className="rounded-[40px] bg-primary p-2 text-base leading-[27px] text-nowrap text-text-inverse transition-colors hover:bg-primary/90 sm:px-8 sm:py-[22px]"
+                className="rounded-[40px] p-2 text-base leading-[27px] text-nowrap sm:px-8 sm:py-[22px]"
               >
                 Get Early Access
-              </button>
+              </Button>
             </form>
           </div>
         </div>

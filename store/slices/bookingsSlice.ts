@@ -6,7 +6,6 @@ import {
 import { $api } from "@/app/api";
 import { fetchAllBookingListPages } from "@/lib/bookings/fetchAllBookingListPages";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
-import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
 import type { IResponse } from "@/types";
 import type { Booking, BookingListQuery } from "@/types/bookings";
 import { mergeBookingsList } from "@/lib/bookings/mergeBookingsList";
@@ -23,7 +22,6 @@ type BookingListBranch = {
 export type BookingsState = {
   sent: BookingListBranch;
   received: BookingListBranch;
-  hospitalNamesById: Record<string, string>;
 };
 
 const emptyBranch = (): BookingListBranch => ({
@@ -35,35 +33,20 @@ const emptyBranch = (): BookingListBranch => ({
 const initialState: BookingsState = {
   sent: emptyBranch(),
   received: emptyBranch(),
-  hospitalNamesById: {},
 };
 
-async function loadBookingsWithHospitals(
+async function loadBookingsList(
   listFetcher: (params: BookingListQuery) => Promise<IResponse<unknown>>,
-): Promise<{
-  bookings: Booking[];
-  hospitalNamesById: Record<string, string>;
-}> {
-  const [listRes, hospRes] = await Promise.all([
-    fetchAllBookingListPages((params) => listFetcher(params)),
-    $api.hospitals.list(),
-  ]);
+): Promise<Booking[]> {
+  const listRes = await fetchAllBookingListPages((params) =>
+    listFetcher(params),
+  );
 
   if (!listRes.ok) {
     throw new Error(listRes.error);
   }
 
-  const hospitalNamesById: Record<string, string> = {};
-  if (
-    hospRes.status >= 200 &&
-    hospRes.status < 300 &&
-    hospRes.data !== undefined
-  ) {
-    const hospitals = parseHospitalsListResponse(hospRes.data);
-    for (const h of hospitals) hospitalNamesById[h.id] = h.name;
-  }
-
-  return { bookings: listRes.bookings, hospitalNamesById };
+  return listRes.bookings;
 }
 
 /** Optional `silent` refetch keeps list on screen (no loading skeleton). */
@@ -73,9 +56,10 @@ export const loadSentBookings = createAsyncThunk(
   "bookings/loadSent",
   async (_arg: LoadBookingsArg, { rejectWithValue }) => {
     try {
-      return await loadBookingsWithHospitals((params) =>
+      const bookings = await loadBookingsList((params) =>
         $api.bookings.sent(params),
       );
+      return { bookings };
     } catch (e) {
       const msg =
         e instanceof Error && e.message.trim()
@@ -90,9 +74,10 @@ export const loadReceivedBookings = createAsyncThunk(
   "bookings/loadReceived",
   async (_arg: LoadBookingsArg, { rejectWithValue }) => {
     try {
-      return await loadBookingsWithHospitals((params) =>
+      const bookings = await loadBookingsList((params) =>
         $api.bookings.received(params),
       );
+      return { bookings };
     } catch (e) {
       const msg =
         e instanceof Error && e.message.trim()
@@ -122,6 +107,7 @@ const bookingsSlice = createSlice({
             | "meetingCode"
             | "slotEndAt"
             | "reportsCount"
+            | "requesterHasRated"
           >
         >
       >,
@@ -156,10 +142,6 @@ const bookingsSlice = createSlice({
         state.sent.items = action.meta.arg?.silent
           ? mergeBookingsList(state.sent.items, action.payload.bookings)
           : action.payload.bookings;
-        state.hospitalNamesById = {
-          ...state.hospitalNamesById,
-          ...action.payload.hospitalNamesById,
-        };
       })
       .addCase(loadSentBookings.rejected, (state, action) => {
         state.sent.status = "error";
@@ -178,15 +160,8 @@ const bookingsSlice = createSlice({
       .addCase(loadReceivedBookings.fulfilled, (state, action) => {
         state.received.status = "ok";
         state.received.items = action.meta.arg?.silent
-          ? mergeBookingsList(
-              state.received.items,
-              action.payload.bookings,
-            )
+          ? mergeBookingsList(state.received.items, action.payload.bookings)
           : action.payload.bookings;
-        state.hospitalNamesById = {
-          ...state.hospitalNamesById,
-          ...action.payload.hospitalNamesById,
-        };
       })
       .addCase(loadReceivedBookings.rejected, (state, action) => {
         state.received.status = "error";

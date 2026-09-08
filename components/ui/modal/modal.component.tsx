@@ -125,7 +125,7 @@ export function Modal({
         <div
           ref={panelRef}
           className={classNames(
-            "pointer-events-auto flex w-fit flex-col items-center rounded-xl border border-border bg-white px-8 py-10 shadow-[0_24px_48px_-12px_rgba(150,0,24,0.15)] dark:border-white/10 dark:bg-[#1a1a22]",
+            "custom-scrollbar pointer-events-auto flex w-fit max-w-full max-h-[calc(100dvh-2rem)] flex-col items-center overflow-y-auto overflow-x-hidden rounded-xl border border-border bg-white px-8 py-10 pr-6 shadow-[0_24px_48px_-12px_rgba(150,0,24,0.15)] dark:border-white/10 dark:bg-[#1a1a22] sm:pr-7",
             className,
           )}
           onClick={(e) => e.stopPropagation()}

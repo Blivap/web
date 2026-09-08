@@ -1,6 +1,5 @@
 "use client";
 
-import classNames from "classnames";
 import {
   Award,
   Bus,
@@ -16,6 +15,8 @@ import {
   Stethoscope,
   Users,
 } from "lucide-react";
+import { Button } from "@/components/button/button.component";
+import classNames from "classnames";
 const BALANCE_LABEL = "Donor Support Balance";
 const BALANCE_SUBLABEL = "Impact Rewards";
 
@@ -150,9 +151,10 @@ function RedemptionCard({
   icon: Icon,
 }: (typeof REDEMPTION)[number]) {
   return (
-    <button
+    <Button
       type="button"
-      className="flex w-full flex-col items-start gap-2 rounded-xl border border-[#E8E6E3] bg-white px-4 py-4 text-left shadow-sm transition hover:border-primary/25 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-white/10 dark:bg-[#1a1a22]"
+      variant="outline"
+      className="h-auto w-full flex-col items-start gap-2 rounded-xl px-4 py-4 text-left shadow-sm hover:border-primary/25 hover:shadow-md"
     >
       <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#FFF5F5] text-primary dark:bg-primary/15">
         <Icon className="h-5 w-5" strokeWidth={1.75} />
@@ -161,7 +163,7 @@ function RedemptionCard({
       <span className="text-xs leading-relaxed text-text-secondary">
         {subtitle}
       </span>
-    </button>
+    </Button>
   );
 }
 

@@ -297,3 +297,13 @@ export function getDonationTypeBySlug(
 ): DonationTypeEntry | undefined {
   return bySlug.get(slug);
 }
+
+/** Startup: only whole-blood, sperm, and ovum registration are open in-app. */
+export function isDonorRegistrationEnabled(entry: DonationTypeEntry): boolean {
+  return (
+    entry.integration.kind === "blivap_sperm" ||
+    entry.integration.kind === "blivap_ovary" ||
+    (entry.integration.kind === "blivap_blood" &&
+      entry.slug === "blood-donation")
+  );
+}

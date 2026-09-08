@@ -1,5 +1,6 @@
 "use client";
 
+import classNames from "classnames";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -498,52 +499,124 @@ type BookingsShellSkeletonProps = {
   tabLabels: readonly string[];
 };
 
+function BookingsSk({ className }: { className?: string }) {
+  return (
+    <div
+      className={classNames(
+        "animate-pulse rounded-md bg-[#E5E7EB] dark:bg-white/10",
+        className,
+      )}
+      aria-hidden
+    />
+  );
+}
+
+function BookingsMobileRowSkeleton() {
+  return (
+    <article className="rounded-xl border border-[#F3F4F6] bg-white p-3 dark:border-white/10 dark:bg-[#1a1a22]">
+      <BookingsSk className="h-3 w-24" />
+      <div className="mt-2.5 flex items-center gap-2.5">
+        <BookingsSk className="size-9 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <BookingsSk className="h-4 w-3/4 max-w-[12rem]" />
+          <BookingsSk className="h-3 w-1/2 max-w-[9rem]" />
+        </div>
+      </div>
+      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+        <BookingsSk className="h-6 w-20 rounded-full" />
+        <div className="flex gap-1">
+          <BookingsSk className="size-9 rounded-md" />
+          <BookingsSk className="size-9 rounded-md" />
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function BookingsDesktopRowSkeleton() {
+  return (
+    <div className="grid grid-cols-[minmax(5rem,auto)_1fr_minmax(5rem,auto)_minmax(5.5rem,auto)] items-center gap-3 border-t border-[#F3F4F6] py-3 dark:border-white/10">
+      <BookingsSk className="h-3.5 w-20" />
+      <div className="flex min-w-0 items-center gap-2.5">
+        <BookingsSk className="size-9 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <BookingsSk className="h-4 w-40 max-w-full" />
+          <BookingsSk className="h-3 w-28 max-w-full" />
+        </div>
+      </div>
+      <BookingsSk className="h-6 w-20 rounded-full" />
+      <div className="flex justify-end gap-1">
+        <BookingsSk className="size-9 rounded-md" />
+        <BookingsSk className="size-9 rounded-md" />
+      </div>
+    </div>
+  );
+}
+
 export function BookingsShellSkeleton({
   tabLabels,
 }: BookingsShellSkeletonProps) {
   return (
-    <div className="flex flex-col gap-5 animate-pulse" aria-hidden>
-      <div className="h-9 w-48 rounded-md bg-[#E5E7EB] dark:bg-white/10" />
+    <div
+      className="flex w-full min-w-0 max-w-full flex-col gap-4 sm:gap-5"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <span className="sr-only">Loading bookings…</span>
 
-      <div className="flex flex-col gap-5">
-        <div className="flex w-full flex-wrap gap-1 rounded-xl border border-[#E5E7EB] bg-[#F3F4F6] p-1 dark:border-white/10 dark:bg-white/5">
+      <div className="flex min-w-0 flex-col gap-1">
+        <BookingsSk className="h-7 w-32 sm:h-8 sm:w-40" />
+        <BookingsSk className="h-3.5 w-full max-w-md" />
+      </div>
+
+      <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
+        <div className="flex h-auto min-h-0 w-full min-w-0 flex-col items-stretch gap-1 rounded-xl border border-border bg-[#F3F4F6] p-1 dark:border-white/10 dark:bg-white/5 sm:flex-row sm:flex-nowrap">
           {tabLabels.map((label, i) => (
             <div
               key={`sk-tab-${i}`}
-              className={`min-w-0 flex-1 rounded-lg py-2.5 text-center text-sm ${
-                i === 0 ? "bg-white dark:bg-[#1a1a22]" : "text-text-secondary"
-              }`}
+              className={classNames(
+                tabTriggerClass,
+                i === 0 &&
+                  "bg-white text-primary shadow-sm dark:bg-[#1a1a22] dark:text-primary",
+              )}
             >
               {label}
             </div>
           ))}
         </div>
 
-        <section className="rounded-lg border border-[#E5E7EB] bg-white px-6 py-5 dark:border-white/10 dark:bg-[#1a1a22]">
-          <div className="h-3.5 w-52 rounded bg-[#E5E7EB] dark:bg-white/10" />
-          <div className="mt-3 h-4 w-full max-w-[520px] rounded bg-[#E5E7EB] dark:bg-white/10" />
+        <section className="rounded-lg border border-border bg-white px-4 py-5 dark:border-white/10 dark:bg-[#1a1a22] sm:px-6">
+          <BookingsSk className="h-3 w-40 max-w-full" />
+          <BookingsSk className="mt-3 h-4 w-full max-w-lg" />
         </section>
 
-        <section className="rounded-lg border border-[#E5E7EB] bg-white px-6 py-5 dark:border-white/10 dark:bg-[#1a1a22]">
-          <div className="h-6 w-64 rounded bg-[#E5E7EB] dark:bg-white/10" />
-          <div className="mt-4 border-t border-[#E5E7EB] pt-4 dark:border-white/10">
-            <div className="grid min-w-[680px] grid-cols-[180px_1fr_140px_170px] gap-4">
-              <div className="h-3 w-20 rounded bg-[#E5E7EB] dark:bg-white/10" />
-              <div className="h-3 w-32 rounded bg-[#E5E7EB] dark:bg-white/10" />
-              <div className="h-3 w-16 rounded bg-[#E5E7EB] dark:bg-white/10" />
-              <div className="h-3 w-20 rounded bg-[#E5E7EB] dark:bg-white/10" />
-              <div className="col-span-4 h-px w-full bg-[#F3F4F6] dark:bg-white/10" />
-              <div className="h-4 w-24 rounded bg-[#E5E7EB] dark:bg-white/10" />
-              <div className="space-y-2">
-                <div className="h-4 w-48 rounded bg-[#E5E7EB] dark:bg-white/10" />
-                <div className="h-4 w-64 rounded bg-[#E5E7EB] dark:bg-white/10" />
-              </div>
-              <div className="h-6 w-20 rounded-full bg-[#E5E7EB] dark:bg-white/10" />
-              <div className="space-y-2">
-                <div className="h-7 w-28 rounded-md bg-[#E5E7EB] dark:bg-white/10" />
-                <div className="h-6 w-24 rounded bg-[#E5E7EB] dark:bg-white/10" />
-              </div>
+        <section className="min-w-0 rounded-xl border border-border bg-white px-4 py-4 dark:border-white/10 dark:bg-[#1a1a22] sm:px-5">
+          <BookingsSk className="h-3 w-28" />
+          <BookingsSk className="mt-3 h-4 w-52 max-w-full" />
+
+          <div className="mt-3 border-t border-border pt-3 dark:border-white/10">
+            <div className="flex flex-col gap-3 md:hidden">
+              <BookingsMobileRowSkeleton />
+              <BookingsMobileRowSkeleton />
+              <BookingsMobileRowSkeleton />
             </div>
+
+            <div className="hidden min-w-0 md:block">
+              <div className="grid grid-cols-[minmax(5rem,auto)_1fr_minmax(5rem,auto)_minmax(5.5rem,auto)] gap-3 pb-2">
+                <BookingsSk className="h-3 w-16" />
+                <BookingsSk className="h-3 w-24" />
+                <BookingsSk className="h-3 w-14" />
+                <BookingsSk className="ms-auto h-3 w-12" />
+              </div>
+              <BookingsDesktopRowSkeleton />
+              <BookingsDesktopRowSkeleton />
+              <BookingsDesktopRowSkeleton />
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-[#F9FAFB] px-3 py-3 dark:border-white/10 dark:bg-white/6 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+            <BookingsSk className="mx-auto h-3.5 w-44 sm:mx-0" />
+            <BookingsSk className="h-9 w-full sm:w-52" />
           </div>
         </section>
       </div>
@@ -581,9 +654,6 @@ export function BookingsShell({
   return (
     <div className="flex flex-col gap-4 sm:gap-5">
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
-          Bookings
-        </h1>
         {subtitle ? (
           <p className="max-w-xl text-xs text-text-secondary sm:text-sm">
             {subtitle}

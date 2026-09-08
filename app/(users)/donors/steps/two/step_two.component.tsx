@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/button/button.component";
+import { Input } from "@/components/forms/inputs/input.component";
 import { Radio } from "@/components/forms/Radio";
 
 export interface PersonalDetails {
@@ -70,58 +72,40 @@ export function StepTwo({
         </div>
 
         <div className="grid  gap-4">
-          <div>
-            <label
-              htmlFor="fullName"
-              className="block text-sm font-medium text-text-primary mb-1.5"
-            >
-              Full name
-            </label>
-            <input
-              id="fullName"
-              type="text"
-              value={personal.fullName}
-              onChange={(e) => handlePersonalChange("fullName", e.target.value)}
-              placeholder="Full name"
-              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="dateOfBirth"
-              className="block text-sm font-medium text-text-primary mb-1.5"
-            >
-              Date of birth
-            </label>
-            <input
-              id="dateOfBirth"
-              type="text"
-              value={personal.dateOfBirth}
-              onChange={(e) =>
-                handlePersonalChange("dateOfBirth", e.target.value)
-              }
-              placeholder="DD-MM-YYYY"
-              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="correspondenceName"
-              className="block text-sm font-medium text-text-primary mb-1.5"
-            >
-              Correspondence name
-            </label>
-            <input
-              id="correspondenceName"
-              type="text"
-              value={personal.correspondenceName}
-              onChange={(e) =>
-                handlePersonalChange("correspondenceName", e.target.value)
-              }
-              placeholder="Correspondence name"
-              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-            />
-          </div>
+          <Input
+            id="fullName"
+            name="fullName"
+            label="Full name"
+            type="text"
+            value={personal.fullName}
+            onChange={(e) => handlePersonalChange("fullName", e.target.value)}
+            placeholder="Full name"
+            inputClassName="text-sm py-2.5"
+          />
+          <Input
+            id="dateOfBirth"
+            name="dateOfBirth"
+            label="Date of birth"
+            type="text"
+            value={personal.dateOfBirth}
+            onChange={(e) =>
+              handlePersonalChange("dateOfBirth", e.target.value)
+            }
+            placeholder="DD-MM-YYYY"
+            inputClassName="text-sm py-2.5"
+          />
+          <Input
+            id="correspondenceName"
+            name="correspondenceName"
+            label="Correspondence name"
+            type="text"
+            value={personal.correspondenceName}
+            onChange={(e) =>
+              handlePersonalChange("correspondenceName", e.target.value)
+            }
+            placeholder="Correspondence name"
+            inputClassName="text-sm py-2.5"
+          />
         </div>
 
         <div className="bg-[#FDF2F4] rounded-lg p-4 sm:p-6 w-full">
@@ -132,14 +116,15 @@ export function StepTwo({
             A valid email address is required to arrange your donation
             arrangements. Please ensure you enter it correctly.
           </p>
-          <input
+          <Input
             id="email"
+            name="email"
             type="email"
             value={personal.email}
             onChange={(e) => handlePersonalChange("email", e.target.value)}
             placeholder="Email address *"
             required
-            className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 bg-white"
+            inputClassName="text-sm py-2.5 bg-white"
           />
         </div>
 
@@ -174,127 +159,88 @@ export function StepTwo({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label
-              htmlFor="postalCode"
-              className="block text-sm font-medium text-text-primary mb-1.5"
-            >
-              Postal code
-            </label>
-            <input
-              id="postalCode"
-              type="text"
-              value={personal.postalCode}
-              onChange={(e) =>
-                handlePersonalChange("postalCode", e.target.value)
-              }
-              placeholder="Postal code"
-              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="houseNumber"
-              className="block text-sm font-medium text-text-primary mb-1.5"
-            >
-              House number *
-            </label>
-            <input
-              id="houseNumber"
-              type="text"
-              value={personal.houseNumber}
-              onChange={(e) =>
-                handlePersonalChange("houseNumber", e.target.value)
-              }
-              placeholder="House number*"
-              required
-              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="address"
-              className="block text-sm font-medium text-text-primary mb-1.5"
-            >
-              Address
-            </label>
-            <input
-              id="address"
-              type="text"
-              value={personal.address}
-              onChange={(e) => handlePersonalChange("address", e.target.value)}
-              placeholder="Address"
-              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-            />
-          </div>
+          <Input
+            id="postalCode"
+            name="postalCode"
+            label="Postal code"
+            type="text"
+            value={personal.postalCode}
+            onChange={(e) => handlePersonalChange("postalCode", e.target.value)}
+            placeholder="Postal code"
+            inputClassName="text-sm py-2.5"
+          />
+          <Input
+            id="houseNumber"
+            name="houseNumber"
+            label="House number *"
+            type="text"
+            value={personal.houseNumber}
+            onChange={(e) =>
+              handlePersonalChange("houseNumber", e.target.value)
+            }
+            placeholder="House number*"
+            required
+            inputClassName="text-sm py-2.5"
+          />
+          <Input
+            id="address"
+            name="address"
+            label="Address"
+            type="text"
+            value={personal.address}
+            onChange={(e) => handlePersonalChange("address", e.target.value)}
+            placeholder="Address"
+            inputClassName="text-sm py-2.5"
+          />
         </div>
         <div className="grid  gap-4">
-          <div>
-            <label
-              htmlFor="streetName"
-              className="block text-sm font-medium text-text-primary mb-1.5"
-            >
-              Street name *
-            </label>
-            <input
-              id="streetName"
-              type="text"
-              value={personal.streetName}
-              onChange={(e) =>
-                handlePersonalChange("streetName", e.target.value)
-              }
-              placeholder="Street name*"
-              required
-              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="placeOfResidence"
-              className="block text-sm font-medium text-text-primary mb-1.5"
-            >
-              Place of residence *
-            </label>
-            <input
-              id="placeOfResidence"
-              type="text"
-              value={personal.placeOfResidence}
-              onChange={(e) =>
-                handlePersonalChange("placeOfResidence", e.target.value)
-              }
-              placeholder="Place of residence*"
-              required
-              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="phoneNumber"
-              className="block text-sm font-medium text-text-primary mb-1.5"
-            >
-              Phone number *
-            </label>
-            <input
-              id="phoneNumber"
-              type="tel"
-              value={personal.phoneNumber}
-              onChange={(e) =>
-                handlePersonalChange("phoneNumber", e.target.value)
-              }
-              placeholder="Phone number*"
-              required
-              className="w-full text-sm border border-border rounded-lg px-3.5 py-2.5 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-            />
-          </div>
+          <Input
+            id="streetName"
+            name="streetName"
+            label="Street name *"
+            type="text"
+            value={personal.streetName}
+            onChange={(e) => handlePersonalChange("streetName", e.target.value)}
+            placeholder="Street name*"
+            required
+            inputClassName="text-sm py-2.5"
+          />
+          <Input
+            id="placeOfResidence"
+            name="placeOfResidence"
+            label="Place of residence *"
+            type="text"
+            value={personal.placeOfResidence}
+            onChange={(e) =>
+              handlePersonalChange("placeOfResidence", e.target.value)
+            }
+            placeholder="Place of residence*"
+            required
+            inputClassName="text-sm py-2.5"
+          />
+          <Input
+            id="phoneNumber"
+            name="phoneNumber"
+            label="Phone number *"
+            type="tel"
+            value={personal.phoneNumber}
+            onChange={(e) =>
+              handlePersonalChange("phoneNumber", e.target.value)
+            }
+            placeholder="Phone number*"
+            required
+            inputClassName="text-sm py-2.5"
+          />
         </div>
 
-        <button
+        <Button
           type="submit"
+          size="sm"
           disabled={!allPersonalRequired}
-          className="mt-2 text-sm font-medium py-2.5 px-5 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors w-fit"
+          className="mt-2 w-fit"
         >
           Continue
-        </button>
+        </Button>
       </form>
     )
   );

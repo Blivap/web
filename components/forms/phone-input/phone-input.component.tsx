@@ -170,7 +170,7 @@ export function PhoneInput({
             aria-controls={listboxId}
             aria-label="Country calling code"
             className={classNames(
-              "flex h-full w-full min-w-0 items-center justify-between gap-1 border-0 bg-transparent py-1.5 pl-3 pr-2 text-left text-xs font-medium text-[#111827] outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50 dark:text-white/90",
+              "flex h-full w-full min-w-0 shrink-0 items-center justify-between gap-1 border-0 bg-transparent py-1.5 pl-3 pr-2 text-left text-base font-medium text-[#111827] outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50 dark:text-white/90",
             )}
             onClick={() => !disabled && setOpen((o) => !o)}
             onBlur={() => {
@@ -205,7 +205,7 @@ export function PhoneInput({
                     role="option"
                     aria-selected={o.code === countryCode}
                     className={classNames(
-                      "w-full px-3 py-2 text-left text-xs text-[#111827] hover:bg-[#F3F4F6] dark:text-white/90 dark:hover:bg-white/10",
+                      "w-full px-3 py-2 text-left text-sm text-[#111827] hover:bg-[#F3F4F6] dark:text-white/90 dark:hover:bg-white/10",
                       o.code === countryCode && "bg-[#F3F4F6] dark:bg-white/10",
                     )}
                     onMouseDown={(e) => e.preventDefault()}
@@ -243,7 +243,7 @@ export function PhoneInput({
           placeholder={placeholderNational}
           autoComplete={autoCompleteNational}
           className={classNames(
-            "min-w-0 flex-1 border-0 bg-transparent py-3 pr-3 pl-2 text-xs font-medium text-[#111827] outline-none placeholder:text-[#9794AA] disabled:opacity-50 dark:text-white/90 dark:placeholder:text-white/40",
+            "min-w-0 flex-1 border-0 bg-transparent py-3 pr-3 pl-2 text-base font-medium text-[#111827] outline-none placeholder:text-[#9794AA] disabled:opacity-50 dark:text-white/90 dark:placeholder:text-white/40",
             inputClassName,
           )}
         />

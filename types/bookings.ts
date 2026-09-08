@@ -44,6 +44,8 @@ export type Booking = {
   hospitalName?: string;
   /** From API `reports` array length — trust & safety reports on this booking. */
   reportsCount?: number;
+  /** True when the requester has submitted POST /bookings/:id/rating. */
+  requesterHasRated?: boolean;
 };
 
 export type CreateBookingPayload = {

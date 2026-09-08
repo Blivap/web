@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { publicRoutes } from "@/config/routes";
+import { publicRoutes, routes } from "@/config/routes";
+import { isJwtExpired } from "@/lib/auth/isJwtExpired";
 
 const PUBLIC_ROUTES: string[] = [...publicRoutes];
 
@@ -7,50 +8,44 @@ function isPublicPath(pathname: string): boolean {
   return PUBLIC_ROUTES.includes(pathname);
 }
 
-function isVerifyEmail(pathname: string): boolean {
-  return pathname === "/verify-email";
+function clearAuthCookie(response: NextResponse) {
+  response.cookies.set("auth_token", "", {
+    path: "/",
+    maxAge: 0,
+  });
+  return response;
+}
+
+function redirectToLogin(request: NextRequest, clearCookie: boolean) {
+  const response = NextResponse.redirect(new URL(routes.login, request.url));
+  if (clearCookie) clearAuthCookie(response);
+  return response;
 }
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const token = request.cookies.get("auth_token")?.value;
-  const isAuthenticated = Boolean(token);
+  const rawToken = request.cookies.get("auth_token")?.value ?? null;
+  const tokenExpired = Boolean(rawToken && isJwtExpired(rawToken));
+  const hasValidSession = Boolean(rawToken) && !tokenExpired;
 
   const publicPath = isPublicPath(pathname);
-  const verifyEmailPage = isVerifyEmail(pathname);
 
-  // Authenticated users must not access any public route; send them to overview
-  if (publicPath && isAuthenticated) {
-    return NextResponse.redirect(new URL("/overview", request.url));
+  // Stale JWT cookie: drop it so the client does not keep treating the session as live
+  if (tokenExpired && publicPath) {
+    const response = NextResponse.next();
+    clearAuthCookie(response);
+    return response;
   }
 
-  // Unauthenticated users must not access protected pages (verify-email, dashboard, etc.)
-  if (verifyEmailPage && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/", request.url));
+  // Valid session on auth/marketing public pages → app home
+  if (publicPath && hasValidSession) {
+    return NextResponse.redirect(new URL(routes.overview, request.url));
   }
-  if (pathname === "/overview" && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-  if (pathname.startsWith("/overview/") && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-  if (pathname === "/dashboard" && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-  if (pathname === "/select_avatar" && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-  // /donors, /donors/new, and all /donors/* require authentication
-  if (
-    (pathname === "/donors" || pathname.startsWith("/donors/")) &&
-    !isAuthenticated
-  ) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-  // Any other non-public page requires authentication
-  if (!publicPath && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/", request.url));
+
+  // Protected pages require a non-expired cookie; otherwise go to login
+  if (!publicPath && !hasValidSession) {
+    return redirectToLogin(request, tokenExpired || Boolean(rawToken));
   }
 
   return NextResponse.next();

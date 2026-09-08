@@ -38,6 +38,12 @@ export default function NotificationRepository() {
       });
     },
 
+    markAllRead(): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.notifications.markAllRead, {
+        method: "POST",
+      });
+    },
+
     registerFcmPush(
       payload: FcmPushSubscriptionPayload,
     ): Promise<IResponse<unknown>> {

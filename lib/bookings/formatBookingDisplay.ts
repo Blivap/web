@@ -23,13 +23,21 @@ export type BookingRowDetailParts = {
   when: string;
 };
 
+function hospitalFallbackFromId(hospitalId: string): string {
+  const t = hospitalId.trim();
+  if (!t) return "Hospital";
+  return t.length > SHORT_ID_LEN
+    ? `Hospital ${t.slice(0, SHORT_ID_LEN)}…`
+    : `Hospital ${t}`;
+}
+
 export function bookingRowDetailPartsForViewer(
   b: Booking,
   viewer: "donor" | "requester",
-  hospitalFallback: string,
 ): BookingRowDetailParts {
   const when = formatScheduledLabel(b.scheduledAt);
-  const hospital = b.hospitalName?.trim() || hospitalFallback;
+  const hospital =
+    b.hospitalName?.trim() || hospitalFallbackFromId(b.hospitalId);
   if (viewer === "donor") {
     const who =
       b.requesterDisplayName?.trim() ||
@@ -111,18 +119,12 @@ export function bookingTitleForViewer(
   return "Booking request";
 }
 
-export function bookingSubtitleDonor(
-  b: Booking,
-  hospitalFallback: string,
-): string {
-  const p = bookingRowDetailPartsForViewer(b, "donor", hospitalFallback);
+export function bookingSubtitleDonor(b: Booking): string {
+  const p = bookingRowDetailPartsForViewer(b, "donor");
   return `${p.who} · ${p.hospital} · ${p.when}`;
 }
 
-export function bookingSubtitleRequester(
-  b: Booking,
-  hospitalFallback: string,
-): string {
-  const p = bookingRowDetailPartsForViewer(b, "requester", hospitalFallback);
+export function bookingSubtitleRequester(b: Booking): string {
+  const p = bookingRowDetailPartsForViewer(b, "requester");
   return `${p.who} · ${p.hospital} · ${p.when}`;
 }

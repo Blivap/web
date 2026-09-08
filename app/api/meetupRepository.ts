@@ -1,7 +1,10 @@
 import { fetcher } from "@/services/http";
 import { endpoints } from "@/services/endpoints";
 import type { IResponse } from "@/types";
-import type { MeetupReportPayload } from "@/types/meetups";
+import type {
+  MeetupReportPayload,
+  MeetupTerminatePayload,
+} from "@/types/meetups";
 
 export default function MeetupRepository() {
   return {
@@ -57,9 +60,13 @@ export default function MeetupRepository() {
       });
     },
 
-    cancel(sessionId: string): Promise<IResponse<unknown>> {
-      return fetcher(endpoints.meetups.cancel(sessionId), {
+    terminate(
+      sessionId: string,
+      payload: MeetupTerminatePayload,
+    ): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.meetups.terminate(sessionId), {
         method: "PATCH",
+        data: payload,
       });
     },
   };

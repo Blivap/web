@@ -27,6 +27,7 @@ export const endpoints = {
     public: (userId: string) => `/donors/public/${userId}`,
     /** Clinical / intent profile (JWT). Optional for POST /donors/request-activation. */
     screeningProfile: "/donors/screening-profile",
+    ratings: (id: string) => `/donors/${encodeURIComponent(id)}/ratings`,
   },
 
   /** Per–donation-type AI questionnaire (JWT). Does not gate activation. */
@@ -58,6 +59,8 @@ export const endpoints = {
     report: (id: string) => `/bookings/${encodeURIComponent(id)}/report`,
     /** Optional: notify donor again (rebuzz / reminder). Backend must implement. */
     remind: (id: string) => `/bookings/${encodeURIComponent(id)}/remind`,
+    rating: (bookingId: string) =>
+      `/bookings/${encodeURIComponent(bookingId)}/rating`,
   },
 
   meetups: {
@@ -76,8 +79,8 @@ export const endpoints = {
       `/meetups/${encodeURIComponent(sessionId)}/complete`,
     report: (sessionId: string) =>
       `/meetups/${encodeURIComponent(sessionId)}/report`,
-    cancel: (sessionId: string) =>
-      `/meetups/${encodeURIComponent(sessionId)}/cancel`,
+    terminate: (sessionId: string) =>
+      `/meetups/${encodeURIComponent(sessionId)}/terminate`,
   },
 
   /** Donation coordination chat (`donationId` = booking id). Live traffic uses Socket.IO `/chat`. */
@@ -95,6 +98,7 @@ export const endpoints = {
   notifications: {
     list: "/notifications",
     read: (id: string) => `/notifications/${encodeURIComponent(id)}/read`,
+    markAllRead: "/notifications/mark-all-read",
     pushSubscriptions: {
       fcm: "/notifications/push-subscriptions/fcm",
       web: "/notifications/push-subscriptions/web",

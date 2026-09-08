@@ -163,9 +163,10 @@ export default function LoginPage() {
                       <Button
                         type="submit"
                         disabled={!isValid || isLoading}
+                        loading={isLoading}
                         className="w-full disabled:bg-primary/50 disabled:cursor-not-allowed bg-primary text-white py-[12.5px] rounded-lg font-semibold text-base hover:bg-primary/85 active:bg-primary transition duration-200"
                       >
-                        {isLoading ? "Logging in..." : "Login"}
+                        Login
                       </Button>
                     </div>
                   </form>

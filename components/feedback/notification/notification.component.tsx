@@ -1,28 +1,16 @@
 "use client";
 
+import { Button } from "@/components/button/button.component";
 import classNames from "classnames";
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { FiBell } from "react-icons/fi";
 import { Check, CheckCheck } from "lucide-react";
 import { useNotifications } from "@/hooks/notifications/useNotifications.hook";
+import { formatNotificationTime } from "@/lib/notifications/formatNotificationTime";
 import { useAppSelector } from "@/store/hooks";
 
 export type { NotificationItem } from "@/hooks/notifications/useNotifications.hook";
-
-function formatNotificationTime(createdAt: string): string {
-  const date = new Date(createdAt);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
-}
 
 export const NotificationBell = () => {
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
@@ -36,6 +24,7 @@ export const NotificationBell = () => {
     hasMore,
     isLoading,
     isLoadingMore,
+    isMarkingAllAsRead,
     error,
     refetch,
     loadMore,
@@ -101,11 +90,12 @@ export const NotificationBell = () => {
         size={18}
         className="stroke-2 text-sm text-[#374151] dark:text-white/85"
       />
+
       <span
         ref={panelRef}
         onClick={(e) => e.stopPropagation()}
         className={classNames(
-          "absolute top-10 left-0 flex h-[400px] w-[280px] flex-1 flex-col origin-top-right rounded-xl border border-[#DADADA] bg-white p-3 shadow-[2px_3px_5px_#00000014] md:left-auto md:-right-1 md:w-[350px] dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)]",
+          "absolute top-10 right-0  flex h-[400px] w-[280px] flex-1 flex-col origin-top-right rounded-xl border border-[#DADADA] bg-white p-3 shadow-[2px_3px_5px_#00000014] md:left-auto md:-right-1 md:w-[350px] dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)]",
           isOpen ? "pointer-events-auto" : "pointer-events-none",
         )}
         style={{ visibility: "hidden", opacity: 0, transform: "scale(0.96)" }}
@@ -115,17 +105,21 @@ export const NotificationBell = () => {
             Notifications
           </p>
           {unreadCount > 0 && (
-            <button
+            <Button
               type="button"
+              variant="link"
+              size="xs"
+              className="h-auto gap-1 p-0 text-xs"
+              disabled={isMarkingAllAsRead}
+              loading={isMarkingAllAsRead}
               onClick={(e) => {
                 e.stopPropagation();
                 void markAllAsRead();
               }}
-              className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 dark:hover:text-primary"
             >
               <CheckCheck size={14} />
               Mark all as read
-            </button>
+            </Button>
           )}
         </div>
         {error && (
@@ -174,34 +168,39 @@ export const NotificationBell = () => {
                       </p>
                     </div>
                     {!n.read && (
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="shrink-0 text-primary"
                         onClick={(e) => {
                           e.stopPropagation();
                           void markAsRead(n.id);
                         }}
-                        className="shrink-0 rounded-md p-1.5 text-primary hover:bg-[#E5E7EB] dark:hover:bg-white/10"
                         title="Mark as read"
                         aria-label={`Mark "${n.title}" as read`}
                       >
                         <Check size={14} />
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>
               ))}
               {hasMore && (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="xs"
+                  className="mt-1 w-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     void loadMore();
                   }}
                   disabled={isLoadingMore}
-                  className="mt-1 w-full rounded-lg py-2 text-xs font-medium text-primary hover:bg-[#F3F4F6] disabled:opacity-50 dark:hover:bg-white/10"
+                  loading={isLoadingMore}
                 >
                   {isLoadingMore ? "Loading…" : "Load more"}
-                </button>
+                </Button>
               )}
             </div>
           )}

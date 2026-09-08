@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button/button.component";
 import { BlivapLogo } from "@/public/svg";
 import classNames from "classnames";
 import { gsap } from "gsap";
@@ -157,13 +157,16 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
               <span className="-mt-1 -ml-2">livap</span>
             </p>
           </div>
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={closeDrawer}
-            className="rounded-md p-1.5 text-text-primary transition-colors hover:bg-[#F3F4F6] dark:text-white dark:hover:bg-white/8"
+            className="rounded-md p-1.5"
             aria-label="Close menu"
           >
             <X size={18} />
-          </button>
+          </Button>
         </div>
         <div className="flex flex-col gap-0">
           {navItems.map((e) => {
@@ -205,12 +208,12 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
 
       {/* Top Navigation Bar */}
       <div className="fixed top-0 z-40 flex w-full items-center justify-center border-b border-transparent bg-[#F4F2FF] px-2 sm:pb-0 py-2.5 dark:border-white/8 dark:bg-[#0F1117]/95 sm:px-6 sm:py-3 md:px-8 3xl:px-0">
-        <div className="flex items-center justify-between w-full max-w-[1440px]">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between w-full max-w-360">
+          <div className="flex items-center gap-3 ">
             <Button
               variant="ghost"
               onClick={() => setDrawerOpen((prev) => !prev)}
-              className="h-fit rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-1 text-text-primary transition-colors hover:bg-[#F3F4F6] lg:hidden dark:border-white/10 dark:bg-[#1A1A22] dark:text-white dark:hover:bg-white/8"
+              className="h-fit rounded-md border border-[#E5E7EB] bg-[#F9FAFB] p-1 text-text-primary transition-colors hover:bg-[#F3F4F6] lg:hidden dark:border-white/10 dark:bg-[#1A1A22] dark:text-white dark:hover:bg-white/8 hdden"
               aria-label="Toggle menu"
             >
               <Menu size={24} className="size-6" />
@@ -334,17 +337,19 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                 : "opacity-0 pointer-events-none",
             )}
           >
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={(e) => {
                 e.preventDefault();
                 setBannerVisible(false);
               }}
-              className="absolute top-2 right-2 rounded-full p-1 text-[#6B7280] transition-colors hover:bg-[#E5E7EB] hover:text-black dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+              className="absolute top-2 right-2 rounded-full p-1 text-[#6B7280] dark:text-slate-400"
               aria-label="Close banner"
             >
               <X size={16} />
-            </button>
+            </Button>
             <div className="flex flex-col gap-1.5">
               <p className="text-sm font-semibold leading-snug text-black dark:text-white">
                 Save lives and earn with your blood or sperm

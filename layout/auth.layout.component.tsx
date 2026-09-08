@@ -85,11 +85,11 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       ref={rootRef}
-      className="flex min-h-0 w-full flex-1 items-center justify-center bg-white dark:bg-[#0B0D12]"
+      className="flex min-h-screen w-full  flex-1 items-center justify-center bg-white dark:bg-[#0B0D12]"
     >
       <div
         data-auth-form-shell
-        className="relative z-1 flex w-full justify-center px-3 py-6 md:px-10 xl:px-23"
+        className="relative z-1 h-full grow  flex w-full justify-center items-center px-3 py-6 md:px-10 xl:px-23"
       >
         {children}
       </div>

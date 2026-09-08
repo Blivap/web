@@ -77,9 +77,10 @@ export const Collapsable = ({ isOpen: initialIsOpen }: CollapsableProps) => {
 
   return (
     <div className="rounded-lg border border-[#F5F5F4] bg-white p-5 dark:border-white/10 dark:bg-[#1a1a22]">
-      <button
+      <Button
         type="button"
-        className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#14141a]"
+        variant="ghost"
+        className="h-auto w-full justify-between gap-3 rounded-md px-0 py-0 text-left"
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
         aria-controls="collapsible-health-panel"
@@ -96,7 +97,7 @@ export const Collapsable = ({ isOpen: initialIsOpen }: CollapsableProps) => {
           className="size-4 shrink-0 text-text-tertiary"
           aria-hidden
         />
-      </button>
+      </Button>
 
       <div
         id="collapsible-health-panel"

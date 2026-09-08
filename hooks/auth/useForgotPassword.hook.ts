@@ -19,10 +19,7 @@ export function useForgotPassword() {
       const { status, message, error } =
         await $api.auth.forgotPassword(payload);
       if (status >= 200 && status < 300) {
-        showSnackbar(
-          message ?? "If an account exists, you will receive a reset link.",
-          "success",
-        );
+        showSnackbar("Reset link sent to your email.", "success");
         if (options?.redirectOnSuccess !== false) {
           router.replace("/login");
         }

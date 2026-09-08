@@ -1,7 +1,7 @@
 "use client";
 
 import { HomeLayout } from "../../../layout/home.layout.component";
-import Link from "next/link";
+import { Button } from "@/components/button/button.component";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
@@ -65,11 +65,13 @@ export default function FAQ() {
                 key={index}
                 className="overflow-hidden rounded-lg border border-[#E5E7EB] bg-white dark:border-white/10 dark:bg-[#111827] lg:max-w-1/2"
               >
-                <button
+                <Button
+                  type="button"
+                  variant="ghost"
                   onClick={() =>
                     setOpenIndex(openIndex === index ? null : index)
                   }
-                  className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-[#FAFAFA] dark:hover:bg-white/6 sm:p-4"
+                  className="h-auto w-full justify-between rounded-none p-3 text-left sm:p-4"
                 >
                   <h3 className="pr-3 text-left text-sm font-semibold text-black dark:text-white">
                     {faq.question}
@@ -78,7 +80,7 @@ export default function FAQ() {
                     className={`text-primary shrink-0 transition-transform duration-200 ${openIndex === index ? "rotate-180" : ""}`}
                     size={18}
                   />
-                </button>
+                </Button>
                 {openIndex === index && (
                   <div className="overflow-hidden">
                     <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-0">
@@ -99,12 +101,12 @@ export default function FAQ() {
             <p className="mb-4 text-xs leading-relaxed text-[#6B7280] dark:text-slate-400">
               Contact us and we&apos;ll get back to you as soon as possible.
             </p>
-            <Link
+            <Button
               href="/contact"
-              className="text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 text-white rounded-md inline-block transition-colors"
+              className="rounded-md px-3.5 py-2 text-xs font-medium"
             >
               Contact us
-            </Link>
+            </Button>
           </div>
         </div>
       </div>

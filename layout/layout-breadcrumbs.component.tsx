@@ -112,7 +112,7 @@ export function LayoutBreadcrumbs({ className }: { className?: string }) {
 
   return (
     <nav aria-label="Breadcrumb" className={cn("min-w-0", className)}>
-      <ol className="flex min-w-0 list-none flex-wrap items-center gap-1 text-xs sm:text-sm">
+      <ol className="flex min-w-0 list-none flex-wrap items-center gap-1 text-xs sm:text-sm font-bold font-poppins">
         {items.map((crumb, i) => (
           <li
             key={`${crumb.href}-${i}`}

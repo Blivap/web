@@ -9,11 +9,12 @@ import type { BookingsShellTabItem } from "@/app/(users)/bookings/components/boo
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { AppDispatch, RootState } from "@/store/store";
 import {
-  loadReceivedBookings,
   loadSentBookings,
   patchBookingInLists,
 } from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
+import { bookingNeedsRequesterRating } from "@/lib/ratings/ratedBookingsStorage";
+import type { Booking } from "@/types/bookings";
 import {
   buildBuyerBookingsTabPanels,
   BUYER_TAB_ORDER,
@@ -26,10 +27,14 @@ export { BUYER_TAB_ORDER } from "@/lib/bookings/buyerBookingsTabPanels";
 
 const BOOKINGS_POLL_MS = 20_000;
 
+function donorLabelFromBooking(b: Booking): string {
+  if (b.donorDisplayName?.trim()) return b.donorDisplayName.trim();
+  return `Donor ${b.donorUserId.slice(0, 6)}`;
+}
+
 function scheduleBookingsResync(dispatch: AppDispatch) {
   window.setTimeout(() => {
     void dispatch(loadSentBookings({ silent: true }));
-    void dispatch(loadReceivedBookings({ silent: true }));
   }, 800);
 }
 
@@ -39,7 +44,6 @@ export function useBuyerBookings() {
   const store = useStore<RootState>();
   const user = useAppSelector((s) => s.auth.user);
   const bookings = useAppSelector((s) => s.bookings.sent.items);
-  const hospitalNamesById = useAppSelector((s) => s.bookings.hospitalNamesById);
   const loadState = useAppSelector((s) => s.bookings.sent.status);
   const loadError = useAppSelector((s) => s.bookings.sent.error);
 
@@ -48,7 +52,54 @@ export function useBuyerBookings() {
 
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [remindingId, setRemindingId] = useState<string | null>(null);
-  const [reportBookingId, setReportBookingId] = useState<string | null>(null);
+  const [ratingOpen, setRatingOpen] = useState(false);
+  const [ratingBookingId, setRatingBookingId] = useState<string | null>(null);
+
+  const openRatingForBooking = useCallback(
+    (id: string) => {
+      const b = bookings.find((row) => row.id === id);
+      if (!b || !user?.id || b.requesterId !== user.id) return;
+      if (!bookingNeedsRequesterRating(b)) return;
+      setRatingBookingId(id);
+      setRatingOpen(true);
+    },
+    [bookings, user?.id],
+  );
+
+  const closeRating = useCallback(() => {
+    setRatingOpen(false);
+    setRatingBookingId(null);
+  }, []);
+
+  const activeRatingBooking = useMemo(
+    () =>
+      ratingBookingId
+        ? bookings.find((b) => b.id === ratingBookingId)
+        : undefined,
+    [bookings, ratingBookingId],
+  );
+
+  const activeRatingDonorLabel = useMemo(
+    () =>
+      activeRatingBooking ? donorLabelFromBooking(activeRatingBooking) : "",
+    [activeRatingBooking],
+  );
+
+  const handleRatingSuccess = useCallback(() => {
+    const bid = ratingBookingId;
+    if (bid) {
+      dispatch(
+        patchBookingInLists({
+          id: bid,
+          requesterHasRated: true,
+          status: "completed",
+        }),
+      );
+    }
+    closeRating();
+    showSnackbar("Thanks for your rating.", "success");
+    void dispatch(loadSentBookings({ silent: true }));
+  }, [ratingBookingId, dispatch, closeRating, showSnackbar]);
 
   const loadData = useCallback(() => {
     if (!user?.id) return Promise.resolve();
@@ -56,14 +107,17 @@ export function useBuyerBookings() {
   }, [dispatch, user?.id]);
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    if (!user?.id) return;
+    const status = store.getState().bookings.sent.status;
+    void dispatch(
+      loadSentBookings(status === "ok" ? { silent: true } : undefined),
+    );
+  }, [dispatch, user?.id, store]);
 
   useEffect(() => {
     if (!user?.id) return;
     const timer = window.setInterval(() => {
       void dispatch(loadSentBookings({ silent: true }));
-      void dispatch(loadReceivedBookings({ silent: true }));
     }, BOOKINGS_POLL_MS);
     return () => window.clearInterval(timer);
   }, [dispatch, user?.id]);
@@ -72,7 +126,6 @@ export function useBuyerBookings() {
     const onVis = () => {
       if (document.visibilityState === "visible" && user?.id) {
         void dispatch(loadSentBookings({ silent: true }));
-        void dispatch(loadReceivedBookings({ silent: true }));
       }
     };
     document.addEventListener("visibilitychange", onVis);
@@ -84,12 +137,6 @@ export function useBuyerBookings() {
     [bookings],
   );
   useBookingDeepLinkHighlight(highlightBookingId, loadState, rowIdsFingerprint);
-
-  const hospitalLabel = useCallback(
-    (hospitalId: string) =>
-      hospitalNamesById[hospitalId] ?? `Hospital ${hospitalId.slice(0, 8)}…`,
-    [hospitalNamesById],
-  );
 
   const refreshSent = useCallback(() => {
     void dispatch(loadSentBookings({ silent: true }));
@@ -149,48 +196,27 @@ export function useBuyerBookings() {
     [refreshSent, showSnackbar],
   );
 
-  const submitReport = useCallback(
-    async (payload: { reason: string; details?: string }) => {
-      if (!reportBookingId) return;
-      const id = reportBookingId;
-      const row =
-        store.getState().bookings.sent.items.find((b) => b.id === id) ??
-        store.getState().bookings.received.items.find((b) => b.id === id);
-      const prevCount = row?.reportsCount ?? 0;
-      const { status } = await $api.bookings.report(id, payload);
-      if (status < 200 || status >= 300) {
-        throw new Error("Could not send the report.");
-      }
-      dispatch(patchBookingInLists({ id, reportsCount: prevCount + 1 }));
-      showSnackbar("Thanks — your report was submitted.");
-      scheduleBookingsResync(dispatch);
-    },
-    [dispatch, reportBookingId, showSnackbar, store],
-  );
-
   const tabPanels = useMemo(
     () =>
       buildBuyerBookingsTabPanels({
         bookings,
-        hospitalLabel,
         user,
         highlightBookingId,
         mutatingId,
         remindingId,
         withdrawBooking: (id) => void withdrawBooking(id),
         remindDonor: (id) => void remindDonor(id),
-        setReportBookingId,
+        openRatingForBooking,
       }),
     [
       bookings,
-      hospitalLabel,
       user,
       highlightBookingId,
       mutatingId,
       remindingId,
       withdrawBooking,
       remindDonor,
-      setReportBookingId,
+      openRatingForBooking,
     ],
   );
 
@@ -222,10 +248,12 @@ export function useBuyerBookings() {
     loadState,
     loadError,
     loadData,
-    reportBookingId,
-    setReportBookingId,
-    submitReport,
     shellTabs,
     skeletonTabLabels,
+    ratingOpen,
+    activeRatingBooking,
+    activeRatingDonorLabel,
+    closeRating,
+    handleRatingSuccess,
   };
 }

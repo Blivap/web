@@ -25,6 +25,17 @@ const requiredEnv = (label: string, value: string | undefined): string => {
   return value;
 };
 
+function resolveAppEnv(): Env["env"] {
+  const raw = (
+    first(process.env.NEXT_PUBLIC_ENV, process.env.NODE_ENV) ?? "development"
+  ).toLowerCase();
+
+  if (raw === "production" || raw === "test" || raw === "development") {
+    return raw;
+  }
+  return "development";
+}
+
 /** Canonical site origin; works when `.env` is missing in dev or on Vercel preview. */
 function resolveSiteUrl(): string {
   const vercelUrl = process.env.VERCEL_URL
@@ -38,28 +49,30 @@ function resolveSiteUrl(): string {
 }
 
 const env = (): Env => {
-  const nodeEnv = (process.env.NODE_ENV ?? "development") as Env["env"];
-
   const siteUrl = resolveSiteUrl();
 
   const apiBaseUrl = requiredEnv(
-    "API_BASE_URL (or NEXT_PUBLIC_API_BASE_URL)",
-    first(process.env.API_BASE_URL, process.env.NEXT_PUBLIC_API_BASE_URL),
+    "NEXT_PUBLIC_API_BASE_URL (or NEXT_PUBLIC_API_BASE / API_BASE_URL)",
+    first(
+      process.env.NEXT_PUBLIC_API_BASE_URL,
+      process.env.NEXT_PUBLIC_API_BASE,
+      process.env.API_BASE_URL,
+    ),
   );
 
   const authTokenKey = requiredEnv(
-    "AUTH_TOKEN_KEY (or NEXT_PUBLIC_AUTH_TOKEN_KEY)",
-    first(process.env.AUTH_TOKEN_KEY, process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY),
+    "NEXT_PUBLIC_AUTH_TOKEN_KEY (or AUTH_TOKEN_KEY)",
+    first(process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY, process.env.AUTH_TOKEN_KEY),
   );
 
   const appName = requiredEnv(
-    "APP_NAME (or NEXT_PUBLIC_APP_NAME)",
-    first(process.env.APP_NAME, process.env.NEXT_PUBLIC_APP_NAME),
+    "NEXT_PUBLIC_APP_NAME (or APP_NAME)",
+    first(process.env.NEXT_PUBLIC_APP_NAME, process.env.APP_NAME),
   );
 
   const enableFlag = first(
-    process.env.ENABLE_NOTIFICATIONS,
     process.env.NEXT_PUBLIC_ENABLE_NOTIFICATIONS,
+    process.env.ENABLE_NOTIFICATIONS,
   );
 
   const webPushVapidPublicKey = first(
@@ -68,7 +81,7 @@ const env = (): Env => {
   );
 
   return {
-    env: nodeEnv,
+    env: resolveAppEnv(),
     url: siteUrl,
     apiUrl: apiBaseUrl,
     appName,

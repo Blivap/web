@@ -1,7 +1,8 @@
 "use client";
 
+import { Button } from "@/components/button/button.component";
 import { BookingsShellSkeleton, BookingsShell } from "./bookings-shell.view";
-import { BookingReportModal } from "./booking-report-modal.component";
+import { DonationRatingModal } from "./donation-rating-modal.component";
 import { useBuyerBookings } from "@/hooks/bookings/useBuyerBookings.hook";
 
 export function BuyerBookingsView() {
@@ -10,11 +11,13 @@ export function BuyerBookingsView() {
     loadState,
     loadError,
     loadData,
-    reportBookingId,
-    setReportBookingId,
-    submitReport,
     shellTabs,
     skeletonTabLabels,
+    ratingOpen,
+    activeRatingBooking,
+    activeRatingDonorLabel,
+    closeRating,
+    handleRatingSuccess,
   } = useBuyerBookings();
 
   if (!user?.id) {
@@ -35,26 +38,31 @@ export function BuyerBookingsView() {
         <p className="text-sm font-medium text-text-primary">
           {loadError ?? "Something went wrong."}
         </p>
-        <button
+        <Button
           type="button"
+          variant="link"
+          size="xs"
+          className="mt-3 h-auto p-0 text-xs"
           onClick={() => void loadData()}
-          className="mt-3 text-xs font-medium text-primary hover:underline"
         >
           Try again
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
     <>
-      <BookingReportModal
-        open={reportBookingId !== null}
-        bookingId={reportBookingId}
-        onClose={() => setReportBookingId(null)}
-        onSubmit={submitReport}
-      />
       <BookingsShell defaultTab="sent" tabs={shellTabs} />
+      {activeRatingBooking ? (
+        <DonationRatingModal
+          open={ratingOpen}
+          onClose={closeRating}
+          bookingId={activeRatingBooking.id}
+          donorLabel={activeRatingDonorLabel}
+          onSuccess={handleRatingSuccess}
+        />
+      ) : null}
     </>
   );
 }
