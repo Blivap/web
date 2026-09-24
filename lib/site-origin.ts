@@ -2,12 +2,15 @@ import { config } from "@/config/env";
 
 /**
  * Canonical origin for robots, sitemap, and absolute links.
- * Uses localhost in development so local builds match how you browse the app.
+ * Prefer the configured public site URL (never force localhost when BASE_URL is set).
  */
 export function getSiteOrigin(): string {
   const { url } = config;
   const raw =
-    process.env.NEXT_PUBLIC_SITE_URL || url || "http://localhost:3000";
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    url ||
+    "http://localhost:3000";
   try {
     return new URL(raw).origin;
   } catch {

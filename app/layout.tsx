@@ -8,6 +8,7 @@ import { SnackbarProvider } from "@/components/feedback/snackbar/snackbar.contex
 import { Snackbar } from "@/components/feedback/snackbar/snackbar.component";
 import { ThemePreferenceProvider } from "@/hooks/theme/useThemePreference.hook";
 import { config } from "@/config/env";
+import { getSiteOrigin } from "@/lib/site-origin";
 import StoreProvider from "../store/provider";
 import { StructuredData } from "@/components/seo/structured-data";
 import { AuthChecker } from "@/components/auth/auth-checker";
@@ -50,7 +51,7 @@ const helvetica = localFont({
   ],
   display: "swap",
 });
-const { url, env, googleAnalyticsId } = config;
+const { googleAnalyticsId } = config;
 const themeBootstrapScript = `
 (() => {
   const preferenceKey = "blivap-theme";
@@ -88,7 +89,7 @@ const themeBootstrapScript = `
 })();
 `;
 
-const siteUrl = env === "development" ? "http://localhost:3000" : url;
+const siteUrl = getSiteOrigin();
 // Ensure OG image URL is absolute
 const ogImageUrl = new URL("/api/og", siteUrl).toString();
 
@@ -105,7 +106,7 @@ export const metadata: Metadata = {
     template: "%s | Blivap",
   },
   description:
-    "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
+    "Blivap connects people in need with donors and healthcare support. Discover, connect, and make a difference.",
   keywords: [
     "blood donation",
     "sperm donation",
@@ -142,7 +143,7 @@ export const metadata: Metadata = {
     siteName: "Blivap",
     title: "Blood Donation in Nigeria | Blivap",
     description:
-      "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
+      "Blivap connects people in need with donors and healthcare support. Discover, connect, and make a difference.",
     images: [
       {
         url: ogImageUrl,
@@ -157,7 +158,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Blood Donation in Nigeria | Blivap",
     description:
-      "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
+      "Blivap connects people in need with donors and healthcare support. Discover, connect, and make a difference.",
     images: [ogImageUrl],
     creator: "@blivap",
     site: "@blivap",
