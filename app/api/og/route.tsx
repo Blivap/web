@@ -3,6 +3,8 @@ import { ImageResponse } from "@vercel/og";
 export const runtime = "edge";
 export const alt = "Blivap — Give blood. Save lives.";
 export const contentType = "image/png";
+/** Cache generated PNGs so X/Twitterbot does not hit a cold render every time. */
+export const revalidate = 86400;
 export const size = {
   width: 1200,
   height: 630,
@@ -84,7 +86,9 @@ async function resolveOgLogoDataUri(requestUrl: URL): Promise<string | null> {
 export async function GET(request: Request) {
   try {
     const requestUrl = new URL(request.url);
-    const nameRaw = requestUrl.searchParams.get("name");
+    const nameRaw =
+      requestUrl.searchParams.get("name") ??
+      requestUrl.searchParams.get("title");
     const appName = nameRaw ? clampText(safeDecode(nameRaw), 48) : "Blivap";
 
     const logoDataUri = await resolveOgLogoDataUri(requestUrl);
@@ -195,6 +199,10 @@ export async function GET(request: Request) {
       </div>,
       {
         ...size,
+        headers: {
+          "Cache-Control":
+            "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+        },
         fonts: fontData
           ? [
               {

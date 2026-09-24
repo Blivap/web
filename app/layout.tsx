@@ -90,8 +90,7 @@ const themeBootstrapScript = `
 `;
 
 const siteUrl = getSiteOrigin();
-// Ensure OG image URL is absolute
-const ogImageUrl = new URL("/api/og", siteUrl).toString();
+const ogImageUrl = new URL("/og.png", siteUrl).toString();
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -159,7 +158,14 @@ export const metadata: Metadata = {
     title: "Blood Donation in Nigeria | Blivap",
     description:
       "Blivap connects people in need with donors and healthcare support. Discover, connect, and make a difference.",
-    images: [ogImageUrl],
+    images: [
+      {
+        url: ogImageUrl,
+        width: 1200,
+        height: 630,
+        alt: "Blivap — Blood and Sperm Donation Platform",
+      },
+    ],
     creator: "@blivap",
     site: "@blivap",
   },

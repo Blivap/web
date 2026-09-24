@@ -29,8 +29,12 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/api/og"],
+        allow: ["/", "/api/og", "/og.png"],
         disallow: [...DISALLOWED_PREFIXES],
+      },
+      {
+        userAgent: "Twitterbot",
+        allow: ["/", "/api/og", "/og.png"],
       },
     ],
     sitemap: absoluteSiteUrl("/sitemap.xml"),
