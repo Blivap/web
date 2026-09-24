@@ -11,6 +11,11 @@ type Env = {
    * Optional; web push registration is skipped when unset.
    */
   webPushVapidPublicKey: string | undefined;
+  /**
+   * Google Analytics 4 measurement ID (e.g. G-XXXXXXXXXX).
+   * Optional; analytics is skipped when unset.
+   */
+  googleAnalyticsId: string | undefined;
   authTokenKey: string;
 };
 
@@ -80,6 +85,11 @@ const env = (): Env => {
     process.env.WEB_PUSH_VAPID_PUBLIC_KEY,
   );
 
+  const googleAnalyticsId = first(
+    process.env.NEXT_PUBLIC_GA_ID,
+    process.env.GA_ID,
+  );
+
   return {
     env: resolveAppEnv(),
     url: siteUrl,
@@ -87,6 +97,7 @@ const env = (): Env => {
     appName,
     enableNotifications: enableFlag === "true",
     webPushVapidPublicKey,
+    googleAnalyticsId,
     authTokenKey,
   };
 };

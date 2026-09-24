@@ -98,7 +98,7 @@ export function ProfileAccountMenu({
           "flex h-auto items-center rounded-full border border-transparent hover:border-[#E5E7EB] dark:hover:border-white/15",
           compact
             ? "size-10 justify-center p-0"
-            : "w-full justify-between gap-3 px-0 pr-2",
+            : "w-full justify-between gap-3 px-2 py-1 pr-2.5",
         )}
       >
         <div
