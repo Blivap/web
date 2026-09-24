@@ -1,12 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   Bell,
   ChevronRight,
   LayoutDashboard,
   Pencil,
-  Search,
   Users,
   Wallet,
 } from "lucide-react";
@@ -15,10 +14,7 @@ import { Layout } from "../../../layout/layout.component";
 import { Avatar } from "../../../components/ui/Avatar/avatar.component";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
-import {
-  DONATION_TYPE_ENTRIES,
-  isDonorRegistrationEnabled,
-} from "@/lib/donations/donation-types";
+import { DONATION_TYPE_ENTRIES } from "@/lib/donations/donation-types";
 import { donationPathwayOverviewHref } from "@/lib/donations/donation-pathway-questionnaire-type";
 import { routes } from "@/config/routes";
 import { $api } from "@/app/api";
@@ -33,7 +29,6 @@ import { OverviewActiveDonorCard } from "./components/overview-active-donor-card
 import { SCREENING_DONATION_TYPE_OPTIONS } from "@/lib/donors/screeningDonationTypes";
 import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component";
 import { Button } from "@/components/button/button.component";
-import { Input } from "@/components/forms/inputs/input.component";
 import { OverviewNotificationsTab } from "./components/overview-notifications-tab.component";
 import { Skeleton } from "@/components/ui/skeleton.component";
 
@@ -51,18 +46,11 @@ function donationTypeLabel(type: string): string {
   );
 }
 
-const pathwayFilterChipBase =
-  "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#14141a]";
-
 export default function OverviewPage() {
   const { user } = useDashboard();
   const [myCooldownEndsAt, setMyCooldownEndsAt] = useState<
     string | null | undefined
   >(undefined);
-  const [pathwaySearch, setPathwaySearch] = useState("");
-  const [pathwayFilter, setPathwayFilter] = useState<
-    "all" | "live" | "interest"
-  >("all");
   const [activeDonors, setActiveDonors] = useState<Donor[]>([]);
   const [activeDonorsLoadState, setActiveDonorsLoadState] = useState<
     "idle" | "loading" | "ok" | "error"
@@ -112,24 +100,6 @@ export default function OverviewPage() {
       cancelled = true;
     };
   }, []);
-
-  const filteredPathways = useMemo(() => {
-    const q = pathwaySearch.trim().toLowerCase();
-    return DONATION_TYPE_ENTRIES.filter((entry) => {
-      if (pathwayFilter === "live" && !isDonorRegistrationEnabled(entry))
-        return false;
-      if (pathwayFilter === "interest" && isDonorRegistrationEnabled(entry))
-        return false;
-      if (
-        q &&
-        !entry.label.toLowerCase().includes(q) &&
-        !entry.slug.toLowerCase().includes(q)
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [pathwaySearch, pathwayFilter]);
 
   return (
     <Layout>
@@ -218,135 +188,46 @@ export default function OverviewPage() {
 
               <TabsContent value="overview" className="mt-0">
                 <div className="flex min-w-0 flex-col gap-8 lg:gap-10">
-                  {/* Pathways directory */}
+                  {/* Donation types */}
                   <section
                     id="donation-pathways"
-                    className="flex max-h-none scroll-mt-24 flex-col overflow-hidden rounded-2xl border border-[#DADADA] bg-white md:max-h-[min(65vh,520px)] lg:max-h-[min(78vh,600px)] dark:border-white/10 dark:bg-[#1a1a22]"
+                    className="scroll-mt-24 overflow-hidden rounded-2xl border border-[#DADADA] bg-white dark:border-white/10 dark:bg-[#1a1a22]"
                   >
-                    <div className="shrink-0 space-y-4 border-b border-border px-5 py-5 sm:px-6 dark:border-white/10">
-                      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                        <h2 className="text-lg font-semibold text-text-primary">
-                          Donation pathways
-                        </h2>
-
-                        <p className="text-xs font-medium text-text-tertiary">
-                          {filteredPathways.length} shown
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-3 lg:gap-4">
-                        <Input
-                          name="pathwaySearch"
-                          type="search"
-                          value={pathwaySearch}
-                          onChange={(e) => setPathwaySearch(e.target.value)}
-                          placeholder="Search pathways…"
-                          autoComplete="off"
-                          aria-label="Search donation pathways"
-                          icon={
-                            <Search
-                              className="size-4 text-text-tertiary"
+                    <div className="border-b border-border px-5 py-5 sm:px-6 dark:border-white/10">
+                      <h2 className="text-lg font-semibold text-text-primary">
+                        Start a donation
+                      </h2>
+                      <p className="mt-1 text-sm text-text-secondary">
+                        Open registration for blood, sperm, or egg donation.
+                      </p>
+                    </div>
+                    <ul className="grid grid-cols-1 gap-2 p-4 sm:p-5 md:grid-cols-3">
+                      {DONATION_TYPE_ENTRIES.map((entry) => (
+                        <li key={entry.slug}>
+                          <Link
+                            href={donationPathwayOverviewHref(entry.slug)}
+                            className="flex items-start gap-3 rounded-xl border border-border bg-[#FAFAFA] px-3.5 py-3 text-left text-sm transition hover:border-primary/30 hover:bg-white hover:shadow-sm dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                          >
+                            <span
+                              className="mt-1.5 size-2 shrink-0 rounded-full bg-primary"
                               aria-hidden
                             />
-                          }
-                          containerClassName="min-w-0 flex-1"
-                          inputClassName="rounded-xl border-0 bg-[#F7F7F8] py-2.5 dark:bg-white/5"
-                        />
-                        <div
-                          className="flex flex-wrap gap-2"
-                          role="group"
-                          aria-label="Filter pathways"
-                        >
-                          {(
-                            [
-                              ["all", "All"],
-                              ["live", "Open now"],
-                              ["interest", "Coming soon"],
-                            ] as const
-                          ).map(([value, label]) => (
-                            <Button
-                              key={value}
-                              type="button"
-                              variant={
-                                pathwayFilter === value ? "default" : "outline"
-                              }
-                              size="xs"
-                              onClick={() => setPathwayFilter(value)}
-                              className={`${pathwayFilterChipBase} ${
-                                pathwayFilter === value
-                                  ? "border-primary bg-primary text-white"
-                                  : "border-border bg-white text-text-secondary hover:border-primary/25 hover:text-text-primary dark:border-white/10 dark:bg-white/5"
-                              }`}
-                            >
-                              {label}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
-                      {filteredPathways.length === 0 ? (
-                        <p className="py-8 text-center text-sm text-text-secondary">
-                          No pathways match your search. Try another keyword or
-                          filter.
-                        </p>
-                      ) : (
-                        <ul className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-                          {filteredPathways.map((entry) => {
-                            const registrationEnabled =
-                              isDonorRegistrationEnabled(entry);
-                            const itemClassName =
-                              "flex items-start gap-3 rounded-xl border border-border bg-[#FAFAFA] px-3.5 py-3 text-left text-sm dark:border-white/10 dark:bg-white/5";
-                            const itemContent = (
-                              <>
-                                <span
-                                  className={`mt-1.5 size-2 shrink-0 rounded-full ${
-                                    registrationEnabled
-                                      ? "bg-primary"
-                                      : "bg-text-tertiary/40"
-                                  }`}
-                                  aria-hidden
-                                />
-                                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                                  <span className="font-medium leading-snug text-text-primary">
-                                    {entry.label}
-                                  </span>
-                                  <span className="text-[11px] font-medium uppercase tracking-wide text-text-tertiary">
-                                    {registrationEnabled
-                                      ? "Open for registration"
-                                      : "Coming soon"}
-                                  </span>
-                                </span>
-                                {registrationEnabled ? (
-                                  <ChevronRight className="mt-0.5 size-4 shrink-0 text-text-tertiary" />
-                                ) : null}
-                              </>
-                            );
-
-                            return (
-                              <li key={entry.slug}>
-                                {registrationEnabled ? (
-                                  <Link
-                                    href={donationPathwayOverviewHref(
-                                      entry.slug,
-                                    )}
-                                    className={`${itemClassName} transition hover:border-primary/30 hover:bg-white hover:shadow-sm dark:hover:bg-white/10`}
-                                  >
-                                    {itemContent}
-                                  </Link>
-                                ) : (
-                                  <div
-                                    className={`${itemClassName} cursor-not-allowed opacity-60`}
-                                    aria-disabled="true"
-                                  >
-                                    {itemContent}
-                                  </div>
-                                )}
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      )}
-                    </div>
+                            <span className="flex min-w-0 flex-1 flex-col gap-1">
+                              <span className="font-medium leading-snug text-text-primary">
+                                {entry.label}
+                              </span>
+                              <span className="text-[11px] font-medium uppercase tracking-wide text-text-tertiary">
+                                Open for registration
+                              </span>
+                            </span>
+                            <ChevronRight
+                              className="mt-0.5 size-4 shrink-0 text-text-tertiary"
+                              aria-hidden
+                            />
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   </section>
 
                   {/* Active donors */}
