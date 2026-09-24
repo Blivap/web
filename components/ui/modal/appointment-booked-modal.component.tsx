@@ -97,7 +97,7 @@ export function AppointmentBookedModal({
         variant="primary"
         loading={sending}
         disabled={!code.trim() || sending}
-        className="mt-8 rounded-none! min-w-[140px] px-10 py-3.5 text-base font-bold shadow-none"
+        className="mt-8 rounded-none! min-w-35 px-10 py-3.5 text-base font-bold shadow-none"
         onClick={() => void handleSend()}
       >
         Send

@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { publicRoutes, routes } from "@/config/routes";
+import {
+  isNotFoundPath,
+  publicRoutes,
+  requiresAuth,
+  routes,
+} from "@/config/routes";
 import { isJwtExpired } from "@/lib/auth/isJwtExpired";
+import {
+  AUTH_TOKEN_COOKIE,
+  AUTH_TOKEN_EXPIRES_COOKIE,
+  isExpiresAtPast,
+} from "@/lib/auth/sessionExpiry";
+import { loginWithReturn } from "@/lib/navigation/authRedirect";
 
 const PUBLIC_ROUTES: string[] = [...publicRoutes];
 
@@ -9,7 +20,11 @@ function isPublicPath(pathname: string): boolean {
 }
 
 function clearAuthCookie(response: NextResponse) {
-  response.cookies.set("auth_token", "", {
+  response.cookies.set(AUTH_TOKEN_COOKIE, "", {
+    path: "/",
+    maxAge: 0,
+  });
+  response.cookies.set(AUTH_TOKEN_EXPIRES_COOKIE, "", {
     path: "/",
     maxAge: 0,
   });
@@ -17,7 +32,9 @@ function clearAuthCookie(response: NextResponse) {
 }
 
 function redirectToLogin(request: NextRequest, clearCookie: boolean) {
-  const response = NextResponse.redirect(new URL(routes.login, request.url));
+  const { pathname, search } = request.nextUrl;
+  const loginPath = loginWithReturn(pathname, search);
+  const response = NextResponse.redirect(new URL(loginPath, request.url));
   if (clearCookie) clearAuthCookie(response);
   return response;
 }
@@ -25,8 +42,11 @@ function redirectToLogin(request: NextRequest, clearCookie: boolean) {
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const rawToken = request.cookies.get("auth_token")?.value ?? null;
-  const tokenExpired = Boolean(rawToken && isJwtExpired(rawToken));
+  const rawToken = request.cookies.get(AUTH_TOKEN_COOKIE)?.value ?? null;
+  const expiresRaw =
+    request.cookies.get(AUTH_TOKEN_EXPIRES_COOKIE)?.value ?? null;
+  const tokenExpired =
+    isExpiresAtPast(expiresRaw) || Boolean(rawToken && isJwtExpired(rawToken));
   const hasValidSession = Boolean(rawToken) && !tokenExpired;
 
   const publicPath = isPublicPath(pathname);
@@ -39,12 +59,13 @@ export function proxy(request: NextRequest) {
   }
 
   // Valid session on auth/marketing public pages → app home
-  if (publicPath && hasValidSession) {
+  // Keep not-found reachable so 404 UI still works while logged in.
+  if (publicPath && hasValidSession && !isNotFoundPath(pathname)) {
     return NextResponse.redirect(new URL(routes.overview, request.url));
   }
 
-  // Protected pages require a non-expired cookie; otherwise go to login
-  if (!publicPath && !hasValidSession) {
+  // Known protected areas require a session; unknown paths fall through to not-found
+  if (requiresAuth(pathname) && !hasValidSession) {
     return redirectToLogin(request, tokenExpired || Boolean(rawToken));
   }
 

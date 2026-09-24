@@ -22,7 +22,7 @@ export default async function DonationTypePage({
 
   return (
     <Layout>
-      <Suspense fallback={<div className="min-h-[200px]" aria-hidden />}>
+      <Suspense fallback={<div className="min-h-50" aria-hidden />}>
         <DonationTypeFlow entry={entry} />
       </Suspense>
     </Layout>

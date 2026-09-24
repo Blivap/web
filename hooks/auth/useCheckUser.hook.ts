@@ -6,13 +6,14 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";
 import { forceSessionEnd } from "@/lib/auth/forceSessionEnd";
-import { isJwtExpired } from "@/lib/auth/isJwtExpired";
+import { AUTH_TOKEN_COOKIE, isSessionExpired } from "@/lib/auth/sessionExpiry";
+import { readStoredTokenExpires } from "@/lib/auth/authCookies";
 import Cookies from "js-cookie";
 
 export const useCheckUser = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { token, isAuthenticated, user } = useAppSelector(
+  const { token, tokenExpiresAt, isAuthenticated, user } = useAppSelector(
     (state) => state.auth,
   );
   const hasCheckedRef = useRef<boolean>(false);
@@ -20,7 +21,7 @@ export const useCheckUser = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const cookieToken = Cookies.get("auth_token");
+      const cookieToken = Cookies.get(AUTH_TOKEN_COOKIE);
       const hasToken = Boolean(token || cookieToken);
       const activeToken = token || cookieToken || "";
 
@@ -29,8 +30,10 @@ export const useCheckUser = () => {
         return;
       }
 
-      // Cookie/JWT already past exp — clear and send to login before calling /me
-      if (activeToken && isJwtExpired(activeToken)) {
+      const expiresAt = tokenExpiresAt ?? readStoredTokenExpires();
+
+      // Server expiry or JWT exp — clear and send to login before calling /me
+      if (isSessionExpired(activeToken, expiresAt)) {
         forceSessionEnd({
           replace: (path) => router.replace(path),
         });
@@ -78,7 +81,7 @@ export const useCheckUser = () => {
     };
 
     void checkUser();
-  }, [token, isAuthenticated, user, dispatch, router]);
+  }, [token, tokenExpiresAt, isAuthenticated, user, dispatch, router]);
 
   return { isChecking };
 };

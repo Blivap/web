@@ -25,7 +25,7 @@ export const routes = {
   givingBlood: "/giving-blood",
   healthcare: "/healthcare",
   /** Note: `&` is literal in the URL path. */
-  healthcareProfessionals: "/healthcare&professionals",
+  healthcareProfessionals: "/healthcare-professionals",
   news: "/news",
   ourExpertise: "/our-expertise",
   research: "/research",
@@ -100,3 +100,43 @@ export const publicRoutes: readonly string[] = [
   routes.terms,
   routes.vulnerabilityDisclosure,
 ];
+
+function normalizeRoutePath(pathname: string): string {
+  const path = pathname.split("?")[0] ?? pathname;
+  if (path.length > 1 && path.endsWith("/")) return path.slice(0, -1);
+  return path;
+}
+
+export function isNotFoundPath(pathname: string): boolean {
+  const path = normalizeRoutePath(pathname);
+  return path === routes.notFound || path === routes.notFoundAlt;
+}
+
+/**
+ * App areas that require a session. Unknown paths are intentionally excluded so
+ * Next.js can render `app/not-found.tsx` instead of bouncing guests to `/login`.
+ */
+export const protectedRoutePrefixes: readonly string[] = [
+  routes.overview,
+  routes.dashboard,
+  routes.donors,
+  routes.wallet,
+  routes.history,
+  routes.bookings,
+  "/booking",
+  routes.settings,
+  "/verify-id",
+  "/schedule-appointment",
+  "/donations",
+  routes.verifyEmail,
+  routes.selectAvatar,
+  routes.waitlist,
+];
+
+export function requiresAuth(pathname: string): boolean {
+  const path = normalizeRoutePath(pathname);
+  if (publicRoutes.includes(path)) return false;
+  return protectedRoutePrefixes.some(
+    (prefix) => path === prefix || path.startsWith(`${prefix}/`),
+  );
+}

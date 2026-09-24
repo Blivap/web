@@ -3,6 +3,10 @@ import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/slices/authSlice";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { $api } from "@/app/api";
+import {
+  loginWithReturn,
+  pathFromLocation,
+} from "@/lib/navigation/authRedirect";
 
 export const useLogout = () => {
   const dispatch = useAppDispatch();
@@ -10,6 +14,7 @@ export const useLogout = () => {
   const { showSnackbar } = useSnackbar();
 
   const handleLogout = async () => {
+    const returnPath = pathFromLocation();
     try {
       await $api.auth.logout();
     } catch {
@@ -17,7 +22,7 @@ export const useLogout = () => {
     }
     dispatch(logout());
     showSnackbar("Logged out successfully", "success");
-    router.replace("/login");
+    router.replace(loginWithReturn(returnPath));
   };
 
   return { handleLogout };

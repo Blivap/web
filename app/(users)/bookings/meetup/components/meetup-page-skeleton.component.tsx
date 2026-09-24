@@ -30,8 +30,8 @@ function VerificationCardSk({ emphasize }: { emphasize?: boolean }) {
         <Sk className="h-4 w-20" />
         <Sk className="h-4 w-14 rounded-md" />
       </div>
-      <Sk className="h-[52px] w-full rounded-lg" />
-      <Sk className="h-[52px] w-full rounded-lg" />
+      <Sk className="h-13 w-full rounded-lg" />
+      <Sk className="h-13 w-full rounded-lg" />
     </div>
   );
 }
@@ -93,7 +93,7 @@ export function MeetupPageSkeleton() {
           <Sk className="h-9 w-9 rounded-md" />
           <div className="mt-3 flex flex-col items-center gap-3 rounded-lg bg-white p-4 dark:bg-white">
             <Sk className="h-3 w-16" />
-            <Sk className="aspect-square w-[min(100%,180px)] max-w-[180px] rounded-md" />
+            <Sk className="aspect-square w-[min(100%,180px)] max-w-45 rounded-md" />
           </div>
         </div>
 
@@ -101,7 +101,7 @@ export function MeetupPageSkeleton() {
           <Sk className="h-3.5 w-40 max-w-full" />
           <Sk className="mt-2 h-3 w-full max-w-md" />
           <div className="mt-2 flex max-w-full flex-wrap items-end gap-2">
-            <Sk className="h-10 w-full max-w-44 min-w-[7rem] flex-1 rounded-lg sm:flex-none" />
+            <Sk className="h-10 w-full max-w-44 min-w-28 flex-1 rounded-lg sm:flex-none" />
             <Sk className="h-9 w-20 shrink-0 rounded-lg" />
           </div>
         </div>
@@ -127,7 +127,7 @@ export function MeetupPageSkeleton() {
             <Sk className="h-4 w-28" />
             <Sk className="h-5 w-14 rounded-full" />
           </div>
-          <Sk className="h-9 w-full max-w-[9.5rem] shrink-0 rounded-lg sm:w-36" />
+          <Sk className="h-9 w-full max-w-38 shrink-0 rounded-lg sm:w-36" />
         </div>
         <Sk className="mt-2 h-3 w-full max-w-xl" />
         <div className="mt-3 max-h-64 space-y-2 overflow-hidden rounded-lg border border-border bg-[#FAFAFB] p-3 dark:border-white/10 dark:bg-black/20">
@@ -142,15 +142,15 @@ export function MeetupPageSkeleton() {
           </div>
         </div>
         <div className="mt-3 flex flex-row items-center gap-2">
-          <Sk className="h-11 min-h-[44px] min-w-0 flex-1 rounded-lg" />
+          <Sk className="h-11 min-h-11 min-w-0 flex-1 rounded-lg" />
           <Sk className="size-11 shrink-0 rounded-lg" />
         </div>
       </section>
 
       {/* Terminate / report */}
       <div className="flex flex-wrap gap-2">
-        <Sk className="h-10 w-full max-w-[8.5rem] rounded-lg sm:w-32" />
-        <Sk className="h-10 w-full max-w-[8.5rem] rounded-lg sm:w-36" />
+        <Sk className="h-10 w-full max-w-34 rounded-lg sm:w-32" />
+        <Sk className="h-10 w-full max-w-34 rounded-lg sm:w-36" />
       </div>
     </div>
   );

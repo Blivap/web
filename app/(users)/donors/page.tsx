@@ -295,7 +295,7 @@ export default function DonorsPage() {
               aria-label="Search donors"
             />
 
-            <div className="w-full sm:w-[200px]">
+            <div className="w-full sm:w-50">
               <Select
                 value={activeBloodType}
                 onValueChange={(v) => handleBloodTypeChange(v as BloodType)}

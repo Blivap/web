@@ -180,7 +180,7 @@ export default function OverviewPage() {
         {/* Tabs: shadcn-style Radix tabs + ?tab= sync */}
         <div className="flex flex-col gap-8">
           <Suspense
-            fallback={<div className="flex min-h-[200px] flex-col gap-10" />}
+            fallback={<div className="flex min-h-50 flex-col gap-10" />}
           >
             <Tabs
               defaultValue="overview"
