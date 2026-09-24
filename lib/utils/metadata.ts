@@ -25,12 +25,10 @@ export function generateMetadata({
   robots,
 }: PageMetadata): Metadata {
   const pageUrl = new URL(path || "/", siteUrl).toString();
+  // Prefer a static PNG — X/Twitter often fails on cold dynamic /api/og renders.
   const ogImageUrl = image
     ? new URL(image, siteUrl).toString()
-    : new URL(
-        `/api/og${path ? `?title=${encodeURIComponent(title)}` : ""}`,
-        siteUrl,
-      ).toString();
+    : new URL("/og.png", siteUrl).toString();
 
   const defaultKeywords = [
     "blood donation",
@@ -75,7 +73,14 @@ export function generateMetadata({
       card: "summary_large_image",
       title: ogTitle || title,
       description: ogDescription || description,
-      images: [ogImageUrl],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${title} | Blivap`,
+        },
+      ],
       creator: "@blivap",
       site: "@blivap",
     },
