@@ -72,7 +72,7 @@ export function DonorBasicsStep({
           <h2 className="text-lg font-semibold text-text-primary mb-2">
             Blood type and location
           </h2>
-          <p className="text-sm text-text-secondary max-w-[600px]">
+          <p className="text-sm text-text-secondary max-w-150">
             First we register your donor profile with your blood type. Add where
             you are based with detailed location information. This is required
             and used to match recipients with nearby donors. Next you&apos;ll

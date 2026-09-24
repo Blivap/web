@@ -67,6 +67,9 @@ export type IAuthResponse = {
   accessToken?: string;
   access_token?: string;
   token?: string;
+  /** ISO timestamp when the access token expires (from login/register). */
+  accessTokenExpires?: string;
+  access_token_expires?: string;
   user?: IUser | null;
 };
 

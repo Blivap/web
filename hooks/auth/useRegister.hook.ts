@@ -10,6 +10,7 @@ import { setCredentials, setUser } from "@/store/slices/authSlice";
 import { useRouter, useSearchParams } from "next/navigation";
 import { routes } from "@/config/routes";
 import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
+import { extractAccessTokenExpires } from "@/lib/auth/sessionExpiry";
 
 export const useRegister = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -60,7 +61,12 @@ export const useRegister = () => {
         );
 
         if (token) {
-          dispatch(setCredentials({ token }));
+          dispatch(
+            setCredentials({
+              token,
+              expiresAt: extractAccessTokenExpires(authData),
+            }),
+          );
           let userPayload = normalizeUser(authData?.user) ?? null;
           if (!userPayload) {
             try {

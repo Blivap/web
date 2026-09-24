@@ -23,18 +23,18 @@ function SkeletonStepProgress({ currentStep }: { currentStep: number }) {
               <div className="flex flex-col gap-1.5 w-full sm:w-auto">
                 <div className="flex items-center gap-1">
                   <div
-                    className={`inline-flex size-[13px] rounded-full shrink-0 ${
+                    className={`inline-flex size-3.25 rounded-full shrink-0 ${
                       isActive
                         ? "bg-primary/40"
                         : isPast
                           ? "bg-primary/30"
-                          : `${pulse} w-[13px] h-[13px] !rounded-full`
+                          : `${pulse} w-3.25 h-3.25 !rounded-full`
                     }`}
                   />
                   <div className={`h-3 w-9 ${pulse}`} />
                 </div>
                 <div
-                  className={`h-4 max-w-[180px] rounded ${
+                  className={`h-4 max-w-45 rounded ${
                     isActive ? `sm:max-w-none ${pulse} w-40` : `${pulse} w-32`
                   }`}
                 />
@@ -44,10 +44,10 @@ function SkeletonStepProgress({ currentStep }: { currentStep: number }) {
         })}
       </div>
       <div
-        className="absolute bg-primary/35 h-[3px] bottom-0 left-0 transition-all duration-700 ease-in-out hidden sm:block rounded-sm"
+        className="absolute bg-primary/35 h-0.75 bottom-0 left-0 transition-all duration-700 ease-in-out hidden sm:block rounded-sm"
         style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
       />
-      <div className="w-full h-[3px] bg-border hidden sm:block rounded-sm overflow-hidden" />
+      <div className="w-full h-0.75 bg-border hidden sm:block rounded-sm overflow-hidden" />
     </nav>
   );
 }
@@ -69,7 +69,7 @@ export function NewDonorPageSkeleton() {
         <div className="flex flex-col gap-6 mt-6 xl:mt-10">
           <div>
             <div className={`h-7 w-56 mb-2 ${pulse}`} />
-            <div className="space-y-2 max-w-[600px]">
+            <div className="space-y-2 max-w-150">
               <div className={`h-4 w-full ${pulse}`} />
               <div className={`h-4 w-full ${pulse}`} />
               <div className={`h-4 w-[88%] ${pulse}`} />

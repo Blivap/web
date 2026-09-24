@@ -117,7 +117,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
     { href: "/", label: "Home" },
     { href: "/researchers", label: "Researchers" },
     {
-      href: "/healthcare&professionals",
+      href: "/healthcare-professionals",
       label: "Healthcare professionals",
     },
     {
@@ -207,8 +207,8 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
       </div>
 
       {/* Top Navigation Bar */}
-      <div className="fixed top-0 z-40 flex w-full items-center justify-center border-b border-transparent bg-[#F4F2FF] px-2 sm:pb-0 py-2.5 dark:border-white/8 dark:bg-[#0F1117]/95 sm:px-6 sm:py-3 md:px-8 3xl:px-0">
-        <div className="flex items-center justify-between w-full max-w-360">
+      <div className="fixed top-0 z-40 flex w-full items-center justify-center border-b border-transparent bg-[#F4F2FF] py-2.5 dark:border-white/8 dark:bg-[#0F1117]/95 sm:py-3">
+        <div className="flex w-full max-w-360 items-center justify-between px-4 sm:px-8 lg:px-20">
           <div className="flex items-center gap-3 ">
             <Button
               variant="ghost"
@@ -227,7 +227,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                     key={`nav-link-${e.label}`}
                     href={e.href}
                     className={classNames(
-                      "rounded-t-md px-3.5 pt-2.5 pb-3.5 text-sm font-medium transition-colors duration-200",
+                      "rounded-md px-3.5 py-2.5  text-sm font-medium transition-colors duration-200",
                       active
                         ? "bg-white text-black dark:bg-white/10 dark:text-white"
                         : "text-[#374151] hover:bg-white/60 dark:text-slate-300 dark:hover:bg-white/6 dark:hover:text-white",
@@ -244,7 +244,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
             <Link
               href="/about"
               className={classNames(
-                "hidden rounded-t-md px-3.5 pt-2.5 pb-3.5 text-sm font-medium text-black transition-colors hover:bg-white/60 sm:inline dark:text-slate-300 dark:hover:bg-white/6 dark:hover:text-white",
+                "hidden rounded-md px-3.5 py-2.5 text-sm font-medium text-black transition-colors hover:bg-white/60 sm:inline dark:text-slate-300 dark:hover:bg-white/6 dark:hover:text-white",
                 {
                   "bg-white dark:bg-white/10 dark:text-white":
                     isActive("/about"),
@@ -266,12 +266,16 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
 
       <div
         ref={contentRef}
-        className="max-w-[1440px] w-full lg:mx-auto px-2 sm:px-6 sm:py-3 md:px-8 3xl:px-0 overflow-hidden"
+        className={
+          pathName === "/"
+            ? "w-full overflow-x-hidden"
+            : "mx-auto w-full max-w-360 overflow-hidden px-4 sm:px-8 sm:py-3 lg:px-20"
+        }
       >
         {props.children}
       </div>
-      <div className="bg-black px-2 sm:px-6 sm:py-3 md:px-8 3xl:px-0 dark:bg-[#05070C]">
-        <div className="relative mx-auto mt-6 flex max-w-[1440px] flex-col gap-6 pt-6 pb-6 sm:mt-8 sm:gap-8 sm:pt-8 sm:pb-8 md:mt-12 lg:px-0">
+      <div className="bg-black px-4 sm:px-8 dark:bg-[#05070C] lg:px-20">
+        <div className="relative mx-auto mt-6 flex max-w-360 flex-col gap-6 pt-6 pb-6 sm:mt-8 sm:gap-8 sm:pt-8 sm:pb-8 md:mt-12">
           <Link href="/" className="w-fit">
             <p className="flex justify-center font-semibold font-helvetica text-primary text-4xl tracking-tight">
               <BlivapLogo fill="#960018" className="size-10" />
@@ -368,24 +372,37 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
           </div>
         </div>
       </div>
-      <div className="flex bg-[#171717] px-2 sm:px-6 md:px-8 lg:px-0">
-        <div className=" flex flex-col sm:flex-row py-4 sm:py-5 gap-3 sm:gap-4 px-4 sm:px-6 md:px-12 lg:px-20 w-full max-w-[1440px] mx-auto">
-          {[
-            {
-              label: "Vulnerability disclosure",
-              href: "/vulnerability-disclosure",
-            },
-            { label: "Privacy & cookies", href: "/privacy" },
-            { label: "Terms and conditions", href: "/terms" },
-          ].map((item, i) => (
+      <div className="flex bg-[#171717]">
+        <div className="mx-auto flex w-full max-w-360 flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-8 sm:py-5 lg:px-20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+            {[
+              {
+                label: "Vulnerability disclosure",
+                href: "/vulnerability-disclosure",
+              },
+              { label: "Privacy & cookies", href: "/privacy" },
+              { label: "Terms and conditions", href: "/terms" },
+            ].map((item, i) => (
+              <Link
+                key={i}
+                href={item.href}
+                className="text-xs text-white/80 hover:text-primary transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+          <p className="max-w-md text-[11px] leading-relaxed text-white/65 sm:text-right">
+            Blivap handles health-related data with care. We do not sell your
+            medical information.{" "}
             <Link
-              key={i}
-              href={item.href}
-              className="text-xs text-white/80 hover:text-primary transition-colors"
+              href="/privacy"
+              className="text-white/90 underline underline-offset-2 hover:text-primary"
             >
-              {item.label}
+              Read how we protect privacy &amp; security
             </Link>
-          ))}
+            .
+          </p>
         </div>
       </div>
     </div>

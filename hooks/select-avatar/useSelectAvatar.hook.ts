@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { $api } from "@/app/api";
 import { AxiosError } from "axios";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
@@ -15,6 +15,7 @@ import {
 } from "@/store/slices/selectAvatarSlice";
 import { normalizeUser } from "@/lib/utils";
 import { IUser } from "@/types";
+import { getPostAuthRedirect } from "@/lib/navigation/authRedirect";
 
 function mergeUserWithAvatar(
   currentUser: IUser | null,
@@ -32,6 +33,7 @@ function mergeUserWithAvatar(
 
 export function useSelectAvatar() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
   const { avatars, isLoading, selectedAvatar } = useAppSelector(
@@ -112,7 +114,7 @@ export function useSelectAvatar() {
         }
 
         if (shouldRedirect) {
-          router.replace("/overview");
+          router.replace(getPostAuthRedirect(searchParams));
           return true;
         }
         return true;

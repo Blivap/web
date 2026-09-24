@@ -290,3 +290,116 @@ html.dark .custom-scrollbar::-webkit-scrollbar-track {
     @apply font-sans;
   }
 }
+
+/* Landing page motion (lightweight CSS; gated by prefers-reduced-motion consumers) */
+.home-cta-ripple {
+  transform: scale(0);
+  opacity: 0;
+}
+.home-cta-ripple-active {
+  animation: homeCtaRipple 0.55s ease-out forwards;
+}
+@keyframes homeCtaRipple {
+  0% {
+    transform: scale(0);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+.home-heartbeat-wave {
+  stroke-dasharray: 8 12;
+  animation: homeHeartbeatDash 2.4s linear infinite;
+}
+@keyframes homeHeartbeatDash {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+.home-heartbeat-pulse {
+  animation: homeHeartbeatPulse 1.6s ease-in-out infinite;
+}
+@keyframes homeHeartbeatPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.home-ticker-track {
+  animation: homeTickerScroll 42s linear infinite;
+}
+.home-ticker-track:hover,
+.home-ticker-paused .home-ticker-track {
+  animation-play-state: paused;
+}
+@keyframes homeTickerScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.home-coverage-pulse {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: homeCoveragePulse 2.8s ease-out infinite;
+}
+@keyframes homeCoveragePulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.85;
+  }
+  70% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+
+.home-coverage-link-flow {
+  stroke-dasharray: 0.18 0.82;
+  animation: homeCoverageFlow 3.6s linear infinite;
+}
+@keyframes homeCoverageFlow {
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+
+.home-coverage-meter {
+  transform-origin: left center;
+  animation: homeCoverageMeter 0.9s ease-out both;
+}
+@keyframes homeCoverageMeter {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-cta-ripple-active,
+  .home-heartbeat-wave,
+  .home-heartbeat-pulse,
+  .home-ticker-track,
+  .home-map-dot,
+  .home-coverage-pulse,
+  .home-coverage-link-flow,
+  .home-coverage-meter {
+    animation: none !important;
+  }
+}

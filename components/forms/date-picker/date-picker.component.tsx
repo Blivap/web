@@ -375,7 +375,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               role="dialog"
               aria-modal="true"
               aria-label="Choose date"
-              className="absolute left-0 top-full z-101 mt-1 w-[232px] rounded-md border border-[#66666659] bg-white p-2 shadow-[0_6px_16px_rgba(15,23,42,0.1)] dark:border-white/12 dark:bg-[#111827] dark:shadow-[0_16px_40px_rgba(0,0,0,0.45)]"
+              className="absolute left-0 top-full z-101 mt-1 w-58 rounded-md border border-[#66666659] bg-white p-2 shadow-[0_6px_16px_rgba(15,23,42,0.1)] dark:border-white/12 dark:bg-[#111827] dark:shadow-[0_16px_40px_rgba(0,0,0,0.45)]"
             >
               <div className="mb-1.5 flex items-center gap-0.5">
                 <button

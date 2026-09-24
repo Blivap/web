@@ -286,7 +286,7 @@ export const DonorAiQuestionnairePanel = forwardRef<
       ) : null}
 
       {questions.length > 0 ? (
-        <ul className="space-y-3 pt-1 max-h-[300px] lg:max-h-[450px] overflow-y-auto custom-scrollbar">
+        <ul className="space-y-3 pt-1 max-h-75 lg:max-h-112.5 overflow-y-auto custom-scrollbar">
           {questions.map((q) => {
             const selected = draftAnswers[q.id] ?? "";
             const name = `questionnaire-${q.id}`;

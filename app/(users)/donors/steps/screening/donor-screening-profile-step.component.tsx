@@ -157,7 +157,7 @@ export function DonorScreeningProfileStep({
         <h2 className="text-lg font-semibold text-text-primary">
           Donation-type screening profile
         </h2>
-        <p className="mt-1 text-sm text-text-secondary max-w-[640px]">
+        <p className="mt-1 text-sm text-text-secondary max-w-160">
           This step is separate from blood booking activation. It captures
           clinical context and which donation pathways you want to explore
           first. It powers compatibility checks and optional typed
