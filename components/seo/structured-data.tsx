@@ -18,7 +18,7 @@ export function StructuredData() {
     },
     image: `${siteUrl}/android-chrome-512x512.png`,
     description:
-      "Blivap connects blood and sperm donors with people in need across Nigeria. Join our platform to donate, save lives, and make a meaningful impact in your community.",
+      "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
     foundingDate: "2024",
     sameAs: [
       // Add your social media links here when available
@@ -51,7 +51,7 @@ export function StructuredData() {
     name: "Blivap",
     url: siteUrl,
     description:
-      "Blood and sperm donation platform connecting donors with people in need across Nigeria. Join Blivap to donate, save lives, and make a meaningful impact.",
+      "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
     publisher: {
       "@id": `${siteUrl}#organization`,
     },
@@ -72,7 +72,7 @@ export function StructuredData() {
     "@id": `${siteUrl}#medical-business`,
     name: "Blivap",
     description:
-      "Medical donation platform connecting blood and sperm donors with recipients in Nigeria. Join our platform to donate, save lives, and earn money while making a difference.",
+      "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
     url: siteUrl,
     image: `${siteUrl}/android-chrome-512x512.png`,
     medicalSpecialty: ["Blood Donation", "Sperm Donation", "Medical Services"],

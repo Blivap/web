@@ -4,18 +4,15 @@ import { generateMetadata } from "@/lib/utils/metadata";
 export const metadata: Metadata = generateMetadata({
   title: "Our Expertise",
   description:
-    "Learn about Blivap's expertise in medical donations, healthcare technology, and connecting donors with recipients. Our team brings years of experience in healthcare and technology.",
+    "How Blivap combines healthcare insight and technology to make giving safer and simpler.",
   keywords: [
     "Blivap expertise",
-    "healthcare technology",
-    "medical expertise",
-    "donation expertise",
-    "healthcare professionals",
+    "healthcare technology"
   ],
   path: "/our-expertise",
 });
 
-export default function OurExpertiseLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;

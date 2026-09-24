@@ -4,18 +4,15 @@ import { generateMetadata } from "@/lib/utils/metadata";
 export const metadata: Metadata = generateMetadata({
   title: "Contact Us",
   description:
-    "Get in touch with Blivap. Contact our team for questions about blood donation, sperm donation, registration, or any other inquiries. We're here to help.",
+    "Reach the Blivap team for support, partnerships, or questions about donating and receiving care.",
   keywords: [
     "contact Blivap",
-    "customer support",
-    "help",
-    "inquiries",
-    "support",
+    "customer support"
   ],
   path: "/contact",
 });
 
-export default function ContactLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;

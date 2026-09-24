@@ -4,18 +4,15 @@ import { generateMetadata } from "@/lib/utils/metadata";
 export const metadata: Metadata = generateMetadata({
   title: "Register",
   description:
-    "Create your Blivap account to start donating blood or sperm, save lives, and earn money while making a difference in your community.",
+    "Create a Blivap account to start giving, connecting, and making a difference.",
   keywords: [
     "register",
-    "sign up",
-    "become a donor",
-    "donor registration",
-    "create account",
+    "sign up"
   ],
   path: "/register",
 });
 
-export default function RegisterLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;

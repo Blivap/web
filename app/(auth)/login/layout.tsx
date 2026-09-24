@@ -1,15 +1,20 @@
 import { Metadata } from "next";
-import { generateMetadata } from "../../../lib/utils/metadata";
+import { generateMetadata } from "@/lib/utils/metadata";
 
 export const metadata: Metadata = generateMetadata({
   title: "Login",
   description:
-    "Login to your Blivap account to access your donor dashboard, manage donations, and connect with recipients.",
-  keywords: ["login", "sign in", "Blivap login", "donor login"],
+    "Sign in to your Blivap account to manage donations, bookings, and your profile.",
+  keywords: [
+    "login",
+    "sign in",
+    "Blivap login",
+    "donor login"
+  ],
   path: "/login",
 });
 
-export default function LoginLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;
