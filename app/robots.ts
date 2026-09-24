@@ -4,9 +4,9 @@ import { MetadataRoute } from "next";
 /**
  * Paths that must not be indexed (auth, account, transactional, or thin flows).
  * Trailing slashes match subpaths in robots.txt (e.g. /donors/ blocks /donors/xyz).
+ * Do not blanket-block `/api/` — WhatsApp/X need `/api/og` for link previews.
  */
 const DISALLOWED_PREFIXES = [
-  "/api/",
   "/dashboard/",
   "/overview/",
   "/settings/",
@@ -29,7 +29,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", "/api/og"],
         disallow: [...DISALLOWED_PREFIXES],
       },
     ],
