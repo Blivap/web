@@ -127,7 +127,6 @@ export const protectedRoutePrefixes: readonly string[] = [
   routes.settings,
   "/verify-id",
   "/schedule-appointment",
-  "/donations",
   routes.verifyEmail,
   routes.selectAvatar,
   routes.waitlist,
