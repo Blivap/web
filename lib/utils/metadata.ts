@@ -12,6 +12,7 @@ export interface PageMetadata {
   ogDescription?: string;
   path?: string;
   image?: string;
+  robots?: Metadata["robots"];
 }
 
 export function generateMetadata({
@@ -22,6 +23,7 @@ export function generateMetadata({
   ogDescription,
   path = "",
   image,
+  robots,
 }: PageMetadata): Metadata {
   const pageUrl = new URL(path || "/", siteUrl).toString();
   const ogImageUrl = image
@@ -50,6 +52,7 @@ export function generateMetadata({
     },
     description,
     keywords: [...defaultKeywords, ...keywords],
+    ...(robots ? { robots } : {}),
     openGraph: {
       type: "website",
       locale: "en_US",

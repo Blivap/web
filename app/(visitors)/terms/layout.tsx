@@ -1,20 +1,18 @@
-import { generateMetadata } from "@/lib/utils/metadata";
 import { Metadata } from "next";
+import { generateMetadata } from "@/lib/utils/metadata";
 
 export const metadata: Metadata = generateMetadata({
   title: "Terms and Conditions",
   description:
-    "Terms and conditions for using Blivap's blood and sperm donation platform. Read our user agreement, eligibility requirements, and service terms.",
+    "The rules for using Blivap — eligibility, responsibilities, and service terms explained clearly.",
   keywords: [
     "terms and conditions",
-    "terms of service",
-    "user agreement",
-    "Blivap terms",
+    "terms of service"
   ],
   path: "/terms",
 });
 
-export default function TermsLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;

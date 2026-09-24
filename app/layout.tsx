@@ -101,11 +101,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Blivap — Give Blood. Save Lives.",
+    default: "Blood Donation in Nigeria | Blivap",
     template: "%s | Blivap",
   },
   description:
-    "Blivap connects blood and sperm donors with people in need across Nigeria. Join our platform to donate, save lives, and earn money while making a difference in your community.",
+    "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
   keywords: [
     "blood donation",
     "sperm donation",
@@ -140,9 +140,9 @@ export const metadata: Metadata = {
     alternateLocale: ["en_NG"],
     url: siteUrl,
     siteName: "Blivap",
-    title: "Blivap — Give Blood. Save Lives.",
+    title: "Blood Donation in Nigeria | Blivap",
     description:
-      "Connect with blood and sperm donors across Nigeria. Join Blivap to donate, save lives, and make a meaningful impact in your community.",
+      "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
     images: [
       {
         url: ogImageUrl,
@@ -155,9 +155,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blivap — Give Blood. Save Lives.",
+    title: "Blood Donation in Nigeria | Blivap",
     description:
-      "Connect with blood and sperm donors across Nigeria. Join Blivap to donate, save lives, and make a meaningful impact.",
+      "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
     images: [ogImageUrl],
     creator: "@blivap",
     site: "@blivap",

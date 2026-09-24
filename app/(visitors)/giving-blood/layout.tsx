@@ -1,21 +1,19 @@
 import { Metadata } from "next";
-import { generateMetadata } from "../../../lib/utils/metadata";
+import { generateMetadata } from "@/lib/utils/metadata";
 
 export const metadata: Metadata = generateMetadata({
   title: "Giving Blood",
   description:
-    "Start your blood donation journey with Blivap. Learn how to give blood, find donation centers, schedule appointments, and make a life-saving difference in Nigeria.",
+    "Ready to give blood? Learn what to expect before, during, and after your donation with Blivap.",
   keywords: [
     "give blood",
     "blood donation centers",
-    "donate blood Nigeria",
-    "blood donation appointment",
-    "blood donor registration",
+    "blood donation appointment"
   ],
   path: "/giving-blood",
 });
 
-export default function GivingBloodLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;

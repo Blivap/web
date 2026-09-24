@@ -4,18 +4,16 @@ import { generateMetadata } from "@/lib/utils/metadata";
 export const metadata: Metadata = generateMetadata({
   title: "About Sperm Donation",
   description:
-    "Learn about sperm donation in Nigeria. Understand the process, requirements, compensation, and how you can help families while earning money through sperm donation.",
+    "Learn how sperm donation works on Blivap and how donors can support families building their future.",
   keywords: [
     "sperm donation Nigeria",
     "sperm donor",
-    "fertility donation",
-    "sperm donation process",
-    "become a sperm donor",
+    "sperm donation process"
   ],
   path: "/about-sperm",
 });
 
-export default function AboutSpermLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;
