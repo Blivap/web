@@ -5,8 +5,9 @@ import { config } from "@/config/env";
  * Uses localhost in development so local builds match how you browse the app.
  */
 export function getSiteOrigin(): string {
-  const { url, env } = config;
-  const raw = (env === "development" ? "http://localhost:3000" : url).trim();
+  const { url } = config;
+  const raw =
+    process.env.NEXT_PUBLIC_SITE_URL || url || "http://localhost:3000";
   try {
     return new URL(raw).origin;
   } catch {
