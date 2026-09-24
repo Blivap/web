@@ -246,7 +246,7 @@ function SectionCard({
       <div className="mb-5">
         <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
         {description ? (
-          <p className="mt-2 max-w-[720px] text-sm text-text-secondary">
+          <p className="mt-2 max-w-180 text-sm text-text-secondary">
             {description}
           </p>
         ) : null}
@@ -419,7 +419,7 @@ export function ReproductiveDonorFlow({
         <h1 className="mt-2 text-2xl font-semibold text-text-primary">
           {config.title}
         </h1>
-        <p className="mt-2 max-w-[760px] text-sm text-text-secondary">
+        <p className="mt-2 max-w-190 text-sm text-text-secondary">
           {config.description}
         </p>
       </div>

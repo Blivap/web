@@ -73,7 +73,7 @@ export default function SettingsPage() {
             <h1 className="text-xl sm:text-2xl font-semibold text-primary">
               Account Setting
             </h1>
-            <div className="mt-1 h-[2px] w-full bg-primary rounded-full" />
+            <div className="mt-1 h-0.5 w-full bg-primary rounded-full" />
           </header>
 
           <Formik

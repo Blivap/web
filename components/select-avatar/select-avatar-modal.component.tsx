@@ -62,12 +62,12 @@ export function SelectAvatarModal() {
         <h2 className="text-lg sm:text-xl font-semibold text-primary text-center mb-5">
           Select Avatar
         </h2>
-        <div className="grid grid-cols-4 grid-rows-3 gap-4 rounded-3xl bg-[#00000026] px-8 py-8 sm:px-[75px] sm:py-[98px] ">
+        <div className="grid grid-cols-4 grid-rows-3 gap-4 rounded-3xl bg-[#00000026] px-8 py-8 sm:px-18.75 sm:py-24.5 ">
           {isLoading || !avatars
             ? [...Array(12)].map((_, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-center size-[60px] shrink-0 animate-pulse rounded-full border border-[#FFFFFF00] bg-[#B190B6] "
+                  className="flex items-center justify-center size-15 shrink-0 animate-pulse rounded-full border border-[#FFFFFF00] bg-[#B190B6] "
                 />
               ))
             : avatars.map((avatar) => (
@@ -75,7 +75,7 @@ export function SelectAvatarModal() {
                   key={avatar.id}
                   type="button"
                   className={classNames(
-                    "relative size-10 sm:size-[60px] shrink-0 overflow-hidden rounded-full border border-[#FFFFFF00] bg-[#B190B6] transition-all duration-150 hover:border-3 hover:border-primary",
+                    "relative size-10 sm:size-15 shrink-0 overflow-hidden rounded-full border border-[#FFFFFF00] bg-[#B190B6] transition-all duration-150 hover:border-3 hover:border-primary",
                     {
                       "border-3 border-primary": selectedAvatar === avatar.url,
                     },

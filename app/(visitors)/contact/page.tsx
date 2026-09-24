@@ -275,7 +275,7 @@ export default function Contact() {
                   </p>
                   <Button
                     type="submit"
-                    className="min-w-[150px] rounded-full bg-primary px-5 py-3 text-sm font-medium text-white hover:bg-primary/90"
+                    className="min-w-37.5 rounded-full bg-primary px-5 py-3 text-sm font-medium text-white hover:bg-primary/90"
                   >
                     <Send size={16} />
                     Send message

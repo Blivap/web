@@ -131,7 +131,7 @@ export default function Healthcare() {
               life-saving network.
             </p>
             <Link
-              href="/healthcare&professionals"
+              href="/healthcare-professionals"
               className="text-xs font-medium py-2 px-3.5 bg-primary hover:bg-primary/90 text-white rounded-md inline-block transition-colors"
             >
               Learn more

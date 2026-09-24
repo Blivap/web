@@ -9,6 +9,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { setCredentials, setUser } from "@/store/slices/authSlice";
 import { routes } from "@/config/routes";
 import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
+import { extractAccessTokenExpires } from "@/lib/auth/sessionExpiry";
 
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -38,7 +39,12 @@ export const useLogin = () => {
         showSnackbar("Login successful!", "success");
 
         if (token) {
-          dispatch(setCredentials({ token }));
+          dispatch(
+            setCredentials({
+              token,
+              expiresAt: extractAccessTokenExpires(authData),
+            }),
+          );
           let userPayload = normalizeUser(authData?.user ?? authData) ?? null;
           if (!userPayload) {
             try {

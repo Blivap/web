@@ -270,7 +270,7 @@ function BookingsRowsTable({
 
         <div className="hidden overflow-x-auto md:block">
           <table
-            className={`w-full border-collapse text-left ${actionsColumnLabel ? "min-w-[520px]" : "min-w-[400px]"}`}
+            className={`w-full border-collapse text-left ${actionsColumnLabel ? "min-w-130" : "min-w-100"}`}
           >
             <thead>
               <tr>
@@ -518,8 +518,8 @@ function BookingsMobileRowSkeleton() {
       <div className="mt-2.5 flex items-center gap-2.5">
         <BookingsSk className="size-9 shrink-0 rounded-full" />
         <div className="min-w-0 flex-1 space-y-2">
-          <BookingsSk className="h-4 w-3/4 max-w-[12rem]" />
-          <BookingsSk className="h-3 w-1/2 max-w-[9rem]" />
+          <BookingsSk className="h-4 w-3/4 max-w-48" />
+          <BookingsSk className="h-3 w-1/2 max-w-36" />
         </div>
       </div>
       <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">

@@ -4,7 +4,20 @@ import { useEffect, useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { useCheckUser } from "@/hooks/auth/useCheckUser.hook";
-import { publicRoutes, routes } from "@/config/routes";
+import { useSessionExpiryWatcher } from "@/hooks/auth/useSessionExpiryWatcher.hook";
+import {
+  isNotFoundPath,
+  publicRoutes,
+  requiresAuth,
+  routes,
+} from "@/config/routes";
+import {
+  getPostAuthRedirect,
+  loginWithReturn,
+  pathFromParts,
+  sanitizeReturnPath,
+  withDn,
+} from "@/lib/navigation/authRedirect";
 import { AuthLoader } from "./auth-loader.component";
 
 const VERIFY_EMAIL_PATH = routes.verifyEmail;
@@ -18,6 +31,11 @@ function normalizePath(pathname: string): string {
 function isPublicAppPath(pathname: string): boolean {
   const path = normalizePath(pathname);
   return publicRoutes.includes(path);
+}
+
+function currentSearch(): string {
+  if (typeof window === "undefined") return "";
+  return window.location.search;
 }
 
 /** Client snapshot is true; server snapshot is false — no useEffect setState. */
@@ -43,6 +61,7 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
   const user = useAppSelector((state) => state.auth.user);
   const token = useAppSelector((state) => state.auth.token);
   const { isChecking } = useCheckUser();
+  useSessionExpiryWatcher();
   /** Avoid auth-gated UI until after hydrate (cookie/token only exist on the client). */
   const hasMounted = useHasMounted();
 
@@ -57,40 +76,52 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     }
   }, [pathname]);
 
-  // Protected route with no session after check finished → login
+  // Protected route with no session after check finished → login (preserve return via dn)
   useEffect(() => {
     if (!hasMounted || isChecking) return;
-    if (!pathname || isPublicAppPath(pathname)) return;
+    if (!pathname || !requiresAuth(pathname)) return;
     if (pathname === VERIFY_EMAIL_PATH) return;
     if (user) return;
     if (token) return; // /me still resolving or about to retry
-    router.replace(routes.login);
+    router.replace(loginWithReturn(pathname, currentSearch()));
   }, [hasMounted, isChecking, pathname, user, token, router]);
 
   // Unverified users may only access the verify-email page — redirect and block content.
+  // Allow public marketing + not-found so 404 / legal pages still work.
   // If user has profileImage they've completed select_avatar, so send to dashboard not verify-email.
   useEffect(() => {
     if (
       user &&
       !user.emailVerified &&
       !user.profileImage &&
-      pathname !== VERIFY_EMAIL_PATH
+      pathname !== VERIFY_EMAIL_PATH &&
+      pathname &&
+      !isPublicAppPath(pathname) &&
+      !isNotFoundPath(pathname)
     ) {
-      router.replace(VERIFY_EMAIL_PATH);
+      const returnPath = sanitizeReturnPath(
+        pathFromParts(pathname, currentSearch()),
+      );
+      router.replace(withDn(VERIFY_EMAIL_PATH, returnPath));
     }
     if (
       user &&
       !user.emailVerified &&
       user.profileImage &&
       pathname !== "/overview" &&
-      !pathname.startsWith("/overview/")
+      !pathname.startsWith("/overview/") &&
+      pathname &&
+      !isPublicAppPath(pathname) &&
+      !isNotFoundPath(pathname)
     ) {
       router.replace("/overview");
     }
   }, [user, pathname, router]);
+
   useEffect(() => {
     if (user?.emailVerified === true && pathname === VERIFY_EMAIL_PATH) {
-      router.replace(routes.overview);
+      const params = new URLSearchParams(currentSearch());
+      router.replace(getPostAuthRedirect(params));
     }
   }, [user, pathname, router]);
 
@@ -108,7 +139,10 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     user &&
     !user.emailVerified &&
     !user.profileImage &&
-    pathname !== VERIFY_EMAIL_PATH
+    pathname !== VERIFY_EMAIL_PATH &&
+    pathname &&
+    !isPublicAppPath(pathname) &&
+    !isNotFoundPath(pathname)
   ) {
     return <AuthLoader />;
   }
@@ -118,15 +152,15 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     !user.emailVerified &&
     user.profileImage &&
     pathname !== "/overview" &&
-    !pathname.startsWith("/overview/")
+    !pathname.startsWith("/overview/") &&
+    pathname &&
+    !isPublicAppPath(pathname) &&
+    !isNotFoundPath(pathname)
   ) {
     return <AuthLoader />;
   }
 
-  const isProtectedPath =
-    Boolean(pathname) &&
-    !isPublicAppPath(pathname!) &&
-    pathname !== VERIFY_EMAIL_PATH;
+  const isProtectedPath = Boolean(pathname) && requiresAuth(pathname);
 
   /*
    * Protected routes: same AuthLoader on server + first client paint (hasMounted=false),

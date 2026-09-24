@@ -72,7 +72,7 @@ function NewsHeroSkeleton() {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.6fr)] gap-6">
       <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white animate-pulse dark:border-white/10 dark:bg-[#111827]">
-        <div className="h-[260px] bg-linear-to-br from-[#E5E7EB] via-[#F3F4F6] to-[#E5E7EB] dark:from-[#1F2937] dark:via-[#111827] dark:to-[#1F2937] sm:h-[360px]" />
+        <div className="h-65 bg-linear-to-br from-[#E5E7EB] via-[#F3F4F6] to-[#E5E7EB] dark:from-[#1F2937] dark:via-[#111827] dark:to-[#1F2937] sm:h-90" />
         <div className="p-5 sm:p-6 flex flex-col gap-3">
           <div className="h-3 w-28 rounded-full bg-[#D1D5DB] dark:bg-slate-600" />
           <div className="h-6 w-4/5 rounded-full bg-[#E5E7EB] dark:bg-slate-700" />
@@ -105,7 +105,7 @@ function NewsGridSkeleton() {
           key={index}
           className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white animate-pulse dark:border-white/10 dark:bg-[#111827]"
         >
-          <div className="h-[220px] bg-[#E5E7EB] dark:bg-[#1F2937]" />
+          <div className="h-55 bg-[#E5E7EB] dark:bg-[#1F2937]" />
           <div className="p-5 space-y-3">
             <div className="h-3 w-24 rounded-full bg-[#D1D5DB] dark:bg-slate-600" />
             <div className="h-5 w-4/5 rounded-full bg-[#E5E7EB] dark:bg-slate-700" />
@@ -551,7 +551,7 @@ export default function News() {
                     rel="noreferrer"
                     className="group block"
                   >
-                    <div className="relative h-[260px] sm:h-[360px]">
+                    <div className="relative h-65 sm:h-90">
                       <NewsFallbackImage
                         src={featured.image}
                         alt={featured.title}
@@ -693,7 +693,7 @@ export default function News() {
                       rel="noreferrer"
                       className="group block h-full"
                     >
-                      <div className="relative h-[220px]">
+                      <div className="relative h-55">
                         <NewsFallbackImage
                           src={item.image}
                           alt={item.title}

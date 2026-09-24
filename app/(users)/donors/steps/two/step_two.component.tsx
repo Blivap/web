@@ -41,7 +41,7 @@ export function StepTwo({
           e.preventDefault();
           handleContinue();
         }}
-        className="flex flex-col gap-[22px] mt-6 xl:mt-10"
+        className="flex flex-col gap-5.5 mt-6 xl:mt-10"
       >
         <div className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold text-text-primary">

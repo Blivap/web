@@ -87,7 +87,7 @@ function ScheduleAppointmentPageContent() {
                   for this screening.
                 </p>
               </div>
-              <div className="flex gap-3 rounded-xl border border-amber-200/90 bg-gradient-to-br from-amber-50 to-amber-50/40 px-4 py-3.5 dark:border-amber-400/25 dark:from-amber-950/50 dark:to-amber-950/25">
+              <div className="flex gap-3 rounded-xl border border-amber-200/90 bg-linear-to-br from-amber-50 to-amber-50/40 px-4 py-3.5 dark:border-amber-400/25 dark:from-amber-950/50 dark:to-amber-950/25">
                 <Lightbulb
                   className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-300"
                   strokeWidth={2}
@@ -117,7 +117,7 @@ function ScheduleAppointmentPageContent() {
           </div>
         ) : null}
 
-        <div className="flex flex-1 flex-col gap-4 rounded-2xl border border-border bg-gradient-to-b from-[#FAFAF9] via-[#F7F5F3] to-[#F0EEEB] p-5 shadow-sm dark:border-white/10 dark:from-[#18181f] dark:via-[#14141a] dark:to-[#101014] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+        <div className="flex flex-1 flex-col gap-4 rounded-2xl border border-border bg-linear-to-b from-[#FAFAF9] via-[#F7F5F3] to-[#F0EEEB] p-5 shadow-sm dark:border-white/10 dark:from-[#18181f] dark:via-[#14141a] dark:to-[#101014] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
           <div className="mb-1 flex flex-col gap-3 sm:mb-2 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-3">
               <span
@@ -143,7 +143,7 @@ function ScheduleAppointmentPageContent() {
             ) : null}
           </div>
           {hospitalsLoadState === "loading" ? (
-            <div className="flex min-h-[120px] items-center justify-center gap-2 text-sm text-text-secondary">
+            <div className="flex min-h-30 items-center justify-center gap-2 text-sm text-text-secondary">
               <Loader2 className="size-5 animate-spin text-primary" />
               Loading hospitals…
             </div>
@@ -185,10 +185,10 @@ function ScheduleAppointmentPageContent() {
                   {hospitals.map((h) => (
                     <CarouselItem
                       key={h.id}
-                      className="basis-[min(100%,280px)] pl-3 sm:basis-[248px] md:pl-4 lg:basis-[260px]"
+                      className="basis-[min(100%,280px)] pl-3 sm:basis-62 md:pl-4 lg:basis-65"
                     >
                       <label
-                        className={`flex h-full min-h-[148px] cursor-pointer flex-col rounded-xl border-2 bg-white/90 p-4 shadow-sm transition-all dark:bg-[#1a1a22]/95 dark:shadow-none ${
+                        className={`flex h-full min-h-37 cursor-pointer flex-col rounded-xl border-2 bg-white/90 p-4 shadow-sm transition-all dark:bg-[#1a1a22]/95 dark:shadow-none ${
                           appointment.hospitalId === h.id
                             ? "border-primary ring-2 ring-primary/25 dark:ring-primary/35"
                             : "border-border hover:border-primary/45 hover:shadow-md dark:border-white/10 dark:hover:border-primary/40"
@@ -307,7 +307,7 @@ function ScheduleAppointmentPageContent() {
                 </div>
               </div>
             </div>
-            <div className="col-span-1 mx-auto h-px max-h-[380px] w-full place-self-center self-center bg-[#DADADA] lg:h-full lg:w-px dark:bg-white/10" />
+            <div className="col-span-1 mx-auto h-px max-h-95 w-full place-self-center self-center bg-[#DADADA] lg:h-full lg:w-px dark:bg-white/10" />
             <div className="col-span-3 flex w-full flex-col items-center gap-8">
               <label className="mb-2 block rounded-[50px] bg-[#FFE2E2] px-5 py-2 text-xs font-medium text-text-primary dark:bg-primary/20">
                 Choose a time
@@ -375,7 +375,7 @@ export default function ScheduleAppointmentPage() {
     <Suspense
       fallback={
         <Layout>
-          <div className="mt-6 flex min-h-[200px] items-center justify-center gap-2 text-sm text-text-secondary xl:mt-10">
+          <div className="mt-6 flex min-h-50 items-center justify-center gap-2 text-sm text-text-secondary xl:mt-10">
             <BlivapLogo fill="#960018" className="size-17" />
           </div>
         </Layout>

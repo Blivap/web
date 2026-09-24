@@ -280,7 +280,7 @@ function StepProgress({ currentStep }: { currentStep: number }) {
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-1">
                   <div
-                    className={`inline-flex items-center justify-center size-[13px] rounded-full text-xs font-medium ${
+                    className={`inline-flex items-center justify-center size-3.25 rounded-full text-xs font-medium ${
                       isActive
                         ? "bg-primary text-white"
                         : isPast
@@ -303,10 +303,10 @@ function StepProgress({ currentStep }: { currentStep: number }) {
         })}
       </div>
       <div
-        className="absolute bg-primary h-[3px] bottom-0 left-0 transition-all duration-700 ease-in-out hidden sm:block"
+        className="absolute bg-primary h-0.75 bottom-0 left-0 transition-all duration-700 ease-in-out hidden sm:block"
         style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
       />
-      <div className="w-full h-[3px] bg-border hidden sm:block" />
+      <div className="w-full h-0.75 bg-border hidden sm:block" />
     </nav>
   );
 }

@@ -60,7 +60,7 @@ export function DonorProfilePageSkeleton() {
               key={i}
               className="flex items-center justify-between gap-3 rounded-lg border border-border bg-[#FAFAFB] px-3 py-3 dark:border-white/10 dark:bg-white/4"
             >
-              <Sk className="h-4 flex-1 max-w-[220px]" />
+              <Sk className="h-4 flex-1 max-w-55" />
               <Sk className="size-8 shrink-0 rounded-md" />
             </div>
           ))}
@@ -76,7 +76,7 @@ export function DonorProfilePageSkeleton() {
       </div>
 
       <div className="flex justify-end">
-        <Sk className="h-12 w-full max-w-[280px] rounded-none sm:rounded-sm" />
+        <Sk className="h-12 w-full max-w-70 rounded-none sm:rounded-sm" />
       </div>
     </div>
   );

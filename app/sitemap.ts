@@ -20,7 +20,7 @@ const PUBLIC_ROUTES: Array<{
   { path: "/our-expertise", changeFrequency: "weekly", priority: 0.85 },
   { path: "/healthcare", changeFrequency: "weekly", priority: 0.85 },
   {
-    path: "/healthcare&professionals",
+    path: "/healthcare-professionals",
     changeFrequency: "weekly",
     priority: 0.85,
   },

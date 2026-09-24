@@ -1,6 +1,10 @@
 import { logout } from "@/store/slices/authSlice";
 import { getClientStore } from "@/store/store";
 import { routes } from "@/config/routes";
+import {
+  loginWithReturn,
+  pathFromLocation,
+} from "@/lib/navigation/authRedirect";
 
 const REDIRECTING_KEY = "blivap:auth:redirecting-login";
 
@@ -11,7 +15,7 @@ function isAlreadyOnLogin(): boolean {
 }
 
 /**
- * Clears local auth state and navigates to /login once.
+ * Clears local auth state and navigates to /login once (with `dn` return when valid).
  * Safe to call from axios interceptors (no React hooks).
  */
 export function forceSessionEnd(options?: {
@@ -38,7 +42,7 @@ export function forceSessionEnd(options?: {
     /* private mode / blocked storage */
   }
 
-  const loginPath = routes.login;
+  const loginPath = loginWithReturn(pathFromLocation());
 
   if (options?.replace) {
     options.replace(loginPath);

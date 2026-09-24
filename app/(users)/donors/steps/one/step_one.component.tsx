@@ -166,7 +166,7 @@ function FirstStepQuestionRow({
           </Button>
           {showTooltip && tooltipText && (
             <div
-              className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-1 sm:px-3 py-2 text-[10px] sm:text-xs text-white bg-foundation-dark rounded-lg shadow-lg w-[140px] max-w-[240px] whitespace-normal z-50"
+              className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-1 sm:px-3 py-2 text-[10px] sm:text-xs text-white bg-foundation-dark rounded-lg shadow-lg w-35 max-w-60 whitespace-normal z-50"
               role="tooltip"
             >
               {tooltipText}
@@ -175,7 +175,7 @@ function FirstStepQuestionRow({
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-[10px]">
+      <div className="flex flex-col gap-2.5">
         {options.map((opt, i) => (
           <Radio
             key={opt.value}
@@ -216,7 +216,7 @@ export function StepOne({
         <h2 className="text-lg font-semibold text-text-primary mb-2 mt-6 xl:mt-15">
           Legacy blood health questionnaire
         </h2>
-        <p className="text-sm text-text-secondary mb-1 max-w-[600px]">
+        <p className="text-sm text-text-secondary mb-1 max-w-150">
           This is the fixed yes/no flow required for{" "}
           <span className="font-medium text-text-primary">
             active donor activation

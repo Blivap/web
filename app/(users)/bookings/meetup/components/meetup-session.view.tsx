@@ -1111,7 +1111,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                       {m.roleLabel}
                     </p>
                   ) : null}
-                  <p className="whitespace-pre-wrap wrap-break-words">
+                  <p className="whitespace-pre-wrap wrap-wrap-break-word">
                     {m.text}
                   </p>
                   {m.createdAt ? (
@@ -1146,7 +1146,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         <div className="mt-3 flex items-center gap-2 flex-row">
           <Textarea
             name="chatDraft"
-            className="min-h-[44px] max-h-[120px] flex-1 py-2"
+            className="min-h-11 max-h-30 flex-1 py-2"
             placeholder={
               chatComposerDisabled
                 ? chatLocked
