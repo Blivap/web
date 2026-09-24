@@ -1,8 +1,7 @@
 import { Metadata } from "next";
-import { config } from "@/config/env";
+import { getSiteOrigin } from "@/lib/site-origin";
 
-const { url, env } = config;
-const siteUrl = env === "development" ? "http://localhost:3000" : url;
+const siteUrl = getSiteOrigin();
 
 export interface PageMetadata {
   title: string;

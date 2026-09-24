@@ -1,7 +1,6 @@
-import { config } from "@/config/env";
+import { getSiteOrigin } from "@/lib/site-origin";
 
-const { url, env } = config;
-const siteUrl = env === "development" ? "http://localhost:3000" : url;
+const siteUrl = getSiteOrigin();
 
 export function StructuredData() {
   const organizationSchema = {
@@ -18,7 +17,7 @@ export function StructuredData() {
     },
     image: `${siteUrl}/android-chrome-512x512.png`,
     description:
-      "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
+      "Blivap connects people in need with donors and healthcare support. Discover, connect, and make a difference.",
     foundingDate: "2024",
     sameAs: [
       // Add your social media links here when available
@@ -51,7 +50,7 @@ export function StructuredData() {
     name: "Blivap",
     url: siteUrl,
     description:
-      "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
+      "Blivap connects people in need with donors and healthcare support. Discover, connect, and make a difference.",
     publisher: {
       "@id": `${siteUrl}#organization`,
     },
@@ -72,7 +71,7 @@ export function StructuredData() {
     "@id": `${siteUrl}#medical-business`,
     name: "Blivap",
     description:
-      "Blivap connects people in need with donors, healthcare support, and meaningful opportunities to give. Discover, connect, and make a difference through a trusted digital platform.",
+      "Blivap connects people in need with donors and healthcare support. Discover, connect, and make a difference.",
     url: siteUrl,
     image: `${siteUrl}/android-chrome-512x512.png`,
     medicalSpecialty: ["Blood Donation", "Sperm Donation", "Medical Services"],
