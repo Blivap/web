@@ -4,18 +4,15 @@ import { generateMetadata } from "@/lib/utils/metadata";
 export const metadata: Metadata = generateMetadata({
   title: "Lifesaving Research",
   description:
-    "Explore medical research opportunities with Blivap. Access research data, collaborate with researchers, and contribute to advancing medical science in Nigeria.",
+    "Explore how Blivap supports medical research and knowledge that improves care.",
   keywords: [
     "medical research",
-    "research data",
-    "medical studies",
-    "research collaboration",
-    "healthcare research Nigeria",
+    "research data"
   ],
   path: "/research",
 });
 
-export default function ResearchLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;

@@ -4,18 +4,15 @@ import { generateMetadata } from "@/lib/utils/metadata";
 export const metadata: Metadata = generateMetadata({
   title: "News & Updates",
   description:
-    "Stay updated with the latest news, stories, and updates from Blivap. Read about successful donations, platform updates, and important healthcare news in Nigeria.",
+    "Updates, stories, and announcements from Blivap and the communities we serve.",
   keywords: [
     "Blivap news",
-    "donation stories",
-    "healthcare news",
-    "platform updates",
-    "medical news Nigeria",
+    "donation stories"
   ],
   path: "/news",
 });
 
-export default function NewsLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;

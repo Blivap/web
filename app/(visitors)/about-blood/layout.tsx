@@ -4,18 +4,17 @@ import { generateMetadata } from "@/lib/utils/metadata";
 export const metadata: Metadata = generateMetadata({
   title: "About Blood Donation",
   description:
-    "Learn everything about blood donation in Nigeria. Understand the process, benefits, eligibility requirements, and how you can save lives through blood donation.",
+    "Understand blood donation, who can give, and how your donation helps patients who need it most.",
   keywords: [
     "blood donation information",
     "how to donate blood",
     "blood donation process",
-    "blood types",
-    "blood donation benefits",
+    "blood donation benefits"
   ],
   path: "/about-blood",
 });
 
-export default function AboutBloodLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;

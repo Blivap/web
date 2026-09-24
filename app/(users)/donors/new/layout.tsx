@@ -2,14 +2,14 @@ import { Metadata } from "next";
 import { generateMetadata } from "@/lib/utils/metadata";
 
 export const metadata: Metadata = generateMetadata({
-  title: "Privacy & Cookies",
+  title: "Register as Donor",
   description:
-    "How Blivap collects, uses, and protects your personal information when you use our platform.",
+    "Complete your donor registration and screening on Blivap.",
   keywords: [
-    "privacy policy",
-    "cookies"
+    "donor registration"
   ],
-  path: "/privacy",
+  robots: { index: false, follow: false },
+  path: "/donors/new",
 });
 
 export default function Layout({

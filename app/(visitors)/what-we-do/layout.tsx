@@ -1,21 +1,19 @@
-import { generateMetadata } from "@/lib/utils/metadata";
 import { Metadata } from "next";
+import { generateMetadata } from "@/lib/utils/metadata";
 
 export const metadata: Metadata = generateMetadata({
   title: "What We Do",
   description:
-    "Discover how Blivap connects donors with recipients, facilitates life-saving donations, and supports the healthcare system in Nigeria through our innovative platform.",
+    "See how Blivap helps people give and receive support — from donation pathways to trusted healthcare connections.",
   keywords: [
     "Blivap services",
     "donation platform",
-    "healthcare services",
-    "donor matching",
-    "medical platform Nigeria",
+    "what we do"
   ],
   path: "/what-we-do",
 });
 
-export default function WhatWeDoLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;

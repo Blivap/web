@@ -1,21 +1,18 @@
 import { Metadata } from "next";
-import { generateMetadata } from "../../../lib/utils/metadata";
+import { generateMetadata } from "@/lib/utils/metadata";
 
 export const metadata: Metadata = generateMetadata({
   title: "Education & Resources",
   description:
-    "Educational resources about blood donation, sperm donation, health, and wellness. Learn about the donation process, health benefits, and how to maintain a healthy lifestyle.",
+    "Guides and resources to help you understand donation, health basics, and how to give with confidence.",
   keywords: [
     "donation education",
-    "health resources",
-    "wellness information",
-    "donation guides",
-    "health education",
+    "health resources"
   ],
   path: "/education",
 });
 
-export default function EducationLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;
