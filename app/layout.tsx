@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Geist, Geist_Mono, Inter, Poppins } from "next/font/google";
 import localFont from "next/font/local";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "@/styles/globals.css";
 import { SnackbarProvider } from "@/components/feedback/snackbar/snackbar.context";
 import { Snackbar } from "@/components/feedback/snackbar/snackbar.component";
@@ -49,7 +50,7 @@ const helvetica = localFont({
   ],
   display: "swap",
 });
-const { url, env } = config;
+const { url, env, googleAnalyticsId } = config;
 const themeBootstrapScript = `
 (() => {
   const preferenceKey = "blivap-theme";
@@ -255,6 +256,9 @@ export default function RootLayout({
           </StoreProvider>
         </ThemePreferenceProvider>
       </body>
+      {googleAnalyticsId ? (
+        <GoogleAnalytics gaId={googleAnalyticsId} />
+      ) : null}
     </html>
   );
 }
