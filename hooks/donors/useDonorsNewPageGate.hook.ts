@@ -1,7 +1,10 @@
 "use client";
 
 import Cookies from "js-cookie";
+import { $api } from "@/app/api";
 import { routes } from "@/config/routes";
+import { isExistingRegisteredDonor } from "@/lib/donors/donorProfileGuards";
+import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import { useAppSelector } from "@/store/hooks";
 import type { IUser } from "@/types";
 import { startTransition, useEffect, useState } from "react";
@@ -19,9 +22,14 @@ function isElevatedStaff(user: IUser): boolean {
 /**
  * Mirrors verify-id session gating: wait for `/me`, then enforce identity
  * verification before donor onboarding (staff roles skip NIN redirect).
+ * Also blocks users who already completed donor registration.
  */
 export function useDonorsNewPageGate() {
   const [mounted, setMounted] = useState(false);
+  const [donorCheckState, setDonorCheckState] = useState<
+    "idle" | "loading" | "ready"
+  >("idle");
+  const [alreadyDonor, setAlreadyDonor] = useState(false);
   const token = useAppSelector((s) => s.auth.token);
   const user = useAppSelector((s) => s.auth.user);
   const router = useRouter();
@@ -56,7 +64,39 @@ export function useDonorsNewPageGate() {
     }
   }, [mounted, user, router]);
 
-  const showGateLoader = !mounted || awaitingProfile || needsVerifyId;
+  useEffect(() => {
+    if (!mounted || !user || needsVerifyId) return;
 
-  return { showGateLoader };
+    let cancelled = false;
+    setDonorCheckState("loading");
+
+    void (async () => {
+      try {
+        const { data, status } = await $api.donors.me();
+        if (cancelled) return;
+        if (status >= 200 && status < 300 && data) {
+          const raw = unwrapApiRecord(data);
+          if (raw && isExistingRegisteredDonor(raw)) {
+            setAlreadyDonor(true);
+          }
+        }
+      } catch {
+        // No donor profile — allow registration.
+      } finally {
+        if (!cancelled) setDonorCheckState("ready");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, user, needsVerifyId]);
+
+  const showGateLoader =
+    !mounted ||
+    awaitingProfile ||
+    needsVerifyId ||
+    (Boolean(user) && !needsVerifyId && donorCheckState !== "ready");
+
+  return { showGateLoader, alreadyDonor };
 }
