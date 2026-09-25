@@ -41,6 +41,7 @@ import {
   type DonorBasicsValues,
 } from "../steps/basics/donor-basics-step.component";
 import { DonorRegistrationSuccessModal } from "./donor-registration-success-modal.component";
+import { AlreadyDonorGate } from "./already-donor-gate.component";
 import { NewDonorPageSkeleton } from "./new-donor-page-skeleton";
 import { normalizeDonorRegistrationType } from "./donor-registration-type";
 import { ReproductiveDonorFlow } from "./reproductive-donor-flow.component";
@@ -771,12 +772,20 @@ function NewDonorContent() {
 }
 
 function NewDonorPageWithGate() {
-  const { showGateLoader } = useDonorsNewPageGate();
+  const { showGateLoader, alreadyDonor } = useDonorsNewPageGate();
 
   if (showGateLoader) {
     return (
       <Layout>
         <AuthLoader />
+      </Layout>
+    );
+  }
+
+  if (alreadyDonor) {
+    return (
+      <Layout>
+        <AlreadyDonorGate />
       </Layout>
     );
   }
