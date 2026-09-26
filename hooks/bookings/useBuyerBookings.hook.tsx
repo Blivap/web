@@ -21,6 +21,11 @@ import {
   type BuyerPanelKey,
 } from "@/lib/bookings/buyerBookingsTabPanels";
 import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 export type { BuyerPanelKey } from "@/lib/bookings/buyerBookingsTabPanels";
 export { BUYER_TAB_ORDER } from "@/lib/bookings/buyerBookingsTabPanels";
@@ -152,13 +157,16 @@ export function useBuyerBookings() {
       try {
         const { status } = await $api.bookings.cancel(id);
         if (status < 200 || status >= 300) {
+          trackFailure("booking_cancelled", "api");
           dispatch(patchBookingInLists({ id, status: prev }));
           showSnackbar("Could not withdraw this request.");
           return;
         }
+        trackSuccess("booking_cancelled");
         showSnackbar("Request withdrawn — booking cancelled.");
         scheduleBookingsResync(dispatch);
       } catch (e) {
+        trackFailure("booking_cancelled", classifyAnalyticsError(e));
         dispatch(patchBookingInLists({ id, status: prev }));
         showSnackbar(
           getAxiosErrorMessage(

@@ -15,6 +15,11 @@ import {
 import { parseMeetupSessionBody } from "@/lib/meetups/parseMeetupResponses";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import type { MeetupReportPayload, MeetupSession } from "@/types/meetups";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 const POLL_MS = 5000;
 
@@ -37,6 +42,7 @@ export function useMeetupSession(sessionId: string | undefined) {
   const [terminateBusy, setTerminateBusy] = useState(false);
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const completedTrackedRef = useRef(false);
 
   const refreshSession = useCallback(async () => {
     if (!sessionId) return null;
@@ -57,12 +63,20 @@ export function useMeetupSession(sessionId: string | undefined) {
       setSessionError("Unexpected response from the server.");
       return null;
     }
+    if (
+      parsed.status === "completed" &&
+      !completedTrackedRef.current
+    ) {
+      completedTrackedRef.current = true;
+      trackSuccess("meetup_completed");
+    }
     setSession(parsed);
     setSessionLoad("ok");
     return parsed;
   }, [sessionId]);
 
   useEffect(() => {
+    completedTrackedRef.current = false;
     if (!sessionId) return;
     setSessionLoad("loading");
     void refreshSession();
@@ -87,11 +101,15 @@ export function useMeetupSession(sessionId: string | undefined) {
   const verifyCode = useCallback(
     async (code: string) => {
       const fail = (message: string) => {
+        trackFailure("meetup_code_verified", "api");
         showSnackbar("Unable to verify code. Try again.", "error");
         return { ok: false as const, message };
       };
 
-      if (!sessionId) return fail("Missing session.");
+      if (!sessionId) {
+        trackFailure("meetup_code_verified", "validation");
+        return { ok: false as const, message: "Missing session." };
+      }
       setVerifyBusy(true);
       try {
         const { status, data } = await $api.meetups.verifyCode(sessionId, code);
@@ -105,13 +123,19 @@ export function useMeetupSession(sessionId: string | undefined) {
           );
         }
         await refreshSession();
+        trackSuccess("meetup_code_verified");
         return { ok: true as const };
       } catch (e) {
         const st = statusFromAxios(e);
         if (st === 429) {
           return fail("Too many attempts. Try again later.");
         }
-        return fail(getAxiosErrorMessage(e, "Verification failed. Try again."));
+        trackFailure("meetup_code_verified", classifyAnalyticsError(e));
+        showSnackbar("Unable to verify code. Try again.", "error");
+        return {
+          ok: false as const,
+          message: getAxiosErrorMessage(e, "Verification failed. Try again."),
+        };
       } finally {
         setVerifyBusy(false);
       }
@@ -121,12 +145,15 @@ export function useMeetupSession(sessionId: string | undefined) {
 
   const verifyQr = useCallback(
     async (token: string) => {
-      if (!sessionId)
+      if (!sessionId) {
+        trackFailure("meetup_qr_verified", "validation");
         return { ok: false as const, message: "Missing session." };
+      }
       setVerifyBusy(true);
       try {
         const { status, data } = await $api.meetups.verifyQr(sessionId, token);
         if (status === 409) {
+          trackFailure("meetup_qr_verified", "api");
           return {
             ok: false as const,
             message:
@@ -134,12 +161,14 @@ export function useMeetupSession(sessionId: string | undefined) {
           };
         }
         if (status === 429) {
+          trackFailure("meetup_qr_verified", "api");
           return {
             ok: false as const,
             message: "Too many attempts. Try again later.",
           };
         }
         if (status < 200 || status >= 300) {
+          trackFailure("meetup_qr_verified", "api");
           return {
             ok: false as const,
             message:
@@ -148,8 +177,10 @@ export function useMeetupSession(sessionId: string | undefined) {
           };
         }
         await refreshSession();
+        trackSuccess("meetup_qr_verified");
         return { ok: true as const };
       } catch (e) {
+        trackFailure("meetup_qr_verified", classifyAnalyticsError(e));
         const st = statusFromAxios(e);
         if (st === 409) {
           return {
@@ -178,16 +209,19 @@ export function useMeetupSession(sessionId: string | undefined) {
   const confirmDonation = useCallback(
     async (userId: string) => {
       if (!sessionId || !session) {
+        trackFailure("donation_confirmed", "validation");
         return { ok: false as const, message: "Session not ready." };
       }
       const isReq = meetupUserIsRequester(session, userId);
       if (isReq === null) {
+        trackFailure("donation_confirmed", "validation");
         return {
           ok: false as const,
           message:
             "We could not tell if you are the donor or the requester for this meetup. Refresh the page or contact support.",
         };
       }
+      const role = isReq ? "requester" : "donor";
       setConfirmBusy(true);
       try {
         const res = isReq
@@ -195,6 +229,7 @@ export function useMeetupSession(sessionId: string | undefined) {
           : await $api.meetups.donorConfirm(sessionId);
         const { status, data } = res;
         if (status < 200 || status >= 300) {
+          trackFailure("donation_confirmed", "api", { role });
           return {
             ok: false as const,
             message:
@@ -204,8 +239,12 @@ export function useMeetupSession(sessionId: string | undefined) {
         }
         await refreshSession();
         await $api.meetups.complete(sessionId).catch(() => undefined);
+        trackSuccess("donation_confirmed", { role });
         return { ok: true as const };
       } catch (e) {
+        trackFailure("donation_confirmed", classifyAnalyticsError(e), {
+          role,
+        });
         return {
           ok: false as const,
           message: getAxiosErrorMessage(

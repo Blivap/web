@@ -22,6 +22,11 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { loadSentBookings } from "@/store/slices/bookingsSlice";
 import type { CarouselApi } from "@/components/ui/carousel";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 export type { ScheduleAppointmentDetails } from "@/lib/schedule-appointment/scheduleAppointment.utils";
 
@@ -187,12 +192,14 @@ export function useScheduleAppointment() {
 
         const { status, data } = await $api.bookings.request(payload);
         if (status < 200 || status >= 300) {
+          trackFailure("booking_requested", "api");
           setSubmitError(
             getApiMessageFromData(data) ??
               "Could not create the booking. Please try again.",
           );
           return;
         }
+        trackSuccess("booking_requested");
         void dispatch(loadSentBookings({ silent: true }));
         const hospital = hospitals.find((h) => h.id === appointment.hospitalId);
         setBookingSuccessSummary({
@@ -204,6 +211,7 @@ export function useScheduleAppointment() {
         });
         setBookingRequestSentOpen(true);
       } catch (err) {
+        trackFailure("booking_requested", classifyAnalyticsError(err));
         if (axios.isAxiosError(err)) {
           const st = err.response?.status;
           if (st === 404) {

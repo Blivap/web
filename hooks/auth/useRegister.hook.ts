@@ -11,6 +11,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { routes } from "@/config/routes";
 import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
 import { extractAccessTokenExpires } from "@/lib/auth/sessionExpiry";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 export const useRegister = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -46,6 +51,7 @@ export const useRegister = () => {
       const { data, status, message, error } =
         await $api.auth.register(apiPayload);
       if (status >= 200 && status < 300) {
+        trackSuccess("sign_up", { method: "email" });
         const envelope = (data || {}) as {
           message?: string;
           data?: IAuthResponse;
@@ -89,12 +95,16 @@ export const useRegister = () => {
         }
         return true;
       } else {
+        trackFailure("sign_up", "api", { method: "email" });
         const errorMessage =
           error || message || "Registration failed. Please try again.";
         showSnackbar(errorMessage, "error");
         return false;
       }
     } catch (error: unknown) {
+      trackFailure("sign_up", classifyAnalyticsError(error), {
+        method: "email",
+      });
       let errorMessage = "An unexpected error occurred. Please try again.";
       if (error instanceof AxiosError) {
         const responseData = error.response?.data as

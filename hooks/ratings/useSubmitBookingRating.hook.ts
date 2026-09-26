@@ -7,6 +7,11 @@ import {
   getAxiosErrorMessage,
 } from "@/lib/bookings/axiosErrorMessage";
 import { markBookingRatedLocally } from "@/lib/ratings/ratedBookingsStorage";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 import axios from "axios";
 
 export type SubmitBookingRatingResult =
@@ -23,9 +28,11 @@ export function useSubmitBookingRating() {
       comment?: string,
     ): Promise<SubmitBookingRatingResult> => {
       if (!bookingId.trim()) {
+        trackFailure("booking_rated", "validation");
         return { ok: false, message: "Missing booking." };
       }
       if (!Number.isInteger(score) || score < 1 || score > 5) {
+        trackFailure("booking_rated", "validation");
         return { ok: false, message: "Select a rating from 1 to 5 stars." };
       }
 
@@ -43,6 +50,7 @@ export function useSubmitBookingRating() {
         );
         if (status === 409) {
           markBookingRatedLocally(bookingId);
+          trackSuccess("booking_rated", { score });
           return { ok: true };
         }
         if (status < 200 || status >= 300) {
@@ -54,20 +62,25 @@ export function useSubmitBookingRating() {
             (lower.includes("already") || lower.includes("rated"))
           ) {
             markBookingRatedLocally(bookingId);
+            trackSuccess("booking_rated", { score });
             return { ok: true };
           }
+          trackFailure("booking_rated", "api", { score });
           return { ok: false, message: msg };
         }
         markBookingRatedLocally(bookingId);
+        trackSuccess("booking_rated", { score });
         return { ok: true };
       } catch (e) {
         if (axios.isAxiosError(e)) {
           const st = e.response?.status;
           if (st === 409) {
             markBookingRatedLocally(bookingId);
+            trackSuccess("booking_rated", { score });
             return { ok: true };
           }
           if (st === 429) {
+            trackFailure("booking_rated", "api", { score });
             return {
               ok: false,
               message: "Too many attempts. Try again later.",
@@ -80,10 +93,13 @@ export function useSubmitBookingRating() {
           const lower = msg.toLowerCase();
           if (lower.includes("already") || lower.includes("rated")) {
             markBookingRatedLocally(bookingId);
+            trackSuccess("booking_rated", { score });
             return { ok: true };
           }
+          trackFailure("booking_rated", classifyAnalyticsError(e), { score });
           return { ok: false, message: msg };
         }
+        trackFailure("booking_rated", classifyAnalyticsError(e), { score });
         return {
           ok: false,
           message: "Could not submit your rating. Try again.",

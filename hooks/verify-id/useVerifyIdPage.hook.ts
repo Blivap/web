@@ -7,6 +7,7 @@ import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppSelector } from "@/store/hooks";
 import { startTransition, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { trackFailure, trackSuccess } from "@/lib/analytics/ga";
 
 const NIN_LENGTH = 11;
 
@@ -55,11 +56,17 @@ export function useVerifyIdPage() {
   );
 
   const handleConfirmNin = useCallback(async () => {
-    if (nin.length !== NIN_LENGTH) return;
+    if (nin.length !== NIN_LENGTH) {
+      trackFailure("id_verified", "validation");
+      return;
+    }
     const ok = await verifyNin(nin);
     if (ok) {
+      trackSuccess("id_verified");
       showSnackbar("Identity verified successfully.", "success");
       queueMicrotask(() => navigateOutAfterSuccess(router));
+    } else {
+      trackFailure("id_verified", "api");
     }
   }, [nin, verifyNin, showSnackbar, router]);
 

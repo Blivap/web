@@ -21,6 +21,11 @@ import {
 import { normalizeMeetupSixDigitCode } from "@/lib/meetups/meetupSwapCodes";
 import { routes } from "@/config/routes";
 import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 export function MeetupBootstrapClient() {
   const router = useRouter();
@@ -48,6 +53,7 @@ export function MeetupBootstrapClient() {
         const { status, data } = await $api.meetups.ensureSession(bookingId);
         if (cancelled) return;
         if (status < 200 || status >= 300) {
+          trackFailure("meetup_session_started", "api");
           setError(
             getApiMessageFromData(data) ??
               "Could not open the meetup for this booking.",
@@ -56,9 +62,11 @@ export function MeetupBootstrapClient() {
         }
         const parsed = parseMeetupEnsureSessionBody(data);
         if (!parsed?.sessionId) {
+          trackFailure("meetup_session_started", "api");
           setError("Unexpected response from the server.");
           return;
         }
+        trackSuccess("meetup_session_started");
         try {
           if (parsed.qrToken) {
             sessionStorage.setItem(
@@ -90,6 +98,7 @@ export function MeetupBootstrapClient() {
         router.replace(sessionPath);
       } catch (e) {
         if (!cancelled) {
+          trackFailure("meetup_session_started", classifyAnalyticsError(e));
           setError(
             getAxiosErrorMessage(e, "Could not open the meetup. Try again."),
           );
