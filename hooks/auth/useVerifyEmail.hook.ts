@@ -9,6 +9,11 @@ import { setUser } from "@/store/slices/authSlice";
 import { normalizeUser } from "@/lib/utils";
 import { getDnRedirect } from "@/lib/navigation/authRedirect";
 import { routes } from "@/config/routes";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 export function useVerifyEmail() {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +33,7 @@ export function useVerifyEmail() {
       const { status, message, error } = await $api.auth.verifyEmail(payload);
 
       if (status >= 200 && status < 300) {
+        trackSuccess("email_verified");
         showSnackbar(message ?? "Email verified successfully.", "success");
 
         /* Refresh profile from /me. If the API lags, /me can still return
@@ -53,9 +59,11 @@ export function useVerifyEmail() {
         return true;
       }
 
+      trackFailure("email_verified", "api");
       showSnackbar(error ?? message ?? "Verification failed.", "error");
       return false;
     } catch (err) {
+      trackFailure("email_verified", classifyAnalyticsError(err));
       const msg =
         err instanceof AxiosError
           ? ((err.response?.data as { message?: string })?.message ??

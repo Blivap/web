@@ -29,6 +29,11 @@ import type {
 } from "@/types/donors";
 import { extractScreeningProfileFromDonor } from "@/lib/donors/extractScreeningProfileFromDonor";
 import { normalizeDonationTypeForApi } from "@/lib/donors/screeningDonationTypes";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 import { StepThree } from "../steps/three/step_three.component";
 import {
@@ -509,27 +514,46 @@ function NewDonorForm() {
       return;
     }
     if (!values.basics.bloodType) {
+      trackFailure("donor_profile_registered", "validation", {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setBasicsError("Select a blood type.");
       return;
     }
     if (!values.basics.country.trim()) {
+      trackFailure("donor_profile_registered", "validation", {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setBasicsError("Select your country.");
       return;
     }
     if (!values.basics.state.trim()) {
+      trackFailure("donor_profile_registered", "validation", {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setBasicsError("Enter your state/region.");
       return;
     }
     if (!values.basics.area.trim()) {
+      trackFailure("donor_profile_registered", "validation", {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setBasicsError("Enter your area.");
       return;
     }
     if (!values.basics.city.trim()) {
+      trackFailure("donor_profile_registered", "validation", {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setBasicsError("Enter your city/town.");
       return;
     }
     const parsed = normalizeAreaLocationFromBasics(values.basics);
     if (!parsed) {
+      trackFailure("donor_profile_registered", "validation", {
+        donation_type: donationTypeForQuestionnaire,
+        blood_type: values.basics.bloodType,
+      });
       setBasicsError(
         "Location details are invalid. Please review country, state, city, and area.",
       );
@@ -545,13 +569,29 @@ function NewDonorForm() {
 
       const { status } = await $api.donors.register(payload);
       if (status >= 200 && status < 300) {
+        trackSuccess("donor_profile_registered", {
+          donation_type: donationTypeForQuestionnaire,
+          blood_type: values.basics.bloodType,
+        });
         setParsedAreaLocation(parsed);
         setBasicsComplete(true);
         setStepParam(2);
       } else {
+        trackFailure("donor_profile_registered", "api", {
+          donation_type: donationTypeForQuestionnaire,
+          blood_type: values.basics.bloodType,
+        });
         setBasicsError("Could not save donor profile. Try again.");
       }
     } catch (e) {
+      trackFailure(
+        "donor_profile_registered",
+        classifyAnalyticsError(e),
+        {
+          donation_type: donationTypeForQuestionnaire,
+          blood_type: values.basics.bloodType,
+        },
+      );
       setBasicsError(
         getErrorMessage(e, "Could not save donor profile. Try again."),
       );
@@ -563,6 +603,9 @@ function NewDonorForm() {
   const handleRequestActivation = async () => {
     setActivationRequestError(null);
     if (!basicsComplete) {
+      trackFailure("donor_activation_requested", "validation", {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setActivationRequestError(
         "Complete step 1 with blood type and location details first.",
       );
@@ -570,6 +613,9 @@ function NewDonorForm() {
       return;
     }
     if (!activationPreparationComplete) {
+      trackFailure("donor_activation_requested", "validation", {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setActivationRequestError(
         "Complete the AI questionnaire first (all answers filled), or finish loading your profile.",
       );
@@ -599,6 +645,9 @@ function NewDonorForm() {
     }
 
     if (!areaLocation) {
+      trackFailure("donor_activation_requested", "validation", {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setActivationRequestError(
         "Area location is required for donor matching. Complete step 1 first.",
       );
@@ -613,13 +662,24 @@ function NewDonorForm() {
         donationType: donationTypeForQuestionnaire,
       });
       if (status >= 200 && status < 300) {
+        trackSuccess("donor_activation_requested", {
+          donation_type: donationTypeForQuestionnaire,
+        });
         setIsActivationSuccessModalOpen(true);
         return;
       }
+      trackFailure("donor_activation_requested", "api", {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setActivationRequestError(
         error ?? message ?? "Could not submit activation request.",
       );
     } catch (e) {
+      trackFailure(
+        "donor_activation_requested",
+        classifyAnalyticsError(e),
+        { donation_type: donationTypeForQuestionnaire },
+      );
       setActivationRequestError(
         getErrorMessage(e, "Could not submit activation request."),
       );
@@ -634,13 +694,22 @@ function NewDonorForm() {
     try {
       const { status, error, message } = await $api.donors.requestRetake();
       if (status >= 200 && status < 300) {
+        trackSuccess("donor_retake_requested", {
+          donation_type: donationTypeForQuestionnaire,
+        });
         setIsActivationSuccessModalOpen(true);
         return;
       }
+      trackFailure("donor_retake_requested", "api", {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setActivationRequestError(
         error ?? message ?? "Could not request retake.",
       );
     } catch (e) {
+      trackFailure("donor_retake_requested", classifyAnalyticsError(e), {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setActivationRequestError(
         getErrorMessage(e, "Could not request retake."),
       );

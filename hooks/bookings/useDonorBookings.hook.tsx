@@ -20,6 +20,11 @@ import {
   type DonorPanelKey,
 } from "@/lib/bookings/donorBookingsTabPanels";
 import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 export type { DonorPanelKey } from "@/lib/bookings/donorBookingsTabPanels";
 export {
@@ -105,10 +110,12 @@ export function useDonorBookings() {
       try {
         const { status, data } = await $api.bookings.accept(id);
         if (status < 200 || status >= 300) {
+          trackFailure("booking_accepted", "api");
           dispatch(patchBookingInLists({ id, status: prev }));
           showSnackbar("Could not accept this booking.");
           return;
         }
+        trackSuccess("booking_accepted");
         const serverPatch = parseBookingMutationResponse(data);
         if (serverPatch) {
           dispatch(patchBookingInLists({ id, ...serverPatch }));
@@ -121,6 +128,7 @@ export function useDonorBookings() {
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
         scheduleBookingsResync(dispatch);
       } catch (e) {
+        trackFailure("booking_accepted", classifyAnalyticsError(e));
         dispatch(patchBookingInLists({ id, status: prev }));
         showSnackbar(
           getAxiosErrorMessage(
@@ -151,10 +159,12 @@ export function useDonorBookings() {
       try {
         const { status, data } = await $api.bookings.decline(id);
         if (status < 200 || status >= 300) {
+          trackFailure("booking_declined", "api");
           dispatch(patchBookingInLists({ id, status: prev }));
           showSnackbar("Could not decline this booking.");
           return;
         }
+        trackSuccess("booking_declined");
         const serverPatch = parseBookingMutationResponse(data);
         if (serverPatch) {
           dispatch(patchBookingInLists({ id, ...serverPatch }));
@@ -165,6 +175,7 @@ export function useDonorBookings() {
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
         scheduleBookingsResync(dispatch);
       } catch (e) {
+        trackFailure("booking_declined", classifyAnalyticsError(e));
         dispatch(patchBookingInLists({ id, status: prev }));
         showSnackbar(
           getAxiosErrorMessage(
