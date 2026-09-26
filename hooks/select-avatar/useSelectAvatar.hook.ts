@@ -16,6 +16,11 @@ import {
 import { normalizeUser } from "@/lib/utils";
 import { IUser } from "@/types";
 import { getPostAuthRedirect } from "@/lib/navigation/authRedirect";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 function mergeUserWithAvatar(
   currentUser: IUser | null,
@@ -79,10 +84,14 @@ export function useSelectAvatar() {
     shouldRedirect: boolean = true,
   ): Promise<boolean> => {
     try {
-      if (!selectedAvatar) return false;
+      if (!selectedAvatar) {
+        trackFailure("avatar_selected", "validation");
+        return false;
+      }
       setIsConfirming(true);
       const { data, status } = await $api.avatar.setAvatar(selectedAvatar);
       if (status >= 200 && status < 300 && data) {
+        trackSuccess("avatar_selected");
         const newProfileImage = data.data?.url ?? selectedAvatar;
         dispatch(setSelectedAvatar(newProfileImage));
 
@@ -119,8 +128,10 @@ export function useSelectAvatar() {
         }
         return true;
       }
+      trackFailure("avatar_selected", "api");
       return false;
     } catch (err: unknown) {
+      trackFailure("avatar_selected", classifyAnalyticsError(err));
       const message =
         err instanceof AxiosError
           ? ((err.response?.data as { message?: string })?.message ??

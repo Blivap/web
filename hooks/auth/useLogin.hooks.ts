@@ -10,6 +10,11 @@ import { setCredentials, setUser } from "@/store/slices/authSlice";
 import { routes } from "@/config/routes";
 import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
 import { extractAccessTokenExpires } from "@/lib/auth/sessionExpiry";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -24,6 +29,7 @@ export const useLogin = () => {
     try {
       const { data, status, message, error } = await $api.auth.login(payload);
       if (status >= 200 && status < 300) {
+        trackSuccess("login", { method: "email" });
         // Backend shape: { message: string; data: { accessToken, user, ... } }
         const envelope = (data || {}) as {
           message?: string;
@@ -67,6 +73,7 @@ export const useLogin = () => {
         }
         return true;
       } else {
+        trackFailure("login", "api", { method: "email" });
         const errorMessage =
           error ||
           message ||
@@ -75,6 +82,7 @@ export const useLogin = () => {
         return false;
       }
     } catch (error) {
+      trackFailure("login", classifyAnalyticsError(error), { method: "email" });
       let errorMessage = "An unexpected error occurred. Please try again.";
 
       if (error instanceof AxiosError) {

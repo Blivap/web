@@ -23,6 +23,11 @@ import {
   type ParsedQuestionnaireQuestion,
   questionnaireRecordFromMineResponse,
 } from "@/lib/donors/questionnaireMineResponse";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 const panelClass =
   "rounded-lg border border-border bg-[#FAFAFA] px-5 py-4 sm:px-6 dark:border-white/10 dark:bg-white/5";
@@ -207,11 +212,19 @@ export const DonorAiQuestionnairePanel = forwardRef<
     ref,
     () => ({
       async submitAllAnswers(): Promise<boolean> {
-        if (questions.length === 0) return true;
+        if (questions.length === 0) {
+          trackSuccess("donor_questionnaire_completed", {
+            donation_type: primaryDonationType,
+          });
+          return true;
+        }
         const payload: QuestionnaireAnswerPayloadItem[] = [];
         for (const q of questions) {
           const choice = draftAnswers[q.id] ?? "";
           if (!isQuestionnaireAnswerEnum(choice)) {
+            trackFailure("donor_questionnaire_completed", "validation", {
+              donation_type: primaryDonationType,
+            });
             setActionError(
               "Choose Yes, No, or Not sure for every question before continuing.",
             );
@@ -220,6 +233,9 @@ export const DonorAiQuestionnairePanel = forwardRef<
           payload.push({ questionId: q.id, answer: choice });
         }
         if (!questionnaireId) {
+          trackFailure("donor_questionnaire_completed", "validation", {
+            donation_type: primaryDonationType,
+          });
           setActionError(
             "Questionnaire is not ready yet. Wait for loading to finish or refresh.",
           );
@@ -230,8 +246,16 @@ export const DonorAiQuestionnairePanel = forwardRef<
         try {
           await $api.questionnaire.answer(questionnaireId, payload);
           await fetchAndApplyMine();
+          trackSuccess("donor_questionnaire_completed", {
+            donation_type: primaryDonationType,
+          });
           return true;
         } catch (e) {
+          trackFailure(
+            "donor_questionnaire_completed",
+            classifyAnalyticsError(e),
+            { donation_type: primaryDonationType },
+          );
           setActionError(
             getErrorMessage(
               e,
@@ -244,7 +268,7 @@ export const DonorAiQuestionnairePanel = forwardRef<
         }
       },
     }),
-    [questionnaireId, questions, draftAnswers, fetchAndApplyMine],
+    [questionnaireId, questions, draftAnswers, fetchAndApplyMine, primaryDonationType],
   );
 
   if (disabled) return null;

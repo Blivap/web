@@ -4,6 +4,11 @@ import { $api } from "@/app/api";
 import { IForgotPasswordPayload } from "@/types";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useRouter } from "next/navigation";
+import {
+  classifyAnalyticsError,
+  trackFailure,
+  trackSuccess,
+} from "@/lib/analytics/ga";
 
 export function useForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,15 +24,18 @@ export function useForgotPassword() {
       const { status, message, error } =
         await $api.auth.forgotPassword(payload);
       if (status >= 200 && status < 300) {
+        trackSuccess("password_reset_requested");
         showSnackbar("Reset link sent to your email.", "success");
         if (options?.redirectOnSuccess !== false) {
           router.replace("/login");
         }
         return true;
       }
+      trackFailure("password_reset_requested", "api");
       showSnackbar(error ?? message ?? "Request failed.", "error");
       return false;
     } catch (err) {
+      trackFailure("password_reset_requested", classifyAnalyticsError(err));
       const msg =
         err instanceof AxiosError
           ? ((err.response?.data as { message?: string })?.message ??
