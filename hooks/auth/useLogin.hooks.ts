@@ -2,14 +2,13 @@ import { useState } from "react";
 import { AxiosError } from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { $api } from "@/app/api";
-import { ILoginPayload, IAuthResponse } from "@/types";
-import { isEmailUnverified, normalizeUser } from "@/lib/utils";
+import { ILoginPayload } from "@/types";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch } from "@/store/hooks";
-import { setCredentials, setUser } from "@/store/slices/authSlice";
-import { routes } from "@/config/routes";
-import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
-import { extractAccessTokenExpires } from "@/lib/auth/sessionExpiry";
+import {
+  applyAuthSession,
+  readAuthEnvelope,
+} from "@/lib/auth/applyAuthSession";
 import {
   classifyAnalyticsError,
   trackFailure,
@@ -23,54 +22,18 @@ export const useLogin = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const handleLogin = async (payload: ILoginPayload): Promise<boolean> => {
-    const dnRedirect = getDnRedirect(searchParams);
-    const postAuthRedirect = dnRedirect ?? routes.overview;
     setIsLoading(true);
     try {
       const { data, status, message, error } = await $api.auth.login(payload);
       if (status >= 200 && status < 300) {
         trackSuccess("login", { method: "email" });
-        // Backend shape: { message: string; data: { accessToken, user, ... } }
-        const envelope = (data || {}) as {
-          message?: string;
-          data?: IAuthResponse;
-        };
-        const authData = envelope.data ?? ((data || {}) as IAuthResponse);
-
-        const token =
-          authData?.accessToken ??
-          (authData as { access_token?: string })?.access_token ??
-          authData?.token;
-
         showSnackbar("Login successful!", "success");
-
-        if (token) {
-          dispatch(
-            setCredentials({
-              token,
-              expiresAt: extractAccessTokenExpires(authData),
-            }),
-          );
-          let userPayload = normalizeUser(authData?.user ?? authData) ?? null;
-          if (!userPayload) {
-            try {
-              const me = await $api.auth.me();
-              if (me.status >= 200 && me.status < 300 && me.data) {
-                userPayload = normalizeUser(me.data);
-              }
-            } catch {
-              /* session token may lag; routing still uses login envelope below */
-            }
-          }
-          if (userPayload) {
-            dispatch(setUser(userPayload));
-          }
-          if (isEmailUnverified(userPayload ?? authData?.user)) {
-            router.replace(withDn(routes.verifyEmail, dnRedirect));
-          } else {
-            router.replace(postAuthRedirect);
-          }
-        }
+        await applyAuthSession({
+          authData: readAuthEnvelope(data),
+          dispatch,
+          router,
+          searchParams,
+        });
         return true;
       } else {
         trackFailure("login", "api", { method: "email" });

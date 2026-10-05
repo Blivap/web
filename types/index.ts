@@ -111,8 +111,10 @@ export type {
   InAppNotification,
   InAppNotificationListResponse,
   NotificationEventType,
+  NotificationSettings,
   WebPushSubscriptionPayload,
 } from "./notifications";
+export { DEFAULT_NOTIFICATION_SETTINGS } from "./notifications";
 
 export type {
   DonorBloodType,
