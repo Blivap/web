@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useLayoutEffect, useRef } from "react";
 import { BlivapLogo } from "@/public/svg";
+import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 
 export default function SignUpPage() {
   const { handleRegister, isLoading } = useRegister();
@@ -304,24 +305,7 @@ export default function SignUpPage() {
                 <div className="h-px w-full bg-gray-300 dark:bg-white/10"></div>
               </div>
               <div className="flex gap-6 items-center">
-                <Image
-                  src="/icons/Google.svg"
-                  alt="Google"
-                  width={32}
-                  height={32}
-                />
-                <Image
-                  src="/icons/Apple.svg"
-                  alt="Apple"
-                  width={32}
-                  height={32}
-                />
-                <Image
-                  src="/icons/facebook.svg"
-                  alt="Facebook"
-                  width={32}
-                  height={32}
-                />
+                <SocialAuthButtons />
                 <Image
                   src="/icons/twitter.svg"
                   alt="Twitter"

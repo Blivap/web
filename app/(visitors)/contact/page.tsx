@@ -9,7 +9,6 @@ import {
   Mail,
   MapPin,
   MessageCircle,
-  Phone,
   Send,
   ShieldCheck,
 } from "lucide-react";
@@ -34,14 +33,6 @@ export default function Contact() {
       secondary: "info@blivap.com",
       href: "mailto:support@blivap.com",
       accent: "bg-[#FFF1F3]",
-    },
-    {
-      icon: Phone,
-      label: "Phone",
-      primary: "+234 XXX XXX XXXX",
-      secondary: "Mon–Fri, 9AM–5PM WAT",
-      href: "tel:+234XXXXXXXXXX",
-      accent: "bg-[#EEF2FF]",
     },
     {
       icon: MapPin,

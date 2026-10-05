@@ -60,6 +60,10 @@ export const resetPasswordSchema = yup.object({
 export const changePasswordSchema = yup.object({
   oldPassword: yup.string().required("Current password is required"),
   password: passwordRule,
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("password")], "Passwords must match")
+    .required("Confirm your new password"),
 });
 
 export const editProfileSchema = yup.object({

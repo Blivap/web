@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { generateMetadata as genMeta } from "../lib/utils/metadata";
 import { HomeComponent } from "../components/home/home.componet";
+import { HomeStructuredData } from "@/components/seo/home-structured-data";
 
 export const metadata: Metadata = genMeta({
   title: "Blood Donation in Nigeria | Blivap",
@@ -17,5 +18,10 @@ export const metadata: Metadata = genMeta({
 });
 
 export default function Home() {
-  return <HomeComponent />;
+  return (
+    <>
+      <HomeStructuredData />
+      <HomeComponent />
+    </>
+  );
 }

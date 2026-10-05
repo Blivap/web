@@ -99,6 +99,7 @@ export const endpoints = {
     list: "/notifications",
     read: (id: string) => `/notifications/${encodeURIComponent(id)}/read`,
     markAllRead: "/notifications/mark-all-read",
+    settings: "/notifications/settings",
     pushSubscriptions: {
       fcm: "/notifications/push-subscriptions/fcm",
       web: "/notifications/push-subscriptions/web",
@@ -108,6 +109,7 @@ export const endpoints = {
   /** Primary authentication routes (`authentication` controller) */
   auth: {
     login: "/authentication/login",
+    social: "/authentication/social",
     /** Maps to POST /authentication/signup */
     register: "/authentication/signup",
     signup: "/authentication/signup",

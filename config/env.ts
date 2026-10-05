@@ -17,6 +17,13 @@ type Env = {
    */
   googleAnalyticsId: string | undefined;
   authTokenKey: string;
+  firebase: {
+    apiKey: string | undefined;
+    authDomain: string | undefined;
+    projectId: string | undefined;
+    appId: string | undefined;
+    messagingSenderId: string | undefined;
+  };
 };
 
 /** Prefer server env, then Next.js public env (matches typical `.env.local` layouts). */
@@ -99,6 +106,13 @@ const env = (): Env => {
     webPushVapidPublicKey,
     googleAnalyticsId,
     authTokenKey,
+    firebase: {
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    },
   };
 };
 
