@@ -6,6 +6,7 @@
 self.addEventListener("push", function (event) {
   let title = "Blivap";
   let body = "";
+  let icon = "/icon1.png";
   /** @type {Record<string, string>} */
   let data = {};
 
@@ -14,6 +15,7 @@ self.addEventListener("push", function (event) {
       const json = event.data.json();
       title = json.title || title;
       body = json.body || "";
+      if (typeof json.icon === "string" && json.icon) icon = json.icon;
       if (json.data && typeof json.data === "object") {
         data = /** @type {Record<string, string>} */ (json.data);
       }
@@ -26,8 +28,8 @@ self.addEventListener("push", function (event) {
     self.registration.showNotification(title, {
       body,
       data,
-      icon: "/favicon.svg",
-      badge: "/favicon.svg",
+      icon,
+      badge: "/icon1.png",
     }),
   );
 });

@@ -4,6 +4,7 @@ import type { IResponse } from "@/types";
 import type {
   FcmPushSubscriptionPayload,
   InAppNotificationListResponse,
+  NotificationSettings,
   WebPushSubscriptionPayload,
 } from "@/types/notifications";
 
@@ -42,6 +43,27 @@ export default function NotificationRepository() {
       return fetcher(endpoints.notifications.markAllRead, {
         method: "POST",
       });
+    },
+
+    settings(): Promise<
+      IResponse<{ message?: string; data: NotificationSettings }>
+    > {
+      return fetcher<{ message?: string; data: NotificationSettings }>(
+        endpoints.notifications.settings,
+        { method: "GET" },
+      );
+    },
+
+    updateSettings(
+      payload: Partial<NotificationSettings>,
+    ): Promise<IResponse<{ message?: string; data: NotificationSettings }>> {
+      return fetcher<{ message?: string; data: NotificationSettings }>(
+        endpoints.notifications.settings,
+        {
+          method: "PATCH",
+          data: payload,
+        },
+      );
     },
 
     registerFcmPush(

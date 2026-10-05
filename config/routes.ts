@@ -54,6 +54,13 @@ export const routes = {
   history: "/history",
   bookings: "/bookings",
   settings: "/settings",
+  settingsPersonalInformation: "/settings/personal-information",
+  settingsBankDetails: "/settings/bank-details",
+  settingsDonationHistory: "/settings/donation-history",
+  settingsNotifications: "/settings/notifications",
+  settingsPrivacySecurity: "/settings/privacy-security",
+  settingsHelpSupport: "/settings/help-support",
+  settingsDeleteAccount: "/settings/delete-account",
   verifyId: (id?: string) => `/verify-id${id ? `?donorId=${id}` : ""}`,
   scheduleAppointment: (id: string) => `/schedule-appointment?donorId=${id}`,
   // Next.js routes

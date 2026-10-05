@@ -21,6 +21,12 @@ export default function authRepository() {
         data: payload,
       });
     },
+    social(payload: { idToken: string }): Promise<IResponse<IAuthResponse>> {
+      return fetcher<IAuthResponse>(endpoints.auth.social, {
+        method: "POST",
+        data: payload,
+      });
+    },
     register(payload: IRegisterApiPayload): Promise<IResponse<IAuthResponse>> {
       return fetcher<IAuthResponse>(endpoints.auth.register, {
         method: "POST",

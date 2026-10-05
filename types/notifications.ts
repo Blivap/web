@@ -1,3 +1,22 @@
+/** Preference flags from GET/PATCH /notifications/settings. */
+export type NotificationSettings = {
+  pushEnabled: boolean;
+  donationReminders: boolean;
+  nearbyDrives: boolean;
+  eligibilityAlerts: boolean;
+  rewardUpdates: boolean;
+  appUpdates: boolean;
+};
+
+export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
+  pushEnabled: true,
+  donationReminders: true,
+  nearbyDrives: true,
+  eligibilityAlerts: false,
+  rewardUpdates: true,
+  appUpdates: false,
+};
+
 /** Matches backend notification event types (frontend-notifications.txt). */
 export type NotificationEventType =
   | "donor_matched"
