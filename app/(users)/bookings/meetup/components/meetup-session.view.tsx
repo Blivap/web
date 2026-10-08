@@ -16,6 +16,7 @@ import {
   CircleDashed,
   HelpCircle,
   MessageCircle,
+  PhoneOff,
   ScanIcon,
   SendIcon,
   ShieldAlert,
@@ -57,6 +58,7 @@ import { patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/forms/inputs/input.component";
+import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
 import { Textarea } from "@/components/ui/textarea";
 import { Modal } from "@/components/ui/modal/modal.component";
 
@@ -91,11 +93,9 @@ function platformIdStatus(v: boolean | undefined): PlatformIdStatus {
 
 function MeetupVerificationRow({
   label,
-  description,
   status,
 }: {
   label: string;
-  description: string;
   status: "done" | "pending" | "issue" | "unknown";
 }) {
   const config = {
@@ -124,15 +124,10 @@ function MeetupVerificationRow({
   const { Icon, chip, text } = config[status];
 
   return (
-    <div className="flex items-start justify-between gap-3 rounded-lg border border-border/80 bg-white/80 px-3 py-2.5 dark:border-white/12 dark:bg-[#2a2a34]">
-      <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">
-          {label}
-        </p>
-        <p className="mt-0.5 text-[13px] leading-snug text-text-secondary dark:text-white/75">
-          {description}
-        </p>
-      </div>
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-border/80 bg-white/80 px-3 py-2.5 dark:border-white/12 dark:bg-[#2a2a34]">
+      <p className="min-w-0 text-xs font-semibold uppercase tracking-wide text-text-tertiary">
+        {label}
+      </p>
       <span
         className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${chip}`}
       >
@@ -180,12 +175,10 @@ function MeetupParticipantVerificationCard({
       <div className="flex flex-col gap-2">
         <MeetupVerificationRow
           label="Platform identity"
-          description="Government ID (NIN) on file with Blivap before the meetup."
           status={platformRowStatus}
         />
         <MeetupVerificationRow
           label="This meetup"
-          description="In-person check: you entered the other person's unique code (or scanned their QR)."
           status={meetupRowStatus}
         />
       </div>
@@ -202,23 +195,35 @@ function MeetupVerificationSummary({
 }) {
   return (
     <div className="mt-4 border-t border-border pt-4 dark:border-white/10">
-      <div className="flex items-start gap-2">
-        <ShieldCheck
-          className="mt-0.5 size-4 shrink-0 text-primary"
-          aria-hidden
-        />
-        <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-text-primary">
-            Who is verified?
-          </h3>
-          <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+      <div className="flex items-center gap-1.5">
+        <ShieldCheck className="size-4 shrink-0 text-primary" aria-hidden />
+        <h3 className="text-sm font-semibold text-text-primary">
+          Who is verified?
+        </h3>
+        <InfoHint
+          title="Who is verified?"
+          label="Verification information"
+          className="size-7"
+        >
+          <p>
             <span className="font-medium text-text-primary">
               Two separate checks:
             </span>{" "}
-            your account ID on the platform, then the in-person step for{" "}
-            <span className="whitespace-nowrap">this session only</span>.
+            your account ID on the platform, then the in-person step for this
+            session only.
           </p>
-        </div>
+          <p>
+            <span className="font-medium text-text-primary">
+              Platform identity:
+            </span>{" "}
+            Government ID (NIN) on file with Blivap before the meetup.
+          </p>
+          <p>
+            <span className="font-medium text-text-primary">This meetup:</span>{" "}
+            In-person check — you entered the other person&apos;s unique code
+            (or scanned their QR).
+          </p>
+        </InfoHint>
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <MeetupParticipantVerificationCard
@@ -713,19 +718,17 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     !donationChat.socketConnected ||
     donationChat.sendBusy;
 
+  /** Short operational status only — longer how-it-works copy lives in InfoHint. */
   const chatStatusLine = useMemo(() => {
     if (sessionLoad !== "ok") return null;
-    if (session?.chatEnabled === false) {
-      return "Donation chat opens after this booking is accepted. Meetup verify / confirm flows use /meetups only — they do not carry chat messages.";
-    }
+    if (session?.chatEnabled === false) return "Chat unavailable until booking is accepted.";
     if (!donationChatBookingId) {
-      return "Chat needs your booking id (same value as in /chat/:donationId). Refresh or open meetup again from the booking row if this stays empty.";
+      return "Chat unavailable — reopen meetup from the booking row.";
     }
     if (!token) return "Sign in again to use donation chat.";
     if (chatLocked) {
       return (
-        donationChat.roomCloseReason?.trim() ||
-        "This donation chat is closed — you cannot send new messages."
+        donationChat.roomCloseReason?.trim() || "This chat is closed."
       );
     }
     if (!donationChat.socketConnected && donationChatEnabled) {
@@ -819,13 +822,24 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
           <ArrowLeft className="size-4" aria-hidden />
           Back
         </Link>
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-text-primary">
-          Donation meetup
-        </h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Verify in person, confirm the donation when both sides are ready, then
-          you are done.
-        </p>
+        <div className="mt-3 flex items-center gap-1.5">
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary">
+            Donation meetup
+          </h1>
+          <InfoHint
+            title="Donation meetup"
+            label="Meetup information"
+          >
+            <p>
+              Verify in person, confirm the donation when both sides are ready,
+              then you are done.
+            </p>
+            <p>
+              Meetup verify and confirm flows use /meetups only — they do not
+              carry chat messages.
+            </p>
+          </InfoHint>
+        </div>
       </div>
 
       {!ninOk ? (
@@ -879,12 +893,21 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
       {ninOk && !readOnly && !gateSatisfied ? (
         <section className={cardClass}>
-          <h2 className="text-sm font-semibold text-text-primary">
-            Verify at the hospital
-          </h2>
-          <p className="mt-1 text-xs text-text-secondary">
-            Both must verify before donation confirmation unlocks.
-          </p>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-sm font-semibold text-text-primary">
+              Verify at the hospital
+            </h2>
+            <InfoHint
+              title="Verify at the hospital"
+              label="Hospital verify information"
+              className="size-7"
+            >
+              <p>
+                Both people must complete the in-person verify step before
+                donation confirmation unlocks.
+              </p>
+            </InfoHint>
+          </div>
 
           {myMeetupCode ? (
             <div className="mt-4 rounded-lg border border-border bg-[#FAFAFB] p-3 dark:border-white/10 dark:bg-black/20 sm:hidden">
@@ -967,13 +990,21 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
       {ninOk && gateSatisfied && !readOnly ? (
         <section className={cardClass}>
-          <h2 className="text-sm font-semibold text-text-primary">
-            Confirm donation
-          </h2>
-          <p className="mt-1 text-xs text-text-secondary">
-            After the donation takes place, each of you confirms once. When both
-            confirmations are in, this booking is completed.
-          </p>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-sm font-semibold text-text-primary">
+              Confirm donation
+            </h2>
+            <InfoHint
+              title="Confirm donation"
+              label="Confirm donation information"
+              className="size-7"
+            >
+              <p>
+                After the donation takes place, each of you confirms once. When
+                both confirmations are in, this booking is completed.
+              </p>
+            </InfoHint>
+          </div>
           <ul className="mt-3 space-y-1 text-xs text-text-secondary">
             <li>
               You:{" "}
@@ -1015,21 +1046,49 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
       {readOnly ? (
         <section className={cardClass}>
-          <h2 className="text-sm font-semibold text-text-primary">Summary</h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-sm font-semibold text-text-primary">Summary</h2>
+            <InfoHint
+              title="Meetup summary"
+              label="Summary information"
+              className="size-7"
+            >
+              <p>
+                This meetup is closed. Verification and donation confirmations
+                are frozen. Refresh your bookings list for the latest booking
+                status.
+              </p>
+            </InfoHint>
+          </div>
           <p className="mt-1 text-sm text-text-secondary">
-            This meetup is closed. Verification and donation confirmations are
-            frozen. Refresh your bookings list for the latest booking status.
+            This meetup is closed.
           </p>
         </section>
       ) : null}
 
       <section className={cardClass}>
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <MessageCircle className="size-4 text-primary" aria-hidden />
             <h2 className="text-sm font-semibold text-text-primary">
               Donation chat
             </h2>
+            <InfoHint
+              title="Donation chat"
+              label="Donation chat information"
+              className="size-7"
+            >
+              <p>
+                Donation chat opens after this booking is accepted. Meetup
+                verify / confirm flows use /meetups only — they do not carry
+                chat messages.
+              </p>
+              <p>
+                Chat needs your booking id (same value as in /chat/:donationId).
+                If chat stays unavailable, refresh or open meetup again from the
+                booking row.
+              </p>
+            </InfoHint>
             {donationChatStatusBadge ? (
               <span
                 className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${donationChatStatusBadge.className}`}
@@ -1177,7 +1236,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         </div>
       </section>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {isRequester === false ? (
           <Button
             variant="outline"
@@ -1191,10 +1250,15 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         <Button
           variant="outline"
           type="button"
+          size="icon"
           disabled={readOnly || terminateBusy}
+          loading={terminateBusy}
           onClick={() => setTerminateAlertOpen(true)}
+          title="Terminate meet"
+          aria-label="Terminate meet"
+          className="ml-auto shrink-0 rounded-lg border-red-200 text-red-700 hover:border-red-300 hover:bg-red-50 hover:text-red-800 dark:border-red-900/50 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/40 dark:hover:text-red-200"
         >
-          Terminate meet
+          <PhoneOff className="size-4" aria-hidden />
         </Button>
       </div>
 

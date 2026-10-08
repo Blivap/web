@@ -1,0 +1,37 @@
+---
+description: Put secondary/educational page copy behind InfoHint, not always-visible cards
+alwaysApply: true
+---
+
+# Extra page information pattern
+
+Do **not** stack always-visible educational, compliance, or “how this works” cards on app pages by default.
+
+## Required pattern
+
+1. Keep the page focused on primary actions and data.
+2. Place secondary / explanatory copy behind an **info icon** next to the page (or section) title.
+3. Use the shared component: `@/components/ui/info-hint/info-hint.component` (`InfoHint`).
+4. Put the detailed content as `children` of `InfoHint` (optionally a small `*-info-content` component).
+
+## Example
+
+```tsx
+import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
+
+<header className="flex flex-col gap-1">
+  <div className="flex items-center gap-1.5">
+    <h1>Wallet</h1>
+    <InfoHint title="About your wallet" label="Wallet information">
+      {/* explanatory sections */}
+    </InfoHint>
+  </div>
+  <p className="text-sm text-text-secondary">Short one-line page purpose only.</p>
+</header>
+```
+
+## Allowed exceptions
+
+- Inline errors, loading, and status banners required for the current action.
+- Short one-line helper text under a form field.
+- Critical legal consent that must be visible before submit (not general education).

@@ -296,18 +296,24 @@ export default function OverviewPage() {
                       <Wallet className="size-7" aria-hidden />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <span className="mx-auto inline-flex w-fit rounded-full border border-border bg-[#F4F4F5] px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-text-tertiary dark:border-white/10 dark:bg-white/8">
-                        Upcoming
+                      <span className="mx-auto inline-flex w-fit rounded-full border border-primary/25 bg-[#FFF5F5] px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary dark:border-primary/40 dark:bg-primary/15">
+                        New
                       </span>
                       <h2 className="text-lg font-semibold text-text-primary">
-                        Payment
+                        Wallet
                       </h2>
                       <p className="max-w-md text-sm leading-relaxed text-text-secondary">
-                        Payment settings, payout history, and wallet features
-                        are on the way. You&apos;ll manage compensation here
-                        once this is live.
+                        Track donor support credits, impact rewards, and
+                        redemption options in your wallet.
                       </p>
                     </div>
+                    <Link
+                      href={routes.wallet}
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                    >
+                      Open wallet
+                      <ChevronRight className="size-4" aria-hidden />
+                    </Link>
                   </div>
                 </section>
               </TabsContent>

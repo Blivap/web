@@ -37,6 +37,8 @@ interface NavItem {
   inactiveColor?: string;
   /** Non-clickable nav row with an "Upcoming" badge */
   upcoming?: boolean;
+  /** Clickable nav row with a "New" badge */
+  isNew?: boolean;
 }
 export const Layout = (props: PropsWithChildren<unknown>) => {
   useNotificationNavigationListener();
@@ -221,7 +223,7 @@ const NavLinks = ({ onLinkClick, darkShell }: NavLinksProps) => {
       icon: WalletIcon,
       activeColor: "#960018",
       inactiveColor: "#070416",
-      upcoming: true,
+      isNew: true,
     },
     {
       title: "History",
@@ -229,7 +231,7 @@ const NavLinks = ({ onLinkClick, darkShell }: NavLinksProps) => {
       icon: HistoryIcon,
       activeColor: "#960018",
       inactiveColor: "#070416",
-      upcoming: true,
+      isNew: true,
     },
     {
       title: "Settings",
@@ -291,7 +293,12 @@ const NavLinks = ({ onLinkClick, darkShell }: NavLinksProps) => {
             )}
           >
             <IconComponent color={iconColor} />
-            <span>{item.title}</span>
+            <span className="min-w-0 flex-1">{item.title}</span>
+            {item.isNew ? (
+              <span className="shrink-0 rounded-full border border-primary/25 bg-[#FFF5F5] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary dark:border-primary/40 dark:bg-primary/15">
+                New
+              </span>
+            ) : null}
           </Link>
         );
       })}
