@@ -9,6 +9,7 @@ import HospitalRepository from "./hospitalRepository";
 import NewsRepository from "./newsRepository";
 import NinRepository from "./ninRepository";
 import NotificationRepository from "./notificationRepository";
+import WalletRepository from "./walletRepository";
 export const $api = {
   auth: AuthRepository(),
   avatar: AvatarRepository(),
@@ -21,4 +22,5 @@ export const $api = {
   news: NewsRepository(),
   nin: NinRepository(),
   notifications: NotificationRepository(),
+  wallet: WalletRepository(),
 };

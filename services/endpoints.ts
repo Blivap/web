@@ -95,6 +95,13 @@ export const endpoints = {
 
   news: "/news",
 
+  wallet: {
+    summary: "/wallet",
+    topups: "/wallet/topups",
+    verifyTopup: (reference: string) =>
+      `/wallet/topups/${encodeURIComponent(reference)}/verify`,
+  },
+
   notifications: {
     list: "/notifications",
     read: (id: string) => `/notifications/${encodeURIComponent(id)}/read`,
