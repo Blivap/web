@@ -77,6 +77,7 @@ export function parseWalletSummaryResponse(body: unknown): WalletSummary {
   return {
     availableKobo: pickNonNegInt(data.availableKobo) ?? 0,
     heldKobo: pickNonNegInt(data.heldKobo) ?? 0,
+    payoutHeldKobo: pickNonNegInt(data.payoutHeldKobo) ?? 0,
     currency: pickString(data.currency) ?? "NGN",
     entries,
   };
@@ -85,6 +86,7 @@ export function parseWalletSummaryResponse(body: unknown): WalletSummary {
 export const EMPTY_WALLET_SUMMARY: WalletSummary = {
   availableKobo: 0,
   heldKobo: 0,
+  payoutHeldKobo: 0,
   currency: "NGN",
   entries: [],
 };

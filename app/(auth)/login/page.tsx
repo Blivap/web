@@ -7,7 +7,6 @@ import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
 import { loginSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import { gsap } from "gsap";
-import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useLayoutEffect, useRef } from "react";
@@ -194,12 +193,6 @@ export default function LoginPage() {
               </div>
               <div className="flex gap-6 items-center">
                 <SocialAuthButtons />
-                <Image
-                  src="/icons/twitter.svg"
-                  alt="Twitter"
-                  width={32}
-                  height={32}
-                />
               </div>
             </div>
           </div>

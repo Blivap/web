@@ -11,7 +11,6 @@ import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
 import { registerSchema } from "@/schema/auth.schema";
 import { Formik } from "formik";
 import { gsap } from "gsap";
-import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useLayoutEffect, useRef } from "react";
@@ -126,7 +125,10 @@ export default function SignUpPage() {
                 setFieldValue,
                 isValid,
               }) => {
+                const socialEnabled =
+                  values.termsAndCondition && values.privacyStatement;
                 return (
+                  <>
                   <form
                     className="grid gap-6"
                     onSubmit={handleSubmit}
@@ -282,9 +284,6 @@ export default function SignUpPage() {
                       </Button>
                     </div>
                   </form>
-                );
-              }}
-            </Formik>
             <div
               className="flex flex-col items-center gap-8"
               data-register-social
@@ -305,15 +304,19 @@ export default function SignUpPage() {
                 <div className="h-px w-full bg-gray-300 dark:bg-white/10"></div>
               </div>
               <div className="flex gap-6 items-center">
-                <SocialAuthButtons />
-                <Image
-                  src="/icons/twitter.svg"
-                  alt="Twitter"
-                  width={32}
-                  height={32}
-                />
+                <SocialAuthButtons enabled={socialEnabled} />
               </div>
+              {!socialEnabled ? (
+                <p className="max-w-xs text-center text-xs text-text-tertiary">
+                  Accept the terms and privacy statement to continue with
+                  Google, Apple, or Facebook.
+                </p>
+              ) : null}
             </div>
+                  </>
+                );
+              }}
+            </Formik>
           </div>
         </div>
       </div>

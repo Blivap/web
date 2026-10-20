@@ -38,8 +38,9 @@ export function WalletInfoContent() {
       <section>
         <p className="font-semibold text-text-primary">Held vs available</p>
         <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-          Available balance can pay for donor welfare on new bookings. Held
-          amounts are reserved until a booking completes, refunds, or reimburses.
+          Available balance can pay for donor welfare on new bookings or be
+          withdrawn to a linked bank account. Pending (held) amounts stay
+          reserved until a booking completes, refunds, or reimburses.
         </p>
       </section>
 

@@ -104,7 +104,7 @@ function DonorCard({
         ) : null}
       </div>
 
-      <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mt-2 flex flex-col gap-2  sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-text-secondary">
           {donor.location}, {donor.country}
         </p>

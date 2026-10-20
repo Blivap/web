@@ -3,7 +3,10 @@
 import Image from "next/image";
 
 import { useSocialAuth } from "@/hooks/auth/useSocialAuth.hooks";
-import { SocialProvider } from "@/lib/firebase/auth";
+import {
+  isFirebaseAuthConfigured,
+  SocialProvider,
+} from "@/lib/firebase/auth";
 
 const PROVIDERS: { provider: SocialProvider; src: string; label: string }[] = [
   { provider: "google", src: "/icons/Google.svg", label: "Google" },
@@ -11,8 +14,23 @@ const PROVIDERS: { provider: SocialProvider; src: string; label: string }[] = [
   { provider: "facebook", src: "/icons/facebook.svg", label: "Facebook" },
 ];
 
-export function SocialAuthButtons() {
-  const { signIn, pending } = useSocialAuth();
+type SocialAuthButtonsProps = {
+  /** When false, buttons stay visible but blocked (e.g. terms not accepted). */
+  enabled?: boolean;
+};
+
+export function SocialAuthButtons({ enabled = true }: SocialAuthButtonsProps) {
+  const configured = isFirebaseAuthConfigured();
+  const { signIn, pending } = useSocialAuth({ enabled });
+
+  if (!configured) {
+    return (
+      <p className="max-w-xs text-center text-xs text-text-tertiary">
+        Social sign-in is unavailable until Firebase Authentication is enabled
+        for this project.
+      </p>
+    );
+  }
 
   return (
     <>
@@ -21,7 +39,8 @@ export function SocialAuthButtons() {
           key={item.provider}
           type="button"
           aria-label={`Continue with ${item.label}`}
-          disabled={pending !== null}
+          disabled={pending !== null || !enabled}
+          title={!enabled ? "Accept the terms to continue" : undefined}
           onClick={() => {
             void signIn(item.provider);
           }}

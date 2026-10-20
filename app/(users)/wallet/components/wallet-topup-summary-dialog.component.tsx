@@ -1,37 +1,21 @@
 "use client";
 
-import { Building2, CreditCard, Hash, Landmark } from "lucide-react";
-import classNames from "classnames";
 import { Button } from "@/components/button/button.component";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatKoboAsNaira } from "@/lib/wallet/formatWalletMoney";
 import type { WalletTopupFeeBreakdown } from "@/lib/wallet/estimateTopupFees";
-import {
-  WALLET_PAYMENT_METHODS,
-  type WalletPaymentMethodId,
-} from "@/lib/wallet/walletPaymentMethods";
-
-const METHOD_ICON: Record<WalletPaymentMethodId, typeof CreditCard> = {
-  card: CreditCard,
-  bank: Building2,
-  ussd: Hash,
-  bank_transfer: Landmark,
-};
 
 type WalletTopupSummaryDialogProps = {
   open: boolean;
   currency: string;
   breakdown: WalletTopupFeeBreakdown | null;
-  paymentMethod: WalletPaymentMethodId;
   confirming?: boolean;
-  onPaymentMethodChange: (method: WalletPaymentMethodId) => void;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 };
@@ -40,9 +24,7 @@ export function WalletTopupSummaryDialog({
   open,
   currency,
   breakdown,
-  paymentMethod,
   confirming = false,
-  onPaymentMethodChange,
   onOpenChange,
   onConfirm,
 }: WalletTopupSummaryDialogProps) {
@@ -78,62 +60,6 @@ export function WalletTopupSummaryDialog({
                   {formatKoboAsNaira(breakdown.totalPayableKobo, { currency })}
                 </span>
               </div>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-text-primary">
-                Payment method
-              </p>
-
-              <ul className="mt-3 flex flex-col gap-2">
-                {WALLET_PAYMENT_METHODS.map((method) => {
-                  const Icon = METHOD_ICON[method.id];
-                  const selected = paymentMethod === method.id;
-                  return (
-                    <li key={method.id}>
-                      <button
-                        type="button"
-                        disabled={confirming}
-                        onClick={() => onPaymentMethodChange(method.id)}
-                        className={classNames(
-                          "flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors",
-                          selected
-                            ? "border-primary bg-[#FFF5F5] dark:bg-primary/15"
-                            : "border-[#E8E6E3] bg-white hover:border-primary/30 dark:border-white/10 dark:bg-[#1a1a22]",
-                        )}
-                      >
-                        <span
-                          className={classNames(
-                            "flex size-9 shrink-0 items-center justify-center rounded-lg",
-                            selected
-                              ? "bg-primary text-white"
-                              : "bg-[#F4F4F5] text-text-secondary dark:bg-white/10",
-                          )}
-                        >
-                          <Icon className="size-4" aria-hidden />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-sm font-semibold text-text-primary">
-                            {method.label}
-                          </span>
-                          <span className="block text-xs text-text-secondary">
-                            {method.description}
-                          </span>
-                        </span>
-                        <span
-                          className={classNames(
-                            "size-4 shrink-0 rounded-full border-2",
-                            selected
-                              ? "border-primary bg-primary"
-                              : "border-[#D1D5DB] bg-transparent",
-                          )}
-                          aria-hidden
-                        />
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
             </div>
           </div>
         ) : null}

@@ -6,10 +6,6 @@ import { Input } from "@/components/forms/inputs/input.component";
 import { formatKoboAsNaira } from "@/lib/wallet/formatWalletMoney";
 import { buildWalletTopupFeeBreakdown } from "@/lib/wallet/estimateTopupFees";
 import {
-  DEFAULT_WALLET_PAYMENT_METHOD,
-  type WalletPaymentMethodId,
-} from "@/lib/wallet/walletPaymentMethods";
-import {
   WALLET_TOPUP_QUICK_NAIRA,
   isValidTopupAmountKobo,
   nairaToKobo,
@@ -23,20 +19,20 @@ type WalletTopupFormProps = {
   currency: string;
   starting?: boolean;
   disabled?: boolean;
-  onSubmit: (amountKobo: number) => void | Promise<boolean>;
+  /** When true, omit the outer card chrome (used inside a dialog). */
+  embedded?: boolean;
+  onSubmit: (amountKobo: number) => void | Promise<boolean | void>;
 };
 
 export function WalletTopupForm({
   currency,
   starting = false,
   disabled = false,
+  embedded = false,
   onSubmit,
 }: WalletTopupFormProps) {
   const [nairaInput, setNairaInput] = useState("1000");
   const [summaryOpen, setSummaryOpen] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<WalletPaymentMethodId>(
-    DEFAULT_WALLET_PAYMENT_METHOD,
-  );
 
   const amountNaira = useMemo(() => parseNairaInput(nairaInput), [nairaInput]);
   const amountKobo = nairaToKobo(amountNaira);
@@ -46,17 +42,25 @@ export function WalletTopupForm({
     [amountKobo, valid],
   );
 
-  return (
-    <section className="rounded-xl border border-[#E8E6E3] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1a1a22]">
-      <h2 className="text-xs font-bold uppercase tracking-wide text-text-primary">
-        Add money
-      </h2>
-      <p className="mt-1 text-xs text-text-secondary">
-        Fund your wallet with Paystack. Minimum{" "}
-        {formatKoboAsNaira(MIN_WALLET_TOPUP_KOBO, { currency })}.
-      </p>
+  const body = (
+    <>
+      {!embedded ? (
+        <>
+          <h2 className="text-xs font-bold uppercase tracking-wide text-text-primary">
+            Add money
+          </h2>
+          <p className="mt-1 text-xs text-text-secondary">
+            Fund your wallet with Paystack. Minimum{" "}
+            {formatKoboAsNaira(MIN_WALLET_TOPUP_KOBO, { currency })}.
+          </p>
+        </>
+      ) : (
+        <p className="text-xs text-text-secondary">
+          Minimum {formatKoboAsNaira(MIN_WALLET_TOPUP_KOBO, { currency })}.
+        </p>
+      )}
 
-      <div className="mt-4 flex flex-col gap-3">
+      <div className={classNames("flex flex-col gap-3", embedded ? "mt-3" : "mt-4")}>
         <Input
           name="topupAmount"
           label="Amount (NGN)"
@@ -108,9 +112,7 @@ export function WalletTopupForm({
         open={summaryOpen}
         currency={currency}
         breakdown={breakdown}
-        paymentMethod={paymentMethod}
         confirming={starting}
-        onPaymentMethodChange={setPaymentMethod}
         onOpenChange={(open) => {
           if (!starting) setSummaryOpen(open);
         }}
@@ -118,6 +120,16 @@ export function WalletTopupForm({
           void onSubmit(amountKobo);
         }}
       />
+    </>
+  );
+
+  if (embedded) {
+    return <div className="flex flex-col">{body}</div>;
+  }
+
+  return (
+    <section className="rounded-xl border border-[#E8E6E3] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1a1a22]">
+      {body}
     </section>
   );
 }

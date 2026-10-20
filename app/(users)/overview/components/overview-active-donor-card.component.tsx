@@ -32,7 +32,7 @@ export function OverviewActiveDonorCard({
     .join(", ");
 
   return (
-    <article className="flex flex-col rounded-xl border border-border bg-[#FAFAFA] p-4 transition-colors hover:border-primary/20 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:border-primary/25 dark:hover:bg-white/8">
+    <article className="flex flex-col gap-2 rounded-xl border border-border bg-[#FAFAFA] p-4 transition-colors hover:border-primary/20 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:border-primary/25 dark:hover:bg-white/8">
       <Link href={profileHref} className="group flex min-w-0 items-start gap-3">
         <Avatar
           className="size-12! shrink-0"

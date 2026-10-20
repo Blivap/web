@@ -47,32 +47,40 @@ export function useMeetupSession(sessionId: string | undefined) {
   const refreshSession = useCallback(async () => {
     if (!sessionId) return null;
     setSessionError(null);
-    const { status, data } = await $api.meetups.getSession(sessionId);
-    if (status < 200 || status >= 300) {
+    try {
+      const { status, data, error } = await $api.meetups.getSession(sessionId);
+      if (status < 200 || status >= 300) {
+        setSession(null);
+        setSessionLoad("error");
+        setSessionError(
+          error ??
+            getApiMessageFromData(data) ??
+            "Could not load this meetup session.",
+        );
+        return null;
+      }
+      const parsed = parseMeetupSessionBody(data);
+      if (!parsed) {
+        setSession(null);
+        setSessionLoad("error");
+        setSessionError("Unexpected response from the server.");
+        return null;
+      }
+      if (parsed.status === "completed" && !completedTrackedRef.current) {
+        completedTrackedRef.current = true;
+        trackSuccess("meetup_completed");
+      }
+      setSession(parsed);
+      setSessionLoad("ok");
+      return parsed;
+    } catch (e) {
       setSession(null);
       setSessionLoad("error");
       setSessionError(
-        getApiMessageFromData(data) ?? "Could not load this meetup session.",
+        getAxiosErrorMessage(e, "Could not load this meetup session."),
       );
       return null;
     }
-    const parsed = parseMeetupSessionBody(data);
-    if (!parsed) {
-      setSession(null);
-      setSessionLoad("error");
-      setSessionError("Unexpected response from the server.");
-      return null;
-    }
-    if (
-      parsed.status === "completed" &&
-      !completedTrackedRef.current
-    ) {
-      completedTrackedRef.current = true;
-      trackSuccess("meetup_completed");
-    }
-    setSession(parsed);
-    setSessionLoad("ok");
-    return parsed;
   }, [sessionId]);
 
   useEffect(() => {
