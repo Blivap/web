@@ -1,4 +1,8 @@
 import axios from "axios";
+import {
+  API_UNREACHABLE_MESSAGE,
+  isNetworkFailure,
+} from "@/lib/api/networkFailure";
 
 /** Best-effort `message` field from JSON API bodies (Nest-style). */
 export function getApiMessageFromData(data: unknown): string | null {
@@ -13,6 +17,7 @@ export function getApiMessageFromData(data: unknown): string | null {
 
 /** Best-effort message from Nest/axios error bodies. */
 export function getAxiosErrorMessage(e: unknown, fallback: string): string {
+  if (isNetworkFailure(e)) return API_UNREACHABLE_MESSAGE;
   if (!axios.isAxiosError(e)) return fallback;
   return getApiMessageFromData(e.response?.data) ?? fallback;
 }

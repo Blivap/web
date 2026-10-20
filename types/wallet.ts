@@ -3,7 +3,9 @@ export type WalletLedgerEntryType =
   | "topup"
   | "welfare_payment"
   | "welfare_refund"
-  | "welfare_reimbursement";
+  | "welfare_reimbursement"
+  | "withdrawal"
+  | "withdrawal_reversal";
 
 /** Matches backend `WelfareLedgerDirection`. */
 export type WalletLedgerDirection = "credit" | "debit";
@@ -43,6 +45,18 @@ export const WALLET_LEDGER_CATALOG = {
     label: "Welfare reimbursement",
     description: "Support credited after a completed donation",
   },
+  withdrawal: {
+    type: "withdrawal",
+    direction: "debit",
+    label: "Bank withdrawal",
+    description: "Sent from your wallet to a saved bank account",
+  },
+  withdrawal_reversal: {
+    type: "withdrawal_reversal",
+    direction: "credit",
+    label: "Withdrawal returned",
+    description: "A failed or reversed withdrawal returned to your balance",
+  },
 } as const satisfies Record<
   WalletLedgerEntryType,
   {
@@ -77,8 +91,59 @@ export type WalletLedgerEntry = {
 export type WalletSummary = {
   availableKobo: number;
   heldKobo: number;
+  /** Amount reserved for an in-flight bank withdrawal. */
+  payoutHeldKobo: number;
   currency: "NGN" | (string & {});
   entries: WalletLedgerEntry[];
+};
+
+/** Matches backend `MAX_SAVED_BANK_ACCOUNTS`. */
+export const MAX_SAVED_BANK_ACCOUNTS = 3;
+
+export type WalletBankAccount = {
+  id: string;
+  bankCode: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  isPrimary: boolean;
+};
+
+export type WalletResolvedBankAccount = {
+  accountNumber: string;
+  accountName: string;
+  bankName: string;
+  bankCode: string;
+};
+
+/** POST /wallet/bank-accounts/resolve `data` — single match or several. */
+export type WalletBankResolveResult =
+  | WalletResolvedBankAccount
+  | {
+      accountNumber: string;
+      matches: WalletResolvedBankAccount[];
+    };
+
+export type WalletPayoutStatus =
+  | "awaiting_otp"
+  | "processing"
+  | "paid"
+  | "failed"
+  | "expired";
+
+export type WalletPayout = {
+  id: string;
+  reference: string;
+  amountKobo: number;
+  currency: "NGN" | (string & {});
+  status: WalletPayoutStatus;
+  bankName: string;
+  accountName: string;
+  accountLast4: string;
+  failureReason: string | null;
+  receiptAvailable: boolean;
+  createdAt: string | null;
+  paidAt: string | null;
 };
 
 /** Nest-style body: `{ message, data: WalletSummary }`. */
@@ -89,6 +154,9 @@ export type WalletSummaryResponse = {
 
 /** Paystack practical NGN minimum (₦100). */
 export const MIN_WALLET_TOPUP_KOBO = 10_000;
+
+/** Matches backend `MIN_WALLET_PAYOUT_KOBO` (₦100). */
+export const MIN_WALLET_PAYOUT_KOBO = MIN_WALLET_TOPUP_KOBO;
 
 /** POST /wallet/topups body. */
 export type CreateWalletTopupPayload = {

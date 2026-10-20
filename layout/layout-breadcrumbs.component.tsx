@@ -17,6 +17,8 @@ const SEGMENT_LABEL: Record<string, string> = {
   booking: "Booking",
   meetup: "Meetup",
   wallet: "Wallet",
+  withdraw: "Withdraw",
+  review: "Review",
   history: "History",
   settings: "Settings",
   "personal-information": "Personal Information",

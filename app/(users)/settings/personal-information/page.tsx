@@ -120,9 +120,7 @@ export default function PersonalInformationPage() {
                         onClick={() => {
                           dispatch(
                             setSelectedAvatar(
-                              values.profileImage ||
-                                user?.profileImage ||
-                                null,
+                              values.profileImage || user?.profileImage || null,
                             ),
                           );
                           openAvatarModal();

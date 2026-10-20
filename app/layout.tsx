@@ -12,6 +12,7 @@ import { getSiteOrigin } from "@/lib/site-origin";
 import StoreProvider from "../store/provider";
 import { AuthChecker } from "@/components/auth/auth-checker";
 import { AuthRoutesPrefetch } from "@/components/auth/auth-routes-prefetch";
+import { ApiConnectivityGate } from "@/components/feedback/api-connectivity/api-connectivity-gate.component";
 import { BlivapLogo } from "@/public/svg";
 
 const geistSans = Geist({
@@ -202,9 +203,7 @@ export const metadata: Metadata = {
         type: "image/png",
       },
     ],
-    apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
     other: [
       {
         rel: "mask-icon",
@@ -253,25 +252,25 @@ export default function RootLayout({
           <StoreProvider>
             <AuthRoutesPrefetch />
             <AuthChecker>
-              <SnackbarProvider>
-                <Suspense
-                  fallback={
-                    <div className="flex justify-center items-center h-screen bg-white dark:bg-[#0B0D12]">
-                      <BlivapLogo />
-                    </div>
-                  }
-                >
-                  {children}
-                </Suspense>
-                <Snackbar />
-              </SnackbarProvider>
+              <ApiConnectivityGate>
+                <SnackbarProvider>
+                  <Suspense
+                    fallback={
+                      <div className="flex justify-center items-center h-screen bg-white dark:bg-[#0B0D12]">
+                        <BlivapLogo />
+                      </div>
+                    }
+                  >
+                    {children}
+                  </Suspense>
+                  <Snackbar />
+                </SnackbarProvider>
+              </ApiConnectivityGate>
             </AuthChecker>
           </StoreProvider>
         </ThemePreferenceProvider>
       </body>
-      {googleAnalyticsId ? (
-        <GoogleAnalytics gaId={googleAnalyticsId} />
-      ) : null}
+      {googleAnalyticsId ? <GoogleAnalytics gaId={googleAnalyticsId} /> : null}
     </html>
   );
 }

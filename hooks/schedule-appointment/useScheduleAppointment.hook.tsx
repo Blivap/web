@@ -20,7 +20,6 @@ import {
 } from "@/lib/schedule-appointment/scheduleAppointment.utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { loadSentBookings } from "@/store/slices/bookingsSlice";
-import type { CarouselApi } from "@/components/ui/carousel";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import {
   classifyAnalyticsError,
@@ -53,7 +52,6 @@ export function useScheduleAppointment() {
   >("idle");
   const [hospitalsError, setHospitalsError] = useState<string | null>(null);
 
-  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
   const [bookingRequestSentOpen, setBookingRequestSentOpen] = useState(false);
   const [bookingSuccessSummary, setBookingSuccessSummary] = useState<{
     scheduledLabel: string;
@@ -105,16 +103,6 @@ export function useScheduleAppointment() {
     () => formatCalendarMonthLabel(calendarMonth.year, calendarMonth.month),
     [calendarMonth],
   );
-
-  useEffect(() => {
-    if (!carouselApi) return;
-    if (!appointment.hospitalId) {
-      carouselApi.scrollTo(0);
-      return;
-    }
-    const idx = hospitals.findIndex((h) => h.id === appointment.hospitalId);
-    if (idx >= 0) carouselApi.scrollTo(idx);
-  }, [carouselApi, appointment.hospitalId, hospitals]);
 
   useEffect(() => {
     setAppointment((prev) => {
@@ -270,8 +258,6 @@ export function useScheduleAppointment() {
     hospitalsLoadState,
     hospitalsError,
     loadHospitals,
-    carouselApi,
-    setCarouselApi,
     appointment,
     handleAppointmentChange,
     calendarMonth,

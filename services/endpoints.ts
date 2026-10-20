@@ -100,6 +100,21 @@ export const endpoints = {
     topups: "/wallet/topups",
     verifyTopup: (reference: string) =>
       `/wallet/topups/${encodeURIComponent(reference)}/verify`,
+    banks: "/wallet/banks",
+    bankAccounts: "/wallet/bank-accounts",
+    resolveBankAccount: "/wallet/bank-accounts/resolve",
+    setPrimaryBankAccount: (id: string) =>
+      `/wallet/bank-accounts/${encodeURIComponent(id)}/primary`,
+    deleteBankAccount: (id: string) =>
+      `/wallet/bank-accounts/${encodeURIComponent(id)}`,
+    payouts: "/wallet/payouts",
+    payout: (id: string) => `/wallet/payouts/${encodeURIComponent(id)}`,
+    confirmPayout: (id: string) =>
+      `/wallet/payouts/${encodeURIComponent(id)}/confirm`,
+    resendPayoutOtp: (id: string) =>
+      `/wallet/payouts/${encodeURIComponent(id)}/resend-otp`,
+    payoutReceipt: (id: string) =>
+      `/wallet/payouts/${encodeURIComponent(id)}/receipt`,
   },
 
   notifications: {

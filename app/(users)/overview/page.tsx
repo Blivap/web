@@ -290,22 +290,10 @@ export default function OverviewPage() {
               </TabsContent>
 
               <TabsContent value="payment" className="mt-0">
-                <section className="overflow-hidden rounded-2xl border border-[#DADADA] bg-white dark:border-white/10 dark:bg-[#1a1a22]">
+                <section className="overflow-hidden rounded-2xl border border-[#DADADA] bg-white dark:border-white/10 dark:bg-[#1a1a22] h-full flex-1">
                   <div className="flex flex-col items-center gap-4 px-6 py-14 text-center sm:px-10 sm:py-16">
                     <div className="flex size-14 items-center justify-center rounded-2xl bg-[#F9E8EE] text-primary dark:bg-primary/20">
                       <Wallet className="size-7" aria-hidden />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <span className="mx-auto inline-flex w-fit rounded-full border border-primary/25 bg-[#FFF5F5] px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary dark:border-primary/40 dark:bg-primary/15">
-                        New
-                      </span>
-                      <h2 className="text-lg font-semibold text-text-primary">
-                        Wallet
-                      </h2>
-                      <p className="max-w-md text-sm leading-relaxed text-text-secondary">
-                        Track donor support credits, impact rewards, and
-                        redemption options in your wallet.
-                      </p>
                     </div>
                     <Link
                       href={routes.wallet}

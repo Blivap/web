@@ -5,17 +5,10 @@ export const metadata: Metadata = generateMetadata({
   title: "Healthcare Services",
   description:
     "Healthcare services and support connected through Blivap's trusted digital platform.",
-  keywords: [
-    "healthcare services",
-    "medical facilities"
-  ],
+  keywords: ["healthcare services", "medical facilities"],
   path: "/healthcare",
 });
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

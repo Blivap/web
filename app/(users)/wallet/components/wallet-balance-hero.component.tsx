@@ -1,63 +1,133 @@
-import { HeartHandshake, Lock } from "lucide-react";
-import { formatKoboAsNaira } from "@/lib/wallet/formatWalletMoney";
-import { Skeleton } from "@/components/ui/skeleton.component";
+"use client";
+
+import { useSyncExternalStore } from "react";
+import Link from "next/link";
+import { ArrowUp, Eye, EyeOff, Plus } from "lucide-react";
+import { formatWalletAmount } from "@/lib/wallet/formatWalletDisplay";
+import {
+  persistWalletBalanceHidden,
+  readWalletBalanceHidden,
+  subscribeWalletBalanceHidden,
+} from "@/lib/wallet/walletBalanceVisibility";
+import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
+import { routes } from "@/config/routes";
+import { WalletBalanceHeroSkeleton } from "./wallet-page-skeleton.component";
 
 type WalletBalanceHeroProps = {
   availableKobo: number;
   heldKobo: number;
   currency: string;
   loading?: boolean;
+  onFundWallet?: () => void;
 };
+
+/** Contour / topographic pattern matching the wallet mock. */
+const BALANCE_PATTERN = `url("data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" fill="none">
+    <path d="M-20 40C40 10 90 70 160 55C230 40 260 0 340 20C420 40 460 90 540 70C620 50 680 10 760 35" stroke="white" stroke-opacity="0.18" stroke-width="1.25"/>
+    <path d="M-20 90C50 55 110 120 190 100C270 80 310 40 390 65C470 90 520 130 600 105C680 80 720 50 760 70" stroke="white" stroke-opacity="0.14" stroke-width="1.25"/>
+    <path d="M-20 145C60 110 130 175 210 155C290 135 340 95 420 125C500 155 560 185 640 155C700 135 740 115 780 130" stroke="white" stroke-opacity="0.12" stroke-width="1.25"/>
+    <path d="M-20 200C70 165 150 230 240 205C330 180 380 145 470 175C560 205 620 235 710 200C750 185 780 175 820 185" stroke="white" stroke-opacity="0.1" stroke-width="1.25"/>
+  </svg>`,
+)}")`;
 
 export function WalletBalanceHero({
   availableKobo,
   heldKobo,
-  currency,
   loading = false,
+  onFundWallet,
 }: WalletBalanceHeroProps) {
+  const hidden = useSyncExternalStore(
+    subscribeWalletBalanceHidden,
+    readWalletBalanceHidden,
+    () => false,
+  );
+
+  const toggleHidden = () => {
+    persistWalletBalanceHidden(!hidden);
+  };
+
+  if (loading) {
+    return <WalletBalanceHeroSkeleton />;
+  }
+
   return (
-    <div className="overflow-hidden rounded-2xl bg-linear-to-br from-primary via-[#7a0014] to-[#5c0010] px-5 py-6 text-white shadow-lg">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-white/85">
-            Wallet balance
-          </p>
-          <p className="mt-1 text-lg font-bold leading-tight">
-            Available to use
-          </p>
-        </div>
-        <HeartHandshake
-          className="h-9 w-9 shrink-0 text-white/90"
-          strokeWidth={1.5}
-          aria-hidden
-        />
-      </div>
+    <div className="relative h-full min-h-[188px] overflow-hidden rounded-[16px] bg-[#960018] px-8.5 py-6 text-white sm:px-7 sm:py-7">
+      <div
+        className="pointer-events-none absolute inset-0"
+        aria-hidden
+        style={{
+          backgroundImage: BALANCE_PATTERN,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
 
-      {loading ? (
-        <div className="mt-5 flex flex-col gap-3">
-          <Skeleton className="h-9 w-40 bg-white/20" />
-          <Skeleton className="h-4 w-56 bg-white/15" />
-        </div>
-      ) : (
-        <>
-          <p className="mt-5 font-helvetica text-3xl font-bold tracking-tight tabular-nums">
-            {formatKoboAsNaira(availableKobo, { currency })}
+      <div className="relative flex h-full min-h-[140px] flex-col">
+        <p className="text-[14px] sm:text-[24px] font-medium leading-none text-white/90">
+          Available balance
+        </p>
+
+        <div className="mt-3 flex items-center gap-3">
+          <p className="text-[36px] leading-none font-bold tracking-[-0.02em] text-white tabular-nums sm:text-[48px]">
+            {hidden
+              ? "••••••••"
+              : formatWalletAmount(availableKobo, {
+                  currencySymbol: false,
+                })}
           </p>
-          <div className="mt-4 flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2.5">
-            <Lock className="size-4 shrink-0 text-white/90" aria-hidden />
-            <p className="text-xs leading-relaxed text-white/90">
-              <span className="font-semibold text-white">Held: </span>
-              {formatKoboAsNaira(heldKobo, { currency })} reserved for active
-              donation welfare
-            </p>
+          <button
+            type="button"
+            aria-label={hidden ? "Show balance" : "Hide balance"}
+            onClick={toggleHidden}
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10"
+          >
+            {hidden ? (
+              <EyeOff className="size-[18px]" strokeWidth={1.75} aria-hidden />
+            ) : (
+              <Eye className="size-[18px]" strokeWidth={1.75} aria-hidden />
+            )}
+          </button>
+        </div>
+
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-4 pt-8">
+          <div className="flex flex-wrap gap-2.5">
+            <Link
+              href={routes.walletWithdraw}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#FFFFFF33] bg-transparent px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              <ArrowUp className="size-3.5" strokeWidth={2.25} aria-hidden />
+              Withdraw
+            </Link>
+            <button
+              type="button"
+              onClick={onFundWallet}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#FFFFFF33] bg-transparent px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              <Plus className="size-3.5" strokeWidth={2.25} aria-hidden />
+              Fund wallet
+            </button>
           </div>
-        </>
-      )}
 
-      <p className="mt-3 text-xs leading-relaxed text-white/90">
-        Funds support donation logistics and donor welfare under Nigerian
-        voluntary donation principles — not payment for blood.
-      </p>
+          <div className="flex items-center gap-1.5 text-[12px] font-medium text-white/95">
+            <span>
+              Pending {hidden ? "••••" : formatWalletAmount(heldKobo)}
+            </span>
+            <InfoHint
+              title="Pending balance"
+              label="Pending balance information"
+              className="size-5 text-white/95 hover:bg-white/15 hover:text-white"
+              iconClassName="size-3.5"
+            >
+              <p>
+                Pending amounts are held for active donation welfare until a
+                booking completes, refunds, or reimburses.
+              </p>
+            </InfoHint>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -16,10 +16,6 @@ export const metadata: Metadata = generateMetadata({
   path: "/settings",
 });
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

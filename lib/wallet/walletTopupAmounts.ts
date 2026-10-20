@@ -1,7 +1,9 @@
 import { MIN_WALLET_TOPUP_KOBO } from "@/types/wallet";
 
 /** Quick-pick amounts in Naira (converted to kobo when submitting). */
-export const WALLET_TOPUP_QUICK_NAIRA = [500, 1_000, 2_000, 5_000, 10_000] as const;
+export const WALLET_TOPUP_QUICK_NAIRA = [
+  500, 1_000, 2_000, 5_000, 10_000,
+] as const;
 
 export function nairaToKobo(naira: number): number {
   if (!Number.isFinite(naira)) return 0;

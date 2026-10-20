@@ -268,7 +268,13 @@ export const DonorAiQuestionnairePanel = forwardRef<
         }
       },
     }),
-    [questionnaireId, questions, draftAnswers, fetchAndApplyMine, primaryDonationType],
+    [
+      questionnaireId,
+      questions,
+      draftAnswers,
+      fetchAndApplyMine,
+      primaryDonationType,
+    ],
   );
 
   if (disabled) return null;

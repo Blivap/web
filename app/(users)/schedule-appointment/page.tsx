@@ -1,24 +1,19 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useMemo, useState } from "react";
 import {
   CalendarClock,
   ChevronLeft,
   ChevronRight,
-  Lightbulb,
   Loader2,
   MapPin,
+  Search,
 } from "lucide-react";
 import { Layout } from "@/layout/layout.component";
 import { BookingRequestSentModal } from "@/components/ui/modal/booking-request-sent-modal.component";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { Button } from "@/components/button/button.component";
+import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
+import { Input } from "@/components/forms/inputs/input.component";
 import { SCHEDULE_APPOINTMENT_TIME_SLOTS } from "@/lib/schedule-appointment/scheduleAppointment.constants";
 import {
   formatDateIso,
@@ -36,7 +31,6 @@ function ScheduleAppointmentPageContent() {
     hospitalsLoadState,
     hospitalsError,
     loadHospitals,
-    setCarouselApi,
     appointment,
     handleAppointmentChange,
     calendarMonth,
@@ -52,9 +46,21 @@ function ScheduleAppointmentPageContent() {
     bookingSuccessSummary,
   } = useScheduleAppointment();
 
+  const [hospitalQuery, setHospitalQuery] = useState("");
+
   const timeSlotRows = getScheduleAppointmentDiamondRows<string>([
     ...SCHEDULE_APPOINTMENT_TIME_SLOTS,
   ]);
+
+  const filteredHospitals = useMemo(() => {
+    const q = hospitalQuery.trim().toLowerCase();
+    if (!q) return hospitals;
+    return hospitals.filter((h) => {
+      const haystack =
+        `${h.name} ${h.address} ${h.distance ?? ""}`.toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [hospitals, hospitalQuery]);
 
   return (
     <Layout>
@@ -63,49 +69,40 @@ function ScheduleAppointmentPageContent() {
         onSubmit={handleSubmit}
       >
         <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm dark:border-white/10 dark:bg-[#14141a] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
-          <div className="flex flex-col gap-5 px-5 py-6 sm:flex-row sm:items-start sm:gap-6 sm:px-8 sm:py-8">
+          <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:gap-5 sm:px-8 sm:py-6">
             <div
-              className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 dark:bg-primary/[0.18] dark:ring-primary/25"
+              className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 dark:bg-primary/[0.18] dark:ring-primary/25"
               aria-hidden
             >
-              <CalendarClock className="size-7" strokeWidth={1.75} />
+              <CalendarClock className="size-6" strokeWidth={1.75} />
             </div>
-            <div className="min-w-0 flex-1 space-y-4">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
-                  Screening visit
-                </p>
-                <h2 className="mt-1.5 text-pretty text-xl font-semibold tracking-tight text-text-primary sm:text-2xl">
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
+                Screening visit
+              </p>
+              <div className="mt-1 flex items-center gap-1.5">
+                <h2 className="text-pretty text-xl font-semibold tracking-tight text-text-primary sm:text-2xl">
                   Schedule your inspection appointment
                 </h2>
-                <p className="mt-3 max-w-prose text-sm leading-relaxed text-text-secondary">
-                  Your first visit includes a blood sample for testing and blood
-                  typing. Please allow about{" "}
-                  <span className="font-medium text-text-primary">
-                    one hour on site
-                  </span>{" "}
-                  for this screening.
-                </p>
+                <InfoHint
+                  title="About this screening"
+                  label="Screening information"
+                  className="size-7"
+                >
+                  <p>
+                    Your first visit includes a blood sample for testing and
+                    blood typing. Please allow about one hour on site.
+                  </p>
+                  <p>
+                    If the nearest blood bank is full, book another location
+                    here—you can mention a preferred bank during the screening.
+                  </p>
+                  <p>
+                    Choose a hospital, then pick a date and time. You can adjust
+                    your choices before you confirm.
+                  </p>
+                </InfoHint>
               </div>
-              <div className="flex gap-3 rounded-xl border border-amber-200/90 bg-linear-to-br from-amber-50 to-amber-50/40 px-4 py-3.5 dark:border-amber-400/25 dark:from-amber-950/50 dark:to-amber-950/25">
-                <Lightbulb
-                  className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-300"
-                  strokeWidth={2}
-                  aria-hidden
-                />
-                <p className="text-sm leading-relaxed text-amber-950 dark:text-amber-50/95">
-                  <span className="font-semibold">Tip:</span> If the nearest
-                  blood bank is full, book another location here—you can mention
-                  a preferred bank during the screening.
-                </p>
-              </div>
-              <p className="border-t border-border pt-4 text-sm leading-relaxed text-text-secondary dark:border-white/10">
-                <span className="font-semibold text-text-primary">
-                  Next steps:
-                </span>{" "}
-                choose a hospital, then pick a date and time. You can adjust
-                your choices before you confirm.
-              </p>
             </div>
           </div>
         </section>
@@ -118,30 +115,37 @@ function ScheduleAppointmentPageContent() {
         ) : null}
 
         <div className="flex flex-1 flex-col gap-4 rounded-2xl border border-border bg-linear-to-b from-[#FAFAF9] via-[#F7F5F3] to-[#F0EEEB] p-5 shadow-sm dark:border-white/10 dark:from-[#18181f] dark:via-[#14141a] dark:to-[#101014] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
-          <div className="mb-1 flex flex-col gap-3 sm:mb-2 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex items-start gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
               <span
                 className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary shadow-sm ring-1 ring-primary/15 dark:bg-primary/18 dark:ring-primary/25"
                 aria-hidden
               >
                 <MapPin className="size-5" />
               </span>
-              <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-1.5">
                 <p className="text-sm font-semibold text-text-primary">
                   Select a hospital
                 </p>
-                <p className="mt-0.5 text-xs leading-relaxed text-text-secondary">
-                  Drag the row or use the arrows. Your choice is used for the
-                  inspection appointment.
-                </p>
+                <InfoHint
+                  title="Hospital choice"
+                  label="Hospital selection information"
+                  className="size-7"
+                >
+                  <p>
+                    Your selected hospital is used for the inspection
+                    appointment. Search by name, city, or address.
+                  </p>
+                </InfoHint>
               </div>
             </div>
             {hospitals.length > 0 ? (
-              <p className="shrink-0 text-xs font-medium tabular-nums text-text-tertiary sm:pt-1">
+              <p className="shrink-0 text-xs font-medium tabular-nums text-text-tertiary">
                 {hospitals.length} location{hospitals.length === 1 ? "" : "s"}
               </p>
             ) : null}
           </div>
+
           {hospitalsLoadState === "loading" ? (
             <div className="flex min-h-30 items-center justify-center gap-2 text-sm text-text-secondary">
               <Loader2 className="size-5 animate-spin text-primary" />
@@ -167,71 +171,83 @@ function ScheduleAppointmentPageContent() {
               No hospitals available yet.
             </p>
           ) : (
-            <Carousel
-              setApi={setCarouselApi}
-              opts={{ align: "start", loop: false }}
-              className="w-full"
-            >
-              <CarouselPrevious
-                aria-label="Previous hospital"
-                className="left-0 sm:left-1"
+            <div className="flex flex-col gap-3">
+              <Input
+                name="hospitalSearch"
+                placeholder="Search hospitals…"
+                value={hospitalQuery}
+                onChange={(e) => setHospitalQuery(e.target.value)}
+                icon={
+                  <Search className="size-4 text-text-tertiary" aria-hidden />
+                }
+                labelClassName="hidden"
+                containerClassName="gap-0"
+                aria-label="Search hospitals"
               />
-              <CarouselNext
-                aria-label="Next hospital"
-                className="right-0 sm:right-1"
-              />
-              <div className="mx-9 sm:mx-11">
-                <CarouselContent className="-ml-3 md:-ml-4">
-                  {hospitals.map((h) => (
-                    <CarouselItem
-                      key={h.id}
-                      className="basis-[min(100%,280px)] pl-3 sm:basis-62 md:pl-4 lg:basis-65"
-                    >
-                      <label
-                        className={`flex h-full min-h-37 cursor-pointer flex-col rounded-xl border-2 bg-white/90 p-4 shadow-sm transition-all dark:bg-[#1a1a22]/95 dark:shadow-none ${
-                          appointment.hospitalId === h.id
-                            ? "border-primary ring-2 ring-primary/25 dark:ring-primary/35"
-                            : "border-border hover:border-primary/45 hover:shadow-md dark:border-white/10 dark:hover:border-primary/40"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="rounded-md bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-secondary dark:bg-white/10 dark:text-text-secondary">
-                            {h.distance ?? "—"}
-                          </span>
-                          <input
-                            type="radio"
-                            name="hospital"
-                            value={h.id}
-                            checked={appointment.hospitalId === h.id}
-                            onChange={() => {
-                              handleAppointmentChange("hospitalId", h.id);
-                            }}
-                            className="sr-only"
-                          />
+
+              {filteredHospitals.length === 0 ? (
+                <p className="rounded-lg border border-border bg-white px-4 py-6 text-center text-sm text-text-secondary dark:border-white/10 dark:bg-[#1a1a22]">
+                  No hospitals match “{hospitalQuery.trim()}”.
+                </p>
+              ) : (
+                <ul
+                  className="max-h-72 overflow-y-auto rounded-xl border border-border bg-white dark:border-white/10 dark:bg-[#1a1a22]"
+                  role="listbox"
+                  aria-label="Hospitals"
+                >
+                  {filteredHospitals.map((h, index) => {
+                    const selected = appointment.hospitalId === h.id;
+                    return (
+                      <li key={h.id}>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={selected}
+                          onClick={() =>
+                            handleAppointmentChange("hospitalId", h.id)
+                          }
+                          className={`flex w-full items-start gap-3 px-3 py-3 text-left transition-colors ${
+                            index > 0
+                              ? "border-t border-[#F0EEEB] dark:border-white/10"
+                              : ""
+                          } ${
+                            selected
+                              ? "bg-[#FFF5F5] dark:bg-primary/15"
+                              : "hover:bg-[#FAFAF9] dark:hover:bg-white/5"
+                          }`}
+                        >
                           <span
-                            className={`flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                              appointment.hospitalId === h.id
+                            className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border-2 ${
+                              selected
                                 ? "border-primary bg-primary"
-                                : "border-border dark:border-white/25"
+                                : "border-[#D1D5DB] bg-transparent dark:border-white/30"
                             }`}
+                            aria-hidden
                           >
-                            {appointment.hospitalId === h.id ? (
-                              <span className="size-2 rounded-full bg-white" />
+                            {selected ? (
+                              <span className="size-1.5 rounded-full bg-white" />
                             ) : null}
                           </span>
-                        </div>
-                        <p className="mt-3 text-sm font-semibold leading-snug text-text-primary">
-                          {h.name}
-                        </p>
-                        <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-text-secondary">
-                          {h.address}
-                        </p>
-                      </label>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-              </div>
-            </Carousel>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-text-primary">
+                              {h.name}
+                            </span>
+                            <span className="mt-0.5 block text-xs leading-relaxed text-text-secondary">
+                              {h.address}
+                            </span>
+                          </span>
+                          {h.distance ? (
+                            <span className="shrink-0 rounded-md bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-secondary dark:bg-white/10">
+                              {h.distance}
+                            </span>
+                          ) : null}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           )}
         </div>
 

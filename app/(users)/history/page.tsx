@@ -11,19 +11,12 @@ import { routes } from "@/config/routes";
 
 export default function HistoryPage() {
   const { wallet, loading, error, reload } = useWallet();
-  const {
-    receipt,
-    open,
-    openReceipt,
-    closeReceipt,
-    download,
-    share,
-    busy,
-  } = useWalletReceipt(wallet.currency);
+  const { receipt, open, openReceipt, closeReceipt, download, share, busy } =
+    useWalletReceipt(wallet.currency);
 
   return (
     <Layout>
-      <div className="mx-auto flex max-w-2xl flex-col gap-6 pb-10">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 pb-10">
         <header className="flex flex-col gap-1">
           <h1 className="text-xl font-semibold text-text-primary sm:text-2xl">
             History

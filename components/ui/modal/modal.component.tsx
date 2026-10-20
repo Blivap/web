@@ -112,7 +112,7 @@ export function Modal({
     <dialog
       ref={dialogRef}
       className={classNames(
-        "fixed inset-0 z-50 m-0 h-full max-h-none w-full max-w-none border-0 bg-transparent p-0",
+        "fixed inset-0 z-[70] m-0 h-full max-h-none w-full max-w-none border-0 bg-transparent p-0",
       )}
     >
       <div
