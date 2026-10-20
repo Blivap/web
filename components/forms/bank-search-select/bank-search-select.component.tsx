@@ -106,9 +106,7 @@ export function BankSearchSelect({
             !selected && "font-normal text-[#9794AA] dark:text-slate-500",
           )}
         >
-          {loading
-            ? "Loading banks…"
-            : (selected?.bank ?? placeholder)}
+          {loading ? "Loading banks…" : (selected?.bank ?? placeholder)}
         </span>
         <ChevronsUpDown
           className="size-4 shrink-0 text-[#9794AA]"
@@ -164,7 +162,10 @@ export function BankSearchSelect({
                     >
                       <span className="flex size-4 shrink-0 items-center justify-center">
                         {active ? (
-                          <Check className="size-3.5 text-primary" aria-hidden />
+                          <Check
+                            className="size-3.5 text-primary"
+                            aria-hidden
+                          />
                         ) : null}
                       </span>
                       <span className="min-w-0 flex-1 truncate font-medium">

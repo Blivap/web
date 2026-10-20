@@ -584,14 +584,10 @@ function NewDonorForm() {
         setBasicsError("Could not save donor profile. Try again.");
       }
     } catch (e) {
-      trackFailure(
-        "donor_profile_registered",
-        classifyAnalyticsError(e),
-        {
-          donation_type: donationTypeForQuestionnaire,
-          blood_type: values.basics.bloodType,
-        },
-      );
+      trackFailure("donor_profile_registered", classifyAnalyticsError(e), {
+        donation_type: donationTypeForQuestionnaire,
+        blood_type: values.basics.bloodType,
+      });
       setBasicsError(
         getErrorMessage(e, "Could not save donor profile. Try again."),
       );
@@ -675,11 +671,9 @@ function NewDonorForm() {
         error ?? message ?? "Could not submit activation request.",
       );
     } catch (e) {
-      trackFailure(
-        "donor_activation_requested",
-        classifyAnalyticsError(e),
-        { donation_type: donationTypeForQuestionnaire },
-      );
+      trackFailure("donor_activation_requested", classifyAnalyticsError(e), {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setActivationRequestError(
         getErrorMessage(e, "Could not submit activation request."),
       );

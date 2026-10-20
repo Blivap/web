@@ -76,7 +76,8 @@ export function parseWalletPayout(raw: unknown): WalletPayout | null {
 }
 
 export function parseWalletPayoutResponse(body: unknown): WalletPayout | null {
-  const data = unwrapApiRecord(body) ?? (body as Record<string, unknown> | null);
+  const data =
+    unwrapApiRecord(body) ?? (body as Record<string, unknown> | null);
   return parseWalletPayout(data);
 }
 
@@ -85,7 +86,7 @@ export function parseWalletPayouts(body: unknown): WalletPayout[] {
   const list = Array.isArray(data)
     ? data
     : Array.isArray((body as { data?: unknown })?.data)
-      ? ((body as { data: unknown[] }).data)
+      ? (body as { data: unknown[] }).data
       : Array.isArray(body)
         ? body
         : [];

@@ -53,9 +53,7 @@ export function buildWalletReceipt(
   });
   const signedAmountLabel = `${isCredit ? "+" : "−"}${amountLabel}`;
   const whenLabel = formatWalletEntryWhen(entry.createdAt);
-  const bookingLabel = entry.bookingId
-    ? `Booking ${entry.bookingId}`
-    : null;
+  const bookingLabel = entry.bookingId ? `Booking ${entry.bookingId}` : null;
   const accountLabel = options.accountLabel?.trim() || "Blivap account";
   const id = receiptId(entry, options.index ?? 0);
   const referenceHint = entry.bookingId

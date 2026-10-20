@@ -30,7 +30,8 @@ export function parseResolvedBankAccount(
 export function parseBankResolveResult(
   body: unknown,
 ): WalletBankResolveResult | null {
-  const data = unwrapApiRecord(body) ?? (body as Record<string, unknown> | null);
+  const data =
+    unwrapApiRecord(body) ?? (body as Record<string, unknown> | null);
   if (!data) return null;
 
   if (Array.isArray(data.matches)) {
@@ -73,7 +74,7 @@ export function parseWalletBankAccounts(body: unknown): WalletBankAccount[] {
   const list = Array.isArray(data)
     ? data
     : Array.isArray((body as { data?: unknown })?.data)
-      ? ((body as { data: unknown[] }).data)
+      ? (body as { data: unknown[] }).data
       : Array.isArray(body)
         ? body
         : [];

@@ -12,8 +12,7 @@ export function formatWalletAmount(
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(abs);
-  const withSymbol =
-    options?.currencySymbol === false ? number : `₦${number}`;
+  const withSymbol = options?.currencySymbol === false ? number : `₦${number}`;
   return withSymbol;
 }
 

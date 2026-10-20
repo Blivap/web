@@ -8,15 +8,11 @@ export const metadata: Metadata = generateMetadata({
   keywords: [
     "give blood",
     "blood donation centers",
-    "blood donation appointment"
+    "blood donation appointment",
   ],
   path: "/giving-blood",
 });
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

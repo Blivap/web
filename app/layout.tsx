@@ -203,9 +203,7 @@ export const metadata: Metadata = {
         type: "image/png",
       },
     ],
-    apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
     other: [
       {
         rel: "mask-icon",
@@ -272,9 +270,7 @@ export default function RootLayout({
           </StoreProvider>
         </ThemePreferenceProvider>
       </body>
-      {googleAnalyticsId ? (
-        <GoogleAnalytics gaId={googleAnalyticsId} />
-      ) : null}
+      {googleAnalyticsId ? <GoogleAnalytics gaId={googleAnalyticsId} /> : null}
     </html>
   );
 }

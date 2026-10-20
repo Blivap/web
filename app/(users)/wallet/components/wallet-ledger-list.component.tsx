@@ -138,7 +138,7 @@ function entrySubtitle(entry: WalletLedgerEntry): string {
 }
 
 /** Ledger API has no status yet — treat all settled entries as completed. */
-function entryStatus(_entry: WalletLedgerEntry): EntryStatus {
+function entryStatus(): EntryStatus {
   return "completed";
 }
 
@@ -327,7 +327,7 @@ export function WalletLedgerList({
                 {pageEntries.map((entry, index) => {
                   const isCredit = entry.direction === "credit";
                   const when = formatDateTwoLine(entry.createdAt);
-                  const status = entryStatus(entry);
+                  const status = entryStatus();
                   const absoluteIndex = pageStart + index;
                   const key = `${entry.type}-${entry.createdAt ?? "x"}-${entry.bookingId ?? absoluteIndex}-${entry.amountKobo}`;
                   const pending = status === "pending";

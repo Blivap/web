@@ -59,7 +59,14 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
           <h1 style={{ margin: "12px 0 0", fontSize: 20, fontWeight: 700 }}>
             {network ? "Can't reach Blivap" : "Something went wrong"}
           </h1>
-          <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.5, color: "#49475A" }}>
+          <p
+            style={{
+              margin: "8px 0 0",
+              fontSize: 14,
+              lineHeight: 1.5,
+              color: "#49475A",
+            }}
+          >
             {network
               ? "We couldn’t reach the server. Check your connection or try again."
               : "An unexpected error stopped the app. You can try again."}

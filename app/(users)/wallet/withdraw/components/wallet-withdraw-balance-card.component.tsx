@@ -52,8 +52,7 @@ export function WalletWithdrawBalanceCard({
             </p>
           )}
           <p className="mt-3 text-[13px] font-medium text-white/90">
-            Pending{" "}
-            {loading ? "…" : formatWalletAmount(heldKobo)}
+            Pending {loading ? "…" : formatWalletAmount(heldKobo)}
           </p>
         </div>
 

@@ -1,12 +1,13 @@
 "use client";
 
-import { useLayoutEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ArrowUp, Eye, EyeOff, Plus } from "lucide-react";
 import { formatWalletAmount } from "@/lib/wallet/formatWalletDisplay";
 import {
   persistWalletBalanceHidden,
   readWalletBalanceHidden,
+  subscribeWalletBalanceHidden,
 } from "@/lib/wallet/walletBalanceVisibility";
 import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
 import { routes } from "@/config/routes";
@@ -36,18 +37,14 @@ export function WalletBalanceHero({
   loading = false,
   onFundWallet,
 }: WalletBalanceHeroProps) {
-  const [hidden, setHidden] = useState(false);
-
-  useLayoutEffect(() => {
-    setHidden(readWalletBalanceHidden());
-  }, []);
+  const hidden = useSyncExternalStore(
+    subscribeWalletBalanceHidden,
+    readWalletBalanceHidden,
+    () => false,
+  );
 
   const toggleHidden = () => {
-    setHidden((prev) => {
-      const next = !prev;
-      persistWalletBalanceHidden(next);
-      return next;
-    });
+    persistWalletBalanceHidden(!hidden);
   };
 
   if (loading) {
@@ -87,11 +84,7 @@ export function WalletBalanceHero({
             className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10"
           >
             {hidden ? (
-              <EyeOff
-                className="size-[18px]"
-                strokeWidth={1.75}
-                aria-hidden
-              />
+              <EyeOff className="size-[18px]" strokeWidth={1.75} aria-hidden />
             ) : (
               <Eye className="size-[18px]" strokeWidth={1.75} aria-hidden />
             )}
@@ -104,11 +97,7 @@ export function WalletBalanceHero({
               href={routes.walletWithdraw}
               className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#FFFFFF33] bg-transparent px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/10"
             >
-              <ArrowUp
-                className="size-3.5"
-                strokeWidth={2.25}
-                aria-hidden
-              />
+              <ArrowUp className="size-3.5" strokeWidth={2.25} aria-hidden />
               Withdraw
             </Link>
             <button

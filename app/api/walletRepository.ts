@@ -33,9 +33,7 @@ export default function WalletRepository() {
      * POST /wallet/topups/:reference/verify — settle top-up and return wallet summary.
      * Message is typically "Wallet funded".
      */
-    verifyTopup(
-      reference: string,
-    ): Promise<IResponse<WalletSummaryResponse>> {
+    verifyTopup(reference: string): Promise<IResponse<WalletSummaryResponse>> {
       return fetcher<WalletSummaryResponse>(
         endpoints.wallet.verifyTopup(reference),
         { method: "POST" },

@@ -51,7 +51,10 @@ export function isExistingRegisteredDonor(
   if (truthy(raw.activated) || truthy(raw.isActivated)) return true;
   if (truthy(raw.activationSubmitted) || truthy(raw.activation_submitted))
     return true;
-  if (truthy(raw.hasRequestedActivation) || truthy(raw.has_requested_activation))
+  if (
+    truthy(raw.hasRequestedActivation) ||
+    truthy(raw.has_requested_activation)
+  )
     return true;
 
   const activationStatus =

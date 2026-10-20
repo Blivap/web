@@ -11,15 +11,8 @@ import { routes } from "@/config/routes";
 
 export default function HistoryPage() {
   const { wallet, loading, error, reload } = useWallet();
-  const {
-    receipt,
-    open,
-    openReceipt,
-    closeReceipt,
-    download,
-    share,
-    busy,
-  } = useWalletReceipt(wallet.currency);
+  const { receipt, open, openReceipt, closeReceipt, download, share, busy } =
+    useWalletReceipt(wallet.currency);
 
   return (
     <Layout>

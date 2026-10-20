@@ -16,8 +16,8 @@ export function WalletInfoContent() {
           </p>
           <p className="mt-1 text-xs leading-relaxed text-text-secondary">
             Blivap aligns with Nigerian National Blood Policy and NBTS guidance:
-            donation is voluntary, unpaid, and safe. Wallet funds cover logistics
-            and donor welfare stipends only.
+            donation is voluntary, unpaid, and safe. Wallet funds cover
+            logistics and donor welfare stipends only.
           </p>
         </div>
       </section>
@@ -29,7 +29,9 @@ export function WalletInfoContent() {
           aria-hidden
         />
         <p className="text-[11px] leading-relaxed text-text-secondary">
-          <span className="font-semibold text-text-primary">Compliance note:</span>{" "}
+          <span className="font-semibold text-text-primary">
+            Compliance note:
+          </span>{" "}
           Informational only; always follow facility staff and national health
           guidelines for screening and donation.
         </p>

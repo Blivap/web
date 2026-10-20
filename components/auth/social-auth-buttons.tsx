@@ -3,10 +3,7 @@
 import Image from "next/image";
 
 import { useSocialAuth } from "@/hooks/auth/useSocialAuth.hooks";
-import {
-  isFirebaseAuthConfigured,
-  SocialProvider,
-} from "@/lib/firebase/auth";
+import { isFirebaseAuthConfigured, SocialProvider } from "@/lib/firebase/auth";
 
 const PROVIDERS: { provider: SocialProvider; src: string; label: string }[] = [
   { provider: "google", src: "/icons/Google.svg", label: "Google" },

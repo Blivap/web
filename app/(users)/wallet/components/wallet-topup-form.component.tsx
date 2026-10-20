@@ -60,7 +60,12 @@ export function WalletTopupForm({
         </p>
       )}
 
-      <div className={classNames("flex flex-col gap-3", embedded ? "mt-3" : "mt-4")}>
+      <div
+        className={classNames(
+          "flex flex-col gap-3",
+          embedded ? "mt-3" : "mt-4",
+        )}
+      >
         <Input
           name="topupAmount"
           label="Amount (NGN)"

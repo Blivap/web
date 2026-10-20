@@ -56,7 +56,8 @@ function ScheduleAppointmentPageContent() {
     const q = hospitalQuery.trim().toLowerCase();
     if (!q) return hospitals;
     return hospitals.filter((h) => {
-      const haystack = `${h.name} ${h.address} ${h.distance ?? ""}`.toLowerCase();
+      const haystack =
+        `${h.name} ${h.address} ${h.distance ?? ""}`.toLowerCase();
       return haystack.includes(q);
     });
   }, [hospitals, hospitalQuery]);

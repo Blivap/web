@@ -21,7 +21,7 @@ export function parseWalletBanksResponse(body: unknown): WalletBankOption[] {
   const list = Array.isArray(unwrapped)
     ? unwrapped
     : Array.isArray((body as { data?: unknown })?.data)
-      ? ((body as { data: unknown[] }).data)
+      ? (body as { data: unknown[] }).data
       : Array.isArray(body)
         ? body
         : [];

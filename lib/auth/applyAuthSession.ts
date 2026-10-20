@@ -20,11 +20,7 @@ export function readAuthEnvelope(data: unknown): IAuthResponse {
 }
 
 export function accessTokenFrom(authData: IAuthResponse): string | undefined {
-  return (
-    authData?.accessToken ??
-    authData?.access_token ??
-    authData?.token
-  );
+  return authData?.accessToken ?? authData?.access_token ?? authData?.token;
 }
 
 /** Stores the Blivap session and sends the person to verify-email or the app. */

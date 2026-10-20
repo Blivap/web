@@ -9,15 +9,11 @@ export const metadata: Metadata = generateMetadata({
     "blood donation information",
     "how to donate blood",
     "blood donation process",
-    "blood donation benefits"
+    "blood donation benefits",
   ],
   path: "/about-blood",
 });
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

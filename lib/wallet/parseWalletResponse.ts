@@ -44,8 +44,7 @@ export function parseWalletLedgerEntry(raw: unknown): WalletLedgerEntry | null {
     ? WALLET_LEDGER_CATALOG[typeRaw]
     : null;
 
-  const direction =
-    pickDirection(row.direction) ?? known?.direction ?? null;
+  const direction = pickDirection(row.direction) ?? known?.direction ?? null;
   const label = pickString(row.label) ?? known?.label ?? null;
   if (!direction || !label) return null;
 
@@ -53,8 +52,8 @@ export function parseWalletLedgerEntry(raw: unknown): WalletLedgerEntry | null {
   const bookingId =
     bookingRaw == null || bookingRaw === ""
       ? null
-      : pickString(bookingRaw) ??
-        (typeof bookingRaw === "number" ? String(bookingRaw) : null);
+      : (pickString(bookingRaw) ??
+        (typeof bookingRaw === "number" ? String(bookingRaw) : null));
 
   return {
     type: known?.type ?? typeRaw,

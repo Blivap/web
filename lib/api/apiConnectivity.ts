@@ -34,7 +34,9 @@ export function reportApiUnreachable(): void {
 }
 
 /** Probe the API origin with a cheap request (used by Retry). */
-export async function probeApiReachability(apiBaseUrl: string): Promise<boolean> {
+export async function probeApiReachability(
+  apiBaseUrl: string,
+): Promise<boolean> {
   try {
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 5000);

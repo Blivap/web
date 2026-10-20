@@ -313,7 +313,9 @@ function MeetupVerificationRow({
           {text}
         </span>
       </div>
-      <p className="mt-1 text-xs leading-relaxed text-text-secondary">{detail}</p>
+      <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+        {detail}
+      </p>
     </div>
   );
 }
@@ -388,8 +390,8 @@ function MeetupVerificationSummary({
         </h3>
       </div>
       <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-        Two separate checks: your account ID on the platform, then the in
-        person step for this session only.
+        Two separate checks: your account ID on the platform, then the in person
+        step for this session only.
       </p>
       <div className="mt-4 flex flex-col gap-3">
         <MeetupParticipantVerificationCard
@@ -955,9 +957,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     }
     if (!token) return "Sign in again to use donation chat.";
     if (chatLocked) {
-      return (
-        donationChat.roomCloseReason?.trim() || "This chat is closed."
-      );
+      return donationChat.roomCloseReason?.trim() || "This chat is closed.";
     }
     if (!donationChat.socketConnected && donationChatEnabled) {
       return "Connecting to live chat…";
@@ -1023,7 +1023,9 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     if (!donationChatBookingId) return null;
     return (
       sentBookings.find((booking) => booking.id === donationChatBookingId) ??
-      receivedBookings.find((booking) => booking.id === donationChatBookingId) ??
+      receivedBookings.find(
+        (booking) => booking.id === donationChatBookingId,
+      ) ??
       null
     );
   }, [donationChatBookingId, sentBookings, receivedBookings]);
@@ -1035,8 +1037,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       ? bookingRow?.donorProfileImage
       : isRequester === false
         ? bookingRow?.requesterProfileImage
-        : (bookingRow?.donorProfileImage ??
-          bookingRow?.requesterProfileImage);
+        : (bookingRow?.donorProfileImage ?? bookingRow?.requesterProfileImage);
   const sessionChipDate = formatSessionChipDate(
     session?.scheduledAt ??
       sortedChatMessages[0]?.createdAt ??
@@ -1100,9 +1101,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         }
         showSnackbar("File sent.");
       } catch (error) {
-        setLocalError(
-          getAxiosErrorMessage(error, "Could not send that file."),
-        );
+        setLocalError(getAxiosErrorMessage(error, "Could not send that file."));
       } finally {
         setUploadBusy(false);
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -1255,9 +1254,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                         )}
                       >
                         <PartyAvatar
-                          src={
-                            mine ? user?.profileImage : peerProfileImage
-                          }
+                          src={mine ? user?.profileImage : peerProfileImage}
                           className="mt-0.5"
                         />
                         <div
@@ -1293,10 +1290,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             )}
 
             {donationChat.typingLabel ? (
-              <div
-                className="mt-4 flex items-center gap-2"
-                aria-live="polite"
-              >
+              <div className="mt-4 flex items-center gap-2" aria-live="polite">
                 <PartyAvatar src={peerProfileImage} />
                 <div className="animate-in fade-in slide-in-from-bottom-1 rounded-xl bg-[#F2F4F6] px-3 py-2 duration-200 motion-reduce:animate-none dark:bg-white/8">
                   <p className="text-[10px] text-text-tertiary">
@@ -1316,7 +1310,9 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-text-secondary">
               <span>Chat with</span>
               <PartyAvatar src={peerProfileImage} className="size-6" />
-              <span className="font-medium text-text-primary">{peerHandle}</span>
+              <span className="font-medium text-text-primary">
+                {peerHandle}
+              </span>
               {donationChatStatusBadge ? (
                 <span
                   className={cn(
@@ -1329,10 +1325,15 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               ) : null}
             </div>
             {chatStatusLine ? (
-              <p className="mb-2 text-xs text-text-tertiary">{chatStatusLine}</p>
+              <p className="mb-2 text-xs text-text-tertiary">
+                {chatStatusLine}
+              </p>
             ) : null}
             {donationChat.sendError ? (
-              <p className="mb-2 text-sm text-red-600 dark:text-red-400" role="alert">
+              <p
+                className="mb-2 text-sm text-red-600 dark:text-red-400"
+                role="alert"
+              >
                 {donationChat.sendError}
               </p>
             ) : null}
@@ -1421,9 +1422,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                   type="button"
                   aria-label="Attach a file"
                   disabled={
-                    chatComposerDisabled ||
-                    uploadBusy ||
-                    !donationChatBookingId
+                    chatComposerDisabled || uploadBusy || !donationChatBookingId
                   }
                   className="grid size-8 place-items-center rounded-md text-text-tertiary transition-transform duration-150 hover:scale-105 hover:bg-black/5 hover:text-text-primary active:scale-95 disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none dark:hover:bg-white/8"
                   onClick={() => fileInputRef.current?.click()}
@@ -1656,7 +1655,11 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                           />
                         ) : (
                           <div className="rounded-lg bg-white p-3">
-                            <QRCode value={swapCodeQrUrl} size={160} level="M" />
+                            <QRCode
+                              value={swapCodeQrUrl}
+                              size={160}
+                              level="M"
+                            />
                           </div>
                         )}
                       </div>
