@@ -3,6 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDebouncedValue } from "@/hooks/navigation/useDebouncedSearch.hook";
 import {
   filterWalletBanks,
   type WalletBankOption,
@@ -35,6 +36,7 @@ export function BankSearchSelect({
   const searchRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebouncedValue(query);
 
   const selected = useMemo(() => {
     const wanted = value.trim().toLowerCase();
@@ -42,13 +44,14 @@ export function BankSearchSelect({
     return (
       banks.find((b) => b.bank.toLowerCase() === wanted) ??
       banks.find((b) => b.bank.toLowerCase().includes(wanted)) ??
-      null
+      // Keep a resolved bank name visible even if it is not in the catalog yet.
+      ({ bank: value.trim(), code: "" } satisfies WalletBankOption)
     );
   }, [banks, value]);
 
   const filtered = useMemo(
-    () => filterWalletBanks(banks, query),
-    [banks, query],
+    () => filterWalletBanks(banks, debouncedQuery),
+    [banks, debouncedQuery],
   );
 
   useEffect(() => {

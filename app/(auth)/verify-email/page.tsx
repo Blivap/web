@@ -23,11 +23,14 @@ export default function VerifyEmailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dnRedirect = getDnRedirect(searchParams);
+  const emailToken = searchParams.get("token")?.trim() ?? "";
+  const emailFromLink = searchParams.get("email")?.trim() ?? "";
   const [mounted, setMounted] = useState(false);
   const { verifyEmail, isLoading } = useVerifyEmail();
   const { resendLink, isLoading: isResending } = useResendVerificationLink();
   const token = useAppSelector((state) => state.auth.token);
   const user = useAppSelector((state) => state.auth.user);
+  const accountEmail = user?.email?.trim() || emailFromLink;
   const { handleLogout } = useLogout();
 
   useEffect(() => {
@@ -68,21 +71,24 @@ export default function VerifyEmailPage() {
               Verify your email
             </p>
             <p className="text-base text-[#49475A] dark:text-slate-400">
-              Enter the token from your verification email and your email
-              address.
+              {accountEmail
+                ? `Confirm the code sent to ${accountEmail}.`
+                : "Open the verify link from your email, or sign in and request a new code."}
             </p>
           </div>
           <Formik
             initialValues={{
-              emailValidationToken: "",
+              emailValidationToken: emailToken,
             }}
+            enableReinitialize
             validationSchema={verifyEmailSchema}
-            onSubmit={(values) =>
+            onSubmit={(values) => {
+              if (!accountEmail) return;
               verifyEmail({
-                email: user?.email ?? "",
+                email: accountEmail,
                 emailValidationToken: values.emailValidationToken,
-              })
-            }
+              });
+            }}
           >
             {({
               values,
@@ -110,7 +116,7 @@ export default function VerifyEmailPage() {
                   <Button
                     type="submit"
                     className="w-full"
-                    disabled={!isValid || isLoading}
+                    disabled={!isValid || isLoading || !accountEmail}
                     loading={isLoading}
                   >
                     {isLoading ? "Verifying..." : "Verify email"}
@@ -123,26 +129,26 @@ export default function VerifyEmailPage() {
                     variant="link"
                     size="xs"
                     className="h-auto p-0 font-semibold"
-                    disabled={isResending}
+                    disabled={isResending || !accountEmail}
                     loading={isResending}
-                    onClick={() =>
-                      values.emailValidationToken
-                        ? resendLink({ email: user?.email ?? "" })
-                        : undefined
-                    }
+                    onClick={() => {
+                      if (accountEmail) resendLink({ email: accountEmail });
+                    }}
                   >
                     {isResending ? "Sending..." : "Resend"}
                   </Button>
                 </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-fit gap-2 text-base text-[#49475A] dark:text-slate-300"
-                  onClick={handleLogout}
-                >
-                  <LogOut size={16} />
-                  Logout
-                </Button>
+                {hasSession ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-fit gap-2 text-base text-[#49475A] dark:text-slate-300"
+                    onClick={handleLogout}
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </Button>
+                ) : null}
               </div>
             )}
           </Formik>

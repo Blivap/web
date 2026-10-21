@@ -36,6 +36,7 @@ function pickRefId(raw: unknown): string | null {
 
 function pickPersonFromRef(raw: unknown): {
   displayName?: string;
+  publicId?: string;
   profileImage?: string;
 } {
   if (!raw || typeof raw !== "object") return {};
@@ -43,9 +44,12 @@ function pickPersonFromRef(raw: unknown): {
   const first = typeof o.firstname === "string" ? o.firstname.trim() : "";
   const last = typeof o.lastname === "string" ? o.lastname.trim() : "";
   const displayName = [first, last].filter(Boolean).join(" ").trim();
+  const publicIdRaw = pickString(o.publicId ?? o.public_id);
+  const publicId = publicIdRaw ? publicIdRaw.toUpperCase() : undefined;
   const profileImage = pickString(o.profileImage ?? o.profile_image);
   return {
     ...(displayName ? { displayName } : {}),
+    ...(publicId ? { publicId } : {}),
     ...(profileImage ? { profileImage } : {}),
   };
 }
@@ -174,11 +178,15 @@ export function parseBookingRecord(raw: unknown): Booking | null {
     ...(donorPerson.displayName
       ? { donorDisplayName: donorPerson.displayName }
       : {}),
+    ...(donorPerson.publicId ? { donorPublicId: donorPerson.publicId } : {}),
     ...(donorPerson.profileImage
       ? { donorProfileImage: donorPerson.profileImage }
       : {}),
     ...(requesterPerson.displayName
       ? { requesterDisplayName: requesterPerson.displayName }
+      : {}),
+    ...(requesterPerson.publicId
+      ? { requesterPublicId: requesterPerson.publicId }
       : {}),
     ...(requesterPerson.profileImage
       ? { requesterProfileImage: requesterPerson.profileImage }

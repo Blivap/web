@@ -117,7 +117,7 @@ export default function HelpSupportPage() {
                 Phone Support
               </span>
               <span className="block text-xs text-[#6B7280] dark:text-white/50">
-                +234 XXX XXX XXXX · Mon–Fri, 9AM–5PM WAT
+                +234 090 2667 6096 · Mon–Fri, 9AM–5PM WAT
               </span>
             </span>
             <ChevronRight

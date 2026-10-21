@@ -220,6 +220,8 @@ export function parseDonorRecord(raw: unknown): Donor | null {
 
   const profileImage = pickProfileImageUrl(merged);
   const userId = pickString(merged.userId ?? merged.user_id);
+  const publicIdRaw = pickString(merged.publicId ?? merged.public_id);
+  const publicId = publicIdRaw ? publicIdRaw.toUpperCase() : null;
   const cooldownEndsAt = pickCooldownEndsAt(merged);
 
   return {
@@ -239,6 +241,7 @@ export function parseDonorRecord(raw: unknown): Donor | null {
     donations,
     activeDonationTypes: pickActiveDonationTypes(merged),
     ...(userId ? { userId } : {}),
+    ...(publicId ? { publicId } : {}),
     ...(cooldownEndsAt ? { cooldownEndsAt } : {}),
     ...(profileImage ? { profileImage } : {}),
   };

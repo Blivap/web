@@ -36,9 +36,13 @@ export type Booking = {
   respondedAt?: string | null;
   /** Present when API populates `donorUserId` as an embedded user object. */
   donorDisplayName?: string;
+  /** Anonymous 8-character handle when the donor user is embedded. */
+  donorPublicId?: string;
   donorProfileImage?: string | null;
   /** Present when API populates `requesterId` as an embedded user object. */
   requesterDisplayName?: string;
+  /** Anonymous 8-character handle when the requester user is embedded. */
+  requesterPublicId?: string;
   requesterProfileImage?: string | null;
   /** Present when API populates `hospitalId` as an embedded hospital object. */
   hospitalName?: string;

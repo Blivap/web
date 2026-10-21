@@ -77,12 +77,18 @@ export function isWalletLedgerEntryType(
   return value in WALLET_LEDGER_CATALOG;
 }
 
+/** Ledger row status from GET /wallet `entries[].status`. */
+export type WalletLedgerEntryStatus = "success" | "pending" | "failed";
+
 export type WalletLedgerEntry = {
   type: WalletLedgerEntryType | (string & {});
   label: string;
   direction: WalletLedgerDirection;
   amountKobo: number;
   bookingId: string | null;
+  status: WalletLedgerEntryStatus;
+  /** Paystack / payout reference when present. */
+  reference: string | null;
   /** ISO timestamp from the API. */
   createdAt: string | null;
 };

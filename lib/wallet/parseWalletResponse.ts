@@ -4,6 +4,7 @@ import {
   isWalletLedgerEntryType,
   type WalletLedgerDirection,
   type WalletLedgerEntry,
+  type WalletLedgerEntryStatus,
   type WalletSummary,
 } from "@/types/wallet";
 
@@ -31,6 +32,31 @@ function pickCreatedAt(v: unknown): string | null {
   if (typeof v === "string" && v.trim()) return v.trim();
   if (v instanceof Date && !Number.isNaN(v.getTime())) return v.toISOString();
   return null;
+}
+
+function pickLedgerStatus(v: unknown): WalletLedgerEntryStatus {
+  if (typeof v !== "string") return "success";
+  const normalized = v.trim().toLowerCase();
+  if (normalized === "pending" || normalized === "processing") return "pending";
+  if (
+    normalized === "failed" ||
+    normalized === "failure" ||
+    normalized === "error" ||
+    normalized === "cancelled" ||
+    normalized === "canceled" ||
+    normalized === "expired"
+  ) {
+    return "failed";
+  }
+  if (
+    normalized === "success" ||
+    normalized === "successful" ||
+    normalized === "completed" ||
+    normalized === "paid"
+  ) {
+    return "success";
+  }
+  return "success";
 }
 
 export function parseWalletLedgerEntry(raw: unknown): WalletLedgerEntry | null {
@@ -61,6 +87,8 @@ export function parseWalletLedgerEntry(raw: unknown): WalletLedgerEntry | null {
     direction,
     amountKobo,
     bookingId,
+    status: pickLedgerStatus(row.status),
+    reference: pickString(row.reference),
     createdAt: pickCreatedAt(row.createdAt),
   };
 }

@@ -46,7 +46,7 @@ type PaginationLinkProps = {
   React.ComponentProps<"button">;
 
 const PaginationLink = React.forwardRef<HTMLButtonElement, PaginationLinkProps>(
-  ({ className, isActive, size = "icon-sm", ...props }, ref) => (
+  ({ className, isActive, size = "icon-xs", ...props }, ref) => (
     <button
       ref={ref}
       type="button"
@@ -60,6 +60,7 @@ const PaginationLink = React.forwardRef<HTMLButtonElement, PaginationLinkProps>(
         !isActive &&
           "text-text-primary hover:bg-[#ECECED] dark:hover:bg-white/10",
         className,
+        " border-none p-0",
       )}
       aria-current={isActive ? "page" : undefined}
       {...props}
@@ -70,40 +71,42 @@ PaginationLink.displayName = "PaginationLink";
 
 function PaginationPrevious({
   className,
+  "aria-label": ariaLabel = "Previous page",
   ...props
 }: React.ComponentProps<"button">) {
   return (
     <button
       type="button"
+      aria-label={ariaLabel}
       className={cn(
-        buttonVariants({ variant: "outline", size: "sm" }),
-        "gap-1 pl-2 border-border bg-background text-text-primary shadow-sm dark:border-white/15 dark:bg-[#25252e]",
+        buttonVariants({ variant: "outline", size: "icon-xs" }),
+        "border-border bg-background text-text-primary shadow-sm dark:border-white/15 dark:bg-[#25252e]",
         className,
       )}
       {...props}
     >
-      <ChevronLeft className="size-4 shrink-0" aria-hidden />
-      <span className="hidden sm:inline">Previous</span>
+      <ChevronLeft className="size-3.5 shrink-0" aria-hidden />
     </button>
   );
 }
 
 function PaginationNext({
   className,
+  "aria-label": ariaLabel = "Next page",
   ...props
 }: React.ComponentProps<"button">) {
   return (
     <button
       type="button"
+      aria-label={ariaLabel}
       className={cn(
-        buttonVariants({ variant: "outline", size: "sm" }),
-        "gap-1 pr-2 border-border bg-background text-text-primary shadow-sm dark:border-white/15 dark:bg-[#25252e]",
+        buttonVariants({ variant: "outline", size: "icon-xs" }),
+        "border-border bg-background text-text-primary shadow-sm dark:border-white/15 dark:bg-[#25252e]",
         className,
       )}
       {...props}
     >
-      <span className="hidden sm:inline">Next</span>
-      <ChevronRight className="size-4 shrink-0" aria-hidden />
+      <ChevronRight className="size-3.5 shrink-0" aria-hidden />
     </button>
   );
 }
@@ -115,13 +118,10 @@ function PaginationEllipsis({
   return (
     <span
       aria-hidden
-      className={cn(
-        "flex size-8 items-center justify-center sm:size-9",
-        className,
-      )}
+      className={cn("flex size-6 items-center justify-center", className)}
       {...props}
     >
-      <MoreHorizontal className="size-4 text-text-tertiary" />
+      <MoreHorizontal className="size-3.5 text-text-tertiary" />
       <span className="sr-only">More pages</span>
     </span>
   );

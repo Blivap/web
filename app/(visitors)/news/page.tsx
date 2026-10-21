@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatNewsPublishedDate } from "@/lib/news-date";
 import { HomeLayout } from "@/layout/home.layout.component";
 import { NewsFallbackImage } from "@/components/image/news-fallback-image.component";
@@ -17,6 +17,7 @@ import {
   RefreshCw,
   Search,
 } from "lucide-react";
+import { useDebouncedValue } from "@/hooks/navigation/useDebouncedSearch.hook";
 import { useNews } from "@/hooks/news/useNews.hooks";
 import type {
   NewsCategory,
@@ -122,7 +123,7 @@ const DEFAULT_NEWS_QUERY = "blood donation";
 
 export default function News() {
   const [query, setQuery] = useState(DEFAULT_NEWS_QUERY);
-  const [debouncedQuery, setDebouncedQuery] = useState(DEFAULT_NEWS_QUERY);
+  const debouncedQuery = useDebouncedValue(query.trim(), 450);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<NewsCategory | "">(
     "",
@@ -148,21 +149,12 @@ export default function News() {
 
   const resetFilters = () => {
     setQuery(DEFAULT_NEWS_QUERY);
-    setDebouncedQuery(DEFAULT_NEWS_QUERY);
     setCurrentPage(1);
     setSelectedCategory("");
     setSelectedLanguage("");
     setSelectedCountry("");
     setSelectedTimeframe("");
   };
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setDebouncedQuery(query.trim());
-    }, 450);
-
-    return () => window.clearTimeout(timeout);
-  }, [query]);
 
   const newsParams = useMemo(
     () => ({

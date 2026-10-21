@@ -247,8 +247,13 @@ export function useMeetupSession(sessionId: string | undefined) {
         }
         await refreshSession();
         await $api.meetups.complete(sessionId).catch(() => undefined);
+        const after = await refreshSession();
+        const completed =
+          after?.status?.toLowerCase() === "completed" ||
+          (after?.requesterDonationConfirmed === true &&
+            after?.donorDonationConfirmed === true);
         trackSuccess("donation_confirmed", { role });
-        return { ok: true as const };
+        return { ok: true as const, completed };
       } catch (e) {
         trackFailure("donation_confirmed", classifyAnalyticsError(e), {
           role,

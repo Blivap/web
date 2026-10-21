@@ -29,6 +29,9 @@ import {
 import { NIGERIA_STATES } from "@/lib/donors/location-options";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useMemo, useState } from "react";
+import {
+  useQueryParamNumber,
+} from "@/hooks/navigation/useQueryParamState.hook";
 
 function countryLabel(code: string): string {
   const row = DONOR_COUNTRIES.find((c) => c.value === code);
@@ -291,7 +294,15 @@ export function ReproductiveDonorFlow({
 }) {
   const router = useRouter();
   const config = FLOW_CONFIG[donorType];
-  const [step, setStep] = useState(1);
+  const [stepParam, setStepParam] = useQueryParamNumber("step", 1, {
+    min: 1,
+    omitWhen: 1,
+  });
+  const step = Math.min(3, Math.max(1, stepParam));
+  const setStep = (next: number | ((current: number) => number)) => {
+    const resolved = typeof next === "function" ? next(step) : next;
+    setStepParam(Math.min(3, Math.max(1, resolved)));
+  };
   const [values, setValues] = useState<ReproductiveFormValues>(DEFAULT_VALUES);
   const [error, setError] = useState<string | null>(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);

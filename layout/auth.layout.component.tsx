@@ -5,6 +5,10 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { useAppSelector } from "@/store/hooks";
+import {
+  consumePostLoginNavigation,
+  getPostAuthRedirect,
+} from "@/lib/navigation/authRedirect";
 
 const AUTH_ONLY_PAGES = [
   "/login",
@@ -21,7 +25,10 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (isAuthenticated && pathname && AUTH_ONLY_PAGES.includes(pathname)) {
-      router.replace("/overview");
+      // Fresh login/register: applyAuthSession owns navigation (incl. `dn`).
+      if (consumePostLoginNavigation()) return;
+      // Already signed-in visit to an auth page — honor `dn` when present.
+      router.replace(getPostAuthRedirect(null));
     }
   }, [isAuthenticated, pathname, router]);
 

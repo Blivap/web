@@ -8,6 +8,8 @@ export type MeetupSessionStatus =
 
 export type MeetupParticipant = {
   userId?: string;
+  /** Anonymous 8-character handle when returned on `me` / `peer`. */
+  publicId?: string;
   /** Present when API labels the current user’s role in the meetup. */
   role?: string;
   /** This participant’s six-digit meetup code (when returned on `me` / `peer`). */

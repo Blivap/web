@@ -1,6 +1,6 @@
 import { Award, ShieldCheck } from "lucide-react";
 
-/** Body copy for the wallet page InfoHint dialog. */
+/** Body copy for the wallet page InfoHint popover. */
 export function WalletInfoContent() {
   return (
     <>

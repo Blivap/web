@@ -197,9 +197,6 @@ export default function OverviewPage() {
                       <h2 className="text-lg font-semibold text-text-primary">
                         Start a donation
                       </h2>
-                      <p className="mt-1 text-sm text-text-secondary">
-                        Open registration for blood, sperm, or egg donation.
-                      </p>
                     </div>
                     <ul className="grid grid-cols-1 gap-2 p-4 sm:p-5 md:grid-cols-3">
                       {DONATION_TYPE_ENTRIES.map((entry) => (

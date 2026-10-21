@@ -9,6 +9,7 @@ import { Check, CheckCheck } from "lucide-react";
 import { useNotifications } from "@/hooks/notifications/useNotifications.hook";
 import { formatNotificationTime } from "@/lib/notifications/formatNotificationTime";
 import { useAppSelector } from "@/store/hooks";
+import { NotificationBody } from "./notification-body.component";
 
 export type { NotificationItem } from "@/hooks/notifications/useNotifications.hook";
 
@@ -160,9 +161,11 @@ export const NotificationBell = () => {
                       >
                         {n.title}
                       </p>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-[#6B7280] dark:text-white/55">
-                        {n.message}
-                      </p>
+                      <NotificationBody
+                        message={n.message}
+                        preview
+                        className="mt-0.5"
+                      />
                       <p className="mt-1 text-[11px] text-[#9CA3AF] dark:text-white/40">
                         {formatNotificationTime(n.createdAt)}
                       </p>

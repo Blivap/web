@@ -21,6 +21,8 @@ function parseParticipant(raw: unknown): MeetupParticipant {
   if (!raw || typeof raw !== "object") return {};
   const o = unwrapApiRecord(raw) ?? (raw as Record<string, unknown>);
   const userId = pickString(o.userId ?? o.id ?? o._id);
+  const publicIdRaw = pickString(o.publicId ?? o.public_id);
+  const publicId = publicIdRaw ? publicIdRaw.toUpperCase() : undefined;
   const roleRaw = pickString(o.role ?? o.participantRole);
   const roleLower = roleRaw?.toLowerCase();
   const role =
@@ -36,6 +38,7 @@ function parseParticipant(raw: unknown): MeetupParticipant {
 
   return {
     ...(userId ? { userId } : {}),
+    ...(publicId ? { publicId } : {}),
     ...(role ? { role } : {}),
     ...(meetingCode ? { meetingCode } : {}),
     ...(() => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo } from "react";
 import {
   CalendarClock,
   ChevronLeft,
@@ -10,10 +10,14 @@ import {
   Search,
 } from "lucide-react";
 import { Layout } from "@/layout/layout.component";
-import { BookingRequestSentModal } from "@/components/ui/modal/booking-request-sent-modal.component";
 import { Button } from "@/components/button/button.component";
 import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
 import { Input } from "@/components/forms/inputs/input.component";
+import { useDebouncedSearch } from "@/hooks/navigation/useDebouncedSearch.hook";
+import {
+  useQueryParam,
+  useSetQueryParams,
+} from "@/hooks/navigation/useQueryParamState.hook";
 import { SCHEDULE_APPOINTMENT_TIME_SLOTS } from "@/lib/schedule-appointment/scheduleAppointment.constants";
 import {
   formatDateIso,
@@ -41,12 +45,16 @@ function ScheduleAppointmentPageContent() {
     canConfirmAppointment,
     isSendingBooking,
     handleSubmit,
-    bookingRequestSentOpen,
-    closeBookingRequestSentModal,
-    bookingSuccessSummary,
   } = useScheduleAppointment();
 
-  const [hospitalQuery, setHospitalQuery] = useState("");
+  const setParams = useSetQueryParams();
+  const [urlHospitalQuery] = useQueryParam("hq", "", { omitWhen: "" });
+  const [hospitalQuery, setHospitalQuery] = useDebouncedSearch(
+    urlHospitalQuery,
+    (trimmed) => {
+      setParams({ hq: trimmed || null });
+    },
+  );
 
   const timeSlotRows = getScheduleAppointmentDiamondRows<string>([
     ...SCHEDULE_APPOINTMENT_TIME_SLOTS,
@@ -375,13 +383,6 @@ function ScheduleAppointmentPageContent() {
           Confirm
         </Button>
       </form>
-
-      <BookingRequestSentModal
-        open={bookingRequestSentOpen}
-        onClose={closeBookingRequestSentModal}
-        scheduledLabel={bookingSuccessSummary?.scheduledLabel}
-        hospitalName={bookingSuccessSummary?.hospitalName}
-      />
     </Layout>
   );
 }
