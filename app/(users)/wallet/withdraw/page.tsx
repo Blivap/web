@@ -177,7 +177,10 @@ function WalletWithdrawPageContent() {
           ? (res.data as { message: string }).message
           : null;
       if (next.status === "paid") {
-        await goToWalletAfterMessage(apiMessage || "Withdrawal sent", "success");
+        await goToWalletAfterMessage(
+          apiMessage || "Withdrawal sent",
+          "success",
+        );
         return;
       }
       if (next.status === "failed") {
