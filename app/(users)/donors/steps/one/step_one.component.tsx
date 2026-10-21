@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Info } from "lucide-react";
 import { Radio } from "@/components/forms/Radio";
 import { Button } from "@/components/button/button.component";
+import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
 import type { DonorMedicalFormAnswers } from "@/types/donors";
 
 export type MedicalAnswers = DonorMedicalFormAnswers;
@@ -140,40 +140,23 @@ function FirstStepQuestionRow({
   tooltip?: string;
   disabled?: boolean;
 }) {
-  const [showTooltip, setShowTooltip] = useState(false);
   const idBase = `medical-${name}`;
   const tooltipText = tooltip ?? `More information about: ${label}`;
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-1.5">
         <label htmlFor={`${idBase}-0`} className="text-sm text-balck ">
           {label}
         </label>
-        <div
-          className="relative shrink-0"
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
+        <InfoHint
+          title={label}
+          label={`More info about ${label}`}
+          className="size-5"
+          iconClassName="size-3.5 text-primary"
         >
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="size-4 rounded-full p-0 text-primary hover:text-primary/70"
-            aria-label={`More info about ${label}`}
-          >
-            <Info size={16} />
-          </Button>
-          {showTooltip && tooltipText && (
-            <div
-              className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-1 sm:px-3 py-2 text-[10px] sm:text-xs text-white bg-foundation-dark rounded-lg shadow-lg w-35 max-w-60 whitespace-normal z-50"
-              role="tooltip"
-            >
-              {tooltipText}
-              <span className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-foundation-dark" />
-            </div>
-          )}
-        </div>
+          <p>{tooltipText}</p>
+        </InfoHint>
       </div>
       <div className="flex flex-col gap-2.5">
         {options.map((opt, i) => (

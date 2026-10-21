@@ -6,19 +6,19 @@ import { Skeleton } from "@/components/ui/skeleton.component";
 export function WalletPageSkeleton() {
   return (
     <div
-      className="mx-auto flex w-full flex-col sm:p-12"
+      className="mx-auto flex w-full min-w-0 flex-col sm:p-8 lg:p-12"
       aria-busy="true"
       aria-label="Loading wallet"
     >
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-8 w-28" />
-          <Skeleton className="mt-1 h-4 w-72 max-w-full" />
+      <header className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+        <div className="flex min-w-0 flex-col gap-1.5 sm:gap-2">
+          <Skeleton className="h-7 w-24 sm:h-8 sm:w-28" />
+          <Skeleton className="h-3.5 w-64 max-w-full sm:mt-1 sm:h-4 sm:w-72" />
         </div>
-        <Skeleton className="mt-1 h-4 w-36" />
+        <Skeleton className="mt-0.5 h-3.5 w-32 sm:mt-1 sm:h-4 sm:w-36" />
       </header>
 
-      <div className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-[1.55fr_1fr]">
+      <div className="mt-5 grid min-w-0 grid-cols-1 gap-4 sm:mt-7 sm:gap-6 lg:grid-cols-[1.55fr_1fr]">
         <WalletBalanceHeroSkeleton />
         <WalletPaymentMethodSkeleton />
       </div>
@@ -30,19 +30,19 @@ export function WalletPageSkeleton() {
 
 export function WalletBalanceHeroSkeleton() {
   return (
-    <div className="relative h-full min-h-[188px] overflow-hidden rounded-[16px] bg-[#960018] px-8.5 py-6 sm:px-7 sm:py-7">
-      <div className="relative flex h-full min-h-[140px] flex-col">
-        <Skeleton className="h-5 w-36 bg-white/20 sm:h-6 sm:w-44" />
-        <div className="mt-3 flex items-center gap-3">
-          <Skeleton className="h-10 w-48 bg-white/25 sm:h-12 sm:w-56" />
-          <Skeleton className="size-8 shrink-0 rounded-full bg-white/20" />
+    <div className="relative h-full min-h-[160px] overflow-hidden rounded-[14px] bg-[#960018] px-4 py-5 sm:min-h-[188px] sm:rounded-[16px] sm:px-7 sm:py-7">
+      <div className="relative flex h-full min-h-[120px] flex-col sm:min-h-[140px]">
+        <Skeleton className="h-4 w-32 bg-white/20 sm:h-6 sm:w-44" />
+        <div className="mt-2.5 flex items-center gap-2 sm:mt-3 sm:gap-3">
+          <Skeleton className="h-8 w-36 bg-white/25 sm:h-12 sm:w-56" />
+          <Skeleton className="size-7 shrink-0 rounded-full bg-white/20 sm:size-8" />
         </div>
-        <div className="mt-auto flex flex-wrap items-end justify-between gap-4 pt-8">
-          <div className="flex flex-wrap gap-2.5">
-            <Skeleton className="h-9 w-[6.5rem] rounded-full bg-white/20" />
-            <Skeleton className="h-9 w-[7.25rem] rounded-full bg-white/20" />
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-5 sm:gap-4 sm:pt-8">
+          <div className="flex flex-wrap gap-2 sm:gap-2.5">
+            <Skeleton className="h-8 w-[5.75rem] rounded-full bg-white/20 sm:h-9 sm:w-[6.5rem]" />
+            <Skeleton className="h-8 w-[6.5rem] rounded-full bg-white/20 sm:h-9 sm:w-[7.25rem]" />
           </div>
-          <Skeleton className="h-4 w-28 bg-white/20" />
+          <Skeleton className="h-3.5 w-24 bg-white/20 sm:h-4 sm:w-28" />
         </div>
       </div>
     </div>
@@ -51,19 +51,19 @@ export function WalletBalanceHeroSkeleton() {
 
 export function WalletPaymentMethodSkeleton() {
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div className="flex h-full flex-col gap-2.5 sm:gap-3">
       <div className="flex flex-1 flex-col overflow-hidden rounded-[14px] border border-[#E5E5E5] bg-white dark:border-white/10 dark:bg-[#1a1a22]">
-        <div className="border-b border-[#EBEBEB] px-5 py-3.5 dark:border-white/10">
-          <Skeleton className="h-4 w-40" />
+        <div className="border-b border-[#EBEBEB] px-4 py-3 dark:border-white/10 sm:px-5 sm:py-3.5">
+          <Skeleton className="h-3.5 w-36 sm:h-4 sm:w-40" />
         </div>
-        <div className="flex flex-1 flex-col justify-center gap-2.5 px-5 py-5">
-          <Skeleton className="h-7 w-48" />
-          <Skeleton className="h-4 w-56 max-w-full" />
+        <div className="flex flex-1 flex-col justify-center gap-2.5 px-4 py-4 sm:px-5 sm:py-5">
+          <Skeleton className="h-6 w-40 sm:h-7 sm:w-48" />
+          <Skeleton className="h-3.5 w-48 max-w-full sm:h-4 sm:w-56" />
         </div>
       </div>
       <div className="flex items-center justify-between gap-3">
-        <Skeleton className="h-9 w-[7.5rem] rounded-[8px]" />
-        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-8 w-[6.75rem] rounded-[8px] sm:h-9 sm:w-[7.5rem]" />
+        <Skeleton className="h-3.5 w-20 sm:h-4 sm:w-24" />
       </div>
     </div>
   );

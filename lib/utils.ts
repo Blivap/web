@@ -52,6 +52,9 @@ export function normalizeUser(input: unknown): IUser | null {
     return null;
   }
 
+  const publicIdRaw = asString(obj.publicId, obj.public_id);
+  const publicId = publicIdRaw ? publicIdRaw.toUpperCase() : undefined;
+
   const firstname = asString(obj.firstname, obj.firstName, obj.first_name);
   const lastname = asString(obj.lastname, obj.lastName, obj.last_name);
 
@@ -126,6 +129,7 @@ export function normalizeUser(input: unknown): IUser | null {
 
   return {
     id,
+    ...(publicId ? { publicId } : {}),
     firstname: firstname || email.split("@")[0] || "User",
     lastname: lastname || "",
     email,

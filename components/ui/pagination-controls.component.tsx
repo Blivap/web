@@ -71,7 +71,7 @@ export function PaginationControls({
         className,
       )}
     >
-      <PaginationContent className="flex-wrap justify-center gap-1.5 sm:justify-end">
+      <PaginationContent className="flex-wrap justify-center gap-1 sm:justify-end">
         <PaginationItem>
           <PaginationPrevious
             aria-label="Previous page"

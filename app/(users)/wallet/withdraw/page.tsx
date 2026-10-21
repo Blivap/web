@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Info, Lock, Plus } from "lucide-react";
@@ -9,6 +9,7 @@ import { Button } from "@/components/button/button.component";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useWallet } from "@/hooks/wallet/useWallet.hook";
 import { useWalletBankAccounts } from "@/hooks/wallet/useWalletBankAccounts.hook";
+import { useQueryParam } from "@/hooks/navigation/useQueryParamState.hook";
 import { $api } from "@/app/api";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import { formatWalletAmount } from "@/lib/wallet/formatWalletDisplay";
@@ -30,13 +31,23 @@ import { WalletWithdrawOtpView } from "./components/wallet-withdraw-otp.view";
 
 type Step = "form" | "review" | "otp";
 
-export default function WalletWithdrawPage() {
+const WITHDRAW_STEPS = ["form", "review", "otp"] as const;
+
+function WalletWithdrawPageContent() {
   const router = useRouter();
   const { showSnackbar } = useSnackbar();
   const { wallet, loading, reload } = useWallet();
   const { accounts, loading: banksLoading } = useWalletBankAccounts();
 
-  const [step, setStep] = useState<Step>("form");
+  const [stepParam, setStepParam] = useQueryParam("step", "form", {
+    omitWhen: "form",
+    allowed: WITHDRAW_STEPS,
+  });
+  const step = (
+    WITHDRAW_STEPS.includes(stepParam as Step) ? stepParam : "form"
+  ) as Step;
+  const setStep = (next: Step) => setStepParam(next);
+
   const [bankAccountId, setBankAccountId] = useState("");
   const [amountNaira, setAmountNaira] = useState("");
   const [amountFocused, setAmountFocused] = useState(false);
@@ -45,6 +56,12 @@ export default function WalletWithdrawPage() {
   const [resending, setResending] = useState(false);
   const [payout, setPayout] = useState<WalletPayout | null>(null);
   const [otp, setOtp] = useState("");
+
+  useEffect(() => {
+    if (step === "otp" && !payout) {
+      setStepParam("form");
+    }
+  }, [step, payout, setStepParam]);
 
   useEffect(() => {
     if (!bankAccountId && accounts.length) {
@@ -126,31 +143,57 @@ export default function WalletWithdrawPage() {
     }
   };
 
+  const goToWalletAfterMessage = async (
+    message: string,
+    tone: "success" | "error" | "info" = "success",
+  ) => {
+    showSnackbar(message, tone);
+    // Let the snackbar paint before leaving the page.
+    await new Promise((resolve) => window.setTimeout(resolve, 700));
+    await reload();
+    router.push(routes.wallet);
+  };
+
   const confirmPayout = async () => {
     if (!payout) return;
     setConfirming(true);
     try {
       const res = await $api.wallet.confirmPayout(payout.id, otp);
       if (res.status < 200 || res.status >= 300) {
-        showSnackbar(
+        await goToWalletAfterMessage(
           res.error ?? res.message ?? "Could not confirm withdrawal",
           "error",
         );
         return;
       }
       const next = parseWalletPayoutResponse(res.data ?? res);
-      const message =
-        (typeof (res.data as { message?: string } | undefined)?.message ===
-          "string" &&
-          (res.data as { message: string }).message) ||
-        (next?.status === "paid"
-          ? "Withdrawal sent"
-          : "Withdrawal is on the way");
-      showSnackbar(message, "success");
-      await reload();
-      router.push(routes.wallet);
+      if (!next) {
+        await goToWalletAfterMessage("Could not confirm withdrawal", "error");
+        return;
+      }
+      const apiMessage =
+        typeof (res.data as { message?: string } | undefined)?.message ===
+        "string"
+          ? (res.data as { message: string }).message
+          : null;
+      if (next.status === "paid") {
+        await goToWalletAfterMessage(apiMessage || "Withdrawal sent", "success");
+        return;
+      }
+      if (next.status === "failed") {
+        await goToWalletAfterMessage(
+          apiMessage || "Withdrawal failed",
+          "error",
+        );
+        return;
+      }
+      // processing / awaiting_otp / expired — still leave OTP and return home
+      await goToWalletAfterMessage(
+        apiMessage || "Withdrawal is on the way",
+        next.status === "expired" ? "error" : "success",
+      );
     } catch (err) {
-      showSnackbar(
+      await goToWalletAfterMessage(
         getAxiosErrorMessage(err, "Could not confirm withdrawal"),
         "error",
       );
@@ -451,5 +494,21 @@ export default function WalletWithdrawPage() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+export default function WalletWithdrawPage() {
+  return (
+    <Suspense
+      fallback={
+        <Layout>
+          <div className="mx-auto flex w-full flex-col pb-10 sm:p-12">
+            <p className="text-sm text-text-secondary">Loading…</p>
+          </div>
+        </Layout>
+      }
+    >
+      <WalletWithdrawPageContent />
+    </Suspense>
   );
 }

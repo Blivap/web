@@ -3,20 +3,17 @@
 import type { ReactNode } from "react";
 import { Info } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 type InfoHintProps = {
   title: string;
-  /** Short dialog subtitle under the title. */
+  /** Short subtitle under the title. */
   description?: string;
-  /** Extra detail shown inside the dialog body. */
+  /** Extra detail shown inside the popover body. */
   children: ReactNode;
   /** Accessible label for the icon button. */
   label?: string;
@@ -37,8 +34,8 @@ export function InfoHint({
   iconClassName,
 }: InfoHintProps) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Popover>
+      <PopoverTrigger asChild>
         <button
           type="button"
           aria-label={label}
@@ -49,18 +46,22 @@ export function InfoHint({
         >
           <Info className={cn("size-4", iconClassName)} aria-hidden />
         </button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md gap-0 p-0 sm:max-w-md">
-        <DialogHeader className="border-b border-[#F0EEEB] px-5 py-4 pr-12 dark:border-white/10">
-          <DialogTitle>{title}</DialogTitle>
+      </PopoverTrigger>
+      <PopoverContent
+        align="center"
+        collisionPadding={16}
+        className="w-80 gap-0 p-0"
+      >
+        <div className="border-b border-[#F0EEEB] px-4 py-3 dark:border-white/10">
+          <p className="text-sm font-semibold text-text-primary">{title}</p>
           {description ? (
-            <DialogDescription>{description}</DialogDescription>
+            <p className="mt-0.5 text-xs text-text-secondary">{description}</p>
           ) : null}
-        </DialogHeader>
-        <div className="flex flex-col gap-4 px-5 py-5 text-sm leading-relaxed text-text-secondary">
+        </div>
+        <div className="flex flex-col gap-3 px-4 py-3 text-sm leading-relaxed text-text-secondary">
           {children}
         </div>
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   );
 }

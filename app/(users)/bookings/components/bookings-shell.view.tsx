@@ -1,7 +1,7 @@
 "use client";
 
 import classNames from "classnames";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +14,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { PageSizeSelect } from "@/components/ui/page-size-select.component";
+import { usePageSize } from "@/hooks/navigation/usePageSize.hook";
+import {
+  useQueryParamNumber,
+  useSetQueryParams,
+} from "@/hooks/navigation/useQueryParamState.hook";
 import { BookingSectionCard } from "./booking-section-card";
 import {
   BookingStatusPill,
@@ -72,9 +78,6 @@ const LEGACY_TAB_QUERY: Record<string, string> = {
   referrals: "confirmed",
   archived: "past",
 };
-
-/** Rows per page; pagination footer still shows for shorter lists (single page). */
-const BOOKINGS_TABLE_PAGE_SIZE = 8;
 
 /** Page numbers + ellipsis for shadcn-style pagination controls. */
 function bookingPaginationPages(
@@ -199,20 +202,22 @@ function BookingsRowsTable({
   actionsColumnLabel,
   tableEmptyMessage,
 }: BookingsRowsTableProps) {
-  const [page, setPage] = useState(1);
-  const totalPages = Math.max(
-    1,
-    Math.ceil(rows.length / BOOKINGS_TABLE_PAGE_SIZE),
-  );
+  const [page, setPage] = useQueryParamNumber("page", 1, { omitWhen: 1 });
+  const [pageSize, setPageSize] = usePageSize();
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const safePage = Math.min(Math.max(1, page), totalPages);
 
+  useEffect(() => {
+    if (page > totalPages) setPage(1);
+  }, [page, totalPages, setPage]);
+
   const paginatedRows = useMemo(() => {
-    if (rows.length <= BOOKINGS_TABLE_PAGE_SIZE) {
+    if (rows.length <= pageSize) {
       return rows;
     }
-    const start = (safePage - 1) * BOOKINGS_TABLE_PAGE_SIZE;
-    return rows.slice(start, start + BOOKINGS_TABLE_PAGE_SIZE);
-  }, [rows, safePage]);
+    const start = (safePage - 1) * pageSize;
+    return rows.slice(start, start + pageSize);
+  }, [rows, safePage, pageSize]);
 
   const pageItems = useMemo(
     () => bookingPaginationPages(safePage, totalPages),
@@ -220,9 +225,6 @@ function BookingsRowsTable({
   );
 
   const hasRows = rows.length > 0;
-  const rangeFrom =
-    rows.length === 0 ? 0 : (safePage - 1) * BOOKINGS_TABLE_PAGE_SIZE + 1;
-  const rangeTo = Math.min(safePage * BOOKINGS_TABLE_PAGE_SIZE, rows.length);
 
   return (
     <>
@@ -356,29 +358,24 @@ function BookingsRowsTable({
       </div>
       {hasRows ? (
         <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-[#F9FAFB] px-3 py-3 dark:border-white/10 dark:bg-white/6 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-          <p className="text-center text-xs text-text-secondary sm:text-left">
-            Showing{" "}
-            <span className="font-semibold text-text-primary">
-              {rangeFrom}–{rangeTo}
-            </span>{" "}
-            of{" "}
-            <span className="font-semibold text-text-primary">
-              {rows.length}
-            </span>
-            {totalPages > 1 ? (
-              <span className="text-text-tertiary">
-                {" "}
-                · Page {safePage} of {totalPages}
+          <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
+            <p className="text-center text-xs text-text-secondary sm:text-left">
+              Page{" "}
+              <span className="font-semibold text-text-primary">{safePage}</span>{" "}
+              of{" "}
+              <span className="font-semibold text-text-primary">
+                {totalPages}
               </span>
-            ) : null}
-          </p>
+            </p>
+            <PageSizeSelect value={pageSize} onChange={setPageSize} />
+          </div>
           <Pagination className="mx-0 w-full min-w-0 shrink-0 sm:ms-auto sm:w-auto sm:justify-end">
-            <PaginationContent className="flex-wrap justify-center gap-1.5 sm:justify-end">
+            <PaginationContent className="flex-wrap justify-center gap-1 sm:justify-end">
               <PaginationItem>
                 <PaginationPrevious
                   aria-label="Previous page"
                   disabled={safePage <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => setPage(Math.max(1, safePage - 1))}
                 />
               </PaginationItem>
               {totalPages > 1
@@ -404,7 +401,7 @@ function BookingsRowsTable({
                 <PaginationNext
                   aria-label="Next page"
                   disabled={safePage >= totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() => setPage(Math.min(totalPages, safePage + 1))}
                 />
               </PaginationItem>
             </PaginationContent>
@@ -632,8 +629,11 @@ export function BookingsShell({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const setParams = useSetQueryParams();
 
   const tabValues = useMemo(() => tabs.map((t) => t.value), [tabs]);
+  const activeTab = searchParams.get("tab") ?? defaultTab;
+  const previousTabRef = useRef(activeTab);
 
   useEffect(() => {
     const raw = searchParams.get("tab");
@@ -650,6 +650,14 @@ export function BookingsShell({
     params.set("tab", next);
     void router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [pathname, router, searchParams, tabValues]);
+
+  useEffect(() => {
+    if (previousTabRef.current === activeTab) return;
+    previousTabRef.current = activeTab;
+    if (searchParams.get("page")) {
+      setParams({ page: null });
+    }
+  }, [activeTab, searchParams, setParams]);
 
   return (
     <div className="flex flex-col gap-4 sm:gap-5">

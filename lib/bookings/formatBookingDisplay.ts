@@ -1,27 +1,16 @@
 import type { Booking, BookingStatus } from "@/types/bookings";
 import type { BookingPillVariant } from "@/app/(users)/bookings/components/booking-status-pill";
+import { formatPublicId } from "@/lib/users/formatPublicId";
 
 const SHORT_ID_LEN = 6;
 
-function shortIdLabel(prefix: string, id: string | undefined | null): string {
-  const t = id?.trim() ?? "";
-  if (!t) return `${prefix} —`;
-  const frag = t.length > SHORT_ID_LEN ? `${t.slice(0, SHORT_ID_LEN)}…` : t;
-  return `${prefix} ${frag}`;
+/** Prefer anonymous publicId (ALL CAPS); never fall back to truncated Mongo user ids. */
+function partyPublicLabel(
+  publicId: string | null | undefined,
+  fallback: string,
+): string {
+  return formatPublicId(publicId) ?? fallback;
 }
-
-/** Anonymous donor row: show only the first 6 characters of `donorUserId` (no prefix). */
-function donorIdSnippet(donorUserId: string | undefined | null): string {
-  const t = donorUserId?.trim() ?? "";
-  if (!t) return "—";
-  return t.slice(0, SHORT_ID_LEN);
-}
-
-export type BookingRowDetailParts = {
-  who: string;
-  hospital: string;
-  when: string;
-};
 
 function hospitalFallbackFromId(hospitalId: string): string {
   const t = hospitalId.trim();
@@ -31,6 +20,12 @@ function hospitalFallbackFromId(hospitalId: string): string {
     : `Hospital ${t}`;
 }
 
+export type BookingRowDetailParts = {
+  who: string;
+  hospital: string;
+  when: string;
+};
+
 export function bookingRowDetailPartsForViewer(
   b: Booking,
   viewer: "donor" | "requester",
@@ -39,12 +34,10 @@ export function bookingRowDetailPartsForViewer(
   const hospital =
     b.hospitalName?.trim() || hospitalFallbackFromId(b.hospitalId);
   if (viewer === "donor") {
-    const who =
-      b.requesterDisplayName?.trim() ||
-      shortIdLabel("Requester", b.requesterId);
+    const who = partyPublicLabel(b.requesterPublicId, "Requester");
     return { who, hospital, when };
   }
-  const who = b.donorDisplayName?.trim() || donorIdSnippet(b.donorUserId);
+  const who = partyPublicLabel(b.donorPublicId, "Donor");
   return { who, hospital, when };
 }
 
@@ -110,12 +103,12 @@ export function bookingTitleForViewer(
   role: "donor" | "requester",
 ): string {
   if (role === "donor") {
-    const name = b.requesterDisplayName?.trim();
-    if (name) return `Request · ${name}`;
+    const handle = formatPublicId(b.requesterPublicId);
+    if (handle) return `Request · ${handle}`;
     return "Donation booking";
   }
-  const donor = b.donorDisplayName?.trim();
-  if (donor) return `Booking · ${donor}`;
+  const handle = formatPublicId(b.donorPublicId);
+  if (handle) return `Booking · ${handle}`;
   return "Booking request";
 }
 

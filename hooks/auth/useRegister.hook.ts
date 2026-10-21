@@ -9,7 +9,11 @@ import { useAppDispatch } from "@/store/hooks";
 import { setCredentials, setUser } from "@/store/slices/authSlice";
 import { useRouter, useSearchParams } from "next/navigation";
 import { routes } from "@/config/routes";
-import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
+import {
+  getDnRedirect,
+  markPostLoginNavigation,
+  withDn,
+} from "@/lib/navigation/authRedirect";
 import { extractAccessTokenExpires } from "@/lib/auth/sessionExpiry";
 import {
   classifyAnalyticsError,
@@ -67,6 +71,7 @@ export const useRegister = () => {
         );
 
         if (token) {
+          markPostLoginNavigation();
           dispatch(
             setCredentials({
               token,

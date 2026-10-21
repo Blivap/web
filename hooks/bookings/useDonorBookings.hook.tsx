@@ -6,6 +6,7 @@ import { useStore } from "react-redux";
 import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import type { BookingsShellTabItem } from "@/app/(users)/bookings/components/bookings-shell.view";
+import { useSetQueryParams } from "@/hooks/navigation/useQueryParamState.hook";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { RootState, AppDispatch } from "@/store/store";
 import {
@@ -52,7 +53,22 @@ export function useDonorBookings() {
   const loadState = useAppSelector((s) => s.bookings.received.status);
   const loadError = useAppSelector((s) => s.bookings.received.error);
 
+  const setParams = useSetQueryParams();
   const highlightBookingId = searchParams.get("bookingId")?.trim() ?? "";
+  const reportOpen = searchParams.get("modal") === "report";
+  const reportBookingId =
+    reportOpen && highlightBookingId ? highlightBookingId : null;
+
+  const setReportBookingId = useCallback(
+    (id: string | null) => {
+      if (id) {
+        setParams({ modal: "report", bookingId: id });
+        return;
+      }
+      setParams({ modal: null });
+    },
+    [setParams],
+  );
 
   useEffect(() => {
     if (!user?.id) return;
@@ -63,7 +79,6 @@ export function useDonorBookings() {
   }, [dispatch, user?.id]);
 
   const [mutatingId, setMutatingId] = useState<string | null>(null);
-  const [reportBookingId, setReportBookingId] = useState<string | null>(null);
 
   const loadData = useCallback(() => {
     if (!user?.id) return Promise.resolve();

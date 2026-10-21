@@ -114,7 +114,8 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
       !isPublicAppPath(pathname) &&
       !isNotFoundPath(pathname)
     ) {
-      router.replace("/overview");
+      const params = new URLSearchParams(currentSearch());
+      router.replace(getPostAuthRedirect(params));
     }
   }, [user, pathname, router]);
 
@@ -160,7 +161,10 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
     return <AuthLoader />;
   }
 
-  const isProtectedPath = Boolean(pathname) && requiresAuth(pathname);
+  const isProtectedPath =
+    Boolean(pathname) &&
+    requiresAuth(pathname) &&
+    pathname !== VERIFY_EMAIL_PATH;
 
   /*
    * Protected routes: same AuthLoader on server + first client paint (hasMounted=false),

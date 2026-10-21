@@ -70,6 +70,7 @@ import {
   getApiMessageFromData,
   getAxiosErrorMessage,
 } from "@/lib/bookings/axiosErrorMessage";
+import { formatPublicId } from "@/lib/users/formatPublicId";
 
 const cardClass =
   "rounded-xl border border-border bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#1a1a22]";
@@ -122,11 +123,8 @@ function formatSessionChipDate(iso: string | null | undefined): string | null {
   });
 }
 
-function partyHandle(id?: string | null): string {
-  const value = id?.trim();
-  if (!value) return "";
-  if (/^\d+$/.test(value)) return value.length > 8 ? value.slice(-7) : value;
-  return value.slice(0, 6);
+function partyHandle(publicId?: string | null): string {
+  return formatPublicId(publicId) ?? "";
 }
 
 function messageIsMine(
@@ -313,9 +311,6 @@ function MeetupVerificationRow({
           {text}
         </span>
       </div>
-      <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-        {detail}
-      </p>
     </div>
   );
 }
@@ -388,11 +383,17 @@ function MeetupVerificationSummary({
         <h3 className="text-sm font-semibold text-text-primary">
           Who is verified?
         </h3>
+        <InfoHint
+          title="Who is verified?"
+          label="Verification checks information"
+          className="size-7"
+        >
+          <p>
+            Two separate checks: your account ID on the platform, then the in
+            person step for this session only.
+          </p>
+        </InfoHint>
       </div>
-      <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-        Two separate checks: your account ID on the platform, then the in person
-        step for this session only.
-      </p>
       <div className="mt-4 flex flex-col gap-3">
         <MeetupParticipantVerificationCard
           title="You"
@@ -443,7 +444,18 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   /** Booking id the requester dismissed the rating modal for (avoids effect-driven setState). */
   const [ratingDismissedForBookingId, setRatingDismissedForBookingId] =
     useState<string | null>(null);
+  /** True once we start the post-complete snackbar → bookings redirect. */
+  const [completingRedirect, setCompletingRedirect] = useState(false);
   const codeHydrateAttemptRef = useRef<string | null>(null);
+  /** User was in an active meetup this mount — avoids bouncing already-completed deep links. */
+  const sawActiveMeetupRef = useRef(false);
+  const completionNavStartedRef = useRef(false);
+
+  useEffect(() => {
+    sawActiveMeetupRef.current = false;
+    completionNavStartedRef.current = false;
+    setCompletingRedirect(false);
+  }, [sessionId]);
   const sentBookings = useAppSelector((s) => s.bookings.sent.items);
   const receivedBookings = useAppSelector((s) => s.bookings.received.items);
   /** Booking Mongo id stashed in bootstrap when opening from a booking row (fallback if GET session omits `bookingId`). */
@@ -682,10 +694,11 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     const bid = donationChatBookingId;
     if (!bid) return undefined;
     const row = sentBookings.find((b) => b.id === bid);
-    if (row?.donorDisplayName?.trim()) return row.donorDisplayName.trim();
-    if (session?.donorUserId) return `Donor ${session.donorUserId.slice(0, 6)}`;
+    if (row?.donorPublicId) {
+      return formatPublicId(row.donorPublicId) ?? undefined;
+    }
     return undefined;
-  }, [donationChatBookingId, sentBookings, session?.donorUserId]);
+  }, [donationChatBookingId, sentBookings]);
 
   const meetupDonationComplete = useMemo(() => {
     if (!session) return false;
@@ -719,6 +732,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   );
 
   const ratingModalOpen = Boolean(
+    !completingRedirect &&
     donationChatBookingId &&
     canPromptRequesterRating &&
     sessionLoad === "ok" &&
@@ -750,10 +764,66 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       setLocalError(res.message);
       return;
     }
-    showSnackbar("Your donation confirmation was recorded.");
     void dispatch(loadSentBookings({ silent: true }));
     void dispatch(loadReceivedBookings({ silent: true }));
+    // Fully completed → effect shows success and routes to bookings.
+    if (!res.completed) {
+      showSnackbar("Your donation confirmation was recorded.");
+    }
   }, [user, confirmDonation, showSnackbar, dispatch]);
+
+  useEffect(() => {
+    if (sessionLoad !== "ok" || !session) return;
+
+    const isComplete =
+      session.status?.toLowerCase() === "completed" ||
+      (session.requesterDonationConfirmed === true &&
+        session.donorDonationConfirmed === true);
+
+    if (!isComplete) {
+      sawActiveMeetupRef.current = true;
+      return;
+    }
+
+    if (!sawActiveMeetupRef.current || completionNavStartedRef.current) {
+      return;
+    }
+    completionNavStartedRef.current = true;
+    setCompletingRedirect(true);
+
+    const bookingId =
+      session.bookingId?.trim() || stashedChatBookingId?.trim() || "";
+    if (bookingId) {
+      dispatch(
+        patchBookingInLists({
+          id: bookingId,
+          status: "completed",
+        }),
+      );
+    }
+    void dispatch(loadSentBookings({ silent: true }));
+    void dispatch(loadReceivedBookings({ silent: true }));
+
+    showSnackbar("Booking completed. Taking you to your bookings…", "success");
+
+    const params = new URLSearchParams();
+    params.set("tab", "past");
+    if (bookingId) params.set("bookingId", bookingId);
+    const href = `${routes.bookings}?${params.toString()}`;
+
+    const timer = window.setTimeout(() => {
+      router.push(href);
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    session,
+    sessionLoad,
+    stashedChatBookingId,
+    dispatch,
+    showSnackbar,
+    router,
+  ]);
 
   useEffect(() => {
     if (!canPromptRequesterRating) return;
@@ -1030,8 +1100,9 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     );
   }, [donationChatBookingId, sentBookings, receivedBookings]);
 
-  const myHandle = partyHandle(user?.id ?? session?.me.userId) || "You";
-  const peerHandle = partyHandle(session?.peer.userId) || "Other person";
+  const myHandle =
+    partyHandle(user?.publicId) || partyHandle(session?.me.publicId) || "You";
+  const peerHandle = partyHandle(session?.peer.publicId) || "Other person";
   const peerProfileImage =
     isRequester === true
       ? bookingRow?.donorProfileImage
@@ -1420,12 +1491,10 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                 </div>
                 <button
                   type="button"
-                  aria-label="Attach a file"
-                  disabled={
-                    chatComposerDisabled || uploadBusy || !donationChatBookingId
-                  }
-                  className="grid size-8 place-items-center rounded-md text-text-tertiary transition-transform duration-150 hover:scale-105 hover:bg-black/5 hover:text-text-primary active:scale-95 disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none dark:hover:bg-white/8"
-                  onClick={() => fileInputRef.current?.click()}
+                  aria-label="Attach a file (coming soon)"
+                  title="Coming soon"
+                  disabled
+                  className="grid size-8 place-items-center rounded-md text-text-tertiary opacity-40"
                 >
                   {uploadBusy ? (
                     <Loader2 className="size-4 animate-spin" aria-hidden />
@@ -1433,12 +1502,14 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                     <Paperclip className="size-4" aria-hidden />
                   )}
                 </button>
+                {/* File / image upload — re-enable when ready */}
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/webp,application/pdf"
                   className="sr-only"
                   tabIndex={-1}
+                  disabled
                   onChange={(event) => {
                     const file = event.target.files?.[0];
                     void onAttachFile(file);

@@ -1,7 +1,12 @@
 import { $api } from "@/app/api";
 import { routes } from "@/config/routes";
 import { extractAccessTokenExpires } from "@/lib/auth/sessionExpiry";
-import { getDnRedirect, withDn } from "@/lib/navigation/authRedirect";
+import {
+  consumeStoredDn,
+  markPostLoginNavigation,
+  resolveDnRedirect,
+  withDn,
+} from "@/lib/navigation/authRedirect";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { setCredentials, setUser } from "@/store/slices/authSlice";
 import type { AppDispatch } from "@/store/store";
@@ -33,7 +38,10 @@ export async function applyAuthSession(args: {
   const token = accessTokenFrom(args.authData);
   if (!token) return false;
 
-  const dnRedirect = getDnRedirect(args.searchParams);
+  // Resolve before async work so a later navigation cannot drop `dn`.
+  const dnRedirect = resolveDnRedirect(args.searchParams);
+  // Prevent AuthLayout from racing to /overview while we finish me() + replace.
+  markPostLoginNavigation();
   args.dispatch(
     setCredentials({
       token,
@@ -55,10 +63,14 @@ export async function applyAuthSession(args: {
   if (userPayload) {
     args.dispatch(setUser(userPayload));
   }
+  // Prefer live URL / storage in case another effect already mutated the route.
+  const returnTo =
+    resolveDnRedirect(args.searchParams) ?? dnRedirect ?? consumeStoredDn();
   if (isEmailUnverified(userPayload ?? args.authData?.user)) {
-    args.router.replace(withDn(routes.verifyEmail, dnRedirect));
+    args.router.replace(withDn(routes.verifyEmail, returnTo));
   } else {
-    args.router.replace(dnRedirect ?? routes.overview);
+    if (returnTo) consumeStoredDn();
+    args.router.replace(returnTo ?? routes.overview);
   }
   return true;
 }

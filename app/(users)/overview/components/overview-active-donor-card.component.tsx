@@ -6,6 +6,7 @@ import { Avatar } from "@/components/ui/Avatar/avatar.component";
 import { Button } from "@/components/button/button.component";
 import { donorDetailPath, routes } from "@/config/routes";
 import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
+import { displayPublicId } from "@/lib/users/formatPublicId";
 import type { Donor } from "@/app/(users)/donors/donors.data";
 
 type OverviewActiveDonorCardProps = {
@@ -24,7 +25,7 @@ export function OverviewActiveDonorCard({
   const cooldown = resolveDonorCooldown(donor.cooldownEndsAt);
   const bookingBlocked = cooldown.isActive && !isOwner;
   const profileHref = isOwner ? routes.settings : donorDetailPath(donor.id);
-  const displayId = donor.userId?.slice(0, 6) ?? donor.id.slice(0, 8);
+  const displayId = displayPublicId(donor.publicId);
   const primaryType = donor.activeDonationTypes[0];
   const extraTypes = Math.max(0, donor.activeDonationTypes.length - 1);
   const locationLine = [donor.location, donor.country]
@@ -40,7 +41,7 @@ export function OverviewActiveDonorCard({
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="truncate text-sm font-semibold text-text-primary group-hover:text-primary">
+            <p className="truncate text-sm font-semibold uppercase tracking-wide text-text-primary group-hover:text-primary">
               {displayId}
             </p>
             <span className="shrink-0 rounded-full bg-[#FCE7E7] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary dark:bg-primary/25">

@@ -68,20 +68,3 @@ export function formatDateIso(
 ): string {
   return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
-
-export function formatBookingSuccessScheduledLabel(
-  date: string,
-  time: string,
-): string {
-  const scheduledDate = new Date(`${date}T${time}:00`);
-  if (Number.isNaN(scheduledDate.getTime())) {
-    return `${date} · ${time}`;
-  }
-  return scheduledDate.toLocaleString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}

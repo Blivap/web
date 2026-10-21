@@ -64,14 +64,19 @@ export default function BankDetailsPage() {
   const [saving, setSaving] = useState(false);
 
   const banks = useMemo(() => {
-    if (resolveUi.status !== "choose") return catalogBanks;
-    const matchBanks = resolveUi.matches.map((m) => ({
-      bank: m.bankName,
-      code: m.bankCode,
-    }));
-    const names = new Set(matchBanks.map((b) => b.bank.toLowerCase()));
+    const extras: { bank: string; code: string }[] =
+      resolveUi.status === "choose"
+        ? resolveUi.matches.map((m) => ({
+            bank: m.bankName,
+            code: m.bankCode,
+          }))
+        : resolveUi.status === "ready"
+          ? [{ bank: resolveUi.bankName, code: resolveUi.bankCode }]
+          : [];
+    if (!extras.length) return catalogBanks;
+    const names = new Set(extras.map((b) => b.bank.toLowerCase()));
     return [
-      ...matchBanks,
+      ...extras,
       ...catalogBanks.filter((b) => !names.has(b.bank.toLowerCase())),
     ];
   }, [catalogBanks, resolveUi]);
@@ -214,9 +219,11 @@ export default function BankDetailsPage() {
                   {!account.isPrimary ? (
                     <Button
                       type="button"
-                      size="sm"
+                      size="icon-sm"
                       variant="outline"
-                      className="rounded-md px-3 text-xs font-semibold"
+                      className="rounded-md"
+                      aria-label="Make primary"
+                      title="Make primary"
                       disabled={busyId === account.id}
                       loading={busyId === account.id}
                       onClick={() => {
@@ -224,7 +231,6 @@ export default function BankDetailsPage() {
                       }}
                     >
                       <Star className="size-3.5" aria-hidden />
-                      Make primary
                     </Button>
                   ) : (
                     <span className="inline-flex items-center gap-1 rounded-full bg-[#ECFDF3] px-2.5 py-1 text-[11px] font-semibold text-[#1F7A3F] dark:bg-emerald-500/15 dark:text-emerald-300">
@@ -234,16 +240,17 @@ export default function BankDetailsPage() {
                   )}
                   <Button
                     type="button"
-                    size="sm"
+                    size="icon-sm"
                     variant="outline"
-                    className="rounded-md px-3 text-xs font-semibold text-[#960018]"
+                    className="rounded-md text-[#960018]"
+                    aria-label="Remove"
+                    title="Remove"
                     disabled={busyId === account.id}
                     onClick={() => {
                       void removeAccount(account.id);
                     }}
                   >
                     <Trash2 className="size-3.5" aria-hidden />
-                    Remove
                   </Button>
                 </div>
               </li>

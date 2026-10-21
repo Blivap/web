@@ -39,7 +39,13 @@ export function downloadWalletStatementCsv(
         csvCell(entry.direction),
         csvCell(signed),
         csvCell(currency),
-        csvCell("Completed"),
+        csvCell(
+          entry.status === "pending"
+            ? "Pending"
+            : entry.status === "failed"
+              ? "Failed"
+              : "Successful",
+        ),
         csvCell(entry.bookingId ?? ""),
         csvCell(formatWalletEntryWhen(entry.createdAt)),
       ].join(",");

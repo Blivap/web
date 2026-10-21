@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import debounce from "lodash/debounce";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Layout } from "../../../layout/layout.component";
 import Link from "next/link";
 import { $api } from "@/app/api";
@@ -19,13 +18,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PaginationControls } from "@/components/ui/pagination-controls.component";
+import { PageSizeSelect } from "@/components/ui/page-size-select.component";
 import { DonorsPageSkeleton } from "./components/donors-page-skeleton.component";
 import { Input } from "@/components/forms/inputs/input.component";
 import Image from "next/image";
 import { SCREENING_DONATION_TYPE_OPTIONS } from "@/lib/donors/screeningDonationTypes";
 import { DonorCooldownDisplay } from "./components/donor-cooldown-display.component";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
+import { useDebouncedSearch } from "@/hooks/navigation/useDebouncedSearch.hook";
+import {
+  DEFAULT_PAGE_SIZE,
+  usePageSize,
+} from "@/hooks/navigation/usePageSize.hook";
+import {
+  useQueryParam,
+  useQueryParamNumber,
+  useSetQueryParams,
+} from "@/hooks/navigation/useQueryParamState.hook";
 import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
+import { displayPublicId } from "@/lib/users/formatPublicId";
 import { routes } from "@/config/routes";
 import { Button } from "@/components/button/button.component";
 
@@ -41,12 +52,9 @@ function donationTypeLabel(type: string): string {
   );
 }
 
-const PAGE_SIZE = 9;
-const SEARCH_DEBOUNCE_MS = 400;
-
 const DEFAULT_META: DonorsListMeta = {
   page: 1,
-  limit: PAGE_SIZE,
+  limit: DEFAULT_PAGE_SIZE,
   total: 0,
   totalPages: 1,
   hasNextPage: false,
@@ -71,8 +79,8 @@ function DonorCard({
         <div className="flex min-w-0 items-start gap-3">
           <Avatar src={donor.profileImage ?? undefined} />
           <div className="min-w-0 flex flex-col gap-1.5">
-            <p className="text-xs font-semibold text-text-primary">
-              {donor.userId?.slice(0, 6)}
+            <p className="text-xs font-semibold uppercase tracking-wide text-text-primary">
+              {displayPublicId(donor.publicId)}
             </p>
             <div className="mb-3">
               <DonorCooldownDisplay
@@ -134,7 +142,9 @@ type DonorsPaginatedGridProps = {
   emptyMessage: string;
   isRefetching: boolean;
   currentUserId?: string;
+  pageSize: number;
   onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
 };
 
 function DonorsPaginatedGrid({
@@ -143,12 +153,11 @@ function DonorsPaginatedGrid({
   emptyMessage,
   isRefetching,
   currentUserId,
+  pageSize,
   onPageChange,
+  onPageSizeChange,
 }: DonorsPaginatedGridProps) {
-  const { page: safePage, totalPages, total, limit } = meta;
-
-  const rangeFrom = total === 0 ? 0 : (safePage - 1) * limit + 1;
-  const rangeTo = Math.min(safePage * limit, total);
+  const { page: safePage, totalPages, total } = meta;
 
   if (total === 0 && !isRefetching) {
     return (
@@ -174,19 +183,18 @@ function DonorsPaginatedGrid({
       </div>
 
       <div className="mt-auto flex flex-col gap-3 rounded-lg border border-border bg-[#F9FAFB] px-3 py-3 dark:border-white/10 dark:bg-white/6 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-        <p className="text-center text-xs text-text-secondary sm:text-left">
-          Showing{" "}
-          <span className="font-semibold text-text-primary">
-            {rangeFrom}–{rangeTo}
-          </span>{" "}
-          of <span className="font-semibold text-text-primary">{total}</span>
-          {totalPages > 1 ? (
-            <span className="text-text-tertiary">
-              {" "}
-              · Page {safePage} of {totalPages}
-            </span>
-          ) : null}
-        </p>
+        <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
+          <p className="text-center text-xs text-text-secondary sm:text-left">
+            Page{" "}
+            <span className="font-semibold text-text-primary">{safePage}</span> of{" "}
+            <span className="font-semibold text-text-primary">{totalPages}</span>
+          </p>
+          <PageSizeSelect
+            value={pageSize}
+            onChange={onPageSizeChange}
+            disabled={isRefetching}
+          />
+        </div>
         <PaginationControls
           page={safePage}
           totalPages={totalPages}
@@ -200,12 +208,25 @@ function DonorsPaginatedGrid({
   );
 }
 
-export default function DonorsPage() {
+function DonorsPageContent() {
   const { user } = useDashboard();
-  const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [activeBloodType, setActiveBloodType] = useState<BloodType>("All");
-  const [page, setPage] = useState(1);
+  const setParams = useSetQueryParams();
+  const [urlSearch] = useQueryParam("q", "", { omitWhen: "" });
+  const [activeBloodType] = useQueryParam("bloodType", "All", {
+    omitWhen: "All",
+    allowed: BLOOD_TYPES,
+  });
+  const [page, setPage] = useQueryParamNumber("page", 1, { omitWhen: 1 });
+  const [pageSize, setPageSize] = usePageSize();
+  const [searchInput, setSearchInput] = useDebouncedSearch(
+    urlSearch,
+    (trimmed) => {
+      setParams({
+        q: trimmed || null,
+        page: null,
+      });
+    },
+  );
   const [donors, setDonors] = useState<Donor[]>([]);
   const [meta, setMeta] = useState<DonorsListMeta>(DEFAULT_META);
   const [loadState, setLoadState] = useState<
@@ -213,19 +234,11 @@ export default function DonorsPage() {
   >("idle");
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const applyDebouncedSearch = useMemo(
-    () =>
-      debounce((value: string) => {
-        setDebouncedSearch(value);
-        setPage(1);
-      }, SEARCH_DEBOUNCE_MS),
-    [],
-  );
-
-  useEffect(() => {
-    applyDebouncedSearch(searchInput.trim());
-    return () => applyDebouncedSearch.cancel();
-  }, [searchInput, applyDebouncedSearch]);
+  const bloodType = (
+    BLOOD_TYPES.includes(activeBloodType as BloodType)
+      ? activeBloodType
+      : "All"
+  ) as BloodType;
 
   const loadDonors = useCallback(async () => {
     setLoadState("loading");
@@ -233,9 +246,9 @@ export default function DonorsPage() {
     try {
       const { data, status } = await $api.donors.list({
         page,
-        limit: PAGE_SIZE,
-        ...(debouncedSearch ? { search: debouncedSearch } : {}),
-        ...(activeBloodType !== "All" ? { bloodType: activeBloodType } : {}),
+        limit: pageSize,
+        ...(urlSearch ? { search: urlSearch } : {}),
+        ...(bloodType !== "All" ? { bloodType } : {}),
       });
       if (status < 200 || status >= 300 || data === undefined) {
         setLoadState("error");
@@ -250,7 +263,7 @@ export default function DonorsPage() {
       setLoadState("error");
       setFetchError("Could not load donors. Please try again.");
     }
-  }, [page, debouncedSearch, activeBloodType]);
+  }, [page, pageSize, urlSearch, bloodType]);
 
   useEffect(() => {
     /* Fetch when filters change — async work is deferred inside loadDonors. */
@@ -259,95 +272,107 @@ export default function DonorsPage() {
   }, [loadDonors]);
 
   const handleBloodTypeChange = (value: BloodType) => {
-    setActiveBloodType(value);
-    setPage(1);
+    setParams({
+      bloodType: value === "All" ? null : value,
+      page: null,
+    });
   };
 
   const showInitialSkeleton = loadState === "loading" && donors.length === 0;
   const showFatalFetchError = loadState === "error" && donors.length === 0;
   const isRefetching = loadState === "loading" && donors.length > 0;
   const gridEmptyMessage =
-    debouncedSearch || activeBloodType !== "All"
+    urlSearch || bloodType !== "All"
       ? "No donors match your filters yet."
       : "No donors available yet.";
 
   return (
-    <Layout>
-      <section className="flex h-full flex-1 flex-col gap-6">
-        <div className="flex flex-col gap-6">
-          <header className="flex flex-col gap-2">
-            <h1 className="text-2xl font-semibold text-text-primary sm:text-3xl">
-              Donors
-            </h1>
-            <p className="max-w-xl text-xs text-text-secondary sm:text-sm">
-              Browse available donors
-            </p>
-          </header>
+    <section className="flex h-full flex-1 flex-col gap-6">
+      <div className="flex flex-col gap-6">
+        <header className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold text-text-primary sm:text-3xl">
+            Donors
+          </h1>
+          <p className="max-w-xl text-xs text-text-secondary sm:text-sm">
+            Browse available donors
+          </p>
+        </header>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
-            <Input
-              name="search"
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search available donor"
-              autoComplete="off"
-              aria-label="Search donors"
-            />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
+          <Input
+            name="search"
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search available donor"
+            autoComplete="off"
+            aria-label="Search donors"
+          />
 
-            <div className="w-full sm:w-50">
-              <Select
-                value={activeBloodType}
-                onValueChange={(v) => handleBloodTypeChange(v as BloodType)}
+          <div className="w-full sm:w-50">
+            <Select
+              value={bloodType}
+              onValueChange={(v) => handleBloodTypeChange(v as BloodType)}
+            >
+              <SelectTrigger
+                id="blood-type-filter"
+                className="w-full border-border bg-[#F9FAFB] dark:border-white/10 dark:bg-white/6"
               >
-                <SelectTrigger
-                  id="blood-type-filter"
-                  className="w-full border-border bg-[#F9FAFB] dark:border-white/10 dark:bg-white/6"
-                >
-                  <SelectValue placeholder="All types" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BLOOD_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type === "All" ? "All types" : type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <SelectValue placeholder="All types" />
+              </SelectTrigger>
+              <SelectContent>
+                {BLOOD_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type === "All" ? "All types" : type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
+      </div>
 
-        <div className="h-full grow overflow-scroll">
-          {showInitialSkeleton ? (
-            <DonorsPageSkeleton count={PAGE_SIZE} />
-          ) : showFatalFetchError ? (
-            <div className="rounded-xl border border-border bg-white px-4 py-5 text-sm dark:border-white/10 dark:bg-[#1a1a22]">
-              <p className="font-medium text-text-primary">
-                {fetchError ?? "Could not load donors. Please try again."}
-              </p>
-              <Button
-                type="button"
-                variant="link"
-                size="xs"
-                className="mt-3 h-auto p-0 text-xs"
-                onClick={() => void loadDonors()}
-              >
-                Try again
-              </Button>
-            </div>
-          ) : (
-            <DonorsPaginatedGrid
-              donors={donors}
-              meta={meta}
-              emptyMessage={gridEmptyMessage}
-              isRefetching={isRefetching}
-              currentUserId={user?.id}
-              onPageChange={setPage}
-            />
-          )}
-        </div>
-      </section>
+      <div className="h-full grow overflow-scroll">
+        {showInitialSkeleton ? (
+          <DonorsPageSkeleton count={pageSize} />
+        ) : showFatalFetchError ? (
+          <div className="rounded-xl border border-border bg-white px-4 py-5 text-sm dark:border-white/10 dark:bg-[#1a1a22]">
+            <p className="font-medium text-text-primary">
+              {fetchError ?? "Could not load donors. Please try again."}
+            </p>
+            <Button
+              type="button"
+              variant="link"
+              size="xs"
+              className="mt-3 h-auto p-0 text-xs"
+              onClick={() => void loadDonors()}
+            >
+              Try again
+            </Button>
+          </div>
+        ) : (
+          <DonorsPaginatedGrid
+            donors={donors}
+            meta={meta}
+            emptyMessage={gridEmptyMessage}
+            isRefetching={isRefetching}
+            currentUserId={user?.id}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
+        )}
+      </div>
+    </section>
+  );
+}
+
+export default function DonorsPage() {
+  return (
+    <Layout>
+      <Suspense fallback={<DonorsPageSkeleton count={DEFAULT_PAGE_SIZE} />}>
+        <DonorsPageContent />
+      </Suspense>
     </Layout>
   );
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { Button } from "@/components/button/button.component";
+import { useWalletBankAccounts } from "@/hooks/wallet/useWalletBankAccounts.hook";
+import { useQueryModal } from "@/hooks/navigation/useQueryParamState.hook";
 import { useWalletReceipt } from "@/hooks/wallet/useWalletReceipt.hook";
 import { routes } from "@/config/routes";
 import type { WalletSummary } from "@/types/wallet";
@@ -39,37 +41,42 @@ export function WalletPageView({
   onRetry,
   onStartTopup,
 }: WalletPageViewProps) {
-  const [topupOpen, setTopupOpen] = useState(false);
+  const [topupOpen, setTopupOpen] = useQueryModal("topup");
+  const { accounts, loading: banksLoading } = useWalletBankAccounts();
+  const defaultAccount = useMemo(
+    () => accounts.find((a) => a.isPrimary) ?? accounts[0] ?? null,
+    [accounts],
+  );
   const { receipt, open, openReceipt, closeReceipt, download, share, busy } =
     useWalletReceipt(wallet.currency);
 
   const openTopup = () => setTopupOpen(true);
 
   return (
-    <div className="mx-auto flex w-full flex-col sm:p-12">
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-[28px] leading-tight font-bold tracking-tight text-[#111111] dark:text-white sm:text-[26px]">
+    <div className="mx-auto flex w-full min-w-0 flex-col sm:p-8 lg:p-12">
+      <header className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+        <div className="flex min-w-0 flex-col gap-1.5 sm:gap-2">
+          <h1 className="text-[24px] leading-tight font-bold tracking-tight text-[#111111] dark:text-white sm:text-[26px]">
             Wallet
           </h1>
-          <p className="mt-1.5 text-[14px] leading-snug text-[#6B6B6B] dark:text-white/60">
+          <p className="text-[13px] leading-snug text-[#6B6B6B] dark:text-white/60 sm:mt-1.5 sm:text-[14px]">
             Manage your balance, payment methods and booking payments.
           </p>
         </div>
-        <p className="inline-flex shrink-0 items-center gap-1.5 pt-1 text-[12px] font-medium text-[#1F7A3F] dark:text-emerald-300">
+        <p className="inline-flex shrink-0 items-center gap-1.5 pt-0.5 text-[11px] font-medium text-[#1F7A3F] dark:text-emerald-300 sm:pt-1 sm:text-[12px]">
           <Check className="size-3.5" strokeWidth={2.5} aria-hidden />
           Your wallet is secure
         </p>
       </header>
 
       {verifyingTopup ? (
-        <div className="rounded-[12px] border border-[#960018]/20 bg-[#FFF9F9] px-4 py-3 text-sm text-[#5A403F] dark:bg-primary/10 dark:text-white/80 mt-7">
+        <div className="mt-5 rounded-[12px] border border-[#960018]/20 bg-[#FFF9F9] px-4 py-3 text-sm text-[#5A403F] dark:bg-primary/10 dark:text-white/80 sm:mt-7">
           Confirming your Paystack payment…
         </div>
       ) : null}
 
       {error && !loading ? (
-        <div className="flex flex-col items-start gap-3 rounded-[12px] border border-[#960018]/20 bg-[#FFF9F9] px-4 py-4 dark:bg-primary/10 mt-7">
+        <div className="mt-5 flex flex-col items-start gap-3 rounded-[12px] border border-[#960018]/20 bg-[#FFF9F9] px-4 py-4 dark:bg-primary/10 sm:mt-7">
           <p className="text-sm text-[#5A403F] dark:text-white/80">{error}</p>
           <Button
             type="button"
@@ -83,7 +90,7 @@ export function WalletPageView({
         </div>
       ) : null}
 
-      <div className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-[1.55fr_1fr]">
+      <div className="mt-5 grid min-w-0 grid-cols-1 gap-4 sm:mt-7 sm:gap-6 lg:grid-cols-[1.55fr_1fr]">
         <WalletBalanceHero
           availableKobo={wallet.availableKobo}
           heldKobo={wallet.heldKobo}
@@ -91,7 +98,10 @@ export function WalletPageView({
           loading={loading && !verifyingTopup}
           onFundWallet={openTopup}
         />
-        <WalletPaymentMethodCard loading={loading && !verifyingTopup} />
+        <WalletPaymentMethodCard
+          account={defaultAccount}
+          loading={(loading || banksLoading) && !verifyingTopup}
+        />
       </div>
 
       <WalletLedgerList
@@ -101,7 +111,7 @@ export function WalletPageView({
         onSelectEntry={openReceipt}
       />
 
-      <p className="pt-2 text-center text-[14px] text-[#6B6B6B] dark:text-white/55 mt-5">
+      <p className="mt-4 pt-2 text-center text-[13px] text-[#6B6B6B] dark:text-white/55 sm:mt-5 sm:text-[14px]">
         Have a question about a payment?{" "}
         <Link
           href={routes.settingsHelpSupport}

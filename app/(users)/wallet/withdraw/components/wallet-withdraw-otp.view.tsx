@@ -31,7 +31,7 @@ export function WalletWithdrawOtpView({
   const otpValid = /^[A-Za-z0-9]{6}$/.test(otp);
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col pb-10 sm:p-12">
+    <div className="mx-auto flex w-full flex-col pb-10 sm:p-12">
       <button
         type="button"
         onClick={onBack}
@@ -43,12 +43,9 @@ export function WalletWithdrawOtpView({
 
       <header className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <div>
-          <h1 className="text-[28px] leading-tight font-bold tracking-tight text-[#111111] dark:text-white sm:text-[26px]">
+          <h1 className=" text-2xl leading-tight font-bold tracking-tight text-[#111111] dark:text-white sm:text-[26px]">
             Confirm withdrawal
           </h1>
-          <p className="mt-1.5 text-[14px] leading-snug text-[#6B6B6B] dark:text-white/60">
-            Enter the 6-character code we emailed you. It expires in 10 minutes.
-          </p>
         </div>
         <p className="inline-flex shrink-0 items-center gap-1.5 pt-1 text-[12px] font-medium text-[#1F7A3F] dark:text-emerald-300">
           <Check className="size-3.5" strokeWidth={2.5} aria-hidden />
@@ -112,7 +109,7 @@ export function WalletWithdrawOtpView({
         </p>
       </section>
 
-      <p className="mt-4 text-center text-[13px] text-[#6B6B6B] dark:text-white/55">
+      <p className="mt-6 text-center text-[13px] text-[#6B6B6B] dark:text-white/55">
         Have a question about a withdrawal?
         <br />
         <Link

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -13,6 +13,13 @@ import classNames from "classnames";
 import { formatWalletSignedAmount } from "@/lib/wallet/formatWalletDisplay";
 import { downloadWalletStatementCsv } from "@/lib/wallet/exportWalletStatement";
 import { walletEntryCopy } from "@/lib/wallet/walletEntryPresentation";
+import { useDebouncedSearch } from "@/hooks/navigation/useDebouncedSearch.hook";
+import { usePageSize } from "@/hooks/navigation/usePageSize.hook";
+import {
+  useQueryParam,
+  useQueryParamNumber,
+  useSetQueryParams,
+} from "@/hooks/navigation/useQueryParamState.hook";
 import type { WalletLedgerEntry } from "@/types/wallet";
 import {
   Select,
@@ -21,9 +28,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageSizeSelect } from "@/components/ui/page-size-select.component";
 import { WalletLedgerRowsSkeleton } from "./wallet-page-skeleton.component";
 
-const PAGE_SIZE = 6;
+const LEDGER_TYPE_VALUES = [
+  "all",
+  "topup",
+  "welfare_payment",
+  "welfare_refund",
+  "welfare_reimbursement",
+  "withdrawal",
+  "withdrawal_reversal",
+] as const;
+
 
 type TypeFilter =
   | "all"
@@ -33,8 +50,6 @@ type TypeFilter =
   | "welfare_reimbursement"
   | "withdrawal"
   | "withdrawal_reversal";
-
-type EntryStatus = "completed" | "pending";
 
 type WalletLedgerListProps = {
   entries: WalletLedgerEntry[];
@@ -137,9 +152,26 @@ function entrySubtitle(entry: WalletLedgerEntry): string {
   return walletEntryCopy(entry.type, entry.label).description;
 }
 
-/** Ledger API has no status yet — treat all settled entries as completed. */
-function entryStatus(): EntryStatus {
-  return "completed";
+function StatusPill({ status }: { status: WalletLedgerEntry["status"] }) {
+  if (status === "pending") {
+    return (
+      <span className="inline-flex rounded-full bg-[#FFF1E6] px-2.5 py-1 text-[11px] font-semibold text-[#C2410C] dark:bg-orange-500/15 dark:text-orange-300">
+        Pending
+      </span>
+    );
+  }
+  if (status === "failed") {
+    return (
+      <span className="inline-flex rounded-full bg-[#FEECEC] px-2.5 py-1 text-[11px] font-semibold text-[#B42318] dark:bg-red-500/15 dark:text-red-300">
+        Failed
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex rounded-full bg-[#E8F6EE] px-2.5 py-1 text-[11px] font-semibold text-[#1B7A3F] dark:bg-emerald-500/15 dark:text-emerald-300">
+      Successful
+    </span>
+  );
 }
 
 export function WalletLedgerList({
@@ -148,10 +180,15 @@ export function WalletLedgerList({
   loading = false,
   onSelectEntry,
 }: WalletLedgerListProps) {
-  const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
-  const [monthFilter, setMonthFilter] = useState<string>("all");
-  const [page, setPage] = useState(1);
+  const setParams = useSetQueryParams();
+  const [urlQuery] = useQueryParam("q", "", { omitWhen: "" });
+  const [typeFilter] = useQueryParam("type", "all", {
+    omitWhen: "all",
+    allowed: LEDGER_TYPE_VALUES,
+  });
+  const [monthFilter] = useQueryParam("month", "all", { omitWhen: "all" });
+  const [page, setPage] = useQueryParamNumber("page", 1, { omitWhen: 1 });
+  const [pageSize, setPageSize] = usePageSize();
 
   const sorted = useMemo(() => {
     return [...entries].sort((a, b) => {
@@ -173,26 +210,66 @@ export function WalletLedgerList({
     return Array.from(keys).sort((a, b) => b.localeCompare(a));
   }, [sorted]);
 
+  const resolvedType = (
+    LEDGER_TYPE_VALUES.includes(typeFilter as TypeFilter)
+      ? typeFilter
+      : "all"
+  ) as TypeFilter;
+  const resolvedMonth =
+    monthFilter === "all" || monthOptions.includes(monthFilter)
+      ? monthFilter
+      : "all";
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = urlQuery.trim().toLowerCase();
     return sorted.filter((entry) => {
-      if (typeFilter !== "all" && entry.type !== typeFilter) return false;
-      if (monthFilter !== "all") {
+      if (resolvedType !== "all" && entry.type !== resolvedType) return false;
+      if (resolvedMonth !== "all") {
         const key = monthKey(entry.createdAt);
-        if (key !== monthFilter) return false;
+        if (key !== resolvedMonth) return false;
       }
       if (!q) return true;
       const hay =
         `${displayTitle(String(entry.type), entry.label)} ${entrySubtitle(entry)} ${entry.bookingId ?? ""}`.toLowerCase();
       return hay.includes(q);
     });
-  }, [sorted, query, typeFilter, monthFilter]);
+  }, [sorted, urlQuery, resolvedType, resolvedMonth]);
 
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE) || 1);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize) || 1);
   const safePage = Math.min(page, pageCount);
-  const pageStart = (safePage - 1) * PAGE_SIZE;
-  const pageEntries = filtered.slice(pageStart, pageStart + PAGE_SIZE);
-  const resetPage = () => setPage(1);
+  const pageStart = (safePage - 1) * pageSize;
+  const pageEntries = filtered.slice(pageStart, pageStart + pageSize);
+
+  useEffect(() => {
+    if (page > pageCount) setPage(1);
+  }, [page, pageCount, setPage]);
+
+  const resetFilters = (updates: {
+    q?: string | null;
+    type?: string | null;
+    month?: string | null;
+  }) => {
+    setParams({
+      q: updates.q === undefined ? undefined : updates.q || null,
+      type:
+        updates.type === undefined
+          ? undefined
+          : updates.type === "all"
+            ? null
+            : updates.type,
+      month:
+        updates.month === undefined
+          ? undefined
+          : updates.month === "all"
+            ? null
+            : updates.month,
+      page: null,
+    });
+  };
+
+  const [query, setQuery] = useDebouncedSearch(urlQuery, (trimmed) => {
+    resetFilters({ q: trimmed || null });
+  });
 
   const pageButtons =
     pageCount <= 1
@@ -200,50 +277,46 @@ export function WalletLedgerList({
       : Array.from({ length: Math.min(pageCount, 8) }, (_, i) => i + 1);
 
   return (
-    <section className="flex flex-col gap-5 mt-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-[18px] font-semibold tracking-tight text-[#111111] dark:text-white">
+    <section className="mt-6 flex min-w-0 flex-col gap-4 sm:mt-8 sm:gap-5">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
+        <h2 className="text-[16px] font-semibold tracking-tight text-[#111111] dark:text-white sm:text-[18px]">
           Transaction history
         </h2>
         <button
           type="button"
           disabled={loading || entries.length === 0}
           onClick={() => downloadWalletStatementCsv(filtered, currency)}
-          className="inline-flex h-9 items-center rounded-[8px] border border-[#D4D4D4] bg-white px-3.5 text-[14px] font-medium text-[#111111] transition-colors hover:bg-[#FAFAFA] disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/15 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
+          className="inline-flex h-8 items-center rounded-[8px] border border-[#D4D4D4] bg-white px-3 text-[13px] font-medium text-[#111111] transition-colors hover:bg-[#FAFAFA] disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:px-3.5 sm:text-[14px] dark:border-white/15 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
         >
           Export statement
         </button>
       </div>
 
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+      <div className="flex flex-col gap-2.5 sm:gap-3 lg:flex-row lg:items-center">
         <label className="relative min-w-0 flex-1">
           <Search
-            className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[#9A9A9A]"
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#9A9A9A] sm:left-3.5"
             strokeWidth={1.75}
             aria-hidden
           />
           <input
             name="transactionSearch"
             value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              resetPage();
-            }}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search transactions"
             aria-label="Search transactions"
-            className="h-11 w-full rounded-[10px] border border-[#E0E0E0] bg-white pr-3.5 pl-10 text-[14px] text-[#111111] outline-none placeholder:text-[#9A9A9A] focus:border-[#C4C4C4] focus:ring-2 focus:ring-[#960018]/10 dark:border-white/12 dark:bg-[#1a1a22] dark:text-white dark:placeholder:text-white/40"
+            className="h-10 w-full rounded-[10px] border border-[#E0E0E0] bg-white pr-3 pl-9 text-[13px] text-[#111111] outline-none placeholder:text-[#9A9A9A] focus:border-[#C4C4C4] focus:ring-2 focus:ring-[#960018]/10 sm:h-11 sm:pr-3.5 sm:pl-10 sm:text-[14px] dark:border-white/12 dark:bg-[#1a1a22] dark:text-white dark:placeholder:text-white/40"
           />
         </label>
 
-        <div className="flex flex-wrap gap-2.5">
+        <div className="grid min-w-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2.5">
           <Select
-            value={typeFilter}
+            value={resolvedType}
             onValueChange={(v) => {
-              setTypeFilter(v as TypeFilter);
-              resetPage();
+              resetFilters({ type: v });
             }}
           >
-            <SelectTrigger className="h-11 w-[10.75rem] rounded-[10px] border-[#E0E0E0] bg-white text-[13px] font-medium text-[#111111] shadow-none dark:border-white/12 dark:bg-[#1a1a22] dark:text-white">
+            <SelectTrigger className="h-10 w-full min-w-0 rounded-[10px] border-[#E0E0E0] bg-white text-[12px] font-medium text-[#111111] shadow-none sm:h-11 sm:w-[10.75rem] sm:text-[13px] dark:border-white/12 dark:bg-[#1a1a22] dark:text-white [&>span]:min-w-0 [&>span]:truncate">
               <SelectValue placeholder="All transactions" />
             </SelectTrigger>
             <SelectContent>
@@ -262,13 +335,12 @@ export function WalletLedgerList({
           </Select>
 
           <Select
-            value={monthFilter}
+            value={resolvedMonth}
             onValueChange={(v) => {
-              setMonthFilter(v);
-              resetPage();
+              resetFilters({ month: v });
             }}
           >
-            <SelectTrigger className="h-11 w-[10.75rem] rounded-[10px] border-[#E0E0E0] bg-white text-[13px] font-medium text-[#111111] shadow-none dark:border-white/12 dark:bg-[#1a1a22] dark:text-white">
+            <SelectTrigger className="h-10 w-full min-w-0 rounded-[10px] border-[#E0E0E0] bg-white text-[12px] font-medium text-[#111111] shadow-none sm:h-11 sm:w-[10.75rem] sm:text-[13px] dark:border-white/12 dark:bg-[#1a1a22] dark:text-white [&>span]:min-w-0 [&>span]:truncate">
               <SelectValue placeholder="All months" />
             </SelectTrigger>
             <SelectContent>
@@ -296,9 +368,9 @@ export function WalletLedgerList({
       ) : null}
 
       {!loading && pageEntries.length > 0 ? (
-        <div className="overflow-hidden rounded-[14px] border border-[#E8E8E8] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:border-white/10 dark:bg-[#1a1a22]">
-          <div className="overflow-x-auto px-5 pt-4 sm:px-6">
-            <table className="w-full min-w-[52rem] border-collapse text-left">
+        <div className="min-w-0 overflow-hidden rounded-[14px] border border-[#E8E8E8] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:border-white/10 dark:bg-[#1a1a22]">
+          <div className="overflow-x-auto px-3 pt-3 sm:px-6 sm:pt-4">
+            <table className="w-full min-w-[40rem] border-collapse text-left sm:min-w-[52rem]">
               <thead>
                 <tr className="border-b border-[#EFEFEF] dark:border-white/10">
                   {(
@@ -327,10 +399,9 @@ export function WalletLedgerList({
                 {pageEntries.map((entry, index) => {
                   const isCredit = entry.direction === "credit";
                   const when = formatDateTwoLine(entry.createdAt);
-                  const status = entryStatus();
                   const absoluteIndex = pageStart + index;
-                  const key = `${entry.type}-${entry.createdAt ?? "x"}-${entry.bookingId ?? absoluteIndex}-${entry.amountKobo}`;
-                  const pending = status === "pending";
+                  const key = `${entry.type}-${entry.createdAt ?? "x"}-${entry.reference ?? entry.bookingId ?? absoluteIndex}-${entry.amountKobo}`;
+                  const canOpenReceipt = entry.status === "success";
 
                   return (
                     <tr
@@ -366,22 +437,16 @@ export function WalletLedgerList({
                         ) : null}
                       </td>
                       <td className="py-[18px] pr-4 align-middle">
-                        {pending ? (
-                          <span className="inline-flex rounded-full bg-[#FFF1E6] px-2.5 py-1 text-[11px] font-semibold text-[#C2410C] dark:bg-orange-500/15 dark:text-orange-300">
-                            Pending
-                          </span>
-                        ) : (
-                          <span className="inline-flex rounded-full bg-[#E8F6EE] px-2.5 py-1 text-[11px] font-semibold text-[#1B7A3F] dark:bg-emerald-500/15 dark:text-emerald-300">
-                            Completed
-                          </span>
-                        )}
+                        <StatusPill status={entry.status} />
                       </td>
                       <td
                         className={classNames(
                           "py-[18px] pr-4 align-middle text-[14px] font-semibold tabular-nums",
-                          isCredit
-                            ? "text-[#1B7A3F] dark:text-emerald-300"
-                            : "text-[#111111] dark:text-white",
+                          entry.status === "failed"
+                            ? "text-[#9A9A9A] line-through dark:text-white/40"
+                            : isCredit
+                              ? "text-[#1B7A3F] dark:text-emerald-300"
+                              : "text-[#111111] dark:text-white",
                         )}
                       >
                         {formatWalletSignedAmount(
@@ -390,11 +455,7 @@ export function WalletLedgerList({
                         )}
                       </td>
                       <td className="py-[18px] align-middle">
-                        {pending ? (
-                          <span className="text-[13px] text-[#9A9A9A]">
-                            Processing
-                          </span>
-                        ) : (
+                        {canOpenReceipt ? (
                           <button
                             type="button"
                             className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#960018] hover:underline"
@@ -409,6 +470,12 @@ export function WalletLedgerList({
                               aria-hidden
                             />
                           </button>
+                        ) : (
+                          <span className="text-[13px] text-[#9A9A9A]">
+                            {entry.status === "pending"
+                              ? "Processing"
+                              : "Unavailable"}
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -419,11 +486,19 @@ export function WalletLedgerList({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EFEFEF] px-5 py-4 sm:px-6 dark:border-white/10">
-            <p className="text-[13px] text-[#8A8A8A]">
-              Showing {pageStart + 1}–{pageStart + pageEntries.length} of{" "}
-              {filtered.length} transaction
-              {filtered.length === 1 ? "" : "s"}
-            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-[13px] text-[#8A8A8A]">
+                Page{" "}
+                <span className="font-semibold text-[#111111] dark:text-white">
+                  {safePage}
+                </span>{" "}
+                of{" "}
+                <span className="font-semibold text-[#111111] dark:text-white">
+                  {pageCount}
+                </span>
+              </p>
+              <PageSizeSelect value={pageSize} onChange={setPageSize} />
+            </div>
             {pageButtons.length > 0 ? (
               <div className="flex items-center gap-1.5">
                 {pageButtons.map((n) => (

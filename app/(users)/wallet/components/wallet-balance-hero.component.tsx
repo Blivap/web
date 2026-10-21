@@ -52,7 +52,7 @@ export function WalletBalanceHero({
   }
 
   return (
-    <div className="relative h-full min-h-[188px] overflow-hidden rounded-[16px] bg-[#960018] px-8.5 py-6 text-white sm:px-7 sm:py-7">
+    <div className="relative h-full min-h-[160px] overflow-hidden rounded-[14px] bg-[#960018] px-4 py-5 text-white sm:min-h-[188px] sm:rounded-[16px] sm:px-7 sm:py-7">
       <div
         className="pointer-events-none absolute inset-0"
         aria-hidden
@@ -64,13 +64,13 @@ export function WalletBalanceHero({
         }}
       />
 
-      <div className="relative flex h-full min-h-[140px] flex-col">
-        <p className="text-[14px] sm:text-[24px] font-medium leading-none text-white/90">
+      <div className="relative flex h-full min-h-[120px] flex-col sm:min-h-[140px]">
+        <p className="text-[13px] font-medium leading-none text-white/90 sm:text-[24px]">
           Available balance
         </p>
 
-        <div className="mt-3 flex items-center gap-3">
-          <p className="text-[36px] leading-none font-bold tracking-[-0.02em] text-white tabular-nums sm:text-[48px]">
+        <div className="mt-2.5 flex min-w-0 items-center gap-2 sm:mt-3 sm:gap-3">
+          <p className="min-w-0 truncate text-[28px] leading-none font-bold tracking-[-0.02em] text-white tabular-nums sm:text-[48px]">
             {hidden
               ? "••••••••"
               : formatWalletAmount(availableKobo, {
@@ -81,21 +81,21 @@ export function WalletBalanceHero({
             type="button"
             aria-label={hidden ? "Show balance" : "Hide balance"}
             onClick={toggleHidden}
-            className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10"
+            className="inline-flex size-7 shrink-0 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 sm:size-8"
           >
             {hidden ? (
-              <EyeOff className="size-[18px]" strokeWidth={1.75} aria-hidden />
+              <EyeOff className="size-4 sm:size-[18px]" strokeWidth={1.75} aria-hidden />
             ) : (
-              <Eye className="size-[18px]" strokeWidth={1.75} aria-hidden />
+              <Eye className="size-4 sm:size-[18px]" strokeWidth={1.75} aria-hidden />
             )}
           </button>
         </div>
 
-        <div className="mt-auto flex flex-wrap items-end justify-between gap-4 pt-8">
-          <div className="flex flex-wrap gap-2.5">
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-5 sm:gap-4 sm:pt-8">
+          <div className="flex flex-wrap gap-2 sm:gap-2.5">
             <Link
               href={routes.walletWithdraw}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#FFFFFF33] bg-transparent px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/10"
+              className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[#FFFFFF33] bg-transparent px-3 text-[12px] font-semibold text-white transition-colors hover:bg-white/10 sm:h-9 sm:px-3.5 sm:text-[13px]"
             >
               <ArrowUp className="size-3.5" strokeWidth={2.25} aria-hidden />
               Withdraw
@@ -103,14 +103,14 @@ export function WalletBalanceHero({
             <button
               type="button"
               onClick={onFundWallet}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[#FFFFFF33] bg-transparent px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/10"
+              className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[#FFFFFF33] bg-transparent px-3 text-[12px] font-semibold text-white transition-colors hover:bg-white/10 sm:h-9 sm:px-3.5 sm:text-[13px]"
             >
               <Plus className="size-3.5" strokeWidth={2.25} aria-hidden />
               Fund wallet
             </button>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[12px] font-medium text-white/95">
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/95 sm:text-[12px]">
             <span>
               Pending {hidden ? "••••" : formatWalletAmount(heldKobo)}
             </span>

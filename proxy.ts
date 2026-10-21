@@ -11,9 +11,21 @@ import {
   AUTH_TOKEN_EXPIRES_COOKIE,
   isExpiresAtPast,
 } from "@/lib/auth/sessionExpiry";
-import { loginWithReturn } from "@/lib/navigation/authRedirect";
+import {
+  getPostAuthRedirect,
+  loginWithReturn,
+} from "@/lib/navigation/authRedirect";
 
 const PUBLIC_ROUTES: string[] = [...publicRoutes];
+
+const AUTH_ENTRY_PATHS = new Set<string>([
+  routes.login,
+  routes.register,
+  routes.verifyEmail,
+  routes.forgotPassword,
+  routes.resetPassword,
+  routes.selectAvatar,
+]);
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_ROUTES.includes(pathname);
@@ -51,6 +63,17 @@ export function proxy(request: NextRequest) {
 
   const publicPath = isPublicPath(pathname);
 
+  // Verification links must open with ?token= even when the session is gone.
+  // Logged-in people stay on the page too; AuthChecker sends verified users on.
+  if (pathname === routes.verifyEmail) {
+    if (tokenExpired) {
+      const response = NextResponse.next();
+      clearAuthCookie(response);
+      return response;
+    }
+    return NextResponse.next();
+  }
+
   // Stale JWT cookie: drop it so the client does not keep treating the session as live
   if (tokenExpired && publicPath) {
     const response = NextResponse.next();
@@ -58,10 +81,14 @@ export function proxy(request: NextRequest) {
     return response;
   }
 
-  // Valid session on auth/marketing public pages → app home
+  // Valid session on public pages → leave marketing/auth entry for the app.
+  // Auth hops honor `dn` so post-login return destinations are not dropped.
   // Keep not-found reachable so 404 UI still works while logged in.
   if (publicPath && hasValidSession && !isNotFoundPath(pathname)) {
-    return NextResponse.redirect(new URL(routes.overview, request.url));
+    const destination = AUTH_ENTRY_PATHS.has(pathname)
+      ? getPostAuthRedirect(request.nextUrl.searchParams)
+      : routes.overview;
+    return NextResponse.redirect(new URL(destination, request.url));
   }
 
   // Known protected areas require a session; unknown paths fall through to not-found

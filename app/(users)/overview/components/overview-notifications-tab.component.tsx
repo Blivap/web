@@ -7,6 +7,7 @@ import { useNotifications } from "@/hooks/notifications/useNotifications.hook";
 import { formatNotificationTime } from "@/lib/notifications/formatNotificationTime";
 import { notificationPresentation } from "@/lib/notifications/notificationPresentation";
 import { useAppSelector } from "@/store/hooks";
+import { NotificationBody } from "@/components/feedback/notification/notification-body.component";
 import { Button } from "@/components/ui/button";
 import { OverviewNotificationsTabSkeleton } from "./overview-notifications-tab-skeleton.component";
 
@@ -85,34 +86,30 @@ export function OverviewNotificationsTab() {
               const presentation = notificationPresentation(notification.type);
               const Icon = presentation.Icon;
               const content = (
-                <div className="flex items-center justify-between gap-4 w-full">
+                <div className="flex w-full items-start justify-between gap-3 sm:gap-4">
                   <div
                     className={classNames(
-                      "flex size-10 shrink-0 items-center justify-center rounded-xl",
+                      "flex size-9 shrink-0 items-center justify-center rounded-xl sm:size-10",
                       presentation.iconClassName,
                     )}
                   >
-                    <Icon className="size-5" aria-hidden />
+                    <Icon className="size-4 sm:size-5" aria-hidden />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <p
-                        className={classNames(
-                          "text-sm font-semibold leading-snug",
-                          notification.read
-                            ? "text-text-secondary"
-                            : "text-text-primary",
-                        )}
-                      >
-                        {notification.title}
-                      </p>
-                      {/* {!notification.read ? (
-                        <span className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
-                      ) : null} */}
-                    </div>
-                    <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-                      {notification.message}
+                    <p
+                      className={classNames(
+                        "text-sm font-semibold leading-snug",
+                        notification.read
+                          ? "text-text-secondary"
+                          : "text-text-primary",
+                      )}
+                    >
+                      {notification.title}
                     </p>
+                    <NotificationBody
+                      message={notification.message}
+                      className="mt-1.5"
+                    />
                     <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-tertiary">
                       <span>
                         {formatNotificationTime(notification.createdAt)}
