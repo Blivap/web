@@ -35,7 +35,7 @@ export { BUYER_TAB_ORDER } from "@/lib/bookings/buyerBookingsTabPanels";
 const BOOKINGS_POLL_MS = 20_000;
 
 function donorLabelFromBooking(b: Booking): string {
-  return formatPublicId(b.donorPublicId) ?? "Donor";
+  return formatPublicId(b.donorPublicId) ?? "";
 }
 
 function scheduleBookingsResync(dispatch: AppDispatch) {
@@ -254,6 +254,7 @@ export function useBuyerBookings() {
 
   return {
     user,
+    bookings,
     loadState,
     loadError,
     loadData,

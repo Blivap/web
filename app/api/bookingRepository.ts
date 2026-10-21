@@ -44,6 +44,16 @@ export default function BookingRepository() {
       return fetcher(endpoints.bookings.mine, { method: "GET" });
     },
 
+    meetupCareQuote(params: {
+      donorId: string;
+      hospitalId?: string;
+    }): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.bookings.meetupCareQuote, {
+        method: "GET",
+        params,
+      });
+    },
+
     /** Legacy: PATCH /bookings/:id/respond — prefer `accept` / `decline` in new UIs. */
     respond(
       id: string,

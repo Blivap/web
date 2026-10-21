@@ -6,6 +6,7 @@ import { Layout } from "@/layout/layout.component";
 import { useWallet } from "@/hooks/wallet/useWallet.hook";
 import { useWalletReceipt } from "@/hooks/wallet/useWalletReceipt.hook";
 import { WalletLedgerList } from "@/app/(users)/wallet/components/wallet-ledger-list.component";
+import { WalletLedgerSkeleton } from "@/app/(users)/wallet/components/wallet-page-skeleton.component";
 import { WalletReceiptDialog } from "@/app/(users)/wallet/components/wallet-receipt-dialog.component";
 import Link from "next/link";
 import { routes } from "@/config/routes";
@@ -16,9 +17,9 @@ function HistoryPageContent() {
     useWalletReceipt(wallet.currency);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 pb-10">
+    <div className="flex w-full min-w-0 flex-col gap-6 pb-10">
       <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-text-primary sm:text-2xl">
+        <h1 className="text-xl font-semibold text-text-primary sm:text-2xl mt-12">
           History
         </h1>
         <p className="text-sm text-text-secondary">
@@ -79,8 +80,12 @@ export default function HistoryPage() {
     <Layout>
       <Suspense
         fallback={
-          <div className="mx-auto flex max-w-6xl flex-col gap-6 pb-10">
-            <p className="text-sm text-text-secondary">Loading history…</p>
+          <div className="flex w-full min-w-0 flex-col gap-6 pb-10">
+            <div className="flex flex-col gap-1">
+              <div className="h-7 w-32 animate-pulse rounded-md bg-[#E8E6E3] sm:h-8 dark:bg-white/10" />
+              <div className="h-4 w-full animate-pulse rounded-md bg-[#E8E6E3] dark:bg-white/10" />
+            </div>
+            <WalletLedgerSkeleton />
           </div>
         }
       >

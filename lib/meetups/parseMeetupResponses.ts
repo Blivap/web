@@ -17,12 +17,26 @@ function pickBool(v: unknown): boolean | undefined {
   return undefined;
 }
 
+function publicIdFromUnknown(raw: unknown): string | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const o = raw as Record<string, unknown>;
+  const direct = pickString(o.publicId ?? o.public_id);
+  if (direct) return direct.toUpperCase();
+  for (const key of ["user", "profile"]) {
+    const nested = o[key];
+    if (!nested || typeof nested !== "object") continue;
+    const n = nested as Record<string, unknown>;
+    const id = pickString(n.publicId ?? n.public_id);
+    if (id) return id.toUpperCase();
+  }
+  return undefined;
+}
+
 function parseParticipant(raw: unknown): MeetupParticipant {
   if (!raw || typeof raw !== "object") return {};
   const o = unwrapApiRecord(raw) ?? (raw as Record<string, unknown>);
   const userId = pickString(o.userId ?? o.id ?? o._id);
-  const publicIdRaw = pickString(o.publicId ?? o.public_id);
-  const publicId = publicIdRaw ? publicIdRaw.toUpperCase() : undefined;
+  const publicId = publicIdFromUnknown(o);
   const roleRaw = pickString(o.role ?? o.participantRole);
   const roleLower = roleRaw?.toLowerCase();
   const role =
@@ -293,6 +307,39 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
   let me = parseParticipant(r.me);
   let peer = parseParticipant(r.peer);
   const meRole = me.role?.toLowerCase();
+
+  const donorPublicId =
+    publicIdFromUnknown(r.donorUserId ?? r.donor_user_id) ??
+    (bookingRaw && typeof bookingRaw === "object"
+      ? publicIdFromUnknown(
+          (bookingRaw as Record<string, unknown>).donorUserId ??
+            (bookingRaw as Record<string, unknown>).donor_user_id,
+        )
+      : undefined);
+  const requesterPublicId =
+    publicIdFromUnknown(r.requesterUserId ?? r.requesterId ?? r.requester_id) ??
+    (bookingRaw && typeof bookingRaw === "object"
+      ? publicIdFromUnknown(
+          (bookingRaw as Record<string, unknown>).requesterId ??
+            (bookingRaw as Record<string, unknown>).requester_id,
+        )
+      : undefined);
+  if (!peer.publicId || !me.publicId) {
+    const peerId =
+      meRole === "donor"
+        ? requesterPublicId
+        : meRole === "requester"
+          ? donorPublicId
+          : undefined;
+    const meId =
+      meRole === "donor"
+        ? donorPublicId
+        : meRole === "requester"
+          ? requesterPublicId
+          : undefined;
+    if (!peer.publicId && peerId) peer = { ...peer, publicId: peerId };
+    if (!me.publicId && meId) me = { ...me, publicId: meId };
+  }
 
   if (me.meetupVerified === undefined || peer.meetupVerified === undefined) {
     if (meRole === "requester") {

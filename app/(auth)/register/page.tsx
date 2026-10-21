@@ -315,7 +315,7 @@ export default function SignUpPage() {
                       {!socialEnabled ? (
                         <p className="max-w-xs text-center text-xs text-text-tertiary">
                           Accept the terms and privacy statement to continue
-                          with Google, Apple, or Facebook.
+                          with Google.
                         </p>
                       ) : null}
                     </div>

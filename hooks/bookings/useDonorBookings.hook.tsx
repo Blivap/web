@@ -271,6 +271,7 @@ export function useDonorBookings() {
 
   return {
     user,
+    bookings,
     loadState,
     loadError,
     loadData,

@@ -21,7 +21,7 @@ export default function MeetupSessionPage() {
 
   return (
     <Layout>
-      <div className="-m-4 flex h-[calc(100vh-5.625rem)] min-h-0 flex-col overflow-hidden xl:-mx-7">
+      <div className="-m-4 flex min-h-0 flex-1 flex-col overflow-hidden xl:-mx-7">
         <MeetupSessionView sessionId={sessionId} />
       </div>
     </Layout>

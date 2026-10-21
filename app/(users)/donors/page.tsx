@@ -112,13 +112,16 @@ function DonorCard({
         ) : null}
       </div>
 
-      <div className="mt-2 flex flex-col gap-2  sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-text-secondary">
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <p
+          className="min-w-0 flex-1 truncate text-xs text-text-secondary"
+          title={`${donor.location}, ${donor.country}`}
+        >
           {donor.location}, {donor.country}
         </p>
         {bookingBlocked && !isOwner ? (
           <span
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-[#F4F4F5] px-3 py-1.5 text-[11px] font-medium text-text-tertiary sm:px-4 sm:py-2 sm:text-xs dark:border-white/10 dark:bg-white/8"
+            className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-lg border border-border bg-[#F4F4F5] px-3 py-1.5 text-[11px] font-medium text-text-tertiary sm:px-4 sm:py-2 sm:text-xs dark:border-white/10 dark:bg-white/8"
             aria-disabled
           >
             Booking paused
@@ -126,7 +129,7 @@ function DonorCard({
         ) : (
           <Link
             href={routeOwner}
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-primary/90 sm:px-4 sm:py-2 sm:text-xs"
+            className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-primary/90 sm:px-4 sm:py-2 sm:text-xs"
           >
             {!isOwner ? "Book Appointment" : "Settings"}
           </Link>
@@ -170,7 +173,7 @@ function DonorsPaginatedGrid({
 
   return (
     <div
-      className={`flex h-full flex-col gap-4 transition-opacity ${isRefetching ? "pointer-events-none opacity-60" : ""}`}
+      className={`flex flex-col gap-4 transition-opacity ${isRefetching ? "pointer-events-none opacity-60" : ""}`}
     >
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 sm:gap-5 md:gap-6 xl:grid-cols-3">
         {donors.map((donor) => (
@@ -287,7 +290,7 @@ function DonorsPageContent() {
       : "No donors available yet.";
 
   return (
-    <section className="flex h-full flex-1 flex-col gap-6">
+    <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-6">
         <header className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold text-text-primary sm:text-3xl">
@@ -332,7 +335,7 @@ function DonorsPageContent() {
         </div>
       </div>
 
-      <div className="h-full grow overflow-scroll">
+      <div>
         {showInitialSkeleton ? (
           <DonorsPageSkeleton count={pageSize} />
         ) : showFatalFetchError ? (

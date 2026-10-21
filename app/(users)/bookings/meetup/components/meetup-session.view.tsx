@@ -70,6 +70,7 @@ import {
   getApiMessageFromData,
   getAxiosErrorMessage,
 } from "@/lib/bookings/axiosErrorMessage";
+import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import { formatPublicId } from "@/lib/users/formatPublicId";
 
 const cardClass =
@@ -125,6 +126,35 @@ function formatSessionChipDate(iso: string | null | undefined): string | null {
 
 function partyHandle(publicId?: string | null): string {
   return formatPublicId(publicId) ?? "";
+}
+
+function publicIdFromProfileBody(body: unknown): string | null {
+  const root = unwrapApiRecord(body);
+  const record =
+    root && typeof root === "object"
+      ? (root as Record<string, unknown>)
+      : body && typeof body === "object"
+        ? (body as Record<string, unknown>)
+        : null;
+  if (!record) return null;
+  const direct = formatPublicId(
+    typeof record.publicId === "string"
+      ? record.publicId
+      : typeof record.public_id === "string"
+        ? record.public_id
+        : null,
+  );
+  if (direct) return direct;
+  const user = record.user;
+  if (!user || typeof user !== "object") return null;
+  const nested = user as Record<string, unknown>;
+  return formatPublicId(
+    typeof nested.publicId === "string"
+      ? nested.publicId
+      : typeof nested.public_id === "string"
+        ? nested.public_id
+        : null,
+  );
 }
 
 function messageIsMine(
@@ -1102,7 +1132,61 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
   const myHandle =
     partyHandle(user?.publicId) || partyHandle(session?.me.publicId) || "You";
-  const peerHandle = partyHandle(session?.peer.publicId) || "Other person";
+  const peerPublicIdFromSession =
+    session?.peer.publicId ??
+    (isRequester === true
+      ? bookingRow?.donorPublicId
+      : isRequester === false
+        ? bookingRow?.requesterPublicId
+        : (bookingRow?.donorPublicId ?? bookingRow?.requesterPublicId));
+  const peerUserId =
+    isRequester === true
+      ? (session?.donorUserId ?? bookingRow?.donorUserId ?? "")
+      : isRequester === false
+        ? (session?.requesterUserId ?? bookingRow?.requesterId ?? "")
+        : (session?.peer.userId ??
+          session?.donorUserId ??
+          bookingRow?.donorUserId ??
+          "");
+  const peerPublicIdFromChat = sortedChatMessages.find(
+    (message) =>
+      message.senderPublicId &&
+      !messageIsMine(message, user?.id, session?.me.role),
+  )?.senderPublicId;
+  const [resolvedPeerPublicId, setResolvedPeerPublicId] = useState<
+    string | null
+  >(null);
+
+  useEffect(() => {
+    if (
+      partyHandle(peerPublicIdFromSession) ||
+      partyHandle(peerPublicIdFromChat)
+    ) {
+      return;
+    }
+    const id = peerUserId.trim();
+    if (!id) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const { status, data } = await $api.donors.publicByUserId(id);
+        if (cancelled || status < 200 || status >= 300) return;
+        const publicId = publicIdFromProfileBody(data);
+        if (publicId) setResolvedPeerPublicId(publicId);
+      } catch {
+        /* public profile may be unavailable for non-donors */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [peerPublicIdFromSession, peerPublicIdFromChat, peerUserId]);
+
+  const peerHandle =
+    partyHandle(peerPublicIdFromSession) ||
+    partyHandle(peerPublicIdFromChat) ||
+    partyHandle(resolvedPeerPublicId) ||
+    "Other person";
   const peerProfileImage =
     isRequester === true
       ? bookingRow?.donorProfileImage
@@ -1379,7 +1463,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
           <div className="border-t border-border px-4 py-4 sm:px-6 dark:border-white/10">
             <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-text-secondary">
-              <span>Chat with</span>
               <PartyAvatar src={peerProfileImage} className="size-6" />
               <span className="font-medium text-text-primary">
                 {peerHandle}

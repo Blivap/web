@@ -61,8 +61,14 @@ export type BookingsTabPanel = {
   rows: readonly BookingsShellRow[];
   /** Shown when `rows` is empty. */
   tableEmptyMessage?: string;
+  /** Supporting line under the empty-state title. */
+  emptyDescription?: string;
+  /** Stretch the list card to fill the remaining page height. */
+  fill?: boolean;
   /** When set, table renders a fourth column for `actionsSlot` on each row. */
   actionsColumnLabel?: string;
+  /** Controls aligned to the right of the list title. */
+  headerAside?: ReactNode;
 };
 
 /** One tab: URL value, label, and panel content. */
@@ -127,7 +133,23 @@ type BookingsRowsTableProps = {
 };
 
 function bookingRowHighlightClass(highlight: boolean | undefined): string {
-  return highlight ? "bg-primary/5 ring-2 ring-inset ring-primary/40" : "";
+  return highlight ? "bg-primary/5 ring-1 ring-inset ring-primary/30" : "";
+}
+
+function bookingDesktopHighlightClass(highlight: boolean | undefined): string {
+  if (!highlight) return "";
+  const tint = "color-mix(in_srgb,#960018_7%,#fff)";
+  const tintDark = "color-mix(in_srgb,#960018_16%,#1a1a22)";
+  return [
+    "[&>td]:border-transparent",
+    "[&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg",
+    `[&>td:first-child]:bg-[linear-gradient(90deg,transparent_0.5rem,${tint}_0.5rem)]`,
+    `[&>td:nth-child(2)]:bg-[${tint}] [&>td:nth-child(3)]:bg-[${tint}]`,
+    `[&>td:last-child]:bg-[linear-gradient(270deg,transparent_0.5rem,${tint}_0.5rem)]`,
+    `dark:[&>td:first-child]:bg-[linear-gradient(90deg,transparent_0.5rem,${tintDark}_0.5rem)]`,
+    `dark:[&>td:nth-child(2)]:bg-[${tintDark}] dark:[&>td:nth-child(3)]:bg-[${tintDark}]`,
+    `dark:[&>td:last-child]:bg-[linear-gradient(270deg,transparent_0.5rem,${tintDark}_0.5rem)]`,
+  ].join(" ");
 }
 
 function BookingRowMeta({
@@ -158,9 +180,11 @@ function BookingRowMeta({
         </span>
       )}
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-text-primary">
-          {title}
-        </p>
+        {title ? (
+          <p className="truncate text-sm font-medium text-text-primary">
+            {title}
+          </p>
+        ) : null}
         {subtitle ? (
           <p className="truncate text-xs text-text-tertiary">{subtitle}</p>
         ) : null}
@@ -201,7 +225,8 @@ function BookingsRowsTable({
   colCount,
   actionsColumnLabel,
   tableEmptyMessage,
-}: BookingsRowsTableProps) {
+  fill = false,
+}: BookingsRowsTableProps & { fill?: boolean }) {
   const [page, setPage] = useQueryParamNumber("page", 1, { omitWhen: 1 });
   const [pageSize, setPageSize] = usePageSize();
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
@@ -227,8 +252,18 @@ function BookingsRowsTable({
   const hasRows = rows.length > 0;
 
   return (
-    <>
-      <div className="mt-3 border-t border-border pt-3 dark:border-white/10">
+    <div
+      className={classNames(
+        "flex flex-col",
+        fill && "min-h-0 flex-1",
+      )}
+    >
+      <div
+        className={classNames(
+          "mt-3 border-t border-border pt-3 dark:border-white/10",
+          fill && "min-h-0 flex-1 overflow-y-auto",
+        )}
+      >
         <div className="flex flex-col gap-3 md:hidden">
           {rows.length === 0 ? (
             <p className="py-10 text-center text-sm text-text-secondary">
@@ -272,13 +307,13 @@ function BookingsRowsTable({
 
         <div className="hidden overflow-x-auto md:block">
           <table
-            className={`w-full border-collapse text-left ${actionsColumnLabel ? "min-w-130" : "min-w-100"}`}
+            className={`w-full border-separate border-spacing-0 text-left ${actionsColumnLabel ? "min-w-130" : "min-w-100"}`}
           >
             <thead>
               <tr>
                 <th
                   scope="col"
-                  className="w-[1%] whitespace-nowrap pb-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
+                  className="w-[1%] whitespace-nowrap pb-2 pr-3 pl-3 text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
                 >
                   {colA}
                 </th>
@@ -297,7 +332,7 @@ function BookingsRowsTable({
                 {actionsColumnLabel ? (
                   <th
                     scope="col"
-                    className="w-[1%] pb-2 text-end text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
+                    className="w-[1%] pb-2 pr-3 text-end text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
                   >
                     <span className="sr-only">{actionsColumnLabel}</span>
                   </th>
@@ -319,19 +354,19 @@ function BookingsRowsTable({
                   <tr
                     key={row.id}
                     data-booking-row-id={row.id}
-                    className={`border-t border-[#F3F4F6] dark:border-white/10 ${bookingRowHighlightClass(row.highlight)}`}
+                    className={bookingDesktopHighlightClass(row.highlight)}
                   >
-                    <td className="whitespace-nowrap py-3 pr-3 align-middle text-xs text-text-secondary">
+                    <td className="whitespace-nowrap border-t border-[#F3F4F6] py-3 pr-3 pl-3 align-middle text-xs text-text-secondary dark:border-white/10">
                       {row.dateCol}
                     </td>
-                    <td className="py-3 pr-3 align-middle">
+                    <td className="border-t border-[#F3F4F6] py-3 pr-3 align-middle dark:border-white/10">
                       <BookingRowMeta
                         title={row.title}
                         subtitle={row.subtitle}
                         avatarUrl={row.avatarUrl}
                       />
                     </td>
-                    <td className="py-3 pr-3 align-middle">
+                    <td className="border-t border-[#F3F4F6] py-3 pr-3 align-middle dark:border-white/10">
                       <BookingRowStatus
                         pillLabel={row.pillLabel}
                         pillVariant={row.pillVariant}
@@ -339,7 +374,7 @@ function BookingsRowsTable({
                       />
                     </td>
                     {actionsColumnLabel ? (
-                      <td className="py-3 align-middle">
+                      <td className="border-t border-[#F3F4F6] py-3 pr-3 align-middle dark:border-white/10">
                         <div className="flex flex-row flex-nowrap items-center justify-end gap-1">
                           {row.actionsSlot ?? (
                             <span className="text-xs text-text-tertiary">
@@ -357,7 +392,7 @@ function BookingsRowsTable({
         </div>
       </div>
       {hasRows ? (
-        <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-[#F9FAFB] px-3 py-3 dark:border-white/10 dark:bg-white/6 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+        <div className="mt-4 flex shrink-0 flex-col gap-3 rounded-lg border border-border bg-[#F9FAFB] px-3 py-3 dark:border-white/10 dark:bg-white/6 sm:flex-row sm:items-center sm:justify-between sm:px-4">
           <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
             <p className="text-center text-xs text-text-secondary sm:text-left">
               Page{" "}
@@ -408,7 +443,37 @@ function BookingsRowsTable({
           </Pagination>
         </div>
       ) : null}
-    </>
+    </div>
+  );
+}
+
+export function BookingsSingleList(props: BookingsTabBodyProps) {
+  return <BookingsTabBody {...props} />;
+}
+
+function BookingsEmptyState({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
+      <Image
+        src="/svg/nodata.svg"
+        alt=""
+        width={112}
+        height={112}
+        className="size-28"
+      />
+      <p className="mt-4 text-sm font-semibold text-text-primary">{title}</p>
+      {description ? (
+        <p className="mt-1 max-w-sm text-sm leading-relaxed text-text-secondary">
+          {description}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -421,7 +486,10 @@ function BookingsTabBody({
   columnLabels,
   rows,
   tableEmptyMessage = "Nothing here yet.",
+  emptyDescription,
+  fill = false,
   actionsColumnLabel,
+  headerAside,
 }: BookingsTabBodyProps) {
   const [colA, colB, colC] = columnLabels;
   const colCount = actionsColumnLabel ? 4 : 3;
@@ -432,9 +500,10 @@ function BookingsTabBody({
   const bannerBeforeSummaries =
     panelBanner && !bannerInListCard ? panelBanner : null;
   const bannerInsideCard = panelBanner && bannerInListCard ? panelBanner : null;
-
   return (
-    <div className="flex flex-col gap-3">
+    <div
+      className={classNames("flex flex-col gap-3", fill && "min-h-0 flex-1")}
+    >
       {bannerBeforeSummaries ? (
         <div className="w-full">{bannerBeforeSummaries}</div>
       ) : null}
@@ -449,7 +518,12 @@ function BookingsTabBody({
           ))
         : null}
 
-      <section className="rounded-xl border border-border bg-white px-4 py-4 dark:border-white/10 dark:bg-[#1a1a22] sm:px-5">
+      <section
+        className={classNames(
+          "rounded-xl border border-border bg-white px-4 py-4 dark:border-white/10 dark:bg-[#1a1a22] sm:px-5",
+          fill && "flex min-h-0 flex-1 flex-col",
+        )}
+      >
         {listEyebrow ? (
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
             {listEyebrow}
@@ -460,24 +534,39 @@ function BookingsTabBody({
             {bannerInsideCard}
           </div>
         ) : null}
-        <h2
-          className={`text-sm font-semibold text-text-primary sm:text-base ${listEyebrow || bannerInsideCard ? "mt-3" : ""}`}
-        >
-          {mainListTitle}{" "}
-          <span className="font-medium text-text-tertiary">
-            ({mainListCount})
-          </span>
-        </h2>
-        <BookingsRowsTable
-          key={rowIdsKey}
-          rows={rows}
-          colA={colA}
-          colB={colB}
-          colC={colC}
-          colCount={colCount}
-          actionsColumnLabel={actionsColumnLabel}
-          tableEmptyMessage={tableEmptyMessage}
-        />
+        {rows.length > 0 || headerAside ? (
+          <div
+            className={`flex items-center justify-between gap-3 ${listEyebrow || bannerInsideCard ? "mt-3" : ""}`}
+          >
+            <h2 className="text-sm font-semibold text-text-primary sm:text-base">
+              {mainListTitle}{" "}
+              <span className="font-medium text-text-tertiary">
+                ({mainListCount})
+              </span>
+            </h2>
+            {headerAside ? (
+              <div className="shrink-0">{headerAside}</div>
+            ) : null}
+          </div>
+        ) : null}
+        {rows.length === 0 ? (
+          <BookingsEmptyState
+            title={tableEmptyMessage}
+            description={emptyDescription}
+          />
+        ) : (
+          <BookingsRowsTable
+            key={rowIdsKey}
+            rows={rows}
+            colA={colA}
+            colB={colB}
+            colC={colC}
+            colCount={colCount}
+            actionsColumnLabel={actionsColumnLabel}
+            tableEmptyMessage={tableEmptyMessage}
+            fill={fill}
+          />
+        )}
       </section>
     </div>
   );
@@ -492,8 +581,8 @@ type BookingsShellProps = {
 };
 
 type BookingsShellSkeletonProps = {
-  /** Tab labels in display order (skeleton pill count). */
-  tabLabels: readonly string[];
+  /** Kept so older callers still compile. The list skeleton no longer uses tabs. */
+  tabLabels?: readonly string[];
 };
 
 function BookingsSk({ className }: { className?: string }) {
@@ -550,73 +639,59 @@ function BookingsDesktopRowSkeleton() {
   );
 }
 
-export function BookingsShellSkeleton({
-  tabLabels,
-}: BookingsShellSkeletonProps) {
+export function BookingsShellSkeleton(_props: BookingsShellSkeletonProps = {}) {
   return (
     <div
-      className="flex w-full min-w-0 max-w-full flex-col gap-4 sm:gap-5"
+      className="flex w-full min-w-0 flex-col gap-4"
       aria-busy="true"
       aria-live="polite"
     >
       <span className="sr-only">Loading bookings…</span>
 
-      <div className="flex min-w-0 flex-col gap-1">
-        <BookingsSk className="h-7 w-32 sm:h-8 sm:w-40" />
-        <BookingsSk className="h-3.5 w-full max-w-md" />
+      <div className="flex flex-col gap-1">
+        <BookingsSk className="h-8 w-36 sm:h-9 sm:w-44" />
+        <BookingsSk className="h-4 w-72 max-w-full" />
       </div>
 
-      <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-        <div className="flex h-auto min-h-0 w-full min-w-0 flex-col items-stretch gap-1 rounded-xl border border-border bg-[#F3F4F6] p-1 dark:border-white/10 dark:bg-white/5 sm:flex-row sm:flex-nowrap">
-          {tabLabels.map((label, i) => (
-            <div
-              key={`sk-tab-${i}`}
-              className={classNames(
-                tabTriggerClass,
-                i === 0 &&
-                  "bg-white text-primary shadow-sm dark:bg-[#1a1a22] dark:text-primary",
-              )}
-            >
-              {label}
-            </div>
-          ))}
+      <section className="rounded-xl border border-border bg-white px-4 py-4 dark:border-white/10 dark:bg-[#1a1a22] sm:px-5">
+        <div className="flex items-center justify-between gap-3">
+          <BookingsSk className="h-5 w-28" />
+          <div className="flex shrink-0 items-center gap-2">
+            <BookingsSk className="h-9 w-44 rounded-md" />
+            <BookingsSk className="h-9 w-40 rounded-md" />
+          </div>
         </div>
 
-        <section className="rounded-lg border border-border bg-white px-4 py-5 dark:border-white/10 dark:bg-[#1a1a22] sm:px-6">
-          <BookingsSk className="h-3 w-40 max-w-full" />
-          <BookingsSk className="mt-3 h-4 w-full max-w-lg" />
-        </section>
-
-        <section className="min-w-0 rounded-xl border border-border bg-white px-4 py-4 dark:border-white/10 dark:bg-[#1a1a22] sm:px-5">
-          <BookingsSk className="h-3 w-28" />
-          <BookingsSk className="mt-3 h-4 w-52 max-w-full" />
-
-          <div className="mt-3 border-t border-border pt-3 dark:border-white/10">
-            <div className="flex flex-col gap-3 md:hidden">
-              <BookingsMobileRowSkeleton />
-              <BookingsMobileRowSkeleton />
-              <BookingsMobileRowSkeleton />
-            </div>
-
-            <div className="hidden min-w-0 md:block">
-              <div className="grid grid-cols-[minmax(5rem,auto)_1fr_minmax(5rem,auto)_minmax(5.5rem,auto)] gap-3 pb-2">
-                <BookingsSk className="h-3 w-16" />
-                <BookingsSk className="h-3 w-24" />
-                <BookingsSk className="h-3 w-14" />
-                <BookingsSk className="ms-auto h-3 w-12" />
-              </div>
-              <BookingsDesktopRowSkeleton />
-              <BookingsDesktopRowSkeleton />
-              <BookingsDesktopRowSkeleton />
-            </div>
+        <div className="mt-3 border-t border-border pt-3 dark:border-white/10">
+          <div className="flex flex-col gap-3 md:hidden">
+            <BookingsMobileRowSkeleton />
+            <BookingsMobileRowSkeleton />
+            <BookingsMobileRowSkeleton />
           </div>
 
-          <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-[#F9FAFB] px-3 py-3 dark:border-white/10 dark:bg-white/6 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-            <BookingsSk className="mx-auto h-3.5 w-44 sm:mx-0" />
-            <BookingsSk className="h-9 w-full sm:w-52" />
+          <div className="hidden min-w-0 md:block">
+            <div className="grid grid-cols-[minmax(5rem,auto)_1fr_minmax(5rem,auto)_minmax(5.5rem,auto)] gap-3 pb-2">
+              <BookingsSk className="h-3 w-12" />
+              <BookingsSk className="h-3 w-16" />
+              <BookingsSk className="h-3 w-12" />
+              <BookingsSk className="ms-auto h-3 w-14" />
+            </div>
+            <BookingsDesktopRowSkeleton />
+            <BookingsDesktopRowSkeleton />
+            <BookingsDesktopRowSkeleton />
+            <BookingsDesktopRowSkeleton />
           </div>
-        </section>
-      </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <BookingsSk className="h-4 w-24" />
+          <div className="flex items-center gap-2">
+            <BookingsSk className="h-8 w-24 rounded-md" />
+            <BookingsSk className="size-8 rounded-md" />
+            <BookingsSk className="size-8 rounded-md" />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
