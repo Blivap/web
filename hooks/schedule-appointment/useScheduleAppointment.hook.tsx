@@ -27,6 +27,7 @@ import {
   trackFailure,
   trackSuccess,
 } from "@/lib/analytics/ga";
+import { clearScheduleAppointmentDraft } from "@/lib/schedule-appointment/scheduleAppointmentDraft";
 
 export type { ScheduleAppointmentDetails } from "@/lib/schedule-appointment/scheduleAppointment.utils";
 
@@ -77,7 +78,12 @@ export function useScheduleAppointment() {
       const parsed = parseHospitalsListResponse(data);
       setHospitals(parsed);
       setHospitalsLoadState("ok");
-      setAppointment((prev) => ({ ...prev, hospitalId: "" }));
+      setAppointment((prev) => ({
+        ...prev,
+        hospitalId: parsed.some((hospital) => hospital.id === prev.hospitalId)
+          ? prev.hospitalId
+          : "",
+      }));
     } catch (e) {
       setHospitals([]);
       setHospitalsLoadState("error");
@@ -141,8 +147,8 @@ export function useScheduleAppointment() {
   );
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
       if (!canConfirmAppointment || isSendingBooking) return;
       if (isBookingSlotInPast(appointment.date, appointment.time)) {
         showSnackbar("That time has already passed.", "error");
@@ -181,6 +187,7 @@ export function useScheduleAppointment() {
           return;
         }
         trackSuccess("booking_requested");
+        clearScheduleAppointmentDraft();
         void dispatch(loadSentBookings({ silent: true }));
 
         const created = parseBookingRecord(data);

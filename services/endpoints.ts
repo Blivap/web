@@ -24,6 +24,7 @@ export const endpoints = {
     requestRetake: "/donors/request-retake",
     location: "/donors/location",
     me: "/donors/me",
+    meetupCare: "/donors/me/meetup-care",
     public: (userId: string) => `/donors/public/${userId}`,
     /** Clinical / intent profile (JWT). Optional for POST /donors/request-activation. */
     screeningProfile: "/donors/screening-profile",
@@ -52,6 +53,7 @@ export const endpoints = {
     sent: "/bookings/sent",
     received: "/bookings/received",
     mine: "/bookings/mine",
+    meetupCareQuote: "/bookings/meetup-care-quote",
     respond: (id: string) => `/bookings/${encodeURIComponent(id)}/respond`,
     accept: (id: string) => `/bookings/${encodeURIComponent(id)}/accept`,
     decline: (id: string) => `/bookings/${encodeURIComponent(id)}/decline`,
@@ -94,6 +96,10 @@ export const endpoints = {
   },
 
   news: "/news",
+
+  welfare: {
+    packages: "/welfare-packages",
+  },
 
   wallet: {
     summary: "/wallet",

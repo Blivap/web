@@ -717,7 +717,7 @@ function NewDonorForm() {
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-1 flex-col px-4 pb-6 pt-4 sm:p-6">
+    <div className="flex w-full flex-col px-4 pb-6 pt-4 sm:p-6">
       <Link
         href={routes.overview}
         className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline mb-6"
@@ -728,7 +728,7 @@ function NewDonorForm() {
       <StepProgress currentStep={step} />
       <div
         ref={contentRef}
-        className="flex-1 min-h-0 overflow-y-auto custom-scrollbar"
+        className="min-w-0"
       >
         <DonorBasicsStep
           active={step === 1}

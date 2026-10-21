@@ -34,10 +34,10 @@ export function bookingRowDetailPartsForViewer(
   const hospital =
     b.hospitalName?.trim() || hospitalFallbackFromId(b.hospitalId);
   if (viewer === "donor") {
-    const who = partyPublicLabel(b.requesterPublicId, "Requester");
+    const who = partyPublicLabel(b.requesterPublicId, "");
     return { who, hospital, when };
   }
-  const who = partyPublicLabel(b.donorPublicId, "Donor");
+  const who = partyPublicLabel(b.donorPublicId, "");
   return { who, hospital, when };
 }
 

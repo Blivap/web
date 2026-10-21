@@ -59,13 +59,13 @@ function SkeletonStepProgress({ currentStep }: { currentStep: number }) {
 export function NewDonorPageSkeleton() {
   return (
     <div
-      className="flex h-full min-h-0 w-full flex-1 flex-col px-4 pb-6 pt-4 sm:p-6"
+      className="flex w-full flex-col px-4 pb-6 pt-4 sm:p-6"
       aria-busy="true"
       aria-live="polite"
     >
       <SkeletonStepProgress currentStep={1} />
 
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+      <div className="min-w-0">
         <div className="flex flex-col gap-6 mt-6 xl:mt-10">
           <div>
             <div className={`h-7 w-56 mb-2 ${pulse}`} />

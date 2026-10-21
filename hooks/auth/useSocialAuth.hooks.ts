@@ -85,6 +85,13 @@ export function useSocialAuth(options?: { enabled?: boolean }) {
   }, [configured]);
 
   const signIn = async (provider: SocialProvider) => {
+    if (provider === "apple" || provider === "facebook") {
+      showSnackbar(
+        "Apple and Facebook sign-in are under construction",
+        "info",
+      );
+      return;
+    }
     if (pending) return;
     if (!enabled) {
       showSnackbar("Accept the terms and conditions to continue", "error");

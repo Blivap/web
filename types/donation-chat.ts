@@ -7,4 +7,6 @@ export type DonationChatMessage = {
   roleLabel?: string;
   kind?: string;
   senderUserId?: string;
+  /** Anonymous handle when the sender object includes one. */
+  senderPublicId?: string;
 };

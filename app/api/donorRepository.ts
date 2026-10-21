@@ -25,6 +25,11 @@ export default function DonorRepository() {
       return fetcher(endpoints.donors.detail(id), { method: "GET" });
     },
 
+    /** Public donor profile by user id — includes `publicId`. */
+    publicByUserId(userId: string): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.donors.public(userId), { method: "GET" });
+    },
+
     ratings(donorId: string): Promise<IResponse<unknown>> {
       return fetcher(endpoints.donors.ratings(donorId), { method: "GET" });
     },
@@ -64,6 +69,16 @@ export default function DonorRepository() {
 
     me(): Promise<IResponse<unknown>> {
       return fetcher(endpoints.donors.me, { method: "GET" });
+    },
+
+    saveMeetupCare(payload: {
+      coverage: "self" | "requester";
+      items: string[];
+    }): Promise<IResponse<unknown>> {
+      return fetcher(endpoints.donors.meetupCare, {
+        method: "PUT",
+        data: payload,
+      });
     },
 
     updateLocation(location: DonorLocationPoint): Promise<IResponse<unknown>> {

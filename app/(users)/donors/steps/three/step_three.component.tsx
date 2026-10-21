@@ -72,7 +72,7 @@ export function StepThree({
 
   return (
     active && (
-      <div className="flex flex-col gap-6 mt-6 xl:mt-10 overflow-hidden">
+      <div className="mt-6 flex flex-col gap-6 xl:mt-10">
         <div className="rounded-xl border border-border bg-white px-5 py-5 sm:px-6 sm:py-6 shadow-[0_10px_25px_rgba(0,0,0,0.04)] dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-none">
           <h2 className="text-lg font-semibold text-text-primary">
             Eligibility and activation request
