@@ -383,7 +383,9 @@ function ScheduleAppointmentPageContent() {
             hospitalName={selectedHospital?.name ?? "Selected hospital"}
             dateLabel={appointment.date}
             time={appointment.time}
-            lines={careLines.filter((line) => line.payer === "you")}
+            lines={careLines.filter(
+              (line) => line.payer === "you" && line.amountKobo > 0,
+            )}
             totalKobo={careDueKobo}
             scheduling={isSendingBooking}
             onBack={() => setStep("details")}
