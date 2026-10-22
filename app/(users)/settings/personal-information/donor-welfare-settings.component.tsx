@@ -149,9 +149,9 @@ export function DonorWelfareSettings() {
           </h3>
           <InfoHint title="Meetup care" label="Meetup care information">
             <p>
-              Donation stays voluntary and unpaid. This is only the practical
-              care around a screening visit: getting there, eating, resting,
-              and getting home.
+              Donation stays voluntary. This is only the practical welfare
+              around a screening visit: getting there, eating, resting, and
+              getting home.
             </p>
             <p>
               Covering your own costs means a requester is not asked to arrange

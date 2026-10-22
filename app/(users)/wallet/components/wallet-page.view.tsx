@@ -60,7 +60,7 @@ export function WalletPageView({
             Wallet
           </h1>
           <p className="text-[13px] leading-snug text-[#6B6B6B] dark:text-white/60 sm:mt-1.5 sm:text-[14px]">
-            Manage your balance, payment methods and booking payments.
+            Manage your balance, payment methods and booking welfare.
           </p>
         </div>
         <p className="inline-flex shrink-0 items-center gap-1.5 pt-0.5 text-[11px] font-medium text-[#1F7A3F] dark:text-emerald-300 sm:pt-1 sm:text-[12px]">
@@ -112,7 +112,7 @@ export function WalletPageView({
       />
 
       <p className="mt-4 pt-2 text-center text-[13px] text-[#6B6B6B] dark:text-white/55 sm:mt-5 sm:text-[14px]">
-        Have a question about a payment?{" "}
+        Have a question about welfare?{" "}
         <Link
           href={routes.settingsHelpSupport}
           className="font-semibold text-[#960018] hover:underline"

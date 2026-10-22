@@ -183,11 +183,11 @@ export function ScheduleAppointmentPaymentView({
       <div className="overflow-hidden rounded-xl border border-border bg-white dark:border-white/10 dark:bg-[#14141a]">
         <header className="border-b border-border px-4 py-4 sm:px-5 dark:border-white/10">
           <h2 className="text-sm font-semibold text-text-primary">
-            Payment summary
+            Welfare summary
           </h2>
           <p className="mt-1 text-xs text-text-secondary">
-            The request is sent after this care amount is held from your wallet.
-            Donation stays unpaid.
+            The request is sent after this welfare is held from your wallet.
+            Donation stays voluntary.
           </p>
         </header>
 
@@ -269,7 +269,7 @@ export function ScheduleAppointmentPaymentView({
           disabled={!canPay}
           onClick={onPay}
         >
-          Pay {formatWalletAmount(totalKobo)} and schedule
+          Hold {formatWalletAmount(totalKobo)} welfare and schedule
         </Button>
       )}
     </section>

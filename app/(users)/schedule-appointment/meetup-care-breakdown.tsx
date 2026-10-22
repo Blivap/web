@@ -76,10 +76,10 @@ export function MeetupCareBreakdown({
               className="size-7"
             >
               <p>
-                Donation stays voluntary and unpaid. This sheet is only the
-                practical cost of a safe visit. The donor chooses which care
-                the requester arranges, and those amounts are held from the
-                wallet before the request is sent.
+                Donation stays voluntary. This sheet is only the practical
+                welfare for a safe visit. The donor chooses which welfare the
+                requester arranges, and those amounts are held from the wallet
+                before the request is sent.
               </p>
             </InfoHint>
           </div>

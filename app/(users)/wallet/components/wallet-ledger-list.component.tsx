@@ -65,10 +65,11 @@ function displayTitle(type: string, fallbackLabel: string): string {
     case "topup":
       return "Wallet top-up";
     case "welfare_payment":
-      return "Booking payment";
+      return "Booking welfare";
     case "welfare_refund":
-    case "welfare_reimbursement":
       return "Booking refund";
+    case "welfare_reimbursement":
+      return "Welfare reimbursement";
     case "withdrawal":
       return "Bank withdrawal";
     case "withdrawal_reversal":
@@ -83,7 +84,7 @@ function entryIcon(type: string, isCredit: boolean) {
   if (type === "welfare_payment") {
     return <Calendar className={cls} strokeWidth={1.75} />;
   }
-  if (type === "welfare_refund" || type === "welfare_reimbursement") {
+  if (type === "welfare_refund") {
     return <RefreshCcw className={cls} strokeWidth={1.75} />;
   }
   if (type === "topup" || isCredit) {
@@ -141,13 +142,13 @@ function entrySubtitle(entry: WalletLedgerEntry): string {
     return ref ? `Visa •••• 4242 · ${ref}` : "Visa •••• 4242 · Paystack";
   }
   if (entry.type === "welfare_payment") {
-    return ref ? `Meetup booking · ${ref}` : "Meetup booking";
+    return ref ? `Meetup welfare · ${ref}` : "Meetup welfare";
   }
-  if (
-    entry.type === "welfare_refund" ||
-    entry.type === "welfare_reimbursement"
-  ) {
+  if (entry.type === "welfare_refund") {
     return ref ? `Cancelled booking · ${ref}` : "Cancelled booking";
+  }
+  if (entry.type === "welfare_reimbursement") {
+    return ref ? `Completed donation · ${ref}` : "Completed donation";
   }
   return walletEntryCopy(entry.type, entry.label).description;
 }
@@ -322,7 +323,7 @@ export function WalletLedgerList({
             <SelectContent>
               <SelectItem value="all">All transactions</SelectItem>
               <SelectItem value="topup">Wallet top-ups</SelectItem>
-              <SelectItem value="welfare_payment">Booking payments</SelectItem>
+              <SelectItem value="welfare_payment">Booking welfare</SelectItem>
               <SelectItem value="welfare_refund">Booking refunds</SelectItem>
               <SelectItem value="welfare_reimbursement">
                 Reimbursements
@@ -361,7 +362,7 @@ export function WalletLedgerList({
         <div className="rounded-[14px] border border-[#E8E8E8] bg-white px-5 py-12 text-center dark:border-white/10 dark:bg-[#1a1a22]">
           <p className="text-sm text-[#6B6B6B]">
             {entries.length === 0
-              ? "No wallet activity yet. Top-ups and welfare payments will appear here."
+              ? "No wallet activity yet. Top-ups and welfare will appear here."
               : "No transactions match your filters."}
           </p>
         </div>
