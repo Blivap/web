@@ -17,10 +17,10 @@ export function SettingsShell({
 }: SettingsShellProps) {
   return (
     <Layout>
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8 mt-12">
         <aside className="w-full shrink-0 lg:sticky lg:top-4 lg:w-72">
           <header className="mb-4 flex flex-col w-fit lg:mb-5">
-            <h1 className="text-xl sm:text-2xl font-semibold text-primary">
+            <h1 className="text-xl sm:text-3xl font-semibold text-primary">
               Settings
             </h1>
             <div className="mt-1 h-0.5 w-full bg-primary rounded-full" />
