@@ -252,12 +252,7 @@ function BookingsRowsTable({
   const hasRows = rows.length > 0;
 
   return (
-    <div
-      className={classNames(
-        "flex flex-col",
-        fill && "min-h-0 flex-1",
-      )}
-    >
+    <div className={classNames("flex flex-col", fill && "min-h-0 flex-1")}>
       <div
         className={classNames(
           "mt-3 border-t border-border pt-3 dark:border-white/10",
@@ -396,7 +391,9 @@ function BookingsRowsTable({
           <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
             <p className="text-center text-xs text-text-secondary sm:text-left">
               Page{" "}
-              <span className="font-semibold text-text-primary">{safePage}</span>{" "}
+              <span className="font-semibold text-text-primary">
+                {safePage}
+              </span>{" "}
               of{" "}
               <span className="font-semibold text-text-primary">
                 {totalPages}
@@ -544,9 +541,7 @@ function BookingsTabBody({
                 ({mainListCount})
               </span>
             </h2>
-            {headerAside ? (
-              <div className="shrink-0">{headerAside}</div>
-            ) : null}
+            {headerAside ? <div className="shrink-0">{headerAside}</div> : null}
           </div>
         ) : null}
         {rows.length === 0 ? (
