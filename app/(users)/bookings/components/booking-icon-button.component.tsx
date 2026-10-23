@@ -79,15 +79,15 @@ export function BookingIconActions({
   className?: string;
 }) {
   return (
-    <div className={cn("flex min-w-0 flex-col items-end gap-1", className)}>
-      <div className="flex flex-row flex-nowrap items-center justify-end gap-1">
-        {children}
-      </div>
-      {hint ? (
-        <p className="max-w-full text-right text-[10px] leading-snug text-amber-800 dark:text-amber-300">
-          {hint}
-        </p>
-      ) : null}
+    <div
+      title={typeof hint === "string" ? hint : undefined}
+      className={cn(
+        "flex min-w-0 flex-nowrap items-center justify-end gap-1",
+        className,
+      )}
+    >
+      {children}
+      {hint ? <span className="sr-only">{hint}</span> : null}
     </div>
   );
 }

@@ -26,6 +26,7 @@ import { ProfileAccountMenu } from "./profile-account-menu.component";
 import { Button } from "@/components/button/button.component";
 import { BlivapLogo } from "@/public/svg";
 import { LayoutBreadcrumbs } from "./layout-breadcrumbs.component";
+import { SupportChatButton } from "@/components/support/support-chat-button";
 
 // Define navigation item structure
 interface NavItem {
@@ -148,6 +149,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           {props.children}
         </div>
       </div>
+      <SupportChatButton />
     </div>
   );
 };

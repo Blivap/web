@@ -203,11 +203,11 @@ function BookingRowStatus({
   reported?: boolean;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-nowrap items-center gap-1.5">
       <BookingStatusPill variant={pillVariant}>{pillLabel}</BookingStatusPill>
       {reported ? (
         <span
-          className="inline-flex size-5 items-center justify-center rounded-full bg-[#374151] text-[9px] font-bold text-white dark:bg-white/15"
+          className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[#374151] text-[9px] font-bold text-white dark:bg-white/15"
           title="Reported"
         >
           !
@@ -252,12 +252,7 @@ function BookingsRowsTable({
   const hasRows = rows.length > 0;
 
   return (
-    <div
-      className={classNames(
-        "flex flex-col",
-        fill && "min-h-0 flex-1",
-      )}
-    >
+    <div className={classNames("flex flex-col", fill && "min-h-0 flex-1")}>
       <div
         className={classNames(
           "mt-3 border-t border-border pt-3 dark:border-white/10",
@@ -285,7 +280,7 @@ function BookingsRowsTable({
                     subtitle={row.subtitle}
                     avatarUrl={row.avatarUrl}
                   />
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-nowrap items-center justify-between gap-2">
                     <BookingRowStatus
                       pillLabel={row.pillLabel}
                       pillVariant={row.pillVariant}
@@ -366,7 +361,7 @@ function BookingsRowsTable({
                         avatarUrl={row.avatarUrl}
                       />
                     </td>
-                    <td className="border-t border-[#F3F4F6] py-3 pr-3 align-middle dark:border-white/10">
+                    <td className="whitespace-nowrap border-t border-[#F3F4F6] py-3 pr-3 align-middle dark:border-white/10">
                       <BookingRowStatus
                         pillLabel={row.pillLabel}
                         pillVariant={row.pillVariant}
@@ -396,7 +391,9 @@ function BookingsRowsTable({
           <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
             <p className="text-center text-xs text-text-secondary sm:text-left">
               Page{" "}
-              <span className="font-semibold text-text-primary">{safePage}</span>{" "}
+              <span className="font-semibold text-text-primary">
+                {safePage}
+              </span>{" "}
               of{" "}
               <span className="font-semibold text-text-primary">
                 {totalPages}
@@ -544,9 +541,7 @@ function BookingsTabBody({
                 ({mainListCount})
               </span>
             </h2>
-            {headerAside ? (
-              <div className="shrink-0">{headerAside}</div>
-            ) : null}
+            {headerAside ? <div className="shrink-0">{headerAside}</div> : null}
           </div>
         ) : null}
         {rows.length === 0 ? (
