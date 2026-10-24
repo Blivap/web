@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   Bell,
   ChevronRight,
@@ -24,6 +24,7 @@ import {
 } from "@/lib/donors/parseDonorsListResponse";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import { DonorCooldownDisplay } from "../donors/components/donor-cooldown-display.component";
+import { applyOwnerCooldown } from "@/lib/donors/donorCooldown";
 import type { Donor } from "../donors/donors.data";
 import { OverviewActiveDonorCard } from "./components/overview-active-donor-card.component";
 import { SCREENING_DONATION_TYPE_OPTIONS } from "@/lib/donors/screeningDonationTypes";
@@ -100,6 +101,11 @@ export default function OverviewPage() {
       cancelled = true;
     };
   }, []);
+
+  const visibleActiveDonors = useMemo(
+    () => applyOwnerCooldown(activeDonors, user?.id, myCooldownEndsAt),
+    [activeDonors, myCooldownEndsAt, user?.id],
+  );
 
   return (
     <Layout>
@@ -265,13 +271,13 @@ export default function OverviewPage() {
                         <p className="py-10 text-center text-sm text-text-secondary">
                           Could not load donors. Please try again later.
                         </p>
-                      ) : activeDonors.length === 0 ? (
+                      ) : visibleActiveDonors.length === 0 ? (
                         <p className="py-10 text-center text-sm text-text-secondary">
                           No donors available yet.
                         </p>
                       ) : (
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                          {activeDonors.map((donor) => (
+                          {visibleActiveDonors.map((donor) => (
                             <OverviewActiveDonorCard
                               key={donor.id}
                               donor={donor}

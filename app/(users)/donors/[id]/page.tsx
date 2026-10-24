@@ -105,7 +105,7 @@ export default function DonorDetailsPage() {
   const isOwnProfile =
     !!user?.id && !!donor?.userId && donor.userId === user.id;
   const cooldown = resolveDonorCooldown(donor?.cooldownEndsAt);
-  const bookingBlocked = cooldown.isActive && !isOwnProfile;
+  const bookingBlocked = cooldown.isActive;
   const ratingsSummary = donor?.ratings;
   const ratingLabel =
     ratingsSummary && ratingsSummary.ratingCount > 0
@@ -311,8 +311,7 @@ export default function DonorDetailsPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
               {bookingBlocked ? (
                 <p className="text-sm text-text-secondary">
-                  This donor is on a rest period. Booking opens when their
-                  cooldown ends.
+                  Cooling down. Booking opens when this rest period ends.
                 </p>
               ) : (
                 <Button

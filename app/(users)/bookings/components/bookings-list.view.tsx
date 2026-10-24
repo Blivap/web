@@ -314,15 +314,15 @@ export function BookingsListView() {
         tableEmptyMessage={emptyCopy.title}
         emptyDescription={emptyCopy.description}
         headerAside={
-          <div className="flex items-center gap-2">
-          <div className="relative">
+          <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
+          <div className="relative min-w-0 flex-1 sm:flex-none">
             <DatePicker
               name="bookingDate"
               value={dateFilter}
               placeholder="Any date"
               valueClassName="text-xs font-medium"
               aria-label="Filter by date"
-              containerClassName="w-44 gap-0"
+              containerClassName="w-full min-w-0 gap-0 sm:w-44"
               fieldClassName={dateFilter ? "h-9 pr-8 pl-3" : "h-9 px-3"}
               onChange={(event) => selectDate(event.target.value)}
             />
@@ -345,7 +345,7 @@ export function BookingsListView() {
           >
             <SelectTrigger
               aria-label="Filter bookings"
-              className="h-9 w-40 text-xs sm:text-sm"
+              className="h-9 w-full min-w-0 flex-1 text-xs sm:w-40 sm:flex-none sm:text-sm"
             >
               <SelectValue />
             </SelectTrigger>

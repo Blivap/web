@@ -517,7 +517,7 @@ function BookingsTabBody({
 
       <section
         className={classNames(
-          "rounded-xl border border-border bg-white px-4 py-4 dark:border-white/10 dark:bg-[#1a1a22] sm:px-5",
+          "min-w-0 rounded-xl border border-border bg-white px-4 py-4 dark:border-white/10 dark:bg-[#1a1a22] sm:px-5",
           fill && "flex min-h-0 flex-1 flex-col",
         )}
       >
@@ -533,15 +533,17 @@ function BookingsTabBody({
         ) : null}
         {rows.length > 0 || headerAside ? (
           <div
-            className={`flex items-center justify-between gap-3 ${listEyebrow || bannerInsideCard ? "mt-3" : ""}`}
+            className={`flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${listEyebrow || bannerInsideCard ? "mt-3" : ""}`}
           >
-            <h2 className="text-sm font-semibold text-text-primary sm:text-base">
+            <h2 className="shrink-0 text-sm font-semibold text-text-primary sm:text-base">
               {mainListTitle}{" "}
               <span className="font-medium text-text-tertiary">
                 ({mainListCount})
               </span>
             </h2>
-            {headerAside ? <div className="shrink-0">{headerAside}</div> : null}
+            {headerAside ? (
+              <div className="min-w-0 w-full sm:w-auto">{headerAside}</div>
+            ) : null}
           </div>
         ) : null}
         {rows.length === 0 ? (
@@ -648,12 +650,12 @@ export function BookingsShellSkeleton(_props: BookingsShellSkeletonProps = {}) {
         <BookingsSk className="h-4 w-72 max-w-full" />
       </div>
 
-      <section className="rounded-xl border border-border bg-white px-4 py-4 dark:border-white/10 dark:bg-[#1a1a22] sm:px-5">
-        <div className="flex items-center justify-between gap-3">
-          <BookingsSk className="h-5 w-28" />
-          <div className="flex shrink-0 items-center gap-2">
-            <BookingsSk className="h-9 w-44 rounded-md" />
-            <BookingsSk className="h-9 w-40 rounded-md" />
+      <section className="min-w-0 rounded-xl border border-border bg-white px-4 py-4 dark:border-white/10 dark:bg-[#1a1a22] sm:px-5">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <BookingsSk className="h-5 w-28 max-w-full" />
+          <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
+            <BookingsSk className="h-9 min-w-0 flex-1 basis-0 rounded-md sm:w-44 sm:flex-none" />
+            <BookingsSk className="h-9 min-w-0 flex-1 basis-0 rounded-md sm:w-40 sm:flex-none" />
           </div>
         </div>
 
@@ -678,12 +680,12 @@ export function BookingsShellSkeleton(_props: BookingsShellSkeletonProps = {}) {
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <BookingsSk className="h-4 w-24" />
-          <div className="flex items-center gap-2">
-            <BookingsSk className="h-8 w-24 rounded-md" />
-            <BookingsSk className="size-8 rounded-md" />
-            <BookingsSk className="size-8 rounded-md" />
+        <div className="mt-4 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <BookingsSk className="h-4 w-24 max-w-full" />
+          <div className="flex min-w-0 items-center gap-2">
+            <BookingsSk className="h-8 min-w-0 flex-1 rounded-md sm:w-24 sm:flex-none" />
+            <BookingsSk className="size-8 shrink-0 rounded-md" />
+            <BookingsSk className="size-8 shrink-0 rounded-md" />
           </div>
         </div>
       </section>

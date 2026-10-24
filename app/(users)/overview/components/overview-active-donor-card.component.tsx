@@ -68,9 +68,9 @@ export function OverviewActiveDonorCard({
         />
       </Link>
 
-      {bookingBlocked ? (
+      {cooldown.isActive ? (
         <p className="mt-3 text-xs font-medium text-amber-800 dark:text-amber-200">
-          Booking paused — on cooldown
+          Cooling down. Booking opens when this rest period ends.
         </p>
       ) : isOwner ? (
         <p className="mt-3 text-xs text-text-tertiary">
@@ -87,7 +87,7 @@ export function OverviewActiveDonorCard({
             className="w-full mt-auto"
             disabled
           >
-            Booking paused
+            Cooling down
           </Button>
         ) : isOwner ? (
           <Button
