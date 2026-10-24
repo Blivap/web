@@ -790,11 +790,21 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     return false;
   }, [session, user?.id, isRequester]);
 
+  const iVerifiedMeetup = session?.me.meetupVerified === true;
   const showCodePath =
     session &&
     session.codeVerificationEnabled !== false &&
     !readOnly &&
+    !gateSatisfied &&
+    !iVerifiedMeetup;
+  const waitingOnPeerVerify =
+    Boolean(ninOk) &&
+    Boolean(session) &&
+    !readOnly &&
+    iVerifiedMeetup &&
     !gateSatisfied;
+  const showConfirmDonation =
+    Boolean(ninOk) && gateSatisfied && !readOnly && !myDonationDone;
 
   useEffect(() => {
     if (ninOk && showCodePath) return;
@@ -1335,40 +1345,42 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
           ) : null}
 
           <div className="border-t border-border px-4 py-4 sm:px-6 dark:border-white/10">
-            <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-text-secondary">
-              <PartyAvatar src={peerProfileImage} className="size-6" />
-              <span className="inline-flex items-center gap-1 font-medium text-text-primary">
-                {peerHandle}
-                {session.peer.meetupVerified ? <MeetupVerifiedMark /> : null}
-              </span>
-              {donationChatStatusBadge ? (
-                <span
-                  className={cn(
-                    "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-                    donationChatStatusBadge.className,
-                  )}
-                >
-                  {donationChatStatusBadge.label}
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2 text-sm text-text-secondary">
+                <PartyAvatar src={peerProfileImage} className="size-6" />
+                <span className="inline-flex min-w-0 items-center gap-1 font-medium text-text-primary">
+                  <span className="truncate">{peerHandle}</span>
+                  {session.peer.meetupVerified ? <MeetupVerifiedMark /> : null}
                 </span>
-              ) : null}
-            </div>
-            {chatStatusLine ? (
-              <p className="mb-2 text-xs text-text-tertiary">
-                {chatStatusLine}
-              </p>
-            ) : null}
-            {donationChat.sendError ? (
-              <p
-                className="mb-2 text-sm text-red-600 dark:text-red-400"
-                role="alert"
-              >
-                {donationChat.sendError}
-              </p>
-            ) : null}
-
-            {ninOk && showCodePath ? (
-              <div className="mb-3 flex flex-col gap-2">
-                <div className="flex min-w-0 items-center gap-2">
+                {donationChatStatusBadge ? (
+                  <span
+                    className={cn(
+                      "inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                      donationChatStatusBadge.className,
+                    )}
+                  >
+                    {donationChatStatusBadge.label}
+                  </span>
+                ) : null}
+              </div>
+              {waitingOnPeerVerify ? (
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-200">
+                  <span className="size-1.5 animate-pulse rounded-full bg-amber-300" />
+                  Pending
+                </span>
+              ) : showConfirmDonation ? (
+                <Button
+                  type="button"
+                  size="xs"
+                  className="shrink-0"
+                  disabled={confirmBusy || isRequester === null}
+                  loading={confirmBusy}
+                  onClick={() => void onConfirmDonation()}
+                >
+                  Confirm donation
+                </Button>
+              ) : ninOk && showCodePath ? (
+                <div className="flex shrink-0 items-center gap-2">
                   <input
                     name="meetupCode"
                     aria-label="Other person's code"
@@ -1383,7 +1395,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                     autoComplete="one-time-code"
                     maxLength={6}
                     disabled={verifyBusy}
-                    className="h-8 w-24 shrink-0 rounded-md border border-border bg-white px-2 text-center font-mono text-sm tracking-widest text-text-primary outline-none placeholder:tracking-widest placeholder:text-text-tertiary focus:border-primary/45 disabled:opacity-50 dark:border-white/15 dark:bg-[#111118]"
+                    className="h-8 w-28 rounded-md border border-border bg-white px-2 text-center font-mono text-sm tracking-widest text-text-primary outline-none placeholder:tracking-widest placeholder:text-text-tertiary focus:border-primary/45 disabled:opacity-50 dark:border-white/15 dark:bg-[#111118]"
                   />
                   <Button
                     type="button"
@@ -1420,7 +1432,20 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                     </p>
                   </InfoHint>
                 </div>
-              </div>
+              ) : null}
+            </div>
+            {chatStatusLine ? (
+              <p className="mb-2 text-xs text-text-tertiary">
+                {chatStatusLine}
+              </p>
+            ) : null}
+            {donationChat.sendError ? (
+              <p
+                className="mb-2 text-sm text-red-600 dark:text-red-400"
+                role="alert"
+              >
+                {donationChat.sendError}
+              </p>
             ) : null}
 
             <div
@@ -1445,7 +1470,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                       : "Message…"
                 }
                 className={cn(
-                  "max-h-40 w-full resize-none border-0 bg-transparent text-sm text-text-primary outline-none transition-[min-height] duration-200 placeholder:text-text-tertiary disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none",
+                  "max-h-40 w-full resize-none border-0 bg-transparent text-base sm:text-sm text-text-primary outline-none transition-[min-height] duration-200 placeholder:text-text-tertiary disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none",
                   composerTall ? "min-h-36" : "min-h-16",
                 )}
                 onChange={(event) => {
@@ -1583,24 +1608,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                         <p className="px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
                           Arrival recorded
                         </p>
-                      ) : null}
-                      {ninOk &&
-                      gateSatisfied &&
-                      !readOnly &&
-                      !myDonationDone ? (
-                        <button
-                          type="button"
-                          className="flex w-full rounded-lg px-3 py-2 text-left text-sm text-text-primary hover:bg-[#F3F4F6] disabled:opacity-50 dark:hover:bg-white/8"
-                          disabled={confirmBusy || isRequester === null}
-                          onClick={() => {
-                            setMoreOpen(false);
-                            void onConfirmDonation();
-                          }}
-                        >
-                          {confirmBusy
-                            ? "Confirming donation…"
-                            : "Confirm donation"}
-                        </button>
                       ) : null}
                       {isRequester === false ? (
                         <button
