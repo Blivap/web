@@ -13,6 +13,7 @@ import {
   nextThemePreference,
   useThemePreference,
 } from "@/hooks/theme/useThemePreference.hook";
+import { displayPublicId } from "@/lib/users/formatPublicId";
 import { ProfileThemeCycleRow } from "./theme-profile-submenu.component";
 
 type ProfileAccountMenuProps = {
@@ -80,7 +81,7 @@ export function ProfileAccountMenu({
     }
   }, [isOpen]);
 
-  const displayName = user?.id?.slice(0, 6) ?? "User";
+  const displayName = displayPublicId(user?.publicId);
 
   return (
     <div
@@ -111,7 +112,7 @@ export function ProfileAccountMenu({
           />
           {!compact ? (
             <div className="flex flex-col text-left">
-              <p className="text-sm font-medium text-[#000000] dark:text-white">
+              <p className="text-sm font-medium uppercase tracking-wide text-[#000000] dark:text-white">
                 {displayName}
               </p>
               <p className="text-xs text-[#6B7280] dark:text-white/55">Donor</p>
@@ -150,7 +151,7 @@ export function ProfileAccountMenu({
           }}
         >
           <div className="border-b border-[#F3F4F6] px-3 py-2 dark:border-white/10">
-            <p className="text-sm font-medium text-black dark:text-white">
+            <p className="text-sm font-medium uppercase tracking-wide text-black dark:text-white">
               {displayName}
             </p>
             <p className="text-xs text-[#6B7280] dark:text-white/55">

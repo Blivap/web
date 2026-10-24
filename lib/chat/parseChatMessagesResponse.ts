@@ -96,6 +96,18 @@ export function parseDonationChatMessageRecord(
       r.fromUserId ??
       r.from_user_id,
   );
+  const senderPublicId = (() => {
+    const direct = pickString(r.senderPublicId ?? r.sender_public_id);
+    if (direct) return direct.toUpperCase();
+    for (const key of ["sender", "from", "author", "user"]) {
+      const nested = r[key];
+      if (!nested || typeof nested !== "object") continue;
+      const n = nested as Record<string, unknown>;
+      const id = pickString(n.publicId ?? n.public_id);
+      if (id) return id.toUpperCase();
+    }
+    return undefined;
+  })();
   const createdAt =
     pickString(r.createdAt ?? r.created_at ?? r.timestamp ?? r.sentAt) ??
     undefined;
@@ -111,6 +123,7 @@ export function parseDonationChatMessageRecord(
     ...(roleLabel ? { roleLabel } : {}),
     ...(kind ? { kind } : {}),
     ...(senderUserId ? { senderUserId } : {}),
+    ...(senderPublicId ? { senderPublicId } : {}),
   };
 }
 

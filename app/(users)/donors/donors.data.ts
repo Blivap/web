@@ -13,6 +13,8 @@ export interface Donor {
   id: string;
   /** Auth user id when returned by the API (for owner vs viewer UI). */
   userId?: string;
+  /** Anonymous 8-character handle. */
+  publicId?: string | null;
   packs: number;
   profileImage?: string | null;
   rating: number;

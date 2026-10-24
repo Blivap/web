@@ -152,7 +152,7 @@ export function DonorScreeningProfileStep({
   if (!active) return null;
 
   return (
-    <div className={`flex flex-col gap-6 mt-6 xl:mt-10 overflow-hidden`}>
+    <div className="mt-6 flex flex-col gap-6 xl:mt-10">
       <div className={cardClass}>
         <h2 className="text-lg font-semibold text-text-primary">
           Donation-type screening profile

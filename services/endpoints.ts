@@ -24,6 +24,7 @@ export const endpoints = {
     requestRetake: "/donors/request-retake",
     location: "/donors/location",
     me: "/donors/me",
+    meetupCare: "/donors/me/meetup-care",
     public: (userId: string) => `/donors/public/${userId}`,
     /** Clinical / intent profile (JWT). Optional for POST /donors/request-activation. */
     screeningProfile: "/donors/screening-profile",
@@ -52,6 +53,7 @@ export const endpoints = {
     sent: "/bookings/sent",
     received: "/bookings/received",
     mine: "/bookings/mine",
+    meetupCareQuote: "/bookings/meetup-care-quote",
     respond: (id: string) => `/bookings/${encodeURIComponent(id)}/respond`,
     accept: (id: string) => `/bookings/${encodeURIComponent(id)}/accept`,
     decline: (id: string) => `/bookings/${encodeURIComponent(id)}/decline`,
@@ -94,6 +96,32 @@ export const endpoints = {
   },
 
   news: "/news",
+
+  welfare: {
+    packages: "/welfare-packages",
+  },
+
+  wallet: {
+    summary: "/wallet",
+    topups: "/wallet/topups",
+    verifyTopup: (reference: string) =>
+      `/wallet/topups/${encodeURIComponent(reference)}/verify`,
+    banks: "/wallet/banks",
+    bankAccounts: "/wallet/bank-accounts",
+    resolveBankAccount: "/wallet/bank-accounts/resolve",
+    setPrimaryBankAccount: (id: string) =>
+      `/wallet/bank-accounts/${encodeURIComponent(id)}/primary`,
+    deleteBankAccount: (id: string) =>
+      `/wallet/bank-accounts/${encodeURIComponent(id)}`,
+    payouts: "/wallet/payouts",
+    payout: (id: string) => `/wallet/payouts/${encodeURIComponent(id)}`,
+    confirmPayout: (id: string) =>
+      `/wallet/payouts/${encodeURIComponent(id)}/confirm`,
+    resendPayoutOtp: (id: string) =>
+      `/wallet/payouts/${encodeURIComponent(id)}/resend-otp`,
+    payoutReceipt: (id: string) =>
+      `/wallet/payouts/${encodeURIComponent(id)}/receipt`,
+  },
 
   notifications: {
     list: "/notifications",

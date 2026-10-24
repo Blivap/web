@@ -5,19 +5,10 @@ export const metadata: Metadata = generateMetadata({
   title: "Login",
   description:
     "Sign in to your Blivap account to manage donations, bookings, and your profile.",
-  keywords: [
-    "login",
-    "sign in",
-    "Blivap login",
-    "donor login"
-  ],
+  keywords: ["login", "sign in", "Blivap login", "donor login"],
   path: "/login",
 });
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

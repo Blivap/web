@@ -18,6 +18,7 @@ import { useAppSelector } from "@/store/hooks";
 import { routes } from "@/config/routes";
 import { DonorCooldownDisplay } from "../components/donor-cooldown-display.component";
 import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
+import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
 
 const cardClass =
   "rounded-2xl border border-border bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#14141a] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]";
@@ -104,7 +105,7 @@ export default function DonorDetailsPage() {
   const isOwnProfile =
     !!user?.id && !!donor?.userId && donor.userId === user.id;
   const cooldown = resolveDonorCooldown(donor?.cooldownEndsAt);
-  const bookingBlocked = cooldown.isActive && !isOwnProfile;
+  const bookingBlocked = cooldown.isActive;
   const ratingsSummary = donor?.ratings;
   const ratingLabel =
     ratingsSummary && ratingsSummary.ratingCount > 0
@@ -119,7 +120,7 @@ export default function DonorDetailsPage() {
 
   return (
     <Layout>
-      <section className="mx-auto flex flex-col gap-6">
+      <section className="flex w-full min-w-0 flex-col gap-6">
         <Link
           href={routes.donors}
           className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline"
@@ -226,16 +227,24 @@ export default function DonorDetailsPage() {
             </div>
 
             <div className={cardClass}>
-              <div className="flex flex-col gap-1 border-b border-border pb-4 dark:border-white/10">
+              <div className="flex items-center gap-1.5 border-b border-border pb-4 dark:border-white/10">
                 <h2 className="text-sm font-semibold text-text-primary">
                   Typed screening (AI questionnaire)
                 </h2>
-                <p className="text-xs text-text-secondary">
-                  When this donor has completed typed screening for their
-                  primary donation type, summarized questions and answers may
-                  appear here for coordination. This is separate from legacy
-                  blood eligibility and from active donor verification.
-                </p>
+                <InfoHint
+                  title="Typed screening"
+                  label="Typed screening information"
+                >
+                  <p>
+                    When this donor has completed typed screening for their
+                    primary donation type, summarized questions and answers may
+                    appear here for coordination.
+                  </p>
+                  <p>
+                    This is separate from legacy blood eligibility and from
+                    active donor verification.
+                  </p>
+                </InfoHint>
               </div>
               <div className="mt-4 space-y-3">
                 {donor.screening?.donationType ? (
@@ -302,8 +311,7 @@ export default function DonorDetailsPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
               {bookingBlocked ? (
                 <p className="text-sm text-text-secondary">
-                  This donor is on a rest period. Booking opens when their
-                  cooldown ends.
+                  Cooling down. Booking opens when this rest period ends.
                 </p>
               ) : (
                 <Button

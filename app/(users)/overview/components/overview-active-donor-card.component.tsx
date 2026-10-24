@@ -6,6 +6,7 @@ import { Avatar } from "@/components/ui/Avatar/avatar.component";
 import { Button } from "@/components/button/button.component";
 import { donorDetailPath, routes } from "@/config/routes";
 import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
+import { displayPublicId } from "@/lib/users/formatPublicId";
 import type { Donor } from "@/app/(users)/donors/donors.data";
 
 type OverviewActiveDonorCardProps = {
@@ -24,7 +25,7 @@ export function OverviewActiveDonorCard({
   const cooldown = resolveDonorCooldown(donor.cooldownEndsAt);
   const bookingBlocked = cooldown.isActive && !isOwner;
   const profileHref = isOwner ? routes.settings : donorDetailPath(donor.id);
-  const displayId = donor.userId?.slice(0, 6) ?? donor.id.slice(0, 8);
+  const displayId = displayPublicId(donor.publicId);
   const primaryType = donor.activeDonationTypes[0];
   const extraTypes = Math.max(0, donor.activeDonationTypes.length - 1);
   const locationLine = [donor.location, donor.country]
@@ -32,7 +33,7 @@ export function OverviewActiveDonorCard({
     .join(", ");
 
   return (
-    <article className="flex flex-col rounded-xl border border-border bg-[#FAFAFA] p-4 transition-colors hover:border-primary/20 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:border-primary/25 dark:hover:bg-white/8">
+    <article className="flex flex-col gap-2 rounded-xl border border-border bg-[#FAFAFA] p-4 transition-colors hover:border-primary/20 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:border-primary/25 dark:hover:bg-white/8">
       <Link href={profileHref} className="group flex min-w-0 items-start gap-3">
         <Avatar
           className="size-12! shrink-0"
@@ -40,7 +41,7 @@ export function OverviewActiveDonorCard({
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="truncate text-sm font-semibold text-text-primary group-hover:text-primary">
+            <p className="truncate text-sm font-semibold uppercase tracking-wide text-text-primary group-hover:text-primary">
               {displayId}
             </p>
             <span className="shrink-0 rounded-full bg-[#FCE7E7] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary dark:bg-primary/25">
@@ -67,9 +68,9 @@ export function OverviewActiveDonorCard({
         />
       </Link>
 
-      {bookingBlocked ? (
+      {cooldown.isActive ? (
         <p className="mt-3 text-xs font-medium text-amber-800 dark:text-amber-200">
-          Booking paused — on cooldown
+          Cooling down. Booking opens when this rest period ends.
         </p>
       ) : isOwner ? (
         <p className="mt-3 text-xs text-text-tertiary">
@@ -86,7 +87,7 @@ export function OverviewActiveDonorCard({
             className="w-full mt-auto"
             disabled
           >
-            Booking paused
+            Cooling down
           </Button>
         ) : isOwner ? (
           <Button

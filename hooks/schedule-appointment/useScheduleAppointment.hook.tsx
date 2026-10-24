@@ -1,32 +1,33 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { $api } from "@/app/api";
+import { routes } from "@/config/routes";
 import { parseHospitalsListResponse } from "@/lib/hospitals/parseHospitalsListResponse";
 import type { HospitalListItem } from "@/lib/hospitals/parseHospitalsListResponse";
 import {
   getApiMessageFromData,
   getAxiosErrorMessage,
 } from "@/lib/bookings/axiosErrorMessage";
+import { parseBookingRecord } from "@/lib/bookings/parseBookingsMineResponse";
 import {
   buildCalendarDays,
   buildScheduledAtIso,
-  formatBookingSuccessScheduledLabel,
   formatCalendarMonthLabel,
   isBookingSlotInPast,
   type ScheduleAppointmentDetails,
 } from "@/lib/schedule-appointment/scheduleAppointment.utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { loadSentBookings } from "@/store/slices/bookingsSlice";
-import type { CarouselApi } from "@/components/ui/carousel";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import {
   classifyAnalyticsError,
   trackFailure,
   trackSuccess,
 } from "@/lib/analytics/ga";
+import { clearScheduleAppointmentDraft } from "@/lib/schedule-appointment/scheduleAppointmentDraft";
 
 export type { ScheduleAppointmentDetails } from "@/lib/schedule-appointment/scheduleAppointment.utils";
 
@@ -39,6 +40,7 @@ const emptyAppointment = (): ScheduleAppointmentDetails => ({
 });
 
 export function useScheduleAppointment() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
@@ -53,12 +55,6 @@ export function useScheduleAppointment() {
   >("idle");
   const [hospitalsError, setHospitalsError] = useState<string | null>(null);
 
-  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
-  const [bookingRequestSentOpen, setBookingRequestSentOpen] = useState(false);
-  const [bookingSuccessSummary, setBookingSuccessSummary] = useState<{
-    scheduledLabel: string;
-    hospitalName: string;
-  } | null>(null);
   const [isSendingBooking, setIsSendingBooking] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [appointment, setAppointment] =
@@ -82,7 +78,12 @@ export function useScheduleAppointment() {
       const parsed = parseHospitalsListResponse(data);
       setHospitals(parsed);
       setHospitalsLoadState("ok");
-      setAppointment((prev) => ({ ...prev, hospitalId: "" }));
+      setAppointment((prev) => ({
+        ...prev,
+        hospitalId: parsed.some((hospital) => hospital.id === prev.hospitalId)
+          ? prev.hospitalId
+          : "",
+      }));
     } catch (e) {
       setHospitals([]);
       setHospitalsLoadState("error");
@@ -105,16 +106,6 @@ export function useScheduleAppointment() {
     () => formatCalendarMonthLabel(calendarMonth.year, calendarMonth.month),
     [calendarMonth],
   );
-
-  useEffect(() => {
-    if (!carouselApi) return;
-    if (!appointment.hospitalId) {
-      carouselApi.scrollTo(0);
-      return;
-    }
-    const idx = hospitals.findIndex((h) => h.id === appointment.hospitalId);
-    if (idx >= 0) carouselApi.scrollTo(idx);
-  }, [carouselApi, appointment.hospitalId, hospitals]);
 
   useEffect(() => {
     setAppointment((prev) => {
@@ -155,13 +146,9 @@ export function useScheduleAppointment() {
     appointment.time,
   );
 
-  const closeBookingRequestSentModal = useCallback(() => {
-    setBookingRequestSentOpen(false);
-  }, []);
-
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
       if (!canConfirmAppointment || isSendingBooking) return;
       if (isBookingSlotInPast(appointment.date, appointment.time)) {
         showSnackbar("That time has already passed.", "error");
@@ -200,16 +187,20 @@ export function useScheduleAppointment() {
           return;
         }
         trackSuccess("booking_requested");
+        clearScheduleAppointmentDraft();
         void dispatch(loadSentBookings({ silent: true }));
-        const hospital = hospitals.find((h) => h.id === appointment.hospitalId);
-        setBookingSuccessSummary({
-          scheduledLabel: formatBookingSuccessScheduledLabel(
-            appointment.date,
-            appointment.time,
-          ),
-          hospitalName: hospital?.name?.trim() ?? "Selected hospital",
-        });
-        setBookingRequestSentOpen(true);
+
+        const created = parseBookingRecord(data);
+        const bookingsHref = new URLSearchParams({ tab: "sent" });
+        if (created?.id) bookingsHref.set("bookingId", created.id);
+
+        showSnackbar(
+          "Appointment request sent. Opening your bookings…",
+          "success",
+        );
+        // Let the snackbar paint before leaving the page.
+        await new Promise((resolve) => window.setTimeout(resolve, 700));
+        router.push(`${routes.bookings}?${bookingsHref.toString()}`);
       } catch (err) {
         trackFailure("booking_requested", classifyAnalyticsError(err));
         if (axios.isAxiosError(err)) {
@@ -257,8 +248,8 @@ export function useScheduleAppointment() {
       canConfirmAppointment,
       dispatch,
       donorUserId,
-      hospitals,
       isSendingBooking,
+      router,
       showSnackbar,
       user?.nationalIdentificationNumberVerified,
     ],
@@ -270,8 +261,6 @@ export function useScheduleAppointment() {
     hospitalsLoadState,
     hospitalsError,
     loadHospitals,
-    carouselApi,
-    setCarouselApi,
     appointment,
     handleAppointmentChange,
     calendarMonth,
@@ -283,8 +272,5 @@ export function useScheduleAppointment() {
     isSendingBooking,
     submitError,
     handleSubmit,
-    bookingRequestSentOpen,
-    closeBookingRequestSentModal,
-    bookingSuccessSummary,
   };
 }

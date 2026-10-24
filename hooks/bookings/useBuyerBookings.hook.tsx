@@ -6,6 +6,7 @@ import { useStore } from "react-redux";
 import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import type { BookingsShellTabItem } from "@/app/(users)/bookings/components/bookings-shell.view";
+import { useSetQueryParams } from "@/hooks/navigation/useQueryParamState.hook";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { AppDispatch, RootState } from "@/store/store";
 import {
@@ -13,13 +14,14 @@ import {
   patchBookingInLists,
 } from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
-import { bookingNeedsRequesterRating } from "@/lib/ratings/ratedBookingsStorage";
-import type { Booking } from "@/types/bookings";
 import {
   buildBuyerBookingsTabPanels,
   BUYER_TAB_ORDER,
   type BuyerPanelKey,
 } from "@/lib/bookings/buyerBookingsTabPanels";
+import { bookingNeedsRequesterRating } from "@/lib/ratings/ratedBookingsStorage";
+import { formatPublicId } from "@/lib/users/formatPublicId";
+import type { Booking } from "@/types/bookings";
 import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook";
 import {
   classifyAnalyticsError,
@@ -33,8 +35,7 @@ export { BUYER_TAB_ORDER } from "@/lib/bookings/buyerBookingsTabPanels";
 const BOOKINGS_POLL_MS = 20_000;
 
 function donorLabelFromBooking(b: Booking): string {
-  if (b.donorDisplayName?.trim()) return b.donorDisplayName.trim();
-  return `Donor ${b.donorUserId.slice(0, 6)}`;
+  return formatPublicId(b.donorPublicId) ?? "";
 }
 
 function scheduleBookingsResync(dispatch: AppDispatch) {
@@ -53,28 +54,28 @@ export function useBuyerBookings() {
   const loadError = useAppSelector((s) => s.bookings.sent.error);
 
   const searchParams = useSearchParams();
+  const setParams = useSetQueryParams();
   const highlightBookingId = searchParams.get("bookingId")?.trim() ?? "";
+  const ratingOpen = searchParams.get("modal") === "rate";
+  const ratingBookingId =
+    ratingOpen && highlightBookingId ? highlightBookingId : null;
 
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [remindingId, setRemindingId] = useState<string | null>(null);
-  const [ratingOpen, setRatingOpen] = useState(false);
-  const [ratingBookingId, setRatingBookingId] = useState<string | null>(null);
 
   const openRatingForBooking = useCallback(
     (id: string) => {
       const b = bookings.find((row) => row.id === id);
       if (!b || !user?.id || b.requesterId !== user.id) return;
       if (!bookingNeedsRequesterRating(b)) return;
-      setRatingBookingId(id);
-      setRatingOpen(true);
+      setParams({ modal: "rate", bookingId: id });
     },
-    [bookings, user?.id],
+    [bookings, setParams, user?.id],
   );
 
   const closeRating = useCallback(() => {
-    setRatingOpen(false);
-    setRatingBookingId(null);
-  }, []);
+    setParams({ modal: null });
+  }, [setParams]);
 
   const activeRatingBooking = useMemo(
     () =>
@@ -253,6 +254,7 @@ export function useBuyerBookings() {
 
   return {
     user,
+    bookings,
     loadState,
     loadError,
     loadData,

@@ -55,6 +55,8 @@ export type DatePickerProps = {
   max?: string;
   /** Shown when no date is selected. */
   placeholder?: string;
+  /** Classes for the selected date text only. */
+  valueClassName?: string;
 } & Omit<
   ComponentPropsWithoutRef<"button">,
   "type" | "value" | "onChange" | "children" | "onBlur"
@@ -133,6 +135,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
       max,
       disabled,
       placeholder = "Select date",
+      valueClassName,
       className,
       ...rest
     },
@@ -361,7 +364,9 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               }}
               {...rest}
             >
-              {displayText || (
+              {displayText ? (
+                <span className={valueClassName}>{displayText}</span>
+              ) : (
                 <span className="text-xs font-medium text-[#9794AA] dark:text-slate-500">
                   {placeholder}
                 </span>

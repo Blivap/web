@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   Bell,
   ChevronRight,
@@ -24,6 +24,7 @@ import {
 } from "@/lib/donors/parseDonorsListResponse";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import { DonorCooldownDisplay } from "../donors/components/donor-cooldown-display.component";
+import { applyOwnerCooldown } from "@/lib/donors/donorCooldown";
 import type { Donor } from "../donors/donors.data";
 import { OverviewActiveDonorCard } from "./components/overview-active-donor-card.component";
 import { SCREENING_DONATION_TYPE_OPTIONS } from "@/lib/donors/screeningDonationTypes";
@@ -100,6 +101,11 @@ export default function OverviewPage() {
       cancelled = true;
     };
   }, []);
+
+  const visibleActiveDonors = useMemo(
+    () => applyOwnerCooldown(activeDonors, user?.id, myCooldownEndsAt),
+    [activeDonors, myCooldownEndsAt, user?.id],
+  );
 
   return (
     <Layout>
@@ -197,9 +203,6 @@ export default function OverviewPage() {
                       <h2 className="text-lg font-semibold text-text-primary">
                         Start a donation
                       </h2>
-                      <p className="mt-1 text-sm text-text-secondary">
-                        Open registration for blood, sperm, or egg donation.
-                      </p>
                     </div>
                     <ul className="grid grid-cols-1 gap-2 p-4 sm:p-5 md:grid-cols-3">
                       {DONATION_TYPE_ENTRIES.map((entry) => (
@@ -268,13 +271,13 @@ export default function OverviewPage() {
                         <p className="py-10 text-center text-sm text-text-secondary">
                           Could not load donors. Please try again later.
                         </p>
-                      ) : activeDonors.length === 0 ? (
+                      ) : visibleActiveDonors.length === 0 ? (
                         <p className="py-10 text-center text-sm text-text-secondary">
                           No donors available yet.
                         </p>
                       ) : (
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                          {activeDonors.map((donor) => (
+                          {visibleActiveDonors.map((donor) => (
                             <OverviewActiveDonorCard
                               key={donor.id}
                               donor={donor}
@@ -290,24 +293,18 @@ export default function OverviewPage() {
               </TabsContent>
 
               <TabsContent value="payment" className="mt-0">
-                <section className="overflow-hidden rounded-2xl border border-[#DADADA] bg-white dark:border-white/10 dark:bg-[#1a1a22]">
+                <section className="overflow-hidden rounded-2xl border border-[#DADADA] bg-white dark:border-white/10 dark:bg-[#1a1a22] h-full flex-1">
                   <div className="flex flex-col items-center gap-4 px-6 py-14 text-center sm:px-10 sm:py-16">
                     <div className="flex size-14 items-center justify-center rounded-2xl bg-[#F9E8EE] text-primary dark:bg-primary/20">
                       <Wallet className="size-7" aria-hidden />
                     </div>
-                    <div className="flex flex-col gap-2">
-                      <span className="mx-auto inline-flex w-fit rounded-full border border-border bg-[#F4F4F5] px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-text-tertiary dark:border-white/10 dark:bg-white/8">
-                        Upcoming
-                      </span>
-                      <h2 className="text-lg font-semibold text-text-primary">
-                        Payment
-                      </h2>
-                      <p className="max-w-md text-sm leading-relaxed text-text-secondary">
-                        Payment settings, payout history, and wallet features
-                        are on the way. You&apos;ll manage compensation here
-                        once this is live.
-                      </p>
-                    </div>
+                    <Link
+                      href={routes.wallet}
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                    >
+                      Open wallet
+                      <ChevronRight className="size-4" aria-hidden />
+                    </Link>
                   </div>
                 </section>
               </TabsContent>

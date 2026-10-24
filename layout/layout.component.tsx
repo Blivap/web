@@ -26,6 +26,7 @@ import { ProfileAccountMenu } from "./profile-account-menu.component";
 import { Button } from "@/components/button/button.component";
 import { BlivapLogo } from "@/public/svg";
 import { LayoutBreadcrumbs } from "./layout-breadcrumbs.component";
+import { SupportChatButton } from "@/components/support/support-chat-button";
 
 // Define navigation item structure
 interface NavItem {
@@ -37,6 +38,8 @@ interface NavItem {
   inactiveColor?: string;
   /** Non-clickable nav row with an "Upcoming" badge */
   upcoming?: boolean;
+  /** Clickable nav row with a "New" badge */
+  isNew?: boolean;
 }
 export const Layout = (props: PropsWithChildren<unknown>) => {
   useNotificationNavigationListener();
@@ -46,7 +49,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
   const { user } = useDashboard();
 
   return (
-    <div className="bg-[#f8f8f8] dark:bg-[#0a0a0a] h-screen grow flex transition-colors duration-200">
+    <div className="flex h-dvh grow overflow-hidden bg-[#f8f8f8] transition-colors duration-200 dark:bg-[#0a0a0a]">
       <PushNotificationRegistrar />
       <SelectAvatarModal />
       {/* Overlay for mobile when drawer is open */}
@@ -65,7 +68,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       {/* Sidebar */}
       <div
         className={classNames(
-          "flex flex-col gap-10 w-full max-w-57.5 md:max-w-63 bg-white dark:bg-[#111118] border-r border-[#DADADA] dark:border-white/10 fixed left-0 h-full pt-24 md:pt-4 px-4 md:pl-8 transition-transform duration-200 ease-out z-50",
+          "fixed left-0 z-50 flex h-dvh w-full max-w-57.5 flex-col gap-10 overflow-y-auto border-r border-[#DADADA] bg-white px-4 pt-24 transition-transform duration-200 ease-out md:max-w-63 md:pt-4 md:pl-8 dark:border-white/10 dark:bg-[#111118]",
           {
             // On mobile: completely hidden when closed (-translate-x-full), visible when open (translate-x-0)
             // On desktop: always visible (md:translate-x-0 overrides)
@@ -120,8 +123,8 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
         </div>
       </div>
       {/* Main content area */}
-      <div className="relative flex flex-col gap-6 md:ml-63 m-2 md:m-2 pt-18.5 md:pl-2  flex-1 overflow-hidden ">
-        <div className="flex-1 bg-white dark:bg-[#14141a] overflow-y-auto p-4 xl:px-7 rounded border border-[#DADADA] dark:border-white/10 no-scrollbar overflow-scroll transition-colors duration-200">
+      <div className="relative m-2 flex min-h-0 flex-1 flex-col overflow-hidden pt-18.5 md:ml-63 md:pl-2">
+        <div className="custom-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded border border-[#DADADA] bg-white p-4 transition-colors duration-200 xl:px-7 dark:border-white/10 dark:bg-[#14141a]">
           {!user?.nationalIdentificationNumberVerified && (
             <div className="mb-10 flex gap-4 border-l-4 border-[#960018] bg-[#FFE2E2] p-4 dark:bg-red-950/35 dark:border-primary">
               <Info size={16} className="text-primary shrink-0" />
@@ -146,6 +149,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
           {props.children}
         </div>
       </div>
+      <SupportChatButton />
     </div>
   );
 };
@@ -221,7 +225,7 @@ const NavLinks = ({ onLinkClick, darkShell }: NavLinksProps) => {
       icon: WalletIcon,
       activeColor: "#960018",
       inactiveColor: "#070416",
-      upcoming: true,
+      isNew: true,
     },
     {
       title: "History",
@@ -229,7 +233,7 @@ const NavLinks = ({ onLinkClick, darkShell }: NavLinksProps) => {
       icon: HistoryIcon,
       activeColor: "#960018",
       inactiveColor: "#070416",
-      upcoming: true,
+      isNew: true,
     },
     {
       title: "Settings",
@@ -291,7 +295,12 @@ const NavLinks = ({ onLinkClick, darkShell }: NavLinksProps) => {
             )}
           >
             <IconComponent color={iconColor} />
-            <span>{item.title}</span>
+            <span className="min-w-0 flex-1">{item.title}</span>
+            {item.isNew ? (
+              <span className="shrink-0 rounded-full border border-primary/25 bg-[#FFF5F5] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary dark:border-primary/40 dark:bg-primary/15">
+                New
+              </span>
+            ) : null}
           </Link>
         );
       })}

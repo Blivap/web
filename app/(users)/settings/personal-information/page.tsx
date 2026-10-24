@@ -16,6 +16,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { setSelectedAvatar } from "@/store/slices/selectAvatarSlice";
 import { SettingsShell } from "../components/settings-shell";
 import { SettingsCard } from "../components/settings-card";
+import { DonorWelfareSettings } from "./donor-welfare-settings.component";
 
 function toDateInputValue(iso: string | null | undefined): string {
   if (!iso) return "";
@@ -102,35 +103,28 @@ export default function PersonalInformationPage() {
                 onSubmit={handleSubmit}
                 noValidate
               >
-                <div className="flex flex-col gap-4">
-                  <p className="text-sm font-medium text-[#111827] dark:text-white/90">
-                    Your Profile Picture
-                  </p>
-                  <div className="flex items-center gap-4 sm:gap-6">
-                    <div className="relative">
-                      <Avatar
-                        src={values.profileImage || user?.profileImage}
-                        className="size-20 sm:size-34 border-[3px] border-primary"
-                      />
-                      <Button
-                        type="button"
-                        size="icon-sm"
-                        className="absolute right-3 bottom-3 translate-x-1/4 translate-y-1/4 size-7 p-2 rounded-full bg-black text-white border-2 border-white shadow-md hover:bg-black/90"
-                        aria-label="Change profile picture"
-                        onClick={() => {
-                          dispatch(
-                            setSelectedAvatar(
-                              values.profileImage ||
-                                user?.profileImage ||
-                                null,
-                            ),
-                          );
-                          openAvatarModal();
-                        }}
-                      >
-                        <FaPencilAlt size={12} className="size-3 " />
-                      </Button>
-                    </div>
+                <div className="flex items-center gap-4 sm:gap-6">
+                  <div className="relative">
+                    <Avatar
+                      src={values.profileImage || user?.profileImage}
+                      className="size-20 sm:size-34 border-[3px] border-primary"
+                    />
+                    <Button
+                      type="button"
+                      size="icon-sm"
+                      className="absolute right-3 bottom-3 translate-x-1/4 translate-y-1/4 size-7 p-2 rounded-full bg-black text-white border-2 border-white shadow-md hover:bg-black/90"
+                      aria-label="Change profile picture"
+                      onClick={() => {
+                        dispatch(
+                          setSelectedAvatar(
+                            values.profileImage || user?.profileImage || null,
+                          ),
+                        );
+                        openAvatarModal();
+                      }}
+                    >
+                      <FaPencilAlt size={12} className="size-3 " />
+                    </Button>
                   </div>
                 </div>
 
@@ -247,6 +241,7 @@ export default function PersonalInformationPage() {
           }}
         </Formik>
       </SettingsCard>
+      {user ? <DonorWelfareSettings /> : null}
     </SettingsShell>
   );
 }

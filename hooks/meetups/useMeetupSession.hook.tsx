@@ -47,32 +47,40 @@ export function useMeetupSession(sessionId: string | undefined) {
   const refreshSession = useCallback(async () => {
     if (!sessionId) return null;
     setSessionError(null);
-    const { status, data } = await $api.meetups.getSession(sessionId);
-    if (status < 200 || status >= 300) {
+    try {
+      const { status, data, error } = await $api.meetups.getSession(sessionId);
+      if (status < 200 || status >= 300) {
+        setSession(null);
+        setSessionLoad("error");
+        setSessionError(
+          error ??
+            getApiMessageFromData(data) ??
+            "Could not load this meetup session.",
+        );
+        return null;
+      }
+      const parsed = parseMeetupSessionBody(data);
+      if (!parsed) {
+        setSession(null);
+        setSessionLoad("error");
+        setSessionError("Unexpected response from the server.");
+        return null;
+      }
+      if (parsed.status === "completed" && !completedTrackedRef.current) {
+        completedTrackedRef.current = true;
+        trackSuccess("meetup_completed");
+      }
+      setSession(parsed);
+      setSessionLoad("ok");
+      return parsed;
+    } catch (e) {
       setSession(null);
       setSessionLoad("error");
       setSessionError(
-        getApiMessageFromData(data) ?? "Could not load this meetup session.",
+        getAxiosErrorMessage(e, "Could not load this meetup session."),
       );
       return null;
     }
-    const parsed = parseMeetupSessionBody(data);
-    if (!parsed) {
-      setSession(null);
-      setSessionLoad("error");
-      setSessionError("Unexpected response from the server.");
-      return null;
-    }
-    if (
-      parsed.status === "completed" &&
-      !completedTrackedRef.current
-    ) {
-      completedTrackedRef.current = true;
-      trackSuccess("meetup_completed");
-    }
-    setSession(parsed);
-    setSessionLoad("ok");
-    return parsed;
   }, [sessionId]);
 
   useEffect(() => {
@@ -239,8 +247,13 @@ export function useMeetupSession(sessionId: string | undefined) {
         }
         await refreshSession();
         await $api.meetups.complete(sessionId).catch(() => undefined);
+        const after = await refreshSession();
+        const completed =
+          after?.status?.toLowerCase() === "completed" ||
+          (after?.requesterDonationConfirmed === true &&
+            after?.donorDonationConfirmed === true);
         trackSuccess("donation_confirmed", { role });
-        return { ok: true as const };
+        return { ok: true as const, completed };
       } catch (e) {
         trackFailure("donation_confirmed", classifyAnalyticsError(e), {
           role,

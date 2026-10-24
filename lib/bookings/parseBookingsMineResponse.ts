@@ -34,8 +34,21 @@ function pickRefId(raw: unknown): string | null {
   return null;
 }
 
+function publicIdFromPerson(raw: unknown, depth = 0): string | undefined {
+  if (!raw || typeof raw !== "object" || depth > 2) return undefined;
+  const o = raw as Record<string, unknown>;
+  const direct = pickString(o.publicId ?? o.public_id);
+  if (direct) return direct.toUpperCase();
+  for (const key of ["user", "profile", "account"]) {
+    const nested = publicIdFromPerson(o[key], depth + 1);
+    if (nested) return nested;
+  }
+  return undefined;
+}
+
 function pickPersonFromRef(raw: unknown): {
   displayName?: string;
+  publicId?: string;
   profileImage?: string;
 } {
   if (!raw || typeof raw !== "object") return {};
@@ -43,9 +56,11 @@ function pickPersonFromRef(raw: unknown): {
   const first = typeof o.firstname === "string" ? o.firstname.trim() : "";
   const last = typeof o.lastname === "string" ? o.lastname.trim() : "";
   const displayName = [first, last].filter(Boolean).join(" ").trim();
+  const publicId = publicIdFromPerson(o);
   const profileImage = pickString(o.profileImage ?? o.profile_image);
   return {
     ...(displayName ? { displayName } : {}),
+    ...(publicId ? { publicId } : {}),
     ...(profileImage ? { profileImage } : {}),
   };
 }
@@ -174,11 +189,33 @@ export function parseBookingRecord(raw: unknown): Booking | null {
     ...(donorPerson.displayName
       ? { donorDisplayName: donorPerson.displayName }
       : {}),
+    ...(donorPerson.publicId ||
+    pickString(unwrapped.donorPublicId ?? unwrapped.donor_public_id)
+      ? {
+          donorPublicId: (
+            donorPerson.publicId ??
+            pickString(unwrapped.donorPublicId ?? unwrapped.donor_public_id) ??
+            ""
+          ).toUpperCase(),
+        }
+      : {}),
     ...(donorPerson.profileImage
       ? { donorProfileImage: donorPerson.profileImage }
       : {}),
     ...(requesterPerson.displayName
       ? { requesterDisplayName: requesterPerson.displayName }
+      : {}),
+    ...(requesterPerson.publicId ||
+    pickString(unwrapped.requesterPublicId ?? unwrapped.requester_public_id)
+      ? {
+          requesterPublicId: (
+            requesterPerson.publicId ??
+            pickString(
+              unwrapped.requesterPublicId ?? unwrapped.requester_public_id,
+            ) ??
+            ""
+          ).toUpperCase(),
+        }
       : {}),
     ...(requesterPerson.profileImage
       ? { requesterProfileImage: requesterPerson.profileImage }

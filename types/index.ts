@@ -43,6 +43,8 @@ export type IAuthUser = {
 };
 export type IUser = {
   id: string;
+  /** Anonymous 8-character handle. */
+  publicId?: string;
   firstname: string;
   lastname: string;
   email: string;
@@ -127,3 +129,21 @@ export type {
   DonorRegisterPayload,
   DonorRequestActivationPayload,
 } from "./donors";
+
+export type {
+  CreateWalletTopupPayload,
+  WalletLedgerDirection,
+  WalletLedgerEntry,
+  WalletLedgerEntryStatus,
+  WalletLedgerEntryType,
+  WalletSummary,
+  WalletSummaryResponse,
+  WalletTopupSession,
+  WalletTopupSessionResponse,
+} from "./wallet";
+export {
+  MIN_WALLET_TOPUP_KOBO,
+  WALLET_LEDGER_CATALOG,
+  WALLET_LEDGER_ENTRY_TYPES,
+  isWalletLedgerEntryType,
+} from "./wallet";

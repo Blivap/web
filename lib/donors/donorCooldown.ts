@@ -23,22 +23,48 @@ export type DonorCooldownState = {
 const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 
 export function parseCooldownEndIso(raw: unknown): string | null {
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    const ms = raw < 1e12 ? raw * 1000 : raw;
+    return new Date(ms).toISOString();
+  }
   if (typeof raw !== "string" || !raw.trim()) return null;
   const ms = Date.parse(raw.trim());
   if (!Number.isFinite(ms)) return null;
   return new Date(ms).toISOString();
 }
 
-export function pickCooldownEndsAt(
+function pickCooldownEndsAtFromRecord(
   record: Record<string, unknown>,
 ): string | null {
   return (
     parseCooldownEndIso(record.cooldownEndsAt ?? record.cooldown_ends_at) ??
     parseCooldownEndIso(record.nextEligibleAt ?? record.next_eligible_at) ??
+    parseCooldownEndIso(record.nextDonationAt ?? record.next_donation_at) ??
     parseCooldownEndIso(record.eligibleAt ?? record.eligible_at) ??
+    parseCooldownEndIso(record.availableFrom ?? record.available_from) ??
+    parseCooldownEndIso(record.unavailableUntil ?? record.unavailable_until) ??
     parseCooldownEndIso(record.cooldownUntil ?? record.cooldown_until) ??
     null
   );
+}
+
+export function pickCooldownEndsAt(
+  record: Record<string, unknown>,
+): string | null {
+  const direct = pickCooldownEndsAtFromRecord(record);
+  if (direct) return direct;
+  for (const key of ["cooldown", "availability", "donationAvailability"]) {
+    const nested = record[key];
+    if (!nested || typeof nested !== "object") continue;
+    const nestedRecord = nested as Record<string, unknown>;
+    const found =
+      pickCooldownEndsAtFromRecord(nestedRecord) ??
+      parseCooldownEndIso(
+        nestedRecord.endsAt ?? nestedRecord.ends_at ?? nestedRecord.until,
+      );
+    if (found) return found;
+  }
+  return null;
 }
 
 export function cooldownPartsFromMs(remainingMs: number): CooldownParts {
@@ -103,6 +129,23 @@ export function resolveDonorCooldown(
   };
 }
 
+/** List rows often omit cooldown that GET /donors/me already has for the signed-in donor. */
+export function applyOwnerCooldown<
+  T extends { userId?: string; cooldownEndsAt?: string | null },
+>(
+  donors: T[],
+  ownerUserId: string | undefined,
+  ownerCooldownEndsAt: string | null | undefined,
+): T[] {
+  if (!ownerUserId || !ownerCooldownEndsAt) return donors;
+  if (!resolveDonorCooldown(ownerCooldownEndsAt).isActive) return donors;
+  return donors.map((donor) => {
+    if (donor.userId !== ownerUserId) return donor;
+    if (resolveDonorCooldown(donor.cooldownEndsAt).isActive) return donor;
+    return { ...donor, cooldownEndsAt: ownerCooldownEndsAt };
+  });
+}
+
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
@@ -131,12 +174,12 @@ export function formatPublicCooldownLabel(
     if (parts.months > 0) bits.push(`${parts.months} mo`);
     if (parts.days > 0)
       bits.push(`${parts.days} day${parts.days === 1 ? "" : "s"}`);
-    return `Rest period · ${bits.join(" ")}`;
+    return `Cooling down · ${bits.join(" ")}`;
   }
   if (parts.hours > 0) {
-    return `Rest period · ${parts.hours}h ${parts.minutes}m`;
+    return `Cooling down · ${parts.hours}h ${parts.minutes}m`;
   }
-  return `Rest period · ${parts.minutes}m ${parts.seconds}s`;
+  return `Cooling down · ${parts.minutes}m`;
 }
 
 export const COOLDOWN_TONE_STYLES: Record<

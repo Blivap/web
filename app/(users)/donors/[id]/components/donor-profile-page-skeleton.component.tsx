@@ -16,7 +16,11 @@ function Sk({ className }: { className?: string }) {
 
 export function DonorProfilePageSkeleton() {
   return (
-    <div className="flex flex-col gap-6" aria-busy="true" aria-live="polite">
+    <div
+      className="flex w-full min-w-0 flex-col gap-6"
+      aria-busy="true"
+      aria-live="polite"
+    >
       <span className="sr-only">Loading donor profile…</span>
 
       <div className={cardClass}>
@@ -50,9 +54,9 @@ export function DonorProfilePageSkeleton() {
       </div>
 
       <div className={cardClass}>
-        <div className="flex flex-col gap-2 border-b border-border pb-4 dark:border-white/10">
+        <div className="flex items-center gap-2 border-b border-border pb-4 dark:border-white/10">
           <Sk className="h-4 w-48" />
-          <Sk className="h-3 w-full max-w-lg" />
+          <Sk className="size-4 shrink-0 rounded-full" />
         </div>
         <div className="mt-4 grid gap-3">
           {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -60,7 +64,7 @@ export function DonorProfilePageSkeleton() {
               key={i}
               className="flex items-center justify-between gap-3 rounded-lg border border-border bg-[#FAFAFB] px-3 py-3 dark:border-white/10 dark:bg-white/4"
             >
-              <Sk className="h-4 flex-1 max-w-55" />
+              <Sk className="h-4 min-w-0 flex-1" />
               <Sk className="size-8 shrink-0 rounded-md" />
             </div>
           ))}
@@ -75,9 +79,7 @@ export function DonorProfilePageSkeleton() {
         </div>
       </div>
 
-      <div className="flex justify-end">
-        <Sk className="h-12 w-full max-w-70 rounded-none sm:rounded-sm" />
-      </div>
+      <Sk className="h-12 w-full rounded-none sm:rounded-sm" />
     </div>
   );
 }

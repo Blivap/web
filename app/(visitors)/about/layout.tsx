@@ -9,15 +9,11 @@ export const metadata: Metadata = generateMetadata({
     "about Blivap",
     "our mission",
     "blood donation platform",
-    "medical services Nigeria"
+    "medical services Nigeria",
   ],
   path: "/about",
 });
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

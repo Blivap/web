@@ -1,5 +1,13 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { config } from "@/config/env";
+import {
+  reportApiReachable,
+  reportApiUnreachable,
+} from "@/lib/api/apiConnectivity";
+import {
+  API_UNREACHABLE_MESSAGE,
+  isNetworkFailure,
+} from "@/lib/api/networkFailure";
 import { IResponse } from "@/types";
 import Cookies from "js-cookie";
 import { intercept } from "./interceptors";
@@ -15,25 +23,41 @@ export const fetcher = async <T = unknown>(
   const isFormData =
     typeof FormData !== "undefined" && options?.data instanceof FormData;
 
-  const res: AxiosResponse<T> = await intercept(
-    axios({
-      ...options,
-      url: `${apiUrl}${url}`,
-      headers: {
-        Accept: "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...(!isFormData && { "Content-Type": "application/json" }),
-        ...options?.headers,
-      },
-    }),
-  );
+  try {
+    const res: AxiosResponse<T> = await intercept(
+      axios({
+        ...options,
+        url: `${apiUrl}${url}`,
+        headers: {
+          Accept: "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+          ...(!isFormData && { "Content-Type": "application/json" }),
+          ...options?.headers,
+        },
+      }),
+    );
 
-  return {
-    data: res.data,
-    status: res.status,
-    message: res.statusText,
-    error: null,
-    errors: undefined,
-    meta: undefined,
-  };
+    reportApiReachable();
+    return {
+      data: res.data,
+      status: res.status,
+      message: res.statusText,
+      error: null,
+      errors: undefined,
+      meta: undefined,
+    };
+  } catch (error) {
+    if (isNetworkFailure(error)) {
+      reportApiUnreachable();
+      return {
+        data: undefined,
+        status: 0,
+        message: "Network Error",
+        error: API_UNREACHABLE_MESSAGE,
+        errors: undefined,
+        meta: undefined,
+      };
+    }
+    throw error;
+  }
 };

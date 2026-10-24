@@ -584,14 +584,10 @@ function NewDonorForm() {
         setBasicsError("Could not save donor profile. Try again.");
       }
     } catch (e) {
-      trackFailure(
-        "donor_profile_registered",
-        classifyAnalyticsError(e),
-        {
-          donation_type: donationTypeForQuestionnaire,
-          blood_type: values.basics.bloodType,
-        },
-      );
+      trackFailure("donor_profile_registered", classifyAnalyticsError(e), {
+        donation_type: donationTypeForQuestionnaire,
+        blood_type: values.basics.bloodType,
+      });
       setBasicsError(
         getErrorMessage(e, "Could not save donor profile. Try again."),
       );
@@ -675,11 +671,9 @@ function NewDonorForm() {
         error ?? message ?? "Could not submit activation request.",
       );
     } catch (e) {
-      trackFailure(
-        "donor_activation_requested",
-        classifyAnalyticsError(e),
-        { donation_type: donationTypeForQuestionnaire },
-      );
+      trackFailure("donor_activation_requested", classifyAnalyticsError(e), {
+        donation_type: donationTypeForQuestionnaire,
+      });
       setActivationRequestError(
         getErrorMessage(e, "Could not submit activation request."),
       );
@@ -723,7 +717,7 @@ function NewDonorForm() {
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-1 flex-col px-4 pb-6 pt-4 sm:p-6">
+    <div className="flex w-full flex-col px-4 pb-6 pt-4 sm:p-6">
       <Link
         href={routes.overview}
         className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline mb-6"
@@ -734,7 +728,7 @@ function NewDonorForm() {
       <StepProgress currentStep={step} />
       <div
         ref={contentRef}
-        className="flex-1 min-h-0 overflow-y-auto custom-scrollbar"
+        className="min-w-0"
       >
         <DonorBasicsStep
           active={step === 1}
