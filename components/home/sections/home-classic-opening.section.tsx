@@ -223,8 +223,8 @@ export function HomeClassicOpeningSection() {
           className="col-span-1 flex max-w-full flex-col gap-4 border border-l-0 border-[#E5E7EB] bg-[#F9FAFB] px-4 py-16 pr-4 dark:border-white/10 dark:bg-[#0F172A] sm:gap-5 sm:px-8 sm:py-20 sm:pr-6 md:col-span-3 md:pr-16 xl:pl-36"
         >
           <p className="max-w-100 text-base font-semibold leading-snug text-black dark:text-white sm:text-xl">
-            Together we connect people who need a donation with willing donors
-            — blood, plasma, organs, tissue, and more.
+            Together we connect people who need a donation with willing donors —
+            blood, plasma, organs, tissue, and more.
           </p>
           <p className="max-w-xl text-xs leading-relaxed text-[#6B7280] dark:text-slate-400 sm:text-sm">
             Blivap stands for life. For people. For making a difference when it

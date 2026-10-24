@@ -1,7 +1,14 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, Search, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Search,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { Layout } from "@/layout/layout.component";
 import { routes } from "@/config/routes";
@@ -62,12 +69,14 @@ function ScheduleAppointmentPageContent() {
   const [step, setStep] = useState<"details" | "payment">("details");
   const restoredDraft = useRef(false);
   const [careQuote, setCareQuote] = useState<MeetupCareQuote | null>(null);
-  const [careState, setCareState] = useState<"idle" | "loading" | "ready" | "error">(
-    "idle",
-  );
+  const [careState, setCareState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
   const [careError, setCareError] = useState<string | null>(null);
   const [careReload, setCareReload] = useState(0);
-  const careLines = careLinesFromQuote(donorUserId ? (careQuote?.lines ?? []) : []);
+  const careLines = careLinesFromQuote(
+    donorUserId ? (careQuote?.lines ?? []) : [],
+  );
   const careDueKobo = donorUserId ? (careQuote?.dueKobo ?? 0) : 0;
   const visibleCareState = !donorUserId
     ? "idle"
@@ -136,7 +145,9 @@ function ScheduleAppointmentPageContent() {
         if (res.status < 200 || res.status >= 300) {
           setCareQuote(null);
           setCareState("error");
-          setCareError(res.error ?? res.message ?? "Could not load meetup care");
+          setCareError(
+            res.error ?? res.message ?? "Could not load meetup care",
+          );
           return;
         }
         const quote = parseMeetupCareQuote(res.data ?? res);
@@ -189,9 +200,7 @@ function ScheduleAppointmentPageContent() {
         }}
       >
         <Link
-          href={
-            donorUserId ? routes.donorsDetail(donorUserId) : routes.donors
-          }
+          href={donorUserId ? routes.donorsDetail(donorUserId) : routes.donors}
           className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline"
         >
           <ArrowLeft className="size-4" aria-hidden />
@@ -537,7 +546,9 @@ function ScheduleAppointmentPageContent() {
 
             <Button
               type="submit"
-              disabled={!canConfirmAppointment || isSendingBooking || !careReady}
+              disabled={
+                !canConfirmAppointment || isSendingBooking || !careReady
+              }
               loading={isSendingBooking}
               className="w-fit px-5 py-2.5 text-sm font-medium"
             >

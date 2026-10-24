@@ -1,7 +1,7 @@
 "use client";
 
 import classNames from "classnames";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -636,7 +636,10 @@ function BookingsDesktopRowSkeleton() {
   );
 }
 
-export function BookingsShellSkeleton(_props: BookingsShellSkeletonProps = {}) {
+export function BookingsShellSkeleton({
+  tabLabels,
+}: BookingsShellSkeletonProps = {}) {
+  void tabLabels;
   return (
     <div
       className="flex w-full min-w-0 flex-col gap-4"

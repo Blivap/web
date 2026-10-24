@@ -252,8 +252,7 @@ export function BookingsListView() {
     return <BookingsShellSkeleton tabLabels={["Bookings"]} />;
   }
 
-  const bothFailed =
-    donor.loadState === "error" && buyer.loadState === "error";
+  const bothFailed = donor.loadState === "error" && buyer.loadState === "error";
   if (bothFailed) {
     return (
       <div className="rounded-xl border border-border bg-white p-5 dark:border-white/10 dark:bg-[#1a1a22]">
@@ -315,48 +314,48 @@ export function BookingsListView() {
         emptyDescription={emptyCopy.description}
         headerAside={
           <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
-          <div className="relative min-w-0 flex-1 sm:flex-none">
-            <DatePicker
-              name="bookingDate"
-              value={dateFilter}
-              placeholder="Any date"
-              valueClassName="text-xs font-medium"
-              aria-label="Filter by date"
-              containerClassName="w-full min-w-0 gap-0 sm:w-44"
-              fieldClassName={dateFilter ? "h-9 pr-8 pl-3" : "h-9 px-3"}
-              onChange={(event) => selectDate(event.target.value)}
-            />
-            {dateFilter ? (
-              <button
-                type="button"
-                aria-label="Clear date filter"
-                className="absolute top-1/2 right-2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
-                onClick={() => selectDate("")}
-              >
-                <X className="size-3.5" aria-hidden />
-              </button>
-            ) : null}
-          </div>
-          <Select
-            value={filter}
-            onValueChange={(value) => {
-              if (isBookingListFilter(value)) selectFilter(value);
-            }}
-          >
-            <SelectTrigger
-              aria-label="Filter bookings"
-              className="h-9 w-full min-w-0 flex-1 text-xs sm:w-40 sm:flex-none sm:text-sm"
+            <div className="relative min-w-0 flex-1 sm:flex-none">
+              <DatePicker
+                name="bookingDate"
+                value={dateFilter}
+                placeholder="Any date"
+                valueClassName="text-xs font-medium"
+                aria-label="Filter by date"
+                containerClassName="w-full min-w-0 gap-0 sm:w-44"
+                fieldClassName={dateFilter ? "h-9 pr-8 pl-3" : "h-9 px-3"}
+                onChange={(event) => selectDate(event.target.value)}
+              />
+              {dateFilter ? (
+                <button
+                  type="button"
+                  aria-label="Clear date filter"
+                  className="absolute top-1/2 right-2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
+                  onClick={() => selectDate("")}
+                >
+                  <X className="size-3.5" aria-hidden />
+                </button>
+              ) : null}
+            </div>
+            <Select
+              value={filter}
+              onValueChange={(value) => {
+                if (isBookingListFilter(value)) selectFilter(value);
+              }}
             >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="end">
-              {BOOKING_LIST_FILTERS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {BOOKING_LIST_FILTER_LABELS[option]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              <SelectTrigger
+                aria-label="Filter bookings"
+                className="h-9 w-full min-w-0 flex-1 text-xs sm:w-40 sm:flex-none sm:text-sm"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="end">
+                {BOOKING_LIST_FILTERS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {BOOKING_LIST_FILTER_LABELS[option]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         }
       />

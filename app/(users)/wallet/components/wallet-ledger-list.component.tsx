@@ -41,7 +41,6 @@ const LEDGER_TYPE_VALUES = [
   "withdrawal_reversal",
 ] as const;
 
-
 type TypeFilter =
   | "all"
   | "topup"
@@ -212,9 +211,7 @@ export function WalletLedgerList({
   }, [sorted]);
 
   const resolvedType = (
-    LEDGER_TYPE_VALUES.includes(typeFilter as TypeFilter)
-      ? typeFilter
-      : "all"
+    LEDGER_TYPE_VALUES.includes(typeFilter as TypeFilter) ? typeFilter : "all"
   ) as TypeFilter;
   const resolvedMonth =
     monthFilter === "all" || monthOptions.includes(monthFilter)

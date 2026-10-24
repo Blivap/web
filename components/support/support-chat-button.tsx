@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { gsap } from "gsap";
 import { Send, UserRound } from "lucide-react";
 import {
@@ -92,20 +99,29 @@ function SupportHead({ live = true }: { live?: boolean }) {
       }
       setBlinking(true);
       const again = Math.random() < 0.22;
-      later(() => {
-        setBlinking(false);
-        if (!again) {
-          scheduleBlink();
-          return;
-        }
-        later(() => {
-          setBlinking(true);
-          later(() => {
-            setBlinking(false);
+      later(
+        () => {
+          setBlinking(false);
+          if (!again) {
             scheduleBlink();
-          }, 60 + Math.random() * 40);
-        }, 80 + Math.random() * 90);
-      }, 70 + Math.random() * 50);
+            return;
+          }
+          later(
+            () => {
+              setBlinking(true);
+              later(
+                () => {
+                  setBlinking(false);
+                  scheduleBlink();
+                },
+                60 + Math.random() * 40,
+              );
+            },
+            80 + Math.random() * 90,
+          );
+        },
+        70 + Math.random() * 50,
+      );
     };
 
     const scheduleSmile = () => {
@@ -118,10 +134,13 @@ function SupportHead({ live = true }: { live?: boolean }) {
         return;
       }
       setSmiling(true);
-      later(() => {
-        setSmiling(false);
-        scheduleSmile();
-      }, 480 + Math.random() * 820);
+      later(
+        () => {
+          setSmiling(false);
+          scheduleSmile();
+        },
+        480 + Math.random() * 820,
+      );
     };
 
     scheduleBlink();
@@ -266,6 +285,8 @@ function UserChatAvatar({ src }: { src?: string | null }) {
       aria-hidden
     >
       {showImage ? (
+        // User photos can fail; fall back to the icon without the image optimizer.
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src!}
           alt=""
@@ -316,8 +337,12 @@ export function SupportChatButton() {
     const el = nodeRef.current;
     if (!el) return;
 
-    setXRef.current = gsap.quickSetter(el, "x", "px") as (value: number) => void;
-    setYRef.current = gsap.quickSetter(el, "y", "px") as (value: number) => void;
+    setXRef.current = gsap.quickSetter(el, "x", "px") as (
+      value: number,
+    ) => void;
+    setYRef.current = gsap.quickSetter(el, "y", "px") as (
+      value: number,
+    ) => void;
 
     const initial = remembered
       ? resting(remembered.side, remembered.y)
@@ -376,7 +401,9 @@ export function SupportChatButton() {
     const nextSide: Side = center < window.innerWidth / 2 ? "left" : "right";
     const next = resting(nextSide, placeRef.current.y);
     const distance = Math.abs(next.x - placeRef.current.x);
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     gsap.set(el, { x: placeRef.current.x, y: placeRef.current.y });
     placeRef.current = next;
     remembered = next;
@@ -407,7 +434,8 @@ export function SupportChatButton() {
     if (sheet) {
       sheet.style.transform = `translateY(${px})`;
       const clip = sheet.parentElement;
-      if (clip) clip.style.clipPath = `inset(calc(${px} + ${ROD / 2}px) 0px ${ROD / 2}px 0px)`;
+      if (clip)
+        clip.style.clipPath = `inset(calc(${px} + ${ROD / 2}px) 0px ${ROD / 2}px 0px)`;
     }
     const rod = root?.querySelector("[data-roll-rod]");
     if (rod instanceof HTMLElement) rod.style.top = px;
@@ -442,7 +470,9 @@ export function SupportChatButton() {
     const from = state.value;
     gsap.killTweensOf(state);
     closingRef.current = true;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     const distance = Math.abs(hidden - from) / Math.max(hidden, 1);
     gsap.to(state, {
       value: hidden,
@@ -459,7 +489,8 @@ export function SupportChatButton() {
   };
 
   const startRoll = () => {
-    if (rollStartedRef.current || closingRef.current || !openRef.current) return;
+    if (rollStartedRef.current || closingRef.current || !openRef.current)
+      return;
     const sheet = sheetRef.current;
     if (!sheet) return;
     const hidden = Math.max(sheet.offsetHeight - ROD, 0);
@@ -485,7 +516,9 @@ export function SupportChatButton() {
     gsap.killTweensOf(state);
     state.value = hidden;
     paintRoll(hidden);
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     gsap.to(state, {
       value: 0,
       duration: reduced ? 0 : 0.85,
@@ -566,7 +599,8 @@ export function SupportChatButton() {
             if (drag.id !== event.pointerId) return;
             const dx = event.clientX - drag.startX;
             const dy = event.clientY - drag.startY;
-            if (!drag.moved && dx * dx + dy * dy < DRAG_SLOP * DRAG_SLOP) return;
+            if (!drag.moved && dx * dx + dy * dy < DRAG_SLOP * DRAG_SLOP)
+              return;
             if (!drag.moved) {
               drag.moved = true;
               if (openRef.current) rollClosedRef.current();
@@ -582,7 +616,8 @@ export function SupportChatButton() {
               Math.max(box.margin, drag.originY + dy),
               box.maxY,
             );
-            if (!frameRef.current) frameRef.current = requestAnimationFrame(paint);
+            if (!frameRef.current)
+              frameRef.current = requestAnimationFrame(paint);
           }}
           onPointerUp={(event) => releaseToEdge(event.pointerId)}
           onPointerCancel={(event) => {
@@ -613,105 +648,115 @@ export function SupportChatButton() {
         >
           <div
             className="overflow-hidden"
-            style={{ clipPath: "inset(calc(var(--roll, calc(100% - 32px)) + 16px) 0 16px 0)" }}
+            style={{
+              clipPath:
+                "inset(calc(var(--roll, calc(100% - 32px)) + 16px) 0 16px 0)",
+            }}
           >
-          <div
-            ref={setSheetNode}
-            className="relative z-[1] mx-8 overflow-hidden bg-[linear-gradient(180deg,#F4E4C4_0%,#E4C98A_18%,#F6EBD4_42%,#E7D3A1_100%)] pt-7 shadow-[inset_8px_0_10px_rgba(62,42,28,0.08),inset_-8px_0_10px_rgba(62,42,28,0.08)]"
-            style={{ transform: "translateY(var(--roll, calc(100% - 32px)))" }}
-          >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-[#8C6A45]/50 to-transparent"
-            />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-[#8C6A45]/45 to-transparent"
-            />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_7px,rgba(92,64,32,0.05)_8px)]"
-            />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-y-0 left-4 w-px bg-gradient-to-b from-transparent via-[#24AFB5]/70 to-transparent"
-            />
-            <div className="relative flex items-center gap-2 px-4 pt-5 pb-2">
-              <span className="inline-flex size-8 shrink-0" aria-hidden>
-                <SupportHead live={false} />
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#3C2A1A]">Bliiva</p>
-                <p className="text-xs text-[#7A6248]">We reply by email for now</p>
+            <div
+              ref={setSheetNode}
+              className="relative z-[1] mx-8 overflow-hidden bg-[linear-gradient(180deg,#F4E4C4_0%,#E4C98A_18%,#F6EBD4_42%,#E7D3A1_100%)] pt-7 shadow-[inset_8px_0_10px_rgba(62,42,28,0.08),inset_-8px_0_10px_rgba(62,42,28,0.08)]"
+              style={{
+                transform: "translateY(var(--roll, calc(100% - 32px)))",
+              }}
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-[#8C6A45]/50 to-transparent"
+              />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-[#8C6A45]/45 to-transparent"
+              />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_7px,rgba(92,64,32,0.05)_8px)]"
+              />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 left-4 w-px bg-gradient-to-b from-transparent via-[#24AFB5]/70 to-transparent"
+              />
+              <div className="relative flex items-center gap-2 px-4 pt-5 pb-2">
+                <span className="inline-flex size-8 shrink-0" aria-hidden>
+                  <SupportHead live={false} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[#3C2A1A]">Bliiva</p>
+                  <p className="text-xs text-[#7A6248]">
+                    We reply by email for now
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="custom-scrollbar relative flex max-h-72 flex-col gap-3 overflow-y-auto px-4 py-3">
-              {lines.map((line) => {
-                const mine = line.from === "user";
-                return (
-                  <div
-                    key={line.id}
-                    className={cn("flex", mine ? "justify-end" : "justify-start")}
-                  >
+              <div className="custom-scrollbar relative flex max-h-72 flex-col gap-3 overflow-y-auto px-4 py-3">
+                {lines.map((line) => {
+                  const mine = line.from === "user";
+                  return (
                     <div
+                      key={line.id}
                       className={cn(
-                        "flex max-w-[min(100%,26rem)] items-start gap-2",
-                        mine && "flex-row-reverse",
+                        "flex",
+                        mine ? "justify-end" : "justify-start",
                       )}
                     >
-                      {mine ? (
-                        <UserChatAvatar src={user?.profileImage} />
-                      ) : (
-                        <span
-                          className="mt-0.5 inline-flex size-8 shrink-0"
-                          aria-hidden
-                        >
-                          <SupportHead live={false} />
-                        </span>
-                      )}
-                      <p
+                      <div
                         className={cn(
-                          "min-w-0 rounded-xl px-3 py-2 text-xs leading-relaxed wrap-break-word",
-                          mine
-                            ? "bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.45)]"
-                            : "bg-transparent px-0 text-[#3C2A1A]",
+                          "flex max-w-[min(100%,26rem)] items-start gap-2",
+                          mine && "flex-row-reverse",
                         )}
                       >
-                        {line.text}{" "}
-                        {line.from === "support" ? (
-                          <a
-                            href={`mailto:${SUPPORT_EMAIL}`}
-                            className="font-semibold text-primary underline"
+                        {mine ? (
+                          <UserChatAvatar src={user?.profileImage} />
+                        ) : (
+                          <span
+                            className="mt-0.5 inline-flex size-8 shrink-0"
+                            aria-hidden
                           >
-                            {SUPPORT_EMAIL}
-                          </a>
-                        ) : null}
-                      </p>
+                            <SupportHead live={false} />
+                          </span>
+                        )}
+                        <p
+                          className={cn(
+                            "min-w-0 rounded-xl px-3 py-2 text-xs leading-relaxed wrap-break-word",
+                            mine
+                              ? "bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.45)]"
+                              : "bg-transparent px-0 text-[#3C2A1A]",
+                          )}
+                        >
+                          {line.text}{" "}
+                          {line.from === "support" ? (
+                            <a
+                              href={`mailto:${SUPPORT_EMAIL}`}
+                              className="font-semibold text-primary underline"
+                            >
+                              {SUPPORT_EMAIL}
+                            </a>
+                          ) : null}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-            <form
-              onSubmit={send}
-              className="relative flex items-center gap-2 px-3 pt-1 pb-8"
-            >
-              <input
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                placeholder="Write a message"
-                aria-label="Message Bliiva"
-                className="h-9 min-w-0 flex-1 border-0 border-b border-[#8C6A45]/50 bg-transparent px-1 text-xs text-[#3C2A1A] outline-none placeholder:text-[#8A7355] focus:border-[#960018]"
-              />
-              <button
-                type="submit"
-                aria-label="Send message"
-                className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.65)]"
+                  );
+                })}
+              </div>
+              <form
+                onSubmit={send}
+                className="relative flex items-center gap-2 px-3 pt-1 pb-8"
               >
-                <Send className="size-3.5" aria-hidden />
-              </button>
-            </form>
-          </div>
+                <input
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  placeholder="Write a message"
+                  aria-label="Message Bliiva"
+                  className="h-9 min-w-0 flex-1 border-0 border-b border-[#8C6A45]/50 bg-transparent px-1 text-xs text-[#3C2A1A] outline-none placeholder:text-[#8A7355] focus:border-[#960018]"
+                />
+                <button
+                  type="submit"
+                  aria-label="Send message"
+                  className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.65)]"
+                >
+                  <Send className="size-3.5" aria-hidden />
+                </button>
+              </form>
+            </div>
           </div>
           <div
             data-roll-rod

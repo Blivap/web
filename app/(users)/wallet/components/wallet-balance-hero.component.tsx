@@ -84,9 +84,17 @@ export function WalletBalanceHero({
             className="inline-flex size-7 shrink-0 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 sm:size-8"
           >
             {hidden ? (
-              <EyeOff className="size-4 sm:size-[18px]" strokeWidth={1.75} aria-hidden />
+              <EyeOff
+                className="size-4 sm:size-[18px]"
+                strokeWidth={1.75}
+                aria-hidden
+              />
             ) : (
-              <Eye className="size-4 sm:size-[18px]" strokeWidth={1.75} aria-hidden />
+              <Eye
+                className="size-4 sm:size-[18px]"
+                strokeWidth={1.75}
+                aria-hidden
+              />
             )}
           </button>
         </div>

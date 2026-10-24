@@ -11,7 +11,12 @@ const PROVIDERS: {
   label: string;
   available: boolean;
 }[] = [
-  { provider: "google", src: "/icons/Google.svg", label: "Google", available: true },
+  {
+    provider: "google",
+    src: "/icons/Google.svg",
+    label: "Google",
+    available: true,
+  },
   {
     provider: "apple",
     src: "/icons/Apple.svg",
