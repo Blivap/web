@@ -63,8 +63,7 @@ function pickFromDonationCooldownList(
   );
   const match =
     rows.find(
-      (item) =>
-        item.donationType === primary || item.donation_type === primary,
+      (item) => item.donationType === primary || item.donation_type === primary,
     ) ?? rows.find((item) => item.available === false);
   if (!match || match.available === true) return null;
   return parseCooldownEndIso(match.cooldownEndsAt ?? match.cooldown_ends_at);

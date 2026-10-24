@@ -1,5 +1,4 @@
-const ALLOWED_TAG =
-  /^(?:br|strong|em|b|i|p|ul|ol|li|span|div|a)$/i;
+const ALLOWED_TAG = /^(?:br|strong|em|b|i|p|ul|ol|li|span|div|a)$/i;
 
 /** True when the body looks like HTML rather than plain text. */
 export function notificationBodyLooksLikeHtml(raw: string): boolean {
@@ -43,8 +42,14 @@ export function sanitizeNotificationHtml(raw: string): string {
 
   // Drop dangerous blocks outright.
   let html = raw
-    .replace(/<\s*(script|style|iframe|object|embed|link|meta)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, "")
-    .replace(/<\s*(script|style|iframe|object|embed|link|meta)[^>]*\/?\s*>/gi, "");
+    .replace(
+      /<\s*(script|style|iframe|object|embed|link|meta)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi,
+      "",
+    )
+    .replace(
+      /<\s*(script|style|iframe|object|embed|link|meta)[^>]*\/?\s*>/gi,
+      "",
+    );
 
   // Remove event handlers / javascript: URLs.
   html = html
@@ -53,22 +58,25 @@ export function sanitizeNotificationHtml(raw: string): string {
     .replace(/(href|src)\s*=\s*(['"])\s*javascript:[^'"]*\2/gi, '$1="#"');
 
   // Keep only allowed tags; strip attributes except safe href on anchors.
-  html = html.replace(/<\/?([a-z0-9]+)(\s[^>]*)?>/gi, (match, tag: string, attrs = "") => {
-    if (!ALLOWED_TAG.test(tag)) return "";
-    const closing = match.startsWith("</");
-    if (closing) return `</${tag.toLowerCase()}>`;
-    if (/^br$/i.test(tag)) return "<br />";
-    if (/^a$/i.test(tag)) {
-      const href = extractSafeHref(attrs);
-      return href ? `<a href="${href}" rel="noopener noreferrer" target="_blank">` : "<a>";
-    }
-    return `<${tag.toLowerCase()}>`;
-  });
+  html = html.replace(
+    /<\/?([a-z0-9]+)(\s[^>]*)?>/gi,
+    (match, tag: string, attrs = "") => {
+      if (!ALLOWED_TAG.test(tag)) return "";
+      const closing = match.startsWith("</");
+      if (closing) return `</${tag.toLowerCase()}>`;
+      if (/^br$/i.test(tag)) return "<br />";
+      if (/^a$/i.test(tag)) {
+        const href = extractSafeHref(attrs);
+        return href
+          ? `<a href="${href}" rel="noopener noreferrer" target="_blank">`
+          : "<a>";
+      }
+      return `<${tag.toLowerCase()}>`;
+    },
+  );
 
   // Normalize excessive breaks from email templates.
-  html = html
-    .replace(/(?:<br\s*\/?>\s*){3,}/gi, "<br /><br />")
-    .trim();
+  html = html.replace(/(?:<br\s*\/?>\s*){3,}/gi, "<br /><br />").trim();
 
   return html;
 }

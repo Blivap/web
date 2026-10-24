@@ -29,9 +29,7 @@ import {
 import { NIGERIA_STATES } from "@/lib/donors/location-options";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useMemo, useState } from "react";
-import {
-  useQueryParamNumber,
-} from "@/hooks/navigation/useQueryParamState.hook";
+import { useQueryParamNumber } from "@/hooks/navigation/useQueryParamState.hook";
 
 function countryLabel(code: string): string {
   const row = DONOR_COUNTRIES.find((c) => c.value === code);
