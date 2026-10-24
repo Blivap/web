@@ -138,6 +138,7 @@ export function useDonationChat({
   );
 
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const [roomClosed, setRoomClosed] = useState(false);
@@ -167,6 +168,7 @@ export function useDonationChat({
     if (prev && prev !== donationId) {
       dispatch(resetDonationChatRoom({ donationId: prev }));
     }
+    setHistoryLoaded(false);
   }, [donationId, dispatch]);
 
   const fetchHistory = useCallback(
@@ -228,6 +230,7 @@ export function useDonationChat({
         }
       } finally {
         setHistoryLoading(false);
+        if (!opts?.before) setHistoryLoaded(true);
       }
     },
     [dispatch],
@@ -447,6 +450,7 @@ export function useDonationChat({
       setSocketConnected(false);
     });
 
+    void fetchHistory();
     socket.connect();
 
     return () => {
@@ -598,6 +602,7 @@ export function useDonationChat({
     messages,
     nextCursor,
     historyLoading,
+    historyLoaded,
     historyError,
     sendError,
     clearSendError,

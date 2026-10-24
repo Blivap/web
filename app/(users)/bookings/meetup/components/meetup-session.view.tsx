@@ -157,6 +157,16 @@ function publicIdFromProfileBody(body: unknown): string | null {
   );
 }
 
+/** Server posts this when a request is accepted. It is not a user message. */
+function isSeededAcceptanceNotice(text: string): boolean {
+  const normalized = text.trim().toLowerCase().replace(/\s+/g, " ");
+  return (
+    normalized ===
+      "donation request accepted. you can now coordinate your meetup." ||
+    normalized === "donation request accepted. you can now coordinate your meetup"
+  );
+}
+
 function messageIsMine(
   message: DonationChatMessage,
   userId: string | undefined,
@@ -560,6 +570,14 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     });
   }, [donationChat.messages]);
 
+  const visibleChatMessages = useMemo(
+    () =>
+      sortedChatMessages.filter(
+        (message) => !isSeededAcceptanceNotice(message.text),
+      ),
+    [sortedChatMessages],
+  );
+
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -572,8 +590,8 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   );
   const lastChatMessageIdRef = useRef<string | null>(null);
   const newestChatMessageId =
-    sortedChatMessages.length > 0
-      ? sortedChatMessages[sortedChatMessages.length - 1]!.id
+    visibleChatMessages.length > 0
+      ? visibleChatMessages[visibleChatMessages.length - 1]!.id
       : null;
 
   useLayoutEffect(() => {
@@ -594,17 +612,17 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   }, [newestChatMessageId]);
 
   useEffect(() => {
-    const incoming = sortedChatMessages
+    const incoming = visibleChatMessages
       .map((message) => message.id)
       .filter((id) => !knownMessageIdsRef.current.has(id));
     const firstPaint = knownMessageIdsRef.current.size === 0;
-    for (const message of sortedChatMessages) {
+    for (const message of visibleChatMessages) {
       knownMessageIdsRef.current.add(message.id);
     }
     if (incoming.length === 0) return;
     const animate = firstPaint ? incoming.slice(-6) : incoming;
     setMotionMessageIds(new Set(animate));
-  }, [sortedChatMessages]);
+  }, [visibleChatMessages]);
 
   useEffect(() => {
     if (!emojiOpen && !moreOpen) return;
@@ -1265,7 +1283,12 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     [donationChat, donationChatBookingId, showSnackbar],
   );
 
-  if (sessionLoad === "loading" || sessionLoad === "idle") {
+  const waitingOnChat =
+    sessionLoad === "ok" &&
+    donationChatEnabled &&
+    !donationChat.historyLoaded;
+
+  if (sessionLoad === "loading" || sessionLoad === "idle" || waitingOnChat) {
     return <MeetupPageSkeleton />;
   }
 
@@ -1362,19 +1385,13 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               </div>
             ) : null}
 
-            {donationChat.historyLoading && sortedChatMessages.length === 0 ? (
-              <div className="space-y-4" aria-hidden>
-                <div className="h-14 w-40 animate-pulse rounded-xl bg-[#F3F4F6] dark:bg-white/8" />
-                <div className="ml-auto h-10 w-24 animate-pulse rounded-xl bg-[#FDE8EE] dark:bg-primary/20" />
-                <div className="h-16 w-64 max-w-full animate-pulse rounded-xl bg-[#F3F4F6] dark:bg-white/8" />
-              </div>
-            ) : sortedChatMessages.length === 0 ? (
+            {visibleChatMessages.length === 0 ? (
               <p className="animate-in fade-in py-10 text-center text-sm text-text-tertiary duration-300 motion-reduce:animate-none">
                 {chatLocked ? "No messages to show." : "No messages yet."}
               </p>
             ) : (
               <div className="flex flex-col gap-5">
-                {sortedChatMessages.map((message) => {
+                {visibleChatMessages.map((message) => {
                   const mine = messageIsMine(
                     message,
                     user?.id,
