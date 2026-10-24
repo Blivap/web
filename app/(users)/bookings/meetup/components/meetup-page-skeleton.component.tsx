@@ -13,59 +13,40 @@ function Sk({ className }: { className?: string }) {
 }
 
 /**
- * Mirrors the meetup session layout: chat thread on the left, status and
- * verification on the right.
+ * The meetup loading state: the chat frame with message placeholders.
  */
 export function MeetupPageSkeleton() {
   return (
     <div
-      className="flex h-full min-h-[28rem] w-full min-w-0 flex-col lg:flex-row"
+      className="flex h-full min-h-0 flex-1 flex-col"
       aria-busy="true"
       aria-live="polite"
     >
       <span className="sr-only">Loading meetup…</span>
+      <div className="relative flex min-h-0 flex-1">
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 space-y-4 overflow-hidden px-4 py-6 sm:px-8">
+            <div className="flex justify-center">
+              <Sk className="h-6 w-36 rounded-full" />
+            </div>
+            <div className="h-14 w-40 animate-pulse rounded-xl bg-[#F3F4F6] dark:bg-white/8" />
+            <div className="ml-auto h-10 w-24 animate-pulse rounded-xl bg-[#FDE8EE] dark:bg-primary/20" />
+            <div className="h-16 w-64 max-w-full animate-pulse rounded-xl bg-[#F3F4F6] dark:bg-white/8" />
+          </div>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <div className="min-h-0 flex-1 space-y-5 overflow-hidden px-4 py-6 sm:px-8">
-          <div className="flex justify-center">
-            <Sk className="h-6 w-40 rounded-full" />
-          </div>
-          <div className="flex items-start gap-2">
-            <Sk className="size-8 shrink-0 rounded-full" />
-            <div className="space-y-2">
-              <Sk className="h-3 w-28" />
-              <Sk className="h-10 w-16 rounded-xl" />
+          <div className="border-t border-border px-4 py-4 sm:px-6 dark:border-white/10">
+            <div className="rounded-xl border border-[#C5CDD6] bg-white p-3 dark:border-white/15 dark:bg-[#111118]">
+              <Sk className="h-16 w-full bg-transparent" />
+              <div className="mt-2 flex items-center justify-end gap-1.5">
+                <Sk className="size-8 rounded-md bg-[#F8D7DE] dark:bg-primary/25" />
+                <Sk className="size-8 rounded-md" />
+                <Sk className="size-8 rounded-md" />
+                <Sk className="h-9 w-20 rounded-lg" />
+              </div>
             </div>
           </div>
-          <div className="flex items-start justify-end gap-2">
-            <div className="flex flex-col items-end gap-2">
-              <Sk className="h-3 w-32" />
-              <Sk className="h-10 w-20 rounded-xl bg-[#F8D7DE] dark:bg-primary/20" />
-            </div>
-            <Sk className="size-8 shrink-0 rounded-full" />
-          </div>
-          <div className="flex items-start gap-2">
-            <Sk className="size-8 shrink-0 rounded-full" />
-            <div className="space-y-2">
-              <Sk className="h-3 w-28" />
-              <Sk className="h-16 w-64 max-w-full rounded-xl" />
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-border px-4 py-4 sm:px-6 dark:border-white/10">
-          <Sk className="mb-2 h-4 w-36" />
-          <Sk className="h-28 w-full rounded-xl" />
-        </div>
+        </section>
       </div>
-
-      <aside className="hidden w-[22.5rem] shrink-0 flex-col gap-4 border-l border-border px-5 py-6 lg:flex dark:border-white/10">
-        <Sk className="h-3 w-14" />
-        <Sk className="h-7 w-28" />
-        <Sk className="h-3 w-44" />
-        <Sk className="mt-4 h-4 w-36" />
-        <Sk className="h-28 w-full rounded-xl" />
-        <Sk className="h-28 w-full rounded-xl" />
-      </aside>
     </div>
   );
 }
