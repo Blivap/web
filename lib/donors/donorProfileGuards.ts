@@ -16,10 +16,13 @@ export function isQuestionnaireAnswered(raw: Record<string, unknown>): boolean {
   if (truthy(raw.questionnaire_submitted)) return true;
 
   const status = raw.eligibilityStatus ?? raw.eligibility_status;
-  if (typeof status === "string" && status.length > 0) return true;
-
-  const reasons = raw.ineligibilityReasons ?? raw.ineligibility_reasons;
-  if (Array.isArray(reasons) && reasons.length > 0) return true;
+  if (
+    status === "eligible" ||
+    status === "ineligible" ||
+    status === "pending_review"
+  ) {
+    return true;
+  }
 
   const q = raw.questionnaire;
   if (q && typeof q === "object") {
@@ -38,15 +41,16 @@ export function isQuestionnaireAnswered(raw: Record<string, unknown>): boolean {
 
 /**
  * True when GET /donors/me shows the user is already an active / registered
- * donor and should not re-enter onboarding. Incomplete profiles (e.g. basics
- * only, or questionnaire done but activation still needed) can continue.
+ * donor and should not re-enter onboarding. A profile that is still pending
+ * can continue through screening.
  */
 export function isExistingRegisteredDonor(
   raw: Record<string, unknown>,
 ): boolean {
   const truthy = (v: unknown) => v === true || v === "true";
+  const status = raw.eligibilityStatus ?? raw.eligibility_status;
+  if (status === "eligible") return true;
 
-  if (truthy(raw.isActiveDonor) || truthy(raw.is_active_donor)) return true;
   if (truthy(raw.isDonor) || truthy(raw.is_donor)) return true;
   if (truthy(raw.activated) || truthy(raw.isActivated)) return true;
   if (truthy(raw.activationSubmitted) || truthy(raw.activation_submitted))

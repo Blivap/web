@@ -158,12 +158,9 @@ export function DonorScreeningProfileStep({
           Donation-type screening profile
         </h2>
         <p className="mt-1 text-sm text-text-secondary max-w-160">
-          This step is separate from blood booking activation. It captures
-          clinical context and which donation pathways you want to explore
-          first. It powers compatibility checks and optional typed
-          questionnaires — it does not replace the legacy health questionnaire
-          in the next step, which is still required to request active donor
-          status.
+          This step captures clinical context and which donation pathways you
+          want to explore first. It powers compatibility checks and the
+          screening questionnaire. Passing that check makes you a donor.
         </p>
 
         <div
@@ -172,17 +169,11 @@ export function DonorScreeningProfileStep({
         >
           <Info className="size-4 shrink-0 text-primary" aria-hidden />
           <p className="text-xs leading-relaxed text-text-secondary">
-            <span className="font-semibold text-text-primary">Two layers:</span>{" "}
-            (1){" "}
-            <span className="font-medium text-text-primary">Active donor</span>{" "}
-            — profile + legacy questionnaire +{" "}
-            <span className="font-mono text-[11px]">request-activation</span>.
-            (2){" "}
-            <span className="font-medium text-text-primary">
-              Screening profile + AI questionnaire
+            <span className="font-semibold text-text-primary">
+              Screening profile and questionnaire
             </span>{" "}
-            — optional for activation; recommended for richer matching and your
-            public donor card.
+            decide eligibility. A profile that passes becomes a donor. If it
+            does not, contact support for another chance.
           </p>
         </div>
 
