@@ -102,6 +102,7 @@ export const publicRoutes: readonly string[] = [
   routes.ourExpertise,
   routes.research,
   routes.whatWeDo,
+  routes.waitlist,
   routes.notFound,
   routes.notFoundAlt,
   routes.privacy,
@@ -137,7 +138,6 @@ export const protectedRoutePrefixes: readonly string[] = [
   "/schedule-appointment",
   routes.verifyEmail,
   routes.selectAvatar,
-  routes.waitlist,
 ];
 
 export function requiresAuth(pathname: string): boolean {

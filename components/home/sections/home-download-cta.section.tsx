@@ -29,14 +29,14 @@ export function HomeDownloadCtaSection() {
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <HomeCtaButton
-              href={routes.waitlist}
+              href={`${routes.waitlist}?store=ios`}
               variant="primary"
               className="rounded-full px-6"
             >
               App Store — join waitlist
             </HomeCtaButton>
             <HomeCtaButton
-              href={routes.waitlist}
+              href={`${routes.waitlist}?store=android`}
               variant="outline"
               className="rounded-full border-primary/30 bg-white px-6 dark:bg-transparent"
             >
