@@ -1348,14 +1348,14 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             <div className="mb-2 flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2 text-sm text-text-secondary">
                 <PartyAvatar src={peerProfileImage} className="size-6" />
-                <span className="inline-flex min-w-0 items-center gap-1 font-medium text-text-primary">
+                <span className="hidden min-w-0 items-center gap-1 font-medium text-text-primary sm:inline-flex">
                   <span className="truncate">{peerHandle}</span>
                   {session.peer.meetupVerified ? <MeetupVerifiedMark /> : null}
                 </span>
                 {donationChatStatusBadge ? (
                   <span
                     className={cn(
-                      "inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                      "hidden shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide sm:inline-flex",
                       donationChatStatusBadge.className,
                     )}
                   >
