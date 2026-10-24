@@ -566,7 +566,6 @@ function NewDonorForm() {
           donation_type: donationTypeForQuestionnaire,
           blood_type: values.basics.bloodType,
         });
-        setParsedAreaLocation(parsed);
         setBasicsComplete(true);
         setStepParam(2);
       } else {
