@@ -986,8 +986,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     );
   }, [donationChatBookingId, sentBookings, receivedBookings]);
 
-  const myHandle =
-    partyHandle(user?.publicId) || partyHandle(session?.me.publicId) || "You";
   const peerPublicIdFromSession =
     session?.peer.publicId ??
     (isRequester === true

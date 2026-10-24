@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "blivap-app-waitlist";
 
@@ -51,6 +51,46 @@ function readSavedJoin(): SavedJoin | null {
   }
 }
 
+const savedListeners = new Set<() => void>();
+let savedSnapshot: SavedJoin | null = null;
+let savedSnapshotReady = false;
+
+function emitSaved() {
+  for (const listener of savedListeners) listener();
+}
+
+function subscribeSaved(listener: () => void) {
+  savedListeners.add(listener);
+  return () => {
+    savedListeners.delete(listener);
+  };
+}
+
+function getSavedSnapshot(): SavedJoin | null {
+  if (!savedSnapshotReady) {
+    savedSnapshot = readSavedJoin();
+    savedSnapshotReady = true;
+  }
+  return savedSnapshot;
+}
+
+function getServerSavedSnapshot(): SavedJoin | null {
+  return null;
+}
+
+function persistSaved(join: SavedJoin | null): boolean {
+  try {
+    if (join) localStorage.setItem(STORAGE_KEY, JSON.stringify(join));
+    else localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    return false;
+  }
+  savedSnapshot = join;
+  savedSnapshotReady = true;
+  emitSaved();
+  return true;
+}
+
 function PhonePreview() {
   return (
     <div
@@ -72,22 +112,21 @@ function PhonePreview() {
 export function WaitlistJoin() {
   const searchParams = useSearchParams();
   const requestedStore = searchParams.get("store");
-  const initialStore = isStoreId(requestedStore) ? requestedStore : "both";
+  const storeFromQuery = isStoreId(requestedStore) ? requestedStore : "both";
+  const [storeChoice, setStoreChoice] = useState<{
+    query: string | null;
+    store: StoreId;
+  } | null>(null);
+  const store =
+    storeChoice?.query === requestedStore ? storeChoice.store : storeFromQuery;
 
   const [email, setEmail] = useState("");
-  const [store, setStore] = useState<StoreId>(initialStore);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState<SavedJoin | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setSaved(readSavedJoin());
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (isStoreId(requestedStore)) setStore(requestedStore);
-  }, [requestedStore]);
+  const saved = useSyncExternalStore(
+    subscribeSaved,
+    getSavedSnapshot,
+    getServerSavedSnapshot,
+  );
 
   const headingStore = readyLine(store);
 
@@ -99,14 +138,11 @@ export function WaitlistJoin() {
       return;
     }
     const join = { email: nextEmail, store };
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(join));
-    } catch {
+    if (!persistSaved(join)) {
       setError("Could not save your place on this device. Try again.");
       return;
     }
     setError(null);
-    setSaved(join);
   };
 
   return (
@@ -125,7 +161,7 @@ export function WaitlistJoin() {
               : `Leave your email and the store you use. We'll tell you when ${headingStore}.`}
           </p>
 
-          {ready && saved ? (
+          {saved ? (
             <div className="mt-6 max-w-md rounded-2xl border border-primary/20 bg-white p-5 dark:border-white/10 dark:bg-[#14141a]">
               <p className="inline-flex items-center gap-2 text-sm font-semibold text-text-primary">
                 <Check className="size-4 text-primary" aria-hidden />
@@ -142,12 +178,7 @@ export function WaitlistJoin() {
                 type="button"
                 className="mt-4 text-sm font-medium text-primary underline-offset-2 hover:underline"
                 onClick={() => {
-                  try {
-                    localStorage.removeItem(STORAGE_KEY);
-                  } catch {
-                    /* ignore */
-                  }
-                  setSaved(null);
+                  persistSaved(null);
                   setEmail("");
                 }}
               >
@@ -203,7 +234,12 @@ export function WaitlistJoin() {
                           value={option.id}
                           checked={selected}
                           className="sr-only"
-                          onChange={() => setStore(option.id)}
+                          onChange={() =>
+                            setStoreChoice({
+                              query: requestedStore,
+                              store: option.id,
+                            })
+                          }
                         />
                         {option.label}
                       </label>

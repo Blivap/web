@@ -266,6 +266,8 @@ function UserChatAvatar({ src }: { src?: string | null }) {
       aria-hidden
     >
       {showImage ? (
+        // User photos can fail; fall back to the icon without the image optimizer.
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src!}
           alt=""
