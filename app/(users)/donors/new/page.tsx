@@ -602,10 +602,7 @@ function NewDonorForm() {
         Back
       </Link>
       <StepProgress currentStep={step} />
-      <div
-        ref={contentRef}
-        className="min-w-0"
-      >
+      <div ref={contentRef} className="min-w-0">
         <DonorBasicsStep
           active={step === 1}
           values={values.basics}
@@ -679,8 +676,7 @@ function NewDonorForm() {
           },
           {
             title: "Overview",
-            description:
-              "Return to overview to keep using your account.",
+            description: "Return to overview to keep using your account.",
           },
         ]}
         footerNote="If a later check fails, contact support and they can give you another chance."

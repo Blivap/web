@@ -92,7 +92,15 @@ function TransportArt() {
       <g transform="translate(28 150)">
         <rect x="6" y="10" width="36" height="16" rx="4" fill={MAROON} />
         <path d="M10 10l6-7h16l6 7z" fill={MAROON_DEEP} />
-        <rect x="16" y="5" width="8" height="5" rx="1" fill="#fff" opacity="0.85" />
+        <rect
+          x="16"
+          y="5"
+          width="8"
+          height="5"
+          rx="1"
+          fill="#fff"
+          opacity="0.85"
+        />
         <circle cx="14" cy="28" r="5" fill={INK} />
         <circle cx="34" cy="28" r="5" fill={INK} />
         <circle cx="14" cy="28" r="2" fill="#fff" />
@@ -114,7 +122,12 @@ function MealsArt() {
   return (
     <svg viewBox="0 0 280 220" className="size-full" aria-hidden>
       <rect width="280" height="220" fill="#fff" />
-      <path d="M46 168h188" stroke="#E4E4E4" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M46 168h188"
+        stroke="#E4E4E4"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
 
       <g transform="translate(58 78)">
         <rect x="8" y="18" width="22" height="52" rx="6" fill={INK} />
@@ -135,9 +148,30 @@ function MealsArt() {
           <circle cx="14" cy="14" r="6" fill="#F2C14E" />
         </g>
         <g fill="#E7A23A">
-          <rect x="30" y="62" width="16" height="4" rx="2" transform="rotate(-18 38 64)" />
-          <rect x="34" y="70" width="16" height="4" rx="2" transform="rotate(8 42 72)" />
-          <rect x="22" y="68" width="14" height="4" rx="2" transform="rotate(-8 29 70)" />
+          <rect
+            x="30"
+            y="62"
+            width="16"
+            height="4"
+            rx="2"
+            transform="rotate(-18 38 64)"
+          />
+          <rect
+            x="34"
+            y="70"
+            width="16"
+            height="4"
+            rx="2"
+            transform="rotate(8 42 72)"
+          />
+          <rect
+            x="22"
+            y="68"
+            width="14"
+            height="4"
+            rx="2"
+            transform="rotate(-8 29 70)"
+          />
         </g>
         <g>
           <circle cx="58" cy="58" r="3" fill="#E23B4A" />
@@ -151,7 +185,12 @@ function MealsArt() {
         <circle cx="16" cy="40" r="1.6" fill="#fff" />
         <circle cx="24" cy="48" r="1.4" fill="#fff" />
         <circle cx="14" cy="52" r="1.3" fill="#fff" />
-        <path d="M30 4v28" stroke={MAROON} strokeWidth="3" strokeLinecap="round" />
+        <path
+          d="M30 4v28"
+          stroke={MAROON}
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
       </g>
     </svg>
   );
@@ -161,7 +200,12 @@ function RecoveryArt() {
   return (
     <svg viewBox="0 0 280 220" className="size-full" aria-hidden>
       <rect width="280" height="220" fill="#fff" />
-      <path d="M78 176h124" stroke="#E4E4E4" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M78 176h124"
+        stroke="#E4E4E4"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
       <circle cx="140" cy="108" r="58" fill={MAROON} />
       <circle cx="140" cy="108" r="48" fill="#fff" />
       <circle cx="140" cy="60" r="6" fill={MAROON} />
@@ -192,21 +236,26 @@ function StayArt() {
       <path d="M84 108h112v10H84z" fill={MAROON_DEEP} />
       <path d="M100 96h40l8 12H92z" fill={INK} />
       <rect x="108" y="118" width="28" height="16" rx="3" fill="#fff" />
-      <rect x="146" y="122" width="22" height="12" rx="2" fill="#fff" opacity="0.8" />
-      <path d="M88 144h104" stroke={INK} strokeWidth="4" strokeLinecap="round" />
+      <rect
+        x="146"
+        y="122"
+        width="22"
+        height="12"
+        rx="2"
+        fill="#fff"
+        opacity="0.8"
+      />
+      <path
+        d="M88 144h104"
+        stroke={INK}
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
     </Stage>
   );
 }
 
-function Person({
-  x,
-  y,
-  fill,
-}: {
-  x: number;
-  y: number;
-  fill: string;
-}) {
+function Person({ x, y, fill }: { x: number; y: number; fill: string }) {
   return (
     <g transform={`translate(${x} ${y})`}>
       <circle cx="16" cy="10" r="10" fill={fill} />
@@ -228,7 +277,12 @@ function ChildcareArt() {
   return (
     <svg viewBox="0 0 280 220" className="size-full" aria-hidden>
       <rect width="280" height="220" fill="#fff" />
-      <path d="M70 176h140" stroke="#E4E4E4" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M70 176h140"
+        stroke="#E4E4E4"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
       <path d="M136 78h8v86h-8z" fill={INK} />
       <circle cx="140" cy="74" r="8" fill={MAROON} />
       <ellipse cx="140" cy="104" rx="40" ry="14" fill="#F2C14E" />
@@ -279,8 +333,20 @@ function TimeArt() {
       <rect x="96" y="96" width="72" height="52" rx="6" fill={MAROON} />
       <path d="M96 108h72" stroke={MAROON_DEEP} strokeWidth="8" />
       <path d="M118 96V84h28v12" fill="none" stroke={INK} strokeWidth="4" />
-      <circle cx="184" cy="86" r="22" fill="#fff" stroke={INK} strokeWidth="4" />
-      <path d="M184 86V74" stroke={MAROON} strokeWidth="3" strokeLinecap="round" />
+      <circle
+        cx="184"
+        cy="86"
+        r="22"
+        fill="#fff"
+        stroke={INK}
+        strokeWidth="4"
+      />
+      <path
+        d="M184 86V74"
+        stroke={MAROON}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
       <path d="M184 86h10" stroke={INK} strokeWidth="3" strokeLinecap="round" />
     </Stage>
   );

@@ -11,9 +11,7 @@ function BookingsContent() {
   const token = useAppSelector((s) => s.auth.token);
 
   if (token && !user) {
-    return (
-      <BookingsShellSkeleton />
-    );
+    return <BookingsShellSkeleton />;
   }
 
   return <BookingsListView />;
@@ -23,9 +21,7 @@ export default function BookingsPage() {
   return (
     <Layout>
       <div className="flex min-h-0 flex-col">
-        <Suspense
-          fallback={<BookingsShellSkeleton />}
-        >
+        <Suspense fallback={<BookingsShellSkeleton />}>
           <BookingsContent />
         </Suspense>
       </div>

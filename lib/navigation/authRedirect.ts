@@ -161,9 +161,7 @@ export function resolveDnRedirect(
   const fromParams = getDnRedirect(searchParams);
   if (fromParams) return fromParams;
   if (typeof window === "undefined") return null;
-  const fromWindow = getDnRedirect(
-    new URLSearchParams(window.location.search),
-  );
+  const fromWindow = getDnRedirect(new URLSearchParams(window.location.search));
   if (fromWindow) return fromWindow;
   return peekStoredDn();
 }

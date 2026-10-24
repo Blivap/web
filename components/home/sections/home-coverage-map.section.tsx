@@ -149,7 +149,8 @@ export function HomeCoverageMapSection() {
           </h2>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-text-secondary">
             Blivap links verified donors into a living network — so when someone
-            needs a donation, help is already close by in the cities that matter.
+            needs a donation, help is already close by in the cities that
+            matter.
           </p>
 
           <ul

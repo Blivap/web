@@ -28,7 +28,12 @@ export function loadScheduleAppointmentDraft(): ScheduleAppointmentDraft | null 
     ) {
       return null;
     }
-    if (!parsed.donorUserId || !parsed.hospitalId || !parsed.date || !parsed.time) {
+    if (
+      !parsed.donorUserId ||
+      !parsed.hospitalId ||
+      !parsed.date ||
+      !parsed.time
+    ) {
       return null;
     }
     return {

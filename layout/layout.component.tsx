@@ -135,8 +135,8 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
                   </p>
                   <p className="max-w-200 text-xs text-[#5A403F] dark:text-red-100/85">
                     To ensure safety and trust on our platform, you must verify
-                    your identity using your National Identification Number (NIN)
-                    before you can book donors or receive bookings.{" "}
+                    your identity using your National Identification Number
+                    (NIN) before you can book donors or receive bookings.{" "}
                     <Link
                       href={routes.verifyId("")}
                       className="underline text-primary"

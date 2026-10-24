@@ -109,7 +109,9 @@ export default function Education() {
                   <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280] dark:text-slate-400">
                     <li className="flex items-start gap-2">
                       <CheckCircle className="text-primary mt-1" size={16} />
-                      <span>How matching works for blood, organs, tissue, and more</span>
+                      <span>
+                        How matching works for blood, organs, tissue, and more
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle className="text-primary mt-1" size={16} />

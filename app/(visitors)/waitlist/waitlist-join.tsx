@@ -186,7 +186,10 @@ export function WaitlistJoin() {
               </button>
             </div>
           ) : (
-            <form className="mt-6 flex max-w-md flex-col gap-4" onSubmit={onSubmit}>
+            <form
+              className="mt-6 flex max-w-md flex-col gap-4"
+              onSubmit={onSubmit}
+            >
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="waitlist-email"
@@ -249,7 +252,10 @@ export function WaitlistJoin() {
               </fieldset>
 
               {error ? (
-                <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+                <p
+                  className="text-sm text-red-600 dark:text-red-400"
+                  role="alert"
+                >
                   {error}
                 </p>
               ) : null}

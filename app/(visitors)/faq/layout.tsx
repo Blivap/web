@@ -5,7 +5,12 @@ export const metadata: Metadata = generateMetadata({
   title: "Frequently Asked Questions",
   description:
     "Clear answers about eligibility, the donation process, safety, and using Blivap.",
-  keywords: ["donation FAQ", "organ donation", "blood donation", "donor eligibility"],
+  keywords: [
+    "donation FAQ",
+    "organ donation",
+    "blood donation",
+    "donor eligibility",
+  ],
   path: "/faq",
 });
 

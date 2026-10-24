@@ -196,8 +196,11 @@ function DonorsPaginatedGrid({
         <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
           <p className="text-center text-xs text-text-secondary sm:text-left">
             Page{" "}
-            <span className="font-semibold text-text-primary">{safePage}</span> of{" "}
-            <span className="font-semibold text-text-primary">{totalPages}</span>
+            <span className="font-semibold text-text-primary">{safePage}</span>{" "}
+            of{" "}
+            <span className="font-semibold text-text-primary">
+              {totalPages}
+            </span>
           </p>
           <PageSizeSelect
             value={pageSize}
@@ -248,9 +251,7 @@ function DonorsPageContent() {
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   const bloodType = (
-    BLOOD_TYPES.includes(activeBloodType as BloodType)
-      ? activeBloodType
-      : "All"
+    BLOOD_TYPES.includes(activeBloodType as BloodType) ? activeBloodType : "All"
   ) as BloodType;
 
   const loadDonors = useCallback(async () => {

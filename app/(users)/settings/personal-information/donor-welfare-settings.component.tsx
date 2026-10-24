@@ -46,7 +46,9 @@ export function DonorWelfareSettings() {
       ]);
       if (packageRes.status < 200 || packageRes.status >= 300) {
         setLoadError(
-          packageRes.error ?? packageRes.message ?? "Could not load care packages",
+          packageRes.error ??
+            packageRes.message ??
+            "Could not load care packages",
         );
         return;
       }
@@ -104,7 +106,10 @@ export function DonorWelfareSettings() {
 
   const save = async () => {
     if (askRequester && preferences.items.length === 0) {
-      showSnackbar("Choose at least one care item, or cover your own costs.", "error");
+      showSnackbar(
+        "Choose at least one care item, or cover your own costs.",
+        "error",
+      );
       return;
     }
     setSaving(true);
@@ -124,7 +129,10 @@ export function DonorWelfareSettings() {
       setPreferences(saved);
       showSnackbar("Meetup care preferences saved.", "success");
     } catch (err) {
-      showSnackbar(getAxiosErrorMessage(err, "Could not save meetup care"), "error");
+      showSnackbar(
+        getAxiosErrorMessage(err, "Could not save meetup care"),
+        "error",
+      );
     } finally {
       setSaving(false);
     }
@@ -153,7 +161,9 @@ export function DonorWelfareSettings() {
 
         {loadError ? (
           <div>
-            <p className="text-sm text-[#6B7280] dark:text-white/60">{loadError}</p>
+            <p className="text-sm text-[#6B7280] dark:text-white/60">
+              {loadError}
+            </p>
             <Button
               type="button"
               variant="link"
@@ -169,7 +179,8 @@ export function DonorWelfareSettings() {
             <div className="grid grid-cols-1 gap-3 @min-[36rem]:grid-cols-2">
               {COVERAGE_OPTIONS.map((option) => {
                 const selected = preferences.coverage === option.value;
-                const blocked = option.value === "requester" && packages.length === 0;
+                const blocked =
+                  option.value === "requester" && packages.length === 0;
                 return (
                   <button
                     key={option.value}
@@ -192,7 +203,10 @@ export function DonorWelfareSettings() {
 
             <fieldset
               disabled={!ready || !askRequester}
-              className={cn("min-w-0 border-0 p-0", !askRequester && "opacity-50")}
+              className={cn(
+                "min-w-0 border-0 p-0",
+                !askRequester && "opacity-50",
+              )}
             >
               <legend className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9A9A9A] dark:text-white/50">
                 Care to arrange
