@@ -790,11 +790,21 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     return false;
   }, [session, user?.id, isRequester]);
 
+  const iVerifiedMeetup = session?.me.meetupVerified === true;
   const showCodePath =
     session &&
     session.codeVerificationEnabled !== false &&
     !readOnly &&
+    !gateSatisfied &&
+    !iVerifiedMeetup;
+  const waitingOnPeerVerify =
+    Boolean(ninOk) &&
+    Boolean(session) &&
+    !readOnly &&
+    iVerifiedMeetup &&
     !gateSatisfied;
+  const showConfirmDonation =
+    Boolean(ninOk) && gateSatisfied && !readOnly && !myDonationDone;
 
   useEffect(() => {
     if (ninOk && showCodePath) return;
@@ -1353,7 +1363,23 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                   </span>
                 ) : null}
               </div>
-              {ninOk && showCodePath ? (
+              {waitingOnPeerVerify ? (
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-200">
+                  <span className="size-1.5 animate-pulse rounded-full bg-amber-300" />
+                  Pending
+                </span>
+              ) : showConfirmDonation ? (
+                <Button
+                  type="button"
+                  size="xs"
+                  className="shrink-0"
+                  disabled={confirmBusy || isRequester === null}
+                  loading={confirmBusy}
+                  onClick={() => void onConfirmDonation()}
+                >
+                  Confirm donation
+                </Button>
+              ) : ninOk && showCodePath ? (
                 <div className="flex shrink-0 items-center gap-2">
                   <input
                     name="meetupCode"
@@ -1582,24 +1608,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                         <p className="px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
                           Arrival recorded
                         </p>
-                      ) : null}
-                      {ninOk &&
-                      gateSatisfied &&
-                      !readOnly &&
-                      !myDonationDone ? (
-                        <button
-                          type="button"
-                          className="flex w-full rounded-lg px-3 py-2 text-left text-sm text-text-primary hover:bg-[#F3F4F6] disabled:opacity-50 dark:hover:bg-white/8"
-                          disabled={confirmBusy || isRequester === null}
-                          onClick={() => {
-                            setMoreOpen(false);
-                            void onConfirmDonation();
-                          }}
-                        >
-                          {confirmBusy
-                            ? "Confirming donation…"
-                            : "Confirm donation"}
-                        </button>
                       ) : null}
                       {isRequester === false ? (
                         <button
