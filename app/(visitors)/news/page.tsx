@@ -119,7 +119,7 @@ function NewsGridSkeleton() {
   );
 }
 
-const DEFAULT_NEWS_QUERY = "blood donation";
+const DEFAULT_NEWS_QUERY = "medical donation";
 
 export default function News() {
   const [query, setQuery] = useState(DEFAULT_NEWS_QUERY);

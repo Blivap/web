@@ -42,49 +42,49 @@ export const HOME_IMPACT_EVENTS: ImpactEvent[] = [
   {
     id: "1",
     kind: "need",
-    label: "O+ needed in Wuse",
+    label: "Whole blood needed in Wuse",
     meta: "Abuja · 3 mins ago",
   },
   {
     id: "2",
     kind: "match",
-    label: "Match found in Garki",
+    label: "Plasma match in Garki",
     meta: "12 mins ago",
   },
   {
     id: "3",
     kind: "donate",
-    label: "Donor confirmed in Lekki",
+    label: "Kidney donor confirmed in Lekki",
     meta: "Lagos · 18 mins ago",
   },
   {
     id: "4",
     kind: "need",
-    label: "B− needed in Enugu",
+    label: "Platelets needed in Enugu",
     meta: "Urgent · 22 mins ago",
   },
   {
     id: "5",
     kind: "match",
-    label: "Match found in Kano",
+    label: "Cornea match in Kano",
     meta: "31 mins ago",
   },
   {
     id: "6",
     kind: "need",
-    label: "A+ needed in Port Harcourt",
+    label: "Reproductive donation in Port Harcourt",
     meta: "Rivers · 40 mins ago",
   },
   {
     id: "7",
     kind: "donate",
-    label: "Donation completed in Ikeja",
+    label: "Tissue donation completed in Ikeja",
     meta: "1 hr ago",
   },
   {
     id: "8",
     kind: "match",
-    label: "Match found in Kaduna",
+    label: "Liver match in Kaduna",
     meta: "1 hr ago",
   },
 ];
@@ -112,7 +112,7 @@ export const HOME_TESTIMONIALS: HomeTestimonial[] = [
   {
     id: "t1",
     quote:
-      "I got a match in under twenty minutes when my sister needed O+. Blivap made a terrifying night manageable.",
+      "I got a match in under twenty minutes when my sister needed a donation. Blivap made a terrifying night manageable.",
     name: "Adaeze O.",
     role: "Recipient family",
     location: "Abuja",

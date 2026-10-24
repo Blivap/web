@@ -130,7 +130,8 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             Connecting People to Donors
           </p>
           <p className="text-[18px] text-[#F6F6F8] dark:text-white/80">
-            Discover endless opportunities to receive blood and sperm donation.
+            Find donors for blood, plasma, organs, tissue, reproductive care,
+            and more.
           </p>
         </div>
       </div>

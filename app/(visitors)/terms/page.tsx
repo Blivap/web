@@ -35,8 +35,8 @@ export default function Terms() {
             </h2>
             <p className="text-xs text-[#6B7280] dark:text-slate-400 leading-relaxed">
               Donors must meet the eligibility criteria we publish (including
-              age, health, and location requirements for blood and sperm
-              donation). You are responsible for providing accurate information
+              age, health, and location requirements for the donation type you
+              choose). You are responsible for providing accurate information
               and for ensuring you are eligible at the time of each donation. We
               reserve the right to refuse or suspend participation if
               eligibility is not met.

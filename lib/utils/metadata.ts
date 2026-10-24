@@ -31,14 +31,16 @@ export function generateMetadata({
     : new URL("/og.png", siteUrl).toString();
 
   const defaultKeywords = [
+    "donation platform",
     "blood donation",
+    "plasma donation",
+    "organ donation",
+    "tissue donation",
     "sperm donation",
+    "egg donation",
     "Nigeria",
-    "donate blood",
-    "save lives",
-    "blood bank",
+    "donor matching",
     "healthcare",
-    "medical donation",
     "Blivap",
   ];
 
