@@ -28,6 +28,8 @@ import {
   trackFailure,
   trackSuccess,
 } from "@/lib/analytics/ga";
+import { parseQuestionnaireResult } from "@/lib/donors/parseQuestionnaireResponse";
+import type { DonorQuestionnaireResult } from "@/types/donors";
 
 const panelClass =
   "rounded-lg border border-border bg-[#FAFAFA] px-5 py-4 sm:px-6 dark:border-white/10 dark:bg-white/5";
@@ -63,8 +65,8 @@ export type DonorAiQuestionnairePanelProps = {
 };
 
 export type DonorAiQuestionnairePanelHandle = {
-  /** PATCH all current choices in one request. Returns false if validation or the request fails. */
-  submitAllAnswers: () => Promise<boolean>;
+  /** PATCH all current choices. Returns the eligibility outcome, or null if save fails. */
+  submitAllAnswers: () => Promise<DonorQuestionnaireResult | null>;
 };
 
 /**
@@ -154,7 +156,7 @@ export const DonorAiQuestionnairePanel = forwardRef<
 
           if (status === 403) {
             setActionError(
-              "The server declined this questionnaire (compatibility or policy). You can still request blood donor activation without it.",
+              "The server declined this questionnaire (compatibility or policy).",
             );
             return;
           }
@@ -211,12 +213,12 @@ export const DonorAiQuestionnairePanel = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
-      async submitAllAnswers(): Promise<boolean> {
+      async submitAllAnswers(): Promise<DonorQuestionnaireResult | null> {
         if (questions.length === 0) {
           trackSuccess("donor_questionnaire_completed", {
             donation_type: primaryDonationType,
           });
-          return true;
+          return {};
         }
         const payload: QuestionnaireAnswerPayloadItem[] = [];
         for (const q of questions) {
@@ -228,7 +230,7 @@ export const DonorAiQuestionnairePanel = forwardRef<
             setActionError(
               "Choose Yes, No, or Not sure for every question before continuing.",
             );
-            return false;
+            return null;
           }
           payload.push({ questionId: q.id, answer: choice });
         }
@@ -239,17 +241,26 @@ export const DonorAiQuestionnairePanel = forwardRef<
           setActionError(
             "Questionnaire is not ready yet. Wait for loading to finish or refresh.",
           );
-          return false;
+          return null;
         }
         setActionError(null);
         setBusy(true);
         try {
-          await $api.questionnaire.answer(questionnaireId, payload);
+          const saved = await $api.questionnaire.answer(
+            questionnaireId,
+            payload,
+          );
           await fetchAndApplyMine();
           trackSuccess("donor_questionnaire_completed", {
             donation_type: primaryDonationType,
           });
-          return true;
+          if (saved.status < 200 || saved.status >= 300) {
+            setActionError(
+              saved.error ?? saved.message ?? "Could not save answers.",
+            );
+            return null;
+          }
+          return parseQuestionnaireResult(saved.data);
         } catch (e) {
           trackFailure(
             "donor_questionnaire_completed",
@@ -262,7 +273,7 @@ export const DonorAiQuestionnairePanel = forwardRef<
               "Could not save answers. Check the expected body in API docs.",
             ),
           );
-          return false;
+          return null;
         } finally {
           setBusy(false);
         }

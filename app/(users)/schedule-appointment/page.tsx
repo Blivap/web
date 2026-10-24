@@ -1,8 +1,10 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Loader2, Search, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, Search, X } from "lucide-react";
+import Link from "next/link";
 import { Layout } from "@/layout/layout.component";
+import { routes } from "@/config/routes";
 import { Button } from "@/components/button/button.component";
 import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
 import { Input } from "@/components/forms/inputs/input.component";
@@ -186,8 +188,17 @@ function ScheduleAppointmentPageContent() {
           void handleSubmit(event);
         }}
       >
+        <Link
+          href={
+            donorUserId ? routes.donorsDetail(donorUserId) : routes.donors
+          }
+          className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+          Back
+        </Link>
         <header className="flex items-center gap-1.5">
-          <h1 className="text-xl font-semibold tracking-tight text-text-primary sm:text-3xl mt-12">
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary sm:text-3xl">
             Schedule appointment
           </h1>
           <InfoHint

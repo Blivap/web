@@ -13,6 +13,8 @@ import {
 
 type DonorCooldownDisplayProps = {
   cooldownEndsAt?: string | null;
+  /** Rest period with no end timestamp, including a one-time donation block. */
+  unavailable?: boolean;
   /** Full live timer for the donor viewing their own profile/card */
   variant: "owner" | "public";
   className?: string;
@@ -20,6 +22,7 @@ type DonorCooldownDisplayProps = {
 
 export function DonorCooldownDisplay({
   cooldownEndsAt,
+  unavailable = false,
   variant,
   className,
 }: DonorCooldownDisplayProps) {
@@ -31,7 +34,10 @@ export function DonorCooldownDisplay({
   }, []);
 
   const state = resolveDonorCooldown(cooldownEndsAt, now);
-  const styles = COOLDOWN_TONE_STYLES[state.tone];
+  const blockedWithoutDate = unavailable && !state.isActive;
+  const tone: CooldownTone = blockedWithoutDate ? "long" : state.tone;
+  const styles = COOLDOWN_TONE_STYLES[tone];
+  const resting = state.isActive || blockedWithoutDate;
 
   if (variant === "owner") {
     return (
@@ -41,13 +47,15 @@ export function DonorCooldownDisplay({
         label={
           state.isActive
             ? `Cooling down · ${formatOwnerCountdown(state.parts)}`
-            : "Eligible now"
+            : blockedWithoutDate
+              ? "Cooling down"
+              : "Eligible now"
         }
         icon={
-          state.tone === "ready" ? (
-            <Sparkles className="size-3 shrink-0" aria-hidden />
-          ) : (
+          resting ? (
             <Clock className="size-3 shrink-0" aria-hidden />
+          ) : (
+            <Sparkles className="size-3 shrink-0" aria-hidden />
           )
         }
         mono
@@ -58,8 +66,10 @@ export function DonorCooldownDisplay({
   }
 
   const publicLabel = state.isActive
-    ? formatPublicCooldownLabel(state.parts, state.remainingMs)
-    : "Available to book";
+    ? `Cooling down · ${formatPublicCooldownLabel(state.parts, state.remainingMs)}`
+    : blockedWithoutDate
+      ? "Cooling down"
+      : "Available to book";
 
   return (
     <CooldownLabel
@@ -67,13 +77,13 @@ export function DonorCooldownDisplay({
       styles={styles}
       label={publicLabel}
       icon={
-        state.tone === "ready" ? (
+        resting ? (
+          <Clock className="size-3 shrink-0 opacity-80" aria-hidden />
+        ) : (
           <HeartPulse
             className="size-3 shrink-0 text-emerald-600 dark:text-emerald-400"
             aria-hidden
           />
-        ) : (
-          <Clock className="size-3 shrink-0 opacity-80" aria-hidden />
         )
       }
     />

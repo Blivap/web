@@ -70,7 +70,9 @@ export function ScheduleAppointmentPaymentView({
         return;
       }
       if (balanceFromTopup.current) return;
-      setAvailableKobo(parseWalletSummaryResponse(res.data ?? res).availableKobo);
+      setAvailableKobo(
+        parseWalletSummaryResponse(res.data ?? res).availableKobo,
+      );
     } catch {
       setAvailableKobo(null);
     } finally {
@@ -129,7 +131,10 @@ export function ScheduleAppointmentPaymentView({
   const shortfallKobo =
     availableKobo == null ? null : Math.max(0, totalKobo - availableKobo);
   const canPay =
-    availableKobo != null && shortfallKobo === 0 && !loadingWallet && !scheduling;
+    availableKobo != null &&
+    shortfallKobo === 0 &&
+    !loadingWallet &&
+    !scheduling;
 
   const startTopup = async () => {
     if (shortfallKobo == null || shortfallKobo <= 0 || startingTopup) return;
@@ -216,7 +221,9 @@ export function ScheduleAppointmentPaymentView({
                 <p className="text-sm font-medium text-text-primary">
                   {line.title}
                 </p>
-                <p className="mt-0.5 text-xs text-text-secondary">{line.detail}</p>
+                <p className="mt-0.5 text-xs text-text-secondary">
+                  {line.detail}
+                </p>
               </div>
               <p className="shrink-0 text-sm font-semibold tabular-nums text-text-primary">
                 {formatWalletAmount(line.amountKobo)}
@@ -258,7 +265,8 @@ export function ScheduleAppointmentPaymentView({
           disabled={startingTopup || loadingWallet}
           onClick={() => void startTopup()}
         >
-          Add {formatWalletAmount(Math.max(shortfallKobo, MIN_WALLET_TOPUP_KOBO))}{" "}
+          Add{" "}
+          {formatWalletAmount(Math.max(shortfallKobo, MIN_WALLET_TOPUP_KOBO))}{" "}
           to wallet
         </Button>
       ) : (
@@ -269,7 +277,7 @@ export function ScheduleAppointmentPaymentView({
           disabled={!canPay}
           onClick={onPay}
         >
-          Hold {formatWalletAmount(totalKobo)} welfare and schedule
+          Book for {formatWalletAmount(totalKobo)}
         </Button>
       )}
     </section>

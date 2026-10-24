@@ -68,7 +68,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       {/* Sidebar */}
       <div
         className={classNames(
-          "fixed left-0 z-50 flex h-dvh w-full max-w-57.5 flex-col gap-10 overflow-y-auto border-r border-[#DADADA] bg-white px-4 pt-24 transition-transform duration-200 ease-out md:max-w-63 md:pt-4 md:pl-8 dark:border-white/10 dark:bg-[#111118]",
+          "fixed left-0 z-50 flex h-dvh w-full max-w-57.5 min-w-0 flex-col gap-10 overflow-x-hidden overflow-y-auto border-r border-[#DADADA] bg-white px-4 pt-24 transition-transform duration-200 ease-out md:max-w-63 md:pt-4 md:pl-8 dark:border-white/10 dark:bg-[#111118]",
           {
             // On mobile: completely hidden when closed (-translate-x-full), visible when open (translate-x-0)
             // On desktop: always visible (md:translate-x-0 overrides)
@@ -95,7 +95,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
             />
           </div>
         </div>
-        <p className="flex font-semibold font-helvetica text-primary text-6xl tracking-tight mt-auto mb-4">
+        <p className="mt-auto mb-4 flex min-w-0 max-w-full items-end overflow-hidden font-helvetica text-5xl font-semibold tracking-tight text-primary">
           <BlivapLogo fill="#960018" className="size-18 -ml-2" />
           <span className="-mt-1 -ml-2">livap</span>
         </p>
