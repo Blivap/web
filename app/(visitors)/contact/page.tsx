@@ -45,7 +45,7 @@ export default function Contact() {
   ];
 
   const supportTopics = [
-    "Blood or sperm donation guidance",
+    "Guidance for any donation type",
     "Hospital and partnership enquiries",
     "Platform or account support",
     "Research and collaboration requests",

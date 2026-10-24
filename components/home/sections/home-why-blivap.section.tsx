@@ -107,6 +107,10 @@ export function HomeWhyBlivapSection() {
           >
             Built for urgency, trust, and dignity
           </h2>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-text-secondary">
+            One place for blood, plasma, platelets, organs, tissue, reproductive
+            donation, and other lifesaving gifts.
+          </p>
         </ScrollReveal>
 
         <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

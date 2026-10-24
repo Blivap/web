@@ -22,14 +22,14 @@ export default function About() {
               </h2>
               <p className="text-xs leading-relaxed text-[#6B7280] dark:text-slate-400 sm:text-sm">
                 Blivap stands for life. For people. For making a difference when
-                it really matters. We deliver safe blood products and connect
-                those in need with willing donors.
+                it really matters. We connect people who need a donation with
+                willing donors.
               </p>
               <p className="text-xs leading-relaxed text-[#6B7280] dark:text-slate-400 sm:text-sm">
-                Thanks to our donors, patients get a chance at a better future.
-                Together, we connect people who need blood or sperm with people
-                willing to donate—building a sustainable ecosystem that saves
-                lives.
+                That includes blood, plasma, platelets, organs, tissue,
+                reproductive donation, and other lifesaving gifts. Together we
+                build a way for people to give and receive the donation they
+                need.
               </p>
             </div>
             <div className="relative h-40 sm:h-52 md:h-64 bg-primary rounded-lg overflow-hidden">
@@ -53,7 +53,7 @@ export default function About() {
               {
                 icon: Target,
                 title: "Our goal",
-                desc: "Address the blood crisis in Nigeria and beyond with a platform that makes donation easy, safe, and rewarding. We aim to eliminate preventable deaths from blood shortages.",
+                desc: "Make every kind of donation easier to give and receive in Nigeria and beyond, from blood and plasma to organs, tissue, and reproductive care.",
                 color: "bg-[#EEF2FF]",
               },
               {

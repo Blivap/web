@@ -4,15 +4,15 @@ import { HomeComponent } from "../components/home/home.componet";
 import { HomeStructuredData } from "@/components/seo/home-structured-data";
 
 export const metadata: Metadata = genMeta({
-  title: "Blood Donation in Nigeria | Blivap",
+  title: "Donations in Nigeria | Blivap",
   description:
-    "Blivap connects people in need with donors and healthcare support. Discover, connect, and make a difference.",
+    "Blivap matches people with donors for blood, plasma, platelets, organs, tissue, reproductive donation, and more across Nigeria.",
   keywords: [
-    "blood donation Nigeria",
-    "sperm donation Nigeria",
-    "donate blood online",
-    "blood donor platform",
-    "save lives Nigeria",
+    "donation platform Nigeria",
+    "organ donation Nigeria",
+    "plasma donation",
+    "tissue donation",
+    "reproductive donation",
   ],
   path: "/",
 });

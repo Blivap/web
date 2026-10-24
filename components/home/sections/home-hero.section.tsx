@@ -64,14 +64,14 @@ export function HomeHeroSection() {
           hint: "Create a donor profile and get matched near you.",
         }
       : {
-          label: "Request blood",
+          label: "Request a donation",
           href: routes.waitlist,
-          hint: "Tell us what you need — we connect you with verified donors.",
+          hint: "Tell us what you need — blood, plasma, organs, tissue, or another donation.",
         };
 
   const secondary =
     mode === "donate"
-      ? { label: "Request blood", href: routes.waitlist }
+      ? { label: "Request a donation", href: routes.waitlist }
       : { label: "Donate now", href: routes.register };
 
   return (
@@ -89,7 +89,7 @@ export function HomeHeroSection() {
           {(
             [
               { id: "donate" as const, label: "I want to donate" },
-              { id: "need" as const, label: "I need blood" },
+              { id: "need" as const, label: "I need a donation" },
             ] as const
           ).map((tab) => (
             <button
@@ -122,8 +122,8 @@ export function HomeHeroSection() {
             id="home-hero-heading"
             className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl lg:text-[2.75rem]"
           >
-            <span className="tabular-nums">{needCount}</span> people need blood
-            right now
+            <span className="tabular-nums">{needCount}</span> people need a
+            donation right now
           </h1>
           <p className="max-w-lg text-sm leading-relaxed text-white/85 sm:text-base">
             {primary.hint} Blivap matches donors and recipients across Nigeria —

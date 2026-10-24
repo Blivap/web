@@ -11,6 +11,10 @@ export default function GivingBlood() {
         <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-6">
           Giving blood
         </h1>
+        <p className="mb-6 max-w-2xl text-xs leading-relaxed text-[#6B7280] dark:text-slate-400 sm:text-sm">
+          Blood is one donation on Blivap. The same platform also coordinates
+          plasma, platelets, organs, tissue, and reproductive donation.
+        </p>
 
         <div className="flex flex-col gap-6">
           <div>

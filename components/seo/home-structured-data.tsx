@@ -23,7 +23,7 @@ export function HomeStructuredData() {
         },
         image: logoUrl,
         description:
-          "Blivap connects people in need with donors and healthcare support. Discover, connect, and make a difference.",
+          "Blivap matches people with donors for blood, plasma, platelets, organs, tissue, reproductive donation, and more across Nigeria.",
         foundingDate: "2024",
         areaServed: {
           "@type": "Country",
@@ -32,7 +32,10 @@ export function HomeStructuredData() {
         },
         knowsAbout: [
           "Blood donation",
-          "Sperm donation",
+          "Plasma and platelet donation",
+          "Organ donation",
+          "Tissue donation",
+          "Reproductive donation",
           "Donor matching",
           "Healthcare coordination in Nigeria",
         ],

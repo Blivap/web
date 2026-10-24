@@ -29,7 +29,7 @@ export default function WorkingAt() {
               {
                 icon: Heart,
                 title: "Our mission",
-                desc: "We address the blood crisis and make life-saving donations accessible. Every team member plays a crucial role.",
+                desc: "We make every kind of donation easier to give and receive. Every team member plays a part.",
                 color: "bg-[#FDF2F4] dark:bg-primary/15",
               },
               {

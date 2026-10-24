@@ -287,10 +287,10 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
               {
                 title: "Knowledge",
                 items: [
+                  { label: "About donating", href: "/about-donating" },
                   { label: "Giving blood", href: "/giving-blood" },
                   { label: "About blood", href: "/about-blood" },
                   { label: "About sperm", href: "/about-sperm" },
-                  { label: "Our expertise", href: "/our-expertise" },
                 ],
               },
               {
@@ -305,6 +305,7 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
                 items: [
                   { label: "News", href: "/news" },
                   { label: "Education", href: "/education" },
+                  { label: "Our expertise", href: "/our-expertise" },
                 ],
               },
               {
@@ -356,10 +357,11 @@ export const HomeLayout = (props: PropsWithChildren<unknown>) => {
             </Button>
             <div className="flex flex-col gap-1.5">
               <p className="text-sm font-semibold leading-snug text-black dark:text-white">
-                Save lives and earn with your blood or sperm
+                Save lives with the donation you can give
               </p>
               <p className="text-xs leading-relaxed text-[#6B7280] dark:text-slate-400">
-                We connect donors with those in need.
+                We connect donors and people who need blood, organs, tissue, and
+                more.
               </p>
             </div>
             <Button

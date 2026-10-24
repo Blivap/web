@@ -7,6 +7,11 @@ import { useState } from "react";
 
 const faqs = [
   {
+    question: "What kinds of donation does Blivap handle?",
+    answer:
+      "Blivap coordinates many donations, not only blood. You can register for whole blood, plasma, platelets, organs, tissue such as cornea, skin, or bone, reproductive donation, breast milk, placenta, or cord blood, and some research or education pathways. Each type has its own screening.",
+  },
+  {
     question: "Who can donate blood?",
     answer:
       "Generally, healthy adults aged 18-65 can donate blood. You must weigh at least 50kg, be in good health, and meet certain medical criteria. We'll screen you during registration to confirm eligibility. Some conditions may temporarily or permanently defer you from donating, such as recent illnesses, certain medications, or travel to specific regions.",
@@ -19,7 +24,7 @@ const faqs = [
   {
     question: "Is the donation process safe?",
     answer:
-      "Yes, blood donation is very safe. We use sterile, single-use equipment for each donation, and all our facilities follow strict safety protocols. Our partner medical facilities are certified and regularly audited. All donors undergo a health screening before donation to ensure their safety and the safety of recipients.",
+      "Yes. Every donation starts with screening for that pathway. Partner facilities follow safety protocols, and donors are checked before they give so both the donor and the recipient are protected.",
   },
   {
     question: "How much do I get paid for donating?",
@@ -27,9 +32,9 @@ const faqs = [
       "Compensation varies based on the type of donation and location. You'll see the exact amount when booking your appointment. Payments are processed securely through our platform. Compensation is fair and reflects the time and commitment required for donation.",
   },
   {
-    question: "What about sperm donation?",
+    question: "What about donations other than blood?",
     answer:
-      "Sperm donation has its own eligibility requirements and process. You must be between 18-40 years old, in good health, and pass medical and genetic screening. The process is confidential, and you'll receive fair compensation. Learn more on our About Sperm page for detailed information.",
+      "Plasma, platelets, organs, tissue, sperm, eggs, and other pathways each have their own eligibility and rest period. Screening tells you which ones you can offer. Sperm donation, for example, is confidential and has its own medical checks. Read About blood and About sperm for two of the pathways, or register and choose the donation you want to give.",
   },
   {
     question: "How do I track my donation history?",

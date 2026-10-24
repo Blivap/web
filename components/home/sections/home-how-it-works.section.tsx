@@ -8,7 +8,7 @@ import { usePrefersReducedMotion } from "../motion/use-prefers-reduced-motion";
 const STEPS = [
   {
     title: "Register",
-    body: "Create your profile in minutes. Tell us your blood type, location, and availability.",
+    body: "Create your profile in minutes. Tell us which donation you can give, where you are, and when you are free.",
     paths: ["M12 4v4M12 16v4M4 12h4M16 12h4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"],
   },
   {

@@ -12,9 +12,14 @@ import {
 
 const FAQ_ITEMS = [
   {
+    question: "Which donations can I offer?",
+    answer:
+      "Blivap covers whole blood, plasma, platelets, organs, tissue, reproductive donation, and other pathways. Screening shows which ones you are eligible for, and each type has its own rest period.",
+  },
+  {
     question: "How often can I donate whole blood?",
     answer:
-      "You can donate whole blood every 56 days. Platelet donations can be made more frequently, typically every 7 days up to 24 times per year.",
+      "Whole blood is every 56 days. Platelets are typically every 7 days, and plasma about every 28 days. Organs, tissue, and other gifts follow their own rules after screening.",
   },
   {
     question: "What should I eat before donating?",
@@ -29,7 +34,7 @@ const FAQ_ITEMS = [
   {
     question: "How long does a donation take?",
     answer:
-      "The entire process takes about an hour, but the actual blood draw usually lasts 8 to 10 minutes.",
+      "Time depends on the donation. A whole-blood visit is often about an hour, with the draw itself lasting 8 to 10 minutes. Other pathways, such as plasma, platelets, or tissue, take a different amount of time.",
   },
 ];
 
