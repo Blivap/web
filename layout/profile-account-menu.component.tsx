@@ -133,7 +133,11 @@ export function ProfileAccountMenu({
       <div
         className={classNames(
           "absolute top-full z-50 mt-3 origin-top",
-          menuAlign === "right" ? "right-0" : "left-0",
+          compact
+            ? menuAlign === "right"
+              ? "right-0 w-65"
+              : "left-0 w-65"
+            : "inset-x-0",
           isOpen ? "pointer-events-auto" : "pointer-events-none",
         )}
       >
@@ -141,7 +145,7 @@ export function ProfileAccountMenu({
           ref={menuRef}
           role="menu"
           className={classNames(
-            "relative w-65 rounded-xl border border-[#DADADA] bg-white p-2 shadow-[2px_4px_10px_#00000014] transition-colors duration-200 dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)]",
+            "relative w-full rounded-xl border border-[#DADADA] bg-white p-2 shadow-[2px_4px_10px_#00000014] transition-colors duration-200 dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[2px_4px_24px_rgba(0,0,0,0.45)]",
             isOpen ? "pointer-events-auto" : "pointer-events-none",
           )}
           style={{

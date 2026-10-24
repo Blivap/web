@@ -3,7 +3,7 @@
 const STEPS = [
   { id: 1, label: "Blood type & location" },
   { id: 2, label: "AI questionnaire" },
-  { id: 3, label: "Activation" },
+  { id: 3, label: "Eligibility" },
 ];
 
 const pulse = "bg-[#E5E7EB] dark:bg-white/12 animate-pulse rounded-md";

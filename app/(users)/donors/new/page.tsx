@@ -61,7 +61,7 @@ type AreaLocationPayload = {
   area: string;
 };
 
-const STEP_PARAM_VALUES = ["basics", "questionnaire", "activation"] as const;
+const STEP_PARAM_VALUES = ["basics", "questionnaire", "eligibility"] as const;
 type StepParam = (typeof STEP_PARAM_VALUES)[number];
 
 function stepParamToNumber(param: string | null): number {
@@ -265,7 +265,7 @@ function isRetakeRescheduled(raw: Record<string, unknown>): boolean {
 const STEPS = [
   { id: 1, label: "Blood type & location" },
   { id: 2, label: "AI questionnaire" },
-  { id: 3, label: "Activation" },
+  { id: 3, label: "Eligibility" },
 ];
 
 function StepProgress({ currentStep }: { currentStep: number }) {
@@ -381,14 +381,7 @@ function NewDonorForm() {
     setAiQuestionnaireComplete(complete);
   }, []);
 
-  const [isRequestingActivation, setIsRequestingActivation] = useState(false);
-  const [activationRequestError, setActivationRequestError] = useState<
-    string | null
-  >(null);
-  const [isActivationSuccessModalOpen, setIsActivationSuccessModalOpen] =
-    useState(false);
-  const [parsedAreaLocation, setParsedAreaLocation] =
-    useState<AreaLocationPayload | null>(null);
+  const [isDonorSuccessModalOpen, setIsDonorSuccessModalOpen] = useState(false);
   const [retakeUnlocked, setRetakeUnlocked] = useState(false);
   const [primaryDonationTypeForAi, setPrimaryDonationTypeForAi] =
     useState("whole_blood");
@@ -415,7 +408,6 @@ function NewDonorForm() {
           void setFieldValue("basics.bloodType", raw.bloodType);
           const savedArea = normalizeAreaLocation(raw);
           if (savedArea) {
-            setParsedAreaLocation(savedArea);
             void setFieldValue("basics.country", savedArea.country);
             void setFieldValue("basics.state", savedArea.state);
             void setFieldValue("basics.city", savedArea.city);
@@ -484,12 +476,13 @@ function NewDonorForm() {
 
   const [isSavingAiQuestionnaire, setIsSavingAiQuestionnaire] = useState(false);
 
-  const handleContinueToActivation = useCallback(async () => {
+  const handleContinueToEligibility = useCallback(async () => {
     if (!aiQuestionnaireComplete) return;
     setIsSavingAiQuestionnaire(true);
     try {
-      const ok = (await aiQuestionnaireRef.current?.submitAllAnswers()) ?? true;
-      if (!ok) return;
+      const result = await aiQuestionnaireRef.current?.submitAllAnswers();
+      if (result == null) return;
+      setQuestionnaireResult(result);
       setStepParam(3);
     } finally {
       setIsSavingAiQuestionnaire(false);
@@ -596,122 +589,6 @@ function NewDonorForm() {
     }
   };
 
-  const handleRequestActivation = async () => {
-    setActivationRequestError(null);
-    if (!basicsComplete) {
-      trackFailure("donor_activation_requested", "validation", {
-        donation_type: donationTypeForQuestionnaire,
-      });
-      setActivationRequestError(
-        "Complete step 1 with blood type and location details first.",
-      );
-      setStepParam(1);
-      return;
-    }
-    if (!activationPreparationComplete) {
-      trackFailure("donor_activation_requested", "validation", {
-        donation_type: donationTypeForQuestionnaire,
-      });
-      setActivationRequestError(
-        "Complete the AI questionnaire first (all answers filled), or finish loading your profile.",
-      );
-      setStepParam(2);
-      return;
-    }
-    let areaLocation: AreaLocationPayload | null =
-      normalizeAreaLocationFromBasics(values.basics) ?? parsedAreaLocation;
-
-    // If current form is missing fields, fallback to saved donor profile location.
-    if (!areaLocation) {
-      try {
-        const me = await $api.donors.me();
-        const raw = me.data ? unwrapApiRecord(me.data) : null;
-        if (me.status >= 200 && me.status < 300 && raw) {
-          areaLocation = normalizeAreaLocation(raw);
-          if (areaLocation) {
-            void setFieldValue("basics.country", areaLocation.country);
-            void setFieldValue("basics.state", areaLocation.state);
-            void setFieldValue("basics.city", areaLocation.city);
-            void setFieldValue("basics.area", areaLocation.area);
-          }
-        }
-      } catch {
-        // handled by validation message below
-      }
-    }
-
-    if (!areaLocation) {
-      trackFailure("donor_activation_requested", "validation", {
-        donation_type: donationTypeForQuestionnaire,
-      });
-      setActivationRequestError(
-        "Area location is required for donor matching. Complete step 1 first.",
-      );
-      setStepParam(1);
-      return;
-    }
-
-    setIsRequestingActivation(true);
-    try {
-      const { status, error, message } = await $api.donors.requestActivation({
-        areaLocation,
-        donationType: donationTypeForQuestionnaire,
-      });
-      if (status >= 200 && status < 300) {
-        trackSuccess("donor_activation_requested", {
-          donation_type: donationTypeForQuestionnaire,
-        });
-        setIsActivationSuccessModalOpen(true);
-        return;
-      }
-      trackFailure("donor_activation_requested", "api", {
-        donation_type: donationTypeForQuestionnaire,
-      });
-      setActivationRequestError(
-        error ?? message ?? "Could not submit activation request.",
-      );
-    } catch (e) {
-      trackFailure("donor_activation_requested", classifyAnalyticsError(e), {
-        donation_type: donationTypeForQuestionnaire,
-      });
-      setActivationRequestError(
-        getErrorMessage(e, "Could not submit activation request."),
-      );
-    } finally {
-      setIsRequestingActivation(false);
-    }
-  };
-
-  const handleRequestRetake = async () => {
-    setActivationRequestError(null);
-    setIsRequestingActivation(true);
-    try {
-      const { status, error, message } = await $api.donors.requestRetake();
-      if (status >= 200 && status < 300) {
-        trackSuccess("donor_retake_requested", {
-          donation_type: donationTypeForQuestionnaire,
-        });
-        setIsActivationSuccessModalOpen(true);
-        return;
-      }
-      trackFailure("donor_retake_requested", "api", {
-        donation_type: donationTypeForQuestionnaire,
-      });
-      setActivationRequestError(
-        error ?? message ?? "Could not request retake.",
-      );
-    } catch (e) {
-      trackFailure("donor_retake_requested", classifyAnalyticsError(e), {
-        donation_type: donationTypeForQuestionnaire,
-      });
-      setActivationRequestError(
-        getErrorMessage(e, "Could not request retake."),
-      );
-    } finally {
-      setIsRequestingActivation(false);
-    }
-  };
-
   if (!hydrated) {
     return <NewDonorPageSkeleton />;
   }
@@ -763,7 +640,7 @@ function NewDonorForm() {
               </Button>
               <Button
                 type="button"
-                onClick={() => void handleContinueToActivation()}
+                onClick={() => void handleContinueToEligibility()}
                 loading={isSavingAiQuestionnaire}
                 disabled={isSavingAiQuestionnaire || !aiQuestionnaireComplete}
                 className="w-fit"
@@ -775,42 +652,39 @@ function NewDonorForm() {
         </div>
         <StepThree
           active={step === 3}
-          onSendRequest={handleRequestActivation}
-          onRequestRetake={handleRequestRetake}
+          onContinue={() => setIsDonorSuccessModalOpen(true)}
           onBack={() => setStepParam(2)}
-          isSendingRequest={isRequestingActivation}
-          requestError={activationRequestError}
           eligibility={questionnaireResult}
         />
       </div>
       <DonorRegistrationSuccessModal
-        open={isActivationSuccessModalOpen}
-        onClose={() => setIsActivationSuccessModalOpen(false)}
+        open={isDonorSuccessModalOpen}
+        onClose={() => setIsDonorSuccessModalOpen(false)}
         onContinue={() => {
-          setIsActivationSuccessModalOpen(false);
+          setIsDonorSuccessModalOpen(false);
           queueMicrotask(() => navigateOutAfterSuccess(router));
         }}
         eyebrow="Blood donor registration"
-        title="Your activation request is now in review"
-        description="Your blood donor profile, AI questionnaire answers, and activation request are on file. Our team continues verification from the activation gate."
+        title="You're a donor"
+        description="Your profile passed the eligibility check. You can be matched for donations."
         highlights={[
           {
-            title: "Medical review",
+            title: "Ready to donate",
             description:
-              "Donor details, AI questionnaire responses, and activation requests are checked for eligibility and completeness.",
+              "Your donor profile and screening answers are on file. No extra activation step is required.",
           },
           {
-            title: "Verification progress",
+            title: "Matching",
             description:
-              "Typed questionnaires improve matching and your public card; they do not replace activation rules.",
+              "People looking for your blood type can find you once you are eligible.",
           },
           {
-            title: "Overview updates",
+            title: "Overview",
             description:
-              "Return to overview to keep using your account while this donor request is being processed.",
+              "Return to overview to keep using your account.",
           },
         ]}
-        footerNote="You do not need to stay on this page while the activation request is being reviewed."
+        footerNote="If a later check fails, contact support and they can give you another chance."
       />
     </div>
   );
