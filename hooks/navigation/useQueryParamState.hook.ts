@@ -73,10 +73,12 @@ export function useQueryParam(
   const searchParams = useSearchParams();
   const setParams = useSetQueryParams();
 
+  const omitWhen = options?.omitWhen;
+  const allowed = options?.allowed;
   const raw = searchParams.get(key);
   let value = defaultValue;
   if (raw != null && raw !== "") {
-    if (!options?.allowed || options.allowed.includes(raw)) {
+    if (!allowed || allowed.includes(raw)) {
       value = raw;
     }
   }
@@ -84,12 +86,12 @@ export function useQueryParam(
   const setValue = useCallback(
     (next: string) => {
       const omit =
-        options?.omitWhen !== undefined
-          ? next === options.omitWhen
+        omitWhen !== undefined
+          ? next === omitWhen
           : next === "" || next === defaultValue;
       setParams({ [key]: omit ? null : next });
     },
-    [defaultValue, key, options?.omitWhen, setParams],
+    [defaultValue, key, omitWhen, setParams],
   );
 
   return [value, setValue];

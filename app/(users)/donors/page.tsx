@@ -1,13 +1,15 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Layout } from "../../../layout/layout.component";
 import Link from "next/link";
 import { $api } from "@/app/api";
 import {
+  parseDonorRecord,
   parseDonorsListResponse,
   type DonorsListMeta,
 } from "@/lib/donors/parseDonorsListResponse";
+import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import { BLOOD_TYPES, type BloodType, type Donor } from "./donors.data";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
 import {
@@ -35,7 +37,10 @@ import {
   useQueryParamNumber,
   useSetQueryParams,
 } from "@/hooks/navigation/useQueryParamState.hook";
-import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
+import {
+  applyOwnerCooldown,
+  resolveDonorCooldown,
+} from "@/lib/donors/donorCooldown";
 import { displayPublicId } from "@/lib/users/formatPublicId";
 import { routes } from "@/config/routes";
 import { Button } from "@/components/button/button.component";
@@ -124,7 +129,7 @@ function DonorCard({
             className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-lg border border-border bg-[#F4F4F5] px-3 py-1.5 text-[11px] font-medium text-text-tertiary sm:px-4 sm:py-2 sm:text-xs dark:border-white/10 dark:bg-white/8"
             aria-disabled
           >
-            Booking paused
+            Cooling down
           </span>
         ) : (
           <Link
@@ -231,6 +236,9 @@ function DonorsPageContent() {
     },
   );
   const [donors, setDonors] = useState<Donor[]>([]);
+  const [ownerCooldownEndsAt, setOwnerCooldownEndsAt] = useState<
+    string | null | undefined
+  >(undefined);
   const [meta, setMeta] = useState<DonorsListMeta>(DEFAULT_META);
   const [loadState, setLoadState] = useState<
     "idle" | "loading" | "ok" | "error"
@@ -273,6 +281,30 @@ function DonorsPageContent() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- load donors on mount/filter change
     void loadDonors();
   }, [loadDonors]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const { data, status } = await $api.donors.me();
+        if (cancelled || status < 200 || status >= 300 || !data) return;
+        const raw =
+          unwrapApiRecord(data) ?? (typeof data === "object" ? data : null);
+        const row = parseDonorRecord(raw);
+        if (!cancelled) setOwnerCooldownEndsAt(row?.cooldownEndsAt ?? null);
+      } catch {
+        if (!cancelled) setOwnerCooldownEndsAt(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const visibleDonors = useMemo(
+    () => applyOwnerCooldown(donors, user?.id, ownerCooldownEndsAt),
+    [donors, ownerCooldownEndsAt, user?.id],
+  );
 
   const handleBloodTypeChange = (value: BloodType) => {
     setParams({
@@ -355,7 +387,7 @@ function DonorsPageContent() {
           </div>
         ) : (
           <DonorsPaginatedGrid
-            donors={donors}
+            donors={visibleDonors}
             meta={meta}
             emptyMessage={gridEmptyMessage}
             isRefetching={isRefetching}

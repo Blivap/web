@@ -50,6 +50,11 @@ function viewport() {
   };
 }
 
+function setScrollOpacity(sheet: HTMLElement | null, opacity: string) {
+  const root = sheet?.parentElement?.parentElement;
+  if (root) root.style.opacity = opacity;
+}
+
 function resting(side: Side, y: number): Place {
   const box = viewport();
   return {
@@ -320,8 +325,12 @@ export function SupportChatButton() {
     placeRef.current = initial;
     remembered = initial;
     gsap.set(el, { x: initial.x, y: initial.y, force3D: true });
-    setSide(initial.side);
-    setPlaced(true);
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setSide(initial.side);
+      setPlaced(true);
+    });
 
     const onResize = () => {
       const next = resting(placeRef.current.side, placeRef.current.y);
@@ -334,6 +343,7 @@ export function SupportChatButton() {
 
     window.addEventListener("resize", onResize, { passive: true });
     return () => {
+      cancelled = true;
       window.removeEventListener("resize", onResize);
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
       remembered = placeRef.current;
@@ -440,18 +450,15 @@ export function SupportChatButton() {
       ease: "power3.inOut",
       onUpdate: () => {
         paintRoll(state.value);
-        const root = sheet.parentElement?.parentElement ?? rollRootRef.current;
-        if (!root) return;
         const span = Math.max(hidden - from, 1);
         const t = Math.min(1, Math.max(0, (state.value - from) / span));
-        root.style.opacity = String(1 - t * t);
+        setScrollOpacity(sheet, String(1 - t * t));
       },
       onComplete: finishClose,
     });
   };
-  rollClosedRef.current = rollClosed;
 
-  startRollRef.current = () => {
+  const startRoll = () => {
     if (rollStartedRef.current || closingRef.current || !openRef.current) return;
     const sheet = sheetRef.current;
     if (!sheet) return;
@@ -473,8 +480,7 @@ export function SupportChatButton() {
     }
     rollTriesRef.current = 0;
     rollStartedRef.current = true;
-    const root = sheet.parentElement?.parentElement ?? rollRootRef.current;
-    if (root) root.style.opacity = "1";
+    setScrollOpacity(sheet, "1");
     const state = rollRef.current;
     gsap.killTweensOf(state);
     state.value = hidden;
@@ -487,6 +493,11 @@ export function SupportChatButton() {
       onUpdate: () => paintRoll(state.value),
     });
   };
+
+  useLayoutEffect(() => {
+    rollClosedRef.current = rollClosed;
+    startRollRef.current = startRoll;
+  });
 
   useLayoutEffect(() => {
     if (!open) {
