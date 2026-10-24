@@ -39,9 +39,7 @@ export function DonorCooldownDisplay({
         className={className}
         styles={styles}
         label={
-          state.isActive
-            ? `Cooling down · ${formatOwnerCountdown(state.parts)}`
-            : "Eligible now"
+          state.isActive ? formatOwnerCountdown(state.parts) : "Eligible now"
         }
         icon={
           state.tone === "ready" ? (

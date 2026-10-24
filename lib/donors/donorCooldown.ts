@@ -174,12 +174,12 @@ export function formatPublicCooldownLabel(
     if (parts.months > 0) bits.push(`${parts.months} mo`);
     if (parts.days > 0)
       bits.push(`${parts.days} day${parts.days === 1 ? "" : "s"}`);
-    return `Cooling down · ${bits.join(" ")}`;
+    return bits.join(" ");
   }
   if (parts.hours > 0) {
-    return `Cooling down · ${parts.hours}h ${parts.minutes}m`;
+    return `${parts.hours}h ${parts.minutes}m`;
   }
-  return `Cooling down · ${parts.minutes}m`;
+  return `${parts.minutes}m`;
 }
 
 export const COOLDOWN_TONE_STYLES: Record<
