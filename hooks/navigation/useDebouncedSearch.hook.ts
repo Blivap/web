@@ -38,30 +38,23 @@ export function useDebouncedSearch(
 ): [string, (next: string) => void] {
   const [input, setInput] = useState(committedValue);
   const onCommitRef = useRef(onCommit);
-  onCommitRef.current = onCommit;
+
+  useEffect(() => {
+    onCommitRef.current = onCommit;
+  }, [onCommit]);
 
   useEffect(() => {
     setInput(committedValue);
   }, [committedValue]);
 
-  const debouncedCommit = useMemo(
-    () =>
-      debounce((value: string) => {
-        onCommitRef.current(value);
-      }, delayMs),
-    [delayMs],
-  );
-
-  useEffect(() => {
-    return () => debouncedCommit.cancel();
-  }, [debouncedCommit]);
-
   useEffect(() => {
     const trimmed = input.trim();
     if (trimmed === committedValue.trim()) return;
-    debouncedCommit(trimmed);
-    return () => debouncedCommit.cancel();
-  }, [input, committedValue, debouncedCommit]);
+    const timeout = window.setTimeout(() => {
+      onCommitRef.current(trimmed);
+    }, delayMs);
+    return () => window.clearTimeout(timeout);
+  }, [input, committedValue, delayMs]);
 
   return [input, setInput];
 }
