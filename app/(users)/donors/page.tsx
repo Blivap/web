@@ -39,7 +39,7 @@ import {
 } from "@/hooks/navigation/useQueryParamState.hook";
 import {
   applyOwnerCooldown,
-  resolveDonorCooldown,
+  donorIsCoolingDown,
 } from "@/lib/donors/donorCooldown";
 import { displayPublicId } from "@/lib/users/formatPublicId";
 import { routes } from "@/config/routes";
@@ -75,8 +75,7 @@ function DonorCard({
 }) {
   const isOwner =
     !!currentUserId && !!donor.userId && donor.userId === currentUserId;
-  const cooldown = resolveDonorCooldown(donor.cooldownEndsAt);
-  const bookingBlocked = cooldown.isActive;
+  const bookingBlocked = donorIsCoolingDown(donor);
   const routeOwner = isOwner ? routes.settings : routes.donorsDetail(donor.id);
   return (
     <article className="flex flex-col justify-between rounded-2xl border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0_8px_16px_rgba(15,23,42,0.03)] sm:px-5 sm:py-5 dark:border-white/10 dark:bg-[#1a1a22] dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
@@ -90,6 +89,9 @@ function DonorCard({
             <div className="mb-3">
               <DonorCooldownDisplay
                 cooldownEndsAt={donor.cooldownEndsAt}
+                unavailable={
+                  donor.isInDonationCooldown || donor.isPermanentDonationBlock
+                }
                 variant={isOwner ? "owner" : "public"}
               />
             </div>

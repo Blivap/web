@@ -223,6 +223,9 @@ export function parseDonorRecord(raw: unknown): Donor | null {
   const publicIdRaw = pickString(merged.publicId ?? merged.public_id);
   const publicId = publicIdRaw ? publicIdRaw.toUpperCase() : null;
   const cooldownEndsAt = pickCooldownEndsAt(merged);
+  const isPermanentDonationBlock = merged.isPermanentDonationBlock === true;
+  const isInDonationCooldown =
+    merged.isInDonationCooldown === true || isPermanentDonationBlock;
 
   return {
     id,
@@ -243,6 +246,8 @@ export function parseDonorRecord(raw: unknown): Donor | null {
     ...(userId ? { userId } : {}),
     ...(publicId ? { publicId } : {}),
     ...(cooldownEndsAt ? { cooldownEndsAt } : {}),
+    ...(isInDonationCooldown ? { isInDonationCooldown: true } : {}),
+    ...(isPermanentDonationBlock ? { isPermanentDonationBlock: true } : {}),
     ...(profileImage ? { profileImage } : {}),
   };
 }

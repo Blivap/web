@@ -5,7 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
 import { Button } from "@/components/button/button.component";
 import { donorDetailPath, routes } from "@/config/routes";
-import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
+import { donorIsCoolingDown } from "@/lib/donors/donorCooldown";
 import { displayPublicId } from "@/lib/users/formatPublicId";
 import type { Donor } from "@/app/(users)/donors/donors.data";
 
@@ -22,8 +22,8 @@ export function OverviewActiveDonorCard({
 }: OverviewActiveDonorCardProps) {
   const isOwner =
     !!currentUserId && !!donor.userId && donor.userId === currentUserId;
-  const cooldown = resolveDonorCooldown(donor.cooldownEndsAt);
-  const bookingBlocked = cooldown.isActive && !isOwner;
+  const coolingDown = donorIsCoolingDown(donor);
+  const bookingBlocked = coolingDown && !isOwner;
   const profileHref = isOwner ? routes.settings : donorDetailPath(donor.id);
   const displayId = displayPublicId(donor.publicId);
   const primaryType = donor.activeDonationTypes[0];
@@ -68,7 +68,7 @@ export function OverviewActiveDonorCard({
         />
       </Link>
 
-      {cooldown.isActive ? (
+      {coolingDown ? (
         <p className="mt-3 text-xs font-medium text-amber-800 dark:text-amber-200">
           Cooling down. Booking opens when this rest period ends.
         </p>

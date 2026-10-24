@@ -48,6 +48,28 @@ function pickCooldownEndsAtFromRecord(
   );
 }
 
+function pickFromDonationCooldownList(
+  record: Record<string, unknown>,
+): string | null {
+  const list = record.donationCooldowns ?? record.donation_cooldowns;
+  if (!Array.isArray(list)) return null;
+  const primary =
+    record.primaryDonationType ??
+    record.donationType ??
+    record.primary_donation_type;
+  const rows = list.filter(
+    (item): item is Record<string, unknown> =>
+      !!item && typeof item === "object",
+  );
+  const match =
+    rows.find(
+      (item) =>
+        item.donationType === primary || item.donation_type === primary,
+    ) ?? rows.find((item) => item.available === false);
+  if (!match || match.available === true) return null;
+  return parseCooldownEndIso(match.cooldownEndsAt ?? match.cooldown_ends_at);
+}
+
 export function pickCooldownEndsAt(
   record: Record<string, unknown>,
 ): string | null {
@@ -64,7 +86,21 @@ export function pickCooldownEndsAt(
       );
     if (found) return found;
   }
-  return null;
+  return pickFromDonationCooldownList(record);
+}
+
+export function donorIsCoolingDown(donor: {
+  cooldownEndsAt?: string | null;
+  isInDonationCooldown?: boolean;
+  isPermanentDonationBlock?: boolean;
+}): boolean {
+  if (donor.cooldownEndsAt) {
+    return resolveDonorCooldown(donor.cooldownEndsAt).isActive;
+  }
+  return (
+    donor.isPermanentDonationBlock === true ||
+    donor.isInDonationCooldown === true
+  );
 }
 
 export function cooldownPartsFromMs(remainingMs: number): CooldownParts {

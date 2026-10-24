@@ -17,7 +17,7 @@ import { DonorProfilePageSkeleton } from "./components/donor-profile-page-skelet
 import { useAppSelector } from "@/store/hooks";
 import { routes } from "@/config/routes";
 import { DonorCooldownDisplay } from "../components/donor-cooldown-display.component";
-import { resolveDonorCooldown } from "@/lib/donors/donorCooldown";
+import { donorIsCoolingDown } from "@/lib/donors/donorCooldown";
 import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
 
 const cardClass =
@@ -104,8 +104,7 @@ export default function DonorDetailsPage() {
 
   const isOwnProfile =
     !!user?.id && !!donor?.userId && donor.userId === user.id;
-  const cooldown = resolveDonorCooldown(donor?.cooldownEndsAt);
-  const bookingBlocked = cooldown.isActive;
+  const bookingBlocked = donor ? donorIsCoolingDown(donor) : false;
   const ratingsSummary = donor?.ratings;
   const ratingLabel =
     ratingsSummary && ratingsSummary.ratingCount > 0
@@ -194,6 +193,10 @@ export default function DonorDetailsPage() {
                       ) : null}
                       <DonorCooldownDisplay
                         cooldownEndsAt={donor.cooldownEndsAt}
+                        unavailable={
+                          donor.isInDonationCooldown ||
+                          donor.isPermanentDonationBlock
+                        }
                         variant={isOwnProfile ? "owner" : "public"}
                       />
                     </div>

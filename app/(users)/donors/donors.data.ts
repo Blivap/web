@@ -25,6 +25,9 @@ export interface Donor {
   activeDonationTypes: string[];
   /** ISO timestamp when donation cooldown ends; null/omitted if eligible now. */
   cooldownEndsAt?: string | null;
+  /** Primary donation type cannot be booked yet, including a block with no end date. */
+  isInDonationCooldown?: boolean;
+  isPermanentDonationBlock?: boolean;
 }
 
 export const BLOOD_TYPES: BloodType[] = [
