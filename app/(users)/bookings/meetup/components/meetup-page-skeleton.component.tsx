@@ -13,8 +13,7 @@ function Sk({ className }: { className?: string }) {
 }
 
 /**
- * The meetup loading state: the real session frame, with message placeholders
- * in the thread and quiet blocks where status will appear.
+ * The meetup loading state: the chat frame with message placeholders.
  */
 export function MeetupPageSkeleton() {
   return (
@@ -26,13 +25,6 @@ export function MeetupPageSkeleton() {
       <span className="sr-only">Loading meetup…</span>
       <div className="relative flex min-h-0 flex-1">
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 lg:hidden dark:border-white/10">
-            <div className="space-y-1.5">
-              <Sk className="h-2.5 w-10" />
-              <Sk className="h-4 w-24" />
-            </div>
-          </div>
-
           <div className="min-h-0 flex-1 space-y-4 overflow-hidden px-4 py-6 sm:px-8">
             <div className="flex justify-center">
               <Sk className="h-6 w-36 rounded-full" />
@@ -54,14 +46,6 @@ export function MeetupPageSkeleton() {
             </div>
           </div>
         </section>
-
-        <aside className="hidden min-h-0 w-[22.5rem] shrink-0 flex-col gap-4 overflow-hidden border-l border-border bg-white px-5 py-6 lg:flex dark:border-white/10 dark:bg-[#14141a]">
-          <Sk className="h-3 w-14" />
-          <Sk className="h-8 w-32" />
-          <Sk className="h-3 w-44" />
-          <Sk className="mt-4 h-28 w-full rounded-xl" />
-          <Sk className="h-28 w-full rounded-xl" />
-        </aside>
       </div>
     </div>
   );

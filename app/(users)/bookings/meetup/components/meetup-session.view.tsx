@@ -11,20 +11,15 @@ import {
   useState,
 } from "react";
 import {
-  CheckCircle2,
+  BadgeCheck,
+  Camera,
   ChevronRight,
-  CircleDashed,
-  HelpCircle,
   Loader2,
   MoreVertical,
   Paperclip,
   PhoneOff,
-  ScanIcon,
-  ShieldAlert,
-  ShieldCheck,
   Smile,
   UserRound,
-  X,
 } from "lucide-react";
 import { useDonationChat } from "@/hooks/chat/useDonationChat.hook";
 import { useMeetupSession } from "@/hooks/meetups/useMeetupSession.hook";
@@ -37,7 +32,7 @@ import {
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import QRCode from "react-qr-code";
 import type { DonationChatMessage } from "@/types/donation-chat";
-import type { MeetupParticipant, MeetupReportPayload } from "@/types/meetups";
+import type { MeetupReportPayload } from "@/types/meetups";
 import {
   meetupChatBookingStashKey,
   meetupCodeHintStorageKey,
@@ -61,7 +56,6 @@ import { isBookingRatedLocally } from "@/lib/ratings/ratedBookingsStorage";
 import { patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/forms/inputs/input.component";
 import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
 import { Textarea } from "@/components/ui/textarea";
 import { Modal } from "@/components/ui/modal/modal.component";
@@ -79,24 +73,6 @@ const cardClass =
 export type MeetupSessionViewProps = {
   sessionId: string;
 };
-
-/** "27 Sept 2026, 14:00" */
-function formatSessionEnds(iso: string | null | undefined): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  const date = d.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-  const time = d.toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-  return `${date}, ${time}`;
-}
 
 /** "11:53 pm" */
 function formatChatTime(iso: string | null | undefined): string {
@@ -163,7 +139,8 @@ function isSeededAcceptanceNotice(text: string): boolean {
   return (
     normalized ===
       "donation request accepted. you can now coordinate your meetup." ||
-    normalized === "donation request accepted. you can now coordinate your meetup"
+    normalized ===
+      "donation request accepted. you can now coordinate your meetup"
   );
 }
 
@@ -296,156 +273,12 @@ function PartyAvatar({
   );
 }
 
-type PlatformIdStatus = "verified" | "not_verified" | "unknown";
-
-function platformIdStatus(v: boolean | undefined): PlatformIdStatus {
-  if (v === true) return "verified";
-  if (v === false) return "not_verified";
-  return "unknown";
-}
-
-function MeetupVerificationRow({
-  label,
-  detail,
-  status,
-}: {
-  label: string;
-  detail: string;
-  status: "done" | "pending" | "issue" | "unknown";
-}) {
-  const config = {
-    done: {
-      Icon: CheckCircle2,
-      tone: "text-emerald-600 dark:text-emerald-400",
-      text: "Done",
-    },
-    pending: {
-      Icon: CircleDashed,
-      tone: "text-amber-700 dark:text-amber-300",
-      text: "Still needed",
-    },
-    issue: {
-      Icon: ShieldAlert,
-      tone: "text-amber-700 dark:text-amber-300",
-      text: "Not verified",
-    },
-    unknown: {
-      Icon: HelpCircle,
-      tone: "text-text-tertiary",
-      text: "Not shown",
-    },
-  } as const;
-
-  const { Icon, tone, text } = config[status];
-
+function MeetupVerifiedMark() {
   return (
-    <div className="rounded-lg border border-border/80 bg-white px-3 py-2.5 dark:border-white/10 dark:bg-[#1c1c24]">
-      <div className="flex items-start justify-between gap-3">
-        <p className="min-w-0 text-[10px] font-semibold uppercase tracking-wide text-text-tertiary">
-          {label}
-        </p>
-        <span
-          className={`inline-flex shrink-0 items-center gap-1 text-xs font-medium ${tone}`}
-        >
-          <Icon className="size-3.5 shrink-0" aria-hidden />
-          {text}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function MeetupParticipantVerificationCard({
-  title,
-  participant,
-  emphasize,
-}: {
-  title: string;
-  participant: MeetupParticipant;
-  emphasize?: boolean;
-}) {
-  const pid = platformIdStatus(participant.identityVerified);
-  const platformRowStatus: "done" | "pending" | "issue" | "unknown" =
-    pid === "verified" ? "done" : pid === "not_verified" ? "issue" : "unknown";
-  const meetupRowStatus = participant.meetupVerified ? "done" : "pending";
-
-  return (
-    <div
-      className={cn(
-        "flex flex-col gap-2.5 rounded-xl border bg-white p-3 dark:bg-transparent",
-        emphasize
-          ? "border-[#E7B4BE] shadow-[0_0_0_1px_rgba(150,0,24,0.04)] dark:border-primary/50"
-          : "border-border dark:border-white/10",
-      )}
-    >
-      <div className="flex items-center gap-2">
-        <UserRound
-          className={cn(
-            "size-4 shrink-0",
-            emphasize ? "text-primary" : "text-text-tertiary",
-          )}
-          aria-hidden
-        />
-        <p className="text-sm font-semibold text-text-primary">{title}</p>
-        {participant.role ? (
-          <span className="rounded border border-border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-text-tertiary dark:border-white/15">
-            {participant.role}
-          </span>
-        ) : null}
-      </div>
-      <div className="flex flex-col gap-2">
-        <MeetupVerificationRow
-          label="Platform identity"
-          detail="Government ID (NIN) on file with Blivap before the meetup."
-          status={platformRowStatus}
-        />
-        <MeetupVerificationRow
-          label="This meetup"
-          detail="In-person check: you entered the other person's unique code (or scanned their QR)."
-          status={meetupRowStatus}
-        />
-      </div>
-    </div>
-  );
-}
-
-function MeetupVerificationSummary({
-  me,
-  peer,
-}: {
-  me: MeetupParticipant;
-  peer: MeetupParticipant;
-}) {
-  return (
-    <div className="mt-6">
-      <div className="flex items-center gap-1.5">
-        <ShieldCheck className="size-4 shrink-0 text-primary" aria-hidden />
-        <h3 className="text-sm font-semibold text-text-primary">
-          Who is verified?
-        </h3>
-        <InfoHint
-          title="Who is verified?"
-          label="Verification checks information"
-          className="size-7"
-        >
-          <p>
-            Two separate checks: your account ID on the platform, then the in
-            person step for this session only.
-          </p>
-        </InfoHint>
-      </div>
-      <div className="mt-4 flex flex-col gap-3">
-        <MeetupParticipantVerificationCard
-          title="You"
-          participant={me}
-          emphasize
-        />
-        <MeetupParticipantVerificationCard
-          title="Other person"
-          participant={peer}
-        />
-      </div>
-    </div>
+    <BadgeCheck
+      className="size-3.5 shrink-0 fill-[#1D9BF0] text-white"
+      aria-label="Verified"
+    />
   );
 }
 
@@ -459,6 +292,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
   const [codeInput, setCodeInput] = useState("");
   const [peerScannerOpen, setPeerScannerOpen] = useState(false);
+  const [qrPanelOpen, setQrPanelOpen] = useState(false);
   const [meetingHint, setMeetingHint] = useState<string | null>(() => {
     try {
       const k = meetupCodeHintStorageKey(sessionId);
@@ -472,7 +306,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const [composerTall, setComposerTall] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [terminateAlertOpen, setTerminateAlertOpen] = useState(false);
@@ -734,10 +567,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     [swapCodes, verifyCode, showSnackbar],
   );
 
-  const onPeerScannerStop = useCallback(() => {
-    setPeerScannerOpen(false);
-  }, []);
-
   const ratingDonorLabel = useMemo(() => {
     const bid = donationChatBookingId;
     if (!bid) return undefined;
@@ -961,18 +790,17 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     return false;
   }, [session, user?.id, isRequester]);
 
-  const peerDonationDone = useMemo(() => {
-    if (!session || !user?.id) return false;
-    if (isRequester === true) return session.donorDonationConfirmed;
-    if (isRequester === false) return session.requesterDonationConfirmed;
-    return false;
-  }, [session, user?.id, isRequester]);
-
   const showCodePath =
     session &&
     session.codeVerificationEnabled !== false &&
     !readOnly &&
     !gateSatisfied;
+
+  useEffect(() => {
+    if (ninOk && showCodePath) return;
+    setQrPanelOpen(false);
+    setPeerScannerOpen(false);
+  }, [ninOk, showCodePath]);
 
   useEffect(() => {
     if (sessionLoad !== "ok" || !session) return;
@@ -1284,9 +1112,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   );
 
   const waitingOnChat =
-    sessionLoad === "ok" &&
-    donationChatEnabled &&
-    !donationChat.historyLoaded;
+    sessionLoad === "ok" && donationChatEnabled && !donationChat.historyLoaded;
 
   if (sessionLoad === "loading" || sessionLoad === "idle" || waitingOnChat) {
     return <MeetupPageSkeleton />;
@@ -1342,22 +1168,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
       <div className="relative flex min-h-0 flex-1">
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <button
-            type="button"
-            className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 text-left transition-colors hover:bg-[#FAFAFB] lg:hidden dark:border-white/10 dark:hover:bg-white/5"
-            onClick={() => setPanelOpen(true)}
-          >
-            <span>
-              <span className="block text-[10px] font-semibold uppercase tracking-wide text-text-tertiary">
-                Status
-              </span>
-              <span className="text-sm font-semibold capitalize text-text-primary">
-                {session.status}
-              </span>
-            </span>
-            <ChevronRight className="size-4 text-text-tertiary" aria-hidden />
-          </button>
-
           <div
             ref={chatScrollRef}
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 sm:px-8"
@@ -1385,7 +1195,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               </div>
             ) : null}
 
-            {visibleChatMessages.length === 0 ? (
+            {visibleChatMessages.length === 0 && !donationChat.typingLabel ? (
               <p className="animate-in fade-in py-10 text-center text-sm text-text-tertiary duration-300 motion-reduce:animate-none">
                 {chatLocked ? "No messages to show." : "No messages yet."}
               </p>
@@ -1398,7 +1208,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                     session.me.role,
                   );
                   const timeLabel = formatChatTime(message.createdAt);
-                  const handle = mine ? `${myHandle} (Me)` : peerHandle;
+                  const handle = mine ? "(Me)" : peerHandle;
                   const animate = motionMessageIds.has(message.id);
                   const motionIndex = motionOrder.get(message.id) ?? 0;
                   return (
@@ -1435,13 +1245,23 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                             mine && "flex flex-col items-end",
                           )}
                         >
-                          <p className="mb-1 text-xs text-text-tertiary">
+                          <p
+                            className={cn(
+                              "mb-1 flex items-center gap-1 text-xs text-text-tertiary",
+                              mine && "justify-end",
+                            )}
+                          >
                             <span className="text-text-secondary">
                               {handle}
                             </span>
-                            {timeLabel ? (
-                              <span className="ml-2">{timeLabel}</span>
+                            {(
+                              mine
+                                ? session.me.meetupVerified
+                                : session.peer.meetupVerified
+                            ) ? (
+                              <MeetupVerifiedMark />
                             ) : null}
+                            {timeLabel ? <span>{timeLabel}</span> : null}
                           </p>
                           <div
                             className={cn(
@@ -1458,31 +1278,68 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                     </div>
                   );
                 })}
+                {donationChat.typingLabel ? (
+                  <div
+                    key="peer-typing"
+                    className="flex justify-start"
+                    aria-live="polite"
+                  >
+                    <div className="flex max-w-[min(100%,26rem)] items-start gap-2">
+                      <PartyAvatar src={peerProfileImage} className="mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="mb-1 text-xs text-text-secondary">
+                          {peerHandle} is typing
+                        </p>
+                        <div className="inline-flex items-center gap-1 rounded-xl bg-[#F2F4F6] px-3 py-2 dark:bg-white/8">
+                          <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:0ms] motion-reduce:animate-none" />
+                          <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:120ms] motion-reduce:animate-none" />
+                          <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:240ms] motion-reduce:animate-none" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             )}
-
-            {donationChat.typingLabel ? (
-              <div className="mt-4 flex items-center gap-2" aria-live="polite">
-                <PartyAvatar src={peerProfileImage} />
-                <div className="animate-in fade-in slide-in-from-bottom-1 rounded-xl bg-[#F2F4F6] px-3 py-2 duration-200 motion-reduce:animate-none dark:bg-white/8">
-                  <p className="text-[10px] text-text-tertiary">
-                    {donationChat.typingLabel} is typing
-                  </p>
-                  <span className="mt-1 flex items-center gap-1">
-                    <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:0ms] motion-reduce:animate-none" />
-                    <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:120ms] motion-reduce:animate-none" />
-                    <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:240ms] motion-reduce:animate-none" />
-                  </span>
-                </div>
-              </div>
-            ) : null}
           </div>
+
+          {ninOk && showCodePath && qrPanelOpen && swapCodeQrUrl ? (
+            <div className="flex flex-col items-center gap-2 border-t border-border bg-[#FAFAFB] px-4 py-3 dark:border-white/10 dark:bg-black/25">
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                disabled={verifyBusy}
+                onClick={() => setPeerScannerOpen((open) => !open)}
+              >
+                <Camera className="size-3.5" aria-hidden />
+                {peerScannerOpen ? "Close camera" : "Open camera"}
+              </Button>
+              <div className="relative size-44 overflow-hidden rounded-lg bg-white">
+                {peerScannerOpen ? (
+                  <MeetupQrScanner
+                    className="size-full"
+                    regionOnly
+                    autoStart
+                    disabled={verifyBusy}
+                    busy={verifyBusy}
+                    onScan={onScannedPeerCode}
+                  />
+                ) : (
+                  <div className="grid size-full place-items-center p-2">
+                    <QRCode value={swapCodeQrUrl} size={152} level="M" />
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
 
           <div className="border-t border-border px-4 py-4 sm:px-6 dark:border-white/10">
             <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-text-secondary">
               <PartyAvatar src={peerProfileImage} className="size-6" />
-              <span className="font-medium text-text-primary">
+              <span className="inline-flex items-center gap-1 font-medium text-text-primary">
                 {peerHandle}
+                {session.peer.meetupVerified ? <MeetupVerifiedMark /> : null}
               </span>
               {donationChatStatusBadge ? (
                 <span
@@ -1507,6 +1364,63 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               >
                 {donationChat.sendError}
               </p>
+            ) : null}
+
+            {ninOk && showCodePath ? (
+              <div className="mb-3 flex flex-col gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <input
+                    name="meetupCode"
+                    aria-label="Other person's code"
+                    value={codeInput}
+                    onChange={(event) =>
+                      setCodeInput(
+                        event.target.value.replace(/\D/g, "").slice(0, 6),
+                      )
+                    }
+                    placeholder="000000"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    disabled={verifyBusy}
+                    className="h-8 w-24 shrink-0 rounded-md border border-border bg-white px-2 text-center font-mono text-sm tracking-widest text-text-primary outline-none placeholder:tracking-widest placeholder:text-text-tertiary focus:border-primary/45 disabled:opacity-50 dark:border-white/15 dark:bg-[#111118]"
+                  />
+                  <Button
+                    type="button"
+                    size="xs"
+                    disabled={verifyBusy}
+                    loading={verifyBusy}
+                    onClick={() => void onVerifyCode()}
+                  >
+                    Verify
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    disabled={!swapCodeQrUrl || verifyBusy}
+                    onClick={() =>
+                      setQrPanelOpen((open) => {
+                        if (open) setPeerScannerOpen(false);
+                        return !open;
+                      })
+                    }
+                  >
+                    {qrPanelOpen ? "Hide QR" : "Show QR"}
+                  </Button>
+                  <InfoHint
+                    title="Verify at the hospital"
+                    label="Hospital verify information"
+                    className="size-7 shrink-0"
+                  >
+                    <p>
+                      Enter the other person&apos;s six-digit code, or show your
+                      QR so they can scan it. Open the camera to scan theirs in
+                      the same square.
+                    </p>
+                  </InfoHint>
+                </div>
+              </div>
             ) : null}
 
             <div
@@ -1670,6 +1584,24 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                           Arrival recorded
                         </p>
                       ) : null}
+                      {ninOk &&
+                      gateSatisfied &&
+                      !readOnly &&
+                      !myDonationDone ? (
+                        <button
+                          type="button"
+                          className="flex w-full rounded-lg px-3 py-2 text-left text-sm text-text-primary hover:bg-[#F3F4F6] disabled:opacity-50 dark:hover:bg-white/8"
+                          disabled={confirmBusy || isRequester === null}
+                          onClick={() => {
+                            setMoreOpen(false);
+                            void onConfirmDonation();
+                          }}
+                        >
+                          {confirmBusy
+                            ? "Confirming donation…"
+                            : "Confirm donation"}
+                        </button>
+                      ) : null}
                       {isRequester === false ? (
                         <button
                           type="button"
@@ -1702,244 +1634,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             </div>
           </div>
         </section>
-
-        {panelOpen ? (
-          <button
-            type="button"
-            className="absolute inset-0 z-20 bg-black/30 lg:hidden"
-            aria-label="Close session details"
-            onClick={() => setPanelOpen(false)}
-          />
-        ) : null}
-
-        <aside
-          className={cn(
-            "flex min-h-0 w-[min(100%,22.5rem)] shrink-0 flex-col overflow-y-auto border-border bg-white px-5 py-6 dark:border-white/10 dark:bg-[#14141a]",
-            "max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:z-30 max-lg:border-l max-lg:shadow-2xl",
-            "lg:static lg:z-auto lg:flex lg:w-[22.5rem] lg:border-l lg:shadow-none",
-            panelOpen
-              ? "max-lg:animate-in max-lg:slide-in-from-right max-lg:duration-200"
-              : "max-lg:hidden",
-          )}
-        >
-          <div className="mb-4 flex items-center justify-between lg:hidden">
-            <p className="text-sm font-semibold text-text-primary">
-              Session details
-            </p>
-            <button
-              type="button"
-              className="grid size-8 place-items-center rounded-md text-text-tertiary hover:bg-black/5 dark:hover:bg-white/8"
-              aria-label="Close session details"
-              onClick={() => setPanelOpen(false)}
-            >
-              <X className="size-4" aria-hidden />
-            </button>
-          </div>
-
-          <div className="animate-in fade-in slide-in-from-right-2 duration-300 motion-reduce:animate-none">
-            <div className="flex items-center gap-1.5">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-text-tertiary">
-                Status
-              </p>
-              <InfoHint
-                title="Donation meetup"
-                label="Meetup information"
-                className="size-7"
-              >
-                <p>
-                  Verify in person, confirm the donation when both sides are
-                  ready, then you are done.
-                </p>
-                <p>
-                  Donation chat opens after this booking is accepted. Meetup
-                  verify and confirm flows do not carry chat messages.
-                </p>
-                <p>
-                  Chat needs your booking id. If chat stays unavailable, open
-                  meetup again from the booking row.
-                </p>
-              </InfoHint>
-            </div>
-            <p className="mt-1 text-2xl font-bold capitalize tracking-tight text-text-primary">
-              {session.status}
-            </p>
-            {session.expiresAt ? (
-              <p className="mt-1 text-sm text-text-secondary">
-                Session ends {formatSessionEnds(session.expiresAt)}
-              </p>
-            ) : null}
-            {readOnly ? (
-              <p className="mt-2 text-xs text-text-secondary">
-                This meetup is closed.
-              </p>
-            ) : null}
-          </div>
-
-          <MeetupVerificationSummary me={session.me} peer={session.peer} />
-
-          {ninOk && !readOnly && !gateSatisfied ? (
-            <div className="mt-6 border-t border-border pt-5 dark:border-white/10">
-              <div className="flex items-center gap-1.5">
-                <h2 className="text-sm font-semibold text-text-primary">
-                  Verify at the hospital
-                </h2>
-                <InfoHint
-                  title="Verify at the hospital"
-                  label="Hospital verify information"
-                  className="size-7"
-                >
-                  <p>
-                    Both people must complete the in-person verify step before
-                    donation confirmation unlocks.
-                  </p>
-                </InfoHint>
-              </div>
-
-              {myMeetupCode ? (
-                <div className="mt-4">
-                  {swapCodeQrUrl ? (
-                    <div>
-                      {!peerScannerOpen ? (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={verifyBusy || !ninOk}
-                          onClick={() => setPeerScannerOpen(true)}
-                        >
-                          <ScanIcon className="size-4" aria-hidden />
-                          Scan their QR
-                        </Button>
-                      ) : null}
-                      <div className="mt-3 flex flex-col items-center gap-3 rounded-lg bg-[#FAFAFB] p-4 dark:bg-black/20">
-                        <p className="text-xs font-medium text-text-primary">
-                          {peerScannerOpen ? "Scan their QR" : "Your QR"}
-                        </p>
-                        {peerScannerOpen ? (
-                          <MeetupQrScanner
-                            className="w-full"
-                            autoStart
-                            disabled={verifyBusy || !ninOk}
-                            busy={verifyBusy}
-                            onStop={onPeerScannerStop}
-                            onScan={onScannedPeerCode}
-                          />
-                        ) : (
-                          <div className="rounded-lg bg-white p-3">
-                            <QRCode
-                              value={swapCodeQrUrl}
-                              size={160}
-                              level="M"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              ) : (
-                <p className="mt-3 text-xs text-amber-800 dark:text-amber-300">
-                  Your code is not loaded yet. Check your notification or
-                  refresh this page.
-                </p>
-              )}
-
-              {showCodePath ? (
-                <div className="mt-4">
-                  <label className="text-xs font-medium text-text-primary">
-                    Other person&apos;s code
-                  </label>
-                  <p className="mt-0.5 text-xs text-text-secondary">
-                    Ask them to share their digits or let you scan their QR.
-                  </p>
-                  <div className="mt-2 flex flex-col gap-2">
-                    <Input
-                      name="meetupCode"
-                      value={codeInput}
-                      onChange={(e) =>
-                        setCodeInput(
-                          e.target.value.replace(/\D/g, "").slice(0, 6),
-                        )
-                      }
-                      placeholder="000000"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      maxLength={6}
-                      disabled={verifyBusy || !ninOk}
-                      containerClassName="w-full"
-                      inputClassName="font-mono tracking-widest"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={verifyBusy || !ninOk}
-                      loading={verifyBusy}
-                      onClick={() => void onVerifyCode()}
-                    >
-                      Verify
-                    </Button>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-
-          {ninOk && gateSatisfied && !readOnly ? (
-            <div className="mt-6 border-t border-border pt-5 dark:border-white/10">
-              <div className="flex items-center gap-1.5">
-                <h2 className="text-sm font-semibold text-text-primary">
-                  Confirm donation
-                </h2>
-                <InfoHint
-                  title="Confirm donation"
-                  label="Confirm donation information"
-                  className="size-7"
-                >
-                  <p>
-                    After the donation takes place, each of you confirms once.
-                    When both confirmations are in, this booking is completed.
-                  </p>
-                </InfoHint>
-              </div>
-              <ul className="mt-3 space-y-1 text-xs text-text-secondary">
-                <li>
-                  You:{" "}
-                  {myDonationDone ? (
-                    <span className="font-medium text-emerald-700 dark:text-emerald-400">
-                      Confirmed
-                    </span>
-                  ) : (
-                    <span className="text-amber-800 dark:text-amber-300">
-                      Waiting for your confirmation
-                    </span>
-                  )}
-                </li>
-                <li>
-                  Other party:{" "}
-                  {peerDonationDone ? (
-                    <span className="font-medium text-emerald-700 dark:text-emerald-400">
-                      Confirmed
-                    </span>
-                  ) : (
-                    <span>Not yet</span>
-                  )}
-                </li>
-              </ul>
-              {!myDonationDone ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  className="mt-4"
-                  disabled={confirmBusy || isRequester === null}
-                  loading={confirmBusy}
-                  onClick={() => void onConfirmDonation()}
-                >
-                  Confirm donation
-                </Button>
-              ) : null}
-            </div>
-          ) : null}
-        </aside>
       </div>
 
       <Modal

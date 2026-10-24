@@ -9,7 +9,11 @@ import {
   getApiMessageFromData,
   getAxiosErrorMessage,
 } from "@/lib/bookings/axiosErrorMessage";
-import { parseChatMessagesResponse } from "@/lib/chat/parseChatMessagesResponse";
+import {
+  extractSocketChatPayloads,
+  parseChatMessagesResponse,
+  parseDonationChatMessageRecord,
+} from "@/lib/chat/parseChatMessagesResponse";
 import type { DonationChatMessage } from "@/types/donation-chat";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -104,6 +108,13 @@ function envelopeDonationId(raw: unknown): string | null {
   const o = raw as Record<string, unknown>;
   const v = o.donationId ?? o.bookingId ?? o.booking_id;
   return typeof v === "string" && v.trim() ? v.trim() : null;
+}
+
+function isLiveTypingPayload(payload: unknown): boolean {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return false;
+  }
+  return (payload as { typing?: unknown }).typing === true;
 }
 
 /** Server gateways vary; subscribe to all and de-dupe by message id in state. */
@@ -263,6 +274,30 @@ export function useDonationChat({
     });
     socketRef.current = socket;
 
+    const clearTypingLabel = () => {
+      setTypingLabel(null);
+      if (typingHideTimerRef.current) {
+        clearTimeout(typingHideTimerRef.current);
+        typingHideTimerRef.current = null;
+      }
+    };
+
+    const acceptIncomingMessage = (payload: unknown) => {
+      const roomId = donationIdRef.current;
+      if (!roomId || isLiveTypingPayload(payload)) return;
+      const hasMessage = extractSocketChatPayloads(payload).some(
+        (piece) => parseDonationChatMessageRecord(piece) != null,
+      );
+      if (!hasMessage) return;
+      dispatch(
+        absorbSocketDonationChatPayload({
+          donationId: roomId,
+          payload,
+        }),
+      );
+      clearTypingLabel();
+    };
+
     const handleIncomingMessage = (...args: unknown[]) => {
       const roomId = donationIdRef.current;
       if (!roomId) return;
@@ -274,12 +309,7 @@ export function useDonationChat({
         args[1] != null &&
         typeof args[1] !== "function"
       ) {
-        dispatch(
-          absorbSocketDonationChatPayload({
-            donationId: roomId,
-            payload: args[1],
-          }),
-        );
+        acceptIncomingMessage(args[1]);
         return;
       }
 
@@ -290,12 +320,7 @@ export function useDonationChat({
         args[0] != null &&
         typeof args[0] !== "function"
       ) {
-        dispatch(
-          absorbSocketDonationChatPayload({
-            donationId: roomId,
-            payload: args[0],
-          }),
-        );
+        acceptIncomingMessage(args[0]);
         return;
       }
 
@@ -303,9 +328,7 @@ export function useDonationChat({
         if (payload === undefined || typeof payload === "function") continue;
         const envId = envelopeDonationId(payload);
         if (envId && envId !== roomId) continue;
-        dispatch(
-          absorbSocketDonationChatPayload({ donationId: roomId, payload }),
-        );
+        acceptIncomingMessage(payload);
       }
     };
 
@@ -394,23 +417,20 @@ export function useDonationChat({
 
     const onTyping = (payload: unknown) => {
       if (!payload || typeof payload !== "object") return;
-      const d = (payload as Record<string, unknown>).donationId;
+      const record = payload as Record<string, unknown>;
+      const d = record.donationId;
       if (typeof d !== "string" || d !== donationIdRef.current) return;
-      const roleLabel = (payload as { roleLabel?: unknown }).roleLabel;
-      const typing = Boolean((payload as { typing?: unknown }).typing);
+      const typing = record.typing === true;
       if (!typing) {
-        setTypingLabel(null);
+        clearTypingLabel();
         return;
       }
-      if (typeof roleLabel === "string" && roleLabel.trim()) {
-        setTypingLabel(roleLabel.trim());
-        if (typingHideTimerRef.current)
-          clearTimeout(typingHideTimerRef.current);
-        typingHideTimerRef.current = setTimeout(() => {
-          setTypingLabel(null);
-          typingHideTimerRef.current = null;
-        }, 2800);
-      }
+      setTypingLabel("typing");
+      if (typingHideTimerRef.current) clearTimeout(typingHideTimerRef.current);
+      typingHideTimerRef.current = setTimeout(() => {
+        setTypingLabel(null);
+        typingHideTimerRef.current = null;
+      }, 2800);
     };
 
     socket.on("connect_error", (err: unknown) => {
