@@ -17,6 +17,8 @@ type MeetupQrScannerProps = {
   busy?: boolean;
   /** Start the camera as soon as the scanner mounts. */
   autoStart?: boolean;
+  /** Fill the parent square. The parent owns the open and close control. */
+  regionOnly?: boolean;
   onScan: (decodedText: string) => void | Promise<void>;
   onStop?: () => void;
   className?: string;
@@ -26,6 +28,7 @@ export function MeetupQrScanner({
   disabled,
   busy,
   autoStart = false,
+  regionOnly = false,
   onScan,
   onStop,
   className,
@@ -141,9 +144,14 @@ export function MeetupQrScanner({
       const instance = new Html5Qrcode(regionId);
       scannerRef.current = instance;
 
+      const regionWidth = regionEl.clientWidth || 176;
+      const scanSide = Math.max(
+        96,
+        Math.min(240, Math.floor(regionWidth * 0.72)),
+      );
       const scanConfig = {
         fps: 10,
-        qrbox: { width: 240, height: 240 },
+        qrbox: { width: scanSide, height: scanSide },
         aspectRatio: 1,
       };
 
@@ -220,6 +228,26 @@ export function MeetupQrScanner({
   }, [busy, disabled, regionId]);
 
   const controlsDisabled = disabled || busy || starting;
+
+  if (regionOnly) {
+    return (
+      <div className={cn("relative size-full min-h-0 min-w-0", className)}>
+        <div
+          ref={regionRef}
+          id={regionId}
+          className="absolute inset-0 overflow-hidden bg-black [&_video]:h-full! [&_video]:w-full! [&_video]:object-cover!"
+        />
+        {error ? (
+          <p
+            className="absolute inset-x-2 bottom-2 rounded-md bg-black/80 px-2 py-1 text-center text-[11px] text-red-200"
+            role="alert"
+          >
+            {error}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-3", className)}>
