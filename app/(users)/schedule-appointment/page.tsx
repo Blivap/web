@@ -207,12 +207,12 @@ function ScheduleAppointmentPageContent() {
             className="size-7"
           >
             <p>
-              Your first visit includes a blood sample for testing and blood
-              typing. Please allow about one hour on site.
+              Your first visit includes screening for the donation you booked.
+              Please allow about one hour on site.
             </p>
             <p>
-              If the nearest blood bank is full, book another location here—you
-              can mention a preferred bank during the screening.
+              If the nearest facility is full, book another location here. You
+              can mention a preferred place during screening.
             </p>
             <p>
               Choose a hospital, then pick a date and time. You can adjust your

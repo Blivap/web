@@ -12,6 +12,10 @@ export default function AboutBlood() {
         <h1 className="font-semibold text-primary text-lg sm:text-xl tracking-tight mb-6">
           About blood
         </h1>
+        <p className="mb-6 max-w-2xl text-xs leading-relaxed text-[#6B7280] dark:text-slate-400 sm:text-sm">
+          This page is about blood. Blivap also matches plasma, organs, tissue,
+          and other donations.
+        </p>
 
         <div className="flex flex-col gap-6">
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6">

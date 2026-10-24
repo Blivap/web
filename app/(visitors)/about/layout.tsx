@@ -8,7 +8,7 @@ export const metadata: Metadata = generateMetadata({
   keywords: [
     "about Blivap",
     "our mission",
-    "blood donation platform",
+    "donation platform",
     "medical services Nigeria",
   ],
   path: "/about",

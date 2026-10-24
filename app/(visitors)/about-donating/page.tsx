@@ -21,10 +21,9 @@ export default function AboutDonating() {
                 How to become a donor
               </h2>
               <p className="text-xs sm:text-sm text-[#6B7280] dark:text-slate-400 leading-relaxed">
-                Donating blood or sperm is rewarding and saves lives. The
-                process is simple, safe, and quick. At Blivap we make it easy:
-                register online, book appointments, and track your history in
-                one place.
+                You can give blood, plasma, platelets, an organ, tissue, or a
+                reproductive donation. Register, complete screening for that
+                pathway, and book when you are eligible.
               </p>
               <Button
                 variant="link"
@@ -92,7 +91,7 @@ export default function AboutDonating() {
                 </div>
                 <ul className="flex flex-col gap-1.5 text-xs text-[#6B7280] dark:text-slate-400">
                   {[
-                    "Life-saving blood or sperm for critical needs",
+                    "The donation you need, from blood and plasma to organs and tissue",
                     "Recovery from surgery, trauma, or conditions",
                     "Compatible donors via our matching system",
                   ].map((item, i) => (

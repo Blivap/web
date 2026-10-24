@@ -24,10 +24,10 @@ export default function Research() {
               Advancing medical science
             </h2>
             <p className="text-xs sm:text-sm text-[#6B7280] dark:text-slate-400 leading-relaxed max-w-2xl">
-              Blivap supports research in blood products, therapeutics,
-              diagnostics, and healthcare knowledge. We enable researchers to
-              access data and collaborate with healthcare professionals to
-              advance science and improve outcomes.
+              Blivap supports research across donation pathways — blood
+              products, organs, tissue, therapeutics, diagnostics, and
+              healthcare knowledge. Researchers can collaborate with care teams
+              to improve how donations are given and used.
             </p>
           </div>
 
@@ -35,8 +35,8 @@ export default function Research() {
             {[
               {
                 icon: FlaskConical,
-                title: "Blood products",
-                desc: "Improving storage, processing, and transfusion safety. Preservation, compatibility, and quality assurance.",
+                title: "Donation science",
+                desc: "Storage, matching, and safety across blood, organs, tissue, and other donations.",
                 color: "bg-[#F5F3FF] dark:bg-indigo-500/15",
               },
               {

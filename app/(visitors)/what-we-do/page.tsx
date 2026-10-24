@@ -20,11 +20,10 @@ export default function WhatWeDo() {
                 Connecting donors and recipients
               </h2>
               <p className="text-xs sm:text-sm text-[#6B7280] dark:text-slate-400 leading-relaxed">
-                Blivap connects people who need blood or sperm with willing
-                donors. We match compatible blood groups and facilitate the
-                process. Our mission is to address the blood crisis and make
-                life-saving donations accessible—using technology for a safe,
-                efficient ecosystem.
+                Blivap connects people who need a donation with willing donors.
+                Blood, plasma, platelets, organs, tissue, and reproductive
+                donation all live on one platform, with screening and matching
+                for each pathway.
               </p>
             </div>
             <div className="relative h-40 sm:h-52 overflow-hidden rounded-lg ring-1 ring-black/5 dark:ring-white/10">
@@ -41,20 +40,20 @@ export default function WhatWeDo() {
             {[
               {
                 icon: Droplet,
-                title: "Blood donation",
-                desc: "Connect blood donors with recipients. We match compatible types and facilitate safe donations through verified facilities.",
+                title: "Blood, plasma, and platelets",
+                desc: "Match whole blood, plasma, and platelet donors with people who need them, through verified facilities.",
                 color: "bg-[#FDF2F4] dark:bg-primary/15",
               },
               {
                 icon: Heart,
-                title: "Sperm donation",
-                desc: "Help individuals and couples find sperm donors. Secure, confidential, with quality and compatibility matching.",
+                title: "Organs and tissue",
+                desc: "Coordinate kidney, liver, cornea, skin, bone, and other organ or tissue donations with the right screening.",
                 color: "bg-[#EEF2FF] dark:bg-sky-500/15",
               },
               {
                 icon: Users,
-                title: "Community support",
-                desc: "Community of donors and recipients, with education, resources, and ongoing support.",
+                title: "Reproductive and other gifts",
+                desc: "Sperm, eggs, surrogacy, milk, cord blood, and research participation, each with its own eligibility check.",
                 color: "bg-[#F5F3FF] dark:bg-indigo-500/15",
               },
             ].map((service, i) => (
