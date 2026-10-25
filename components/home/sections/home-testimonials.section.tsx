@@ -2,24 +2,31 @@
 
 import { useCallback, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { HOME_TESTIMONIALS } from "../data/home-landing.mock";
+import type { PublicTestimonial } from "@/app/api/publicRepository";
 import { ScrollReveal } from "../motion/scroll-reveal";
 import { usePrefersReducedMotion } from "../motion/use-prefers-reduced-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export function HomeTestimonialsSection() {
+export function HomeTestimonialsSection({
+  testimonials,
+}: {
+  testimonials: PublicTestimonial[];
+}) {
   const reduced = usePrefersReducedMotion();
   const [index, setIndex] = useState(0);
-  const total = HOME_TESTIMONIALS.length;
-  const active = HOME_TESTIMONIALS[index]!;
-
+  const total = testimonials.length;
+  const active = testimonials[index] ?? testimonials[0];
   const go = useCallback(
     (next: number) => {
+      if (total === 0) return;
       setIndex((next + total) % total);
     },
     [total],
   );
+
+  if (!active || total === 0) return null;
+  const byline = [active.role, active.location].filter(Boolean).join(" · ");
 
   return (
     <section
@@ -64,56 +71,58 @@ export function HomeTestimonialsSection() {
                 <p className="text-sm font-semibold text-text-primary">
                   {active.name}
                 </p>
-                <p className="text-xs text-text-secondary">
-                  {active.role} · {active.location}
-                </p>
+                {byline ? (
+                  <p className="text-xs text-text-secondary">{byline}</p>
+                ) : null}
               </div>
             </div>
 
-            <div className="mt-5 flex items-center justify-between gap-3">
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  aria-label="Previous testimonial"
-                  onClick={() => go(index - 1)}
-                >
-                  <ChevronLeft className="size-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  aria-label="Next testimonial"
-                  onClick={() => go(index + 1)}
-                >
-                  <ChevronRight className="size-4" />
-                </Button>
-              </div>
-              <div
-                className="flex gap-1.5"
-                role="tablist"
-                aria-label="Testimonials"
-              >
-                {HOME_TESTIMONIALS.map((t, i) => (
-                  <button
-                    key={t.id}
+            {total > 1 ? (
+              <div className="mt-5 flex items-center justify-between gap-3">
+                <div className="flex gap-2">
+                  <Button
                     type="button"
-                    role="tab"
-                    aria-selected={i === index}
-                    aria-label={`Show testimonial ${i + 1}`}
-                    onClick={() => setIndex(i)}
-                    className={cn(
-                      "size-2 rounded-full transition-colors",
-                      i === index
-                        ? "bg-primary"
-                        : "bg-[#D1D5DB] dark:bg-white/25",
-                    )}
-                  />
-                ))}
+                    variant="outline"
+                    size="icon-sm"
+                    aria-label="Previous testimonial"
+                    onClick={() => go(index - 1)}
+                  >
+                    <ChevronLeft className="size-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-sm"
+                    aria-label="Next testimonial"
+                    onClick={() => go(index + 1)}
+                  >
+                    <ChevronRight className="size-4" />
+                  </Button>
+                </div>
+                <div
+                  className="flex gap-1.5"
+                  role="tablist"
+                  aria-label="Testimonials"
+                >
+                  {testimonials.map((t, i) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={i === index}
+                      aria-label={`Show testimonial ${i + 1}`}
+                      onClick={() => setIndex(i)}
+                      className={cn(
+                        "size-2 rounded-full transition-colors",
+                        i === index
+                          ? "bg-primary"
+                          : "bg-[#D1D5DB] dark:bg-white/25",
+                      )}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
         </ScrollReveal>
       </div>

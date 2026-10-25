@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Droplet, HeartHandshake } from "lucide-react";
-import { HOME_IMPACT_EVENTS } from "../data/home-landing.mock";
+import { CheckCircle2, HeartHandshake } from "lucide-react";
+import type { PublicActivity } from "@/app/api/publicRepository";
 import { usePrefersReducedMotion } from "../motion/use-prefers-reduced-motion";
 import { cn } from "@/lib/utils";
 
-function EventIcon({ kind }: { kind: "need" | "match" | "donate" }) {
+function EventIcon({ kind }: { kind: PublicActivity["kind"] }) {
   if (kind === "match") {
     return (
       <CheckCircle2
@@ -15,12 +15,9 @@ function EventIcon({ kind }: { kind: "need" | "match" | "donate" }) {
       />
     );
   }
-  if (kind === "donate") {
-    return (
-      <HeartHandshake className="size-3.5 shrink-0 text-primary" aria-hidden />
-    );
-  }
-  return <Droplet className="size-3.5 shrink-0 text-primary" aria-hidden />;
+  return (
+    <HeartHandshake className="size-3.5 shrink-0 text-primary" aria-hidden />
+  );
 }
 
 function TickerChip({
@@ -30,21 +27,27 @@ function TickerChip({
 }: {
   label: string;
   meta: string;
-  kind: "need" | "match" | "donate";
+  kind: PublicActivity["kind"];
 }) {
+  const showMeta = Boolean(meta) && !label.includes(meta);
   return (
     <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-[#E5E7EB] bg-white px-3.5 py-2 text-xs shadow-sm dark:border-white/10 dark:bg-[#111827]">
       <EventIcon kind={kind} />
       <span className="font-semibold text-text-primary">{label}</span>
-      <span className="text-text-tertiary">{meta}</span>
+      {showMeta ? <span className="text-text-tertiary">{meta}</span> : null}
     </span>
   );
 }
 
-export function HomeImpactTickerSection() {
+export function HomeImpactTickerSection({
+  events,
+}: {
+  events: PublicActivity[];
+}) {
   const reduced = usePrefersReducedMotion();
   const [paused, setPaused] = useState(false);
-  const loop = [...HOME_IMPACT_EVENTS, ...HOME_IMPACT_EVENTS];
+  if (events.length === 0) return null;
+  const loop = [...events, ...events];
 
   return (
     <section
@@ -63,13 +66,12 @@ export function HomeImpactTickerSection() {
       }}
     >
       <div className="sr-only" aria-live="polite">
-        Recent updates:{" "}
-        {HOME_IMPACT_EVENTS.map((e) => `${e.label}, ${e.meta}`).join(". ")}
+        Recent updates: {events.map((e) => `${e.label}, ${e.meta}`).join(". ")}
       </div>
 
       {reduced ? (
         <div className="mx-auto flex max-w-360 gap-3 overflow-x-auto px-4 sm:px-8 lg:px-20">
-          {HOME_IMPACT_EVENTS.map((e) => (
+          {events.map((e) => (
             <TickerChip key={e.id} {...e} />
           ))}
         </div>

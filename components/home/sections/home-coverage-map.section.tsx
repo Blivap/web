@@ -1,20 +1,22 @@
 "use client";
 
+import type {
+  PublicCoverageCity,
+  PublicCoverageLink,
+} from "@/app/api/publicRepository";
 import { ScrollReveal } from "../motion/scroll-reveal";
 import { usePrefersReducedMotion } from "../motion/use-prefers-reduced-motion";
-import {
-  HOME_COVERAGE_CITIES,
-  HOME_COVERAGE_LINKS,
-  type CoverageCity,
-} from "../data/home-landing.mock";
 import { cn } from "@/lib/utils";
 
-function cityById(id: string): CoverageCity | undefined {
-  return HOME_COVERAGE_CITIES.find((c) => c.id === id);
+function cityById(
+  cities: PublicCoverageCity[],
+  id: string,
+): PublicCoverageCity | undefined {
+  return cities.find((city) => city.id === id);
 }
 
 /** Soft quadratic arc between two constellation points. */
-function linkPath(a: CoverageCity, b: CoverageCity) {
+function linkPath(a: PublicCoverageCity, b: PublicCoverageCity) {
   const mx = (a.x + b.x) / 2;
   const my = (a.y + b.y) / 2;
   const dx = b.x - a.x;
@@ -26,10 +28,18 @@ function linkPath(a: CoverageCity, b: CoverageCity) {
   return `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
 }
 
-function PresenceNetwork({ reduced }: { reduced: boolean }) {
-  const links = HOME_COVERAGE_LINKS.flatMap((link, i) => {
-    const from = cityById(link.from);
-    const to = cityById(link.to);
+function PresenceNetwork({
+  reduced,
+  cities,
+  links,
+}: {
+  reduced: boolean;
+  cities: PublicCoverageCity[];
+  links: PublicCoverageLink[];
+}) {
+  const paths = links.flatMap((link, i) => {
+    const from = cityById(cities, link.from);
+    const to = cityById(cities, link.to);
     if (!from || !to) return [];
     return [{ id: `${link.from}-${link.to}`, d: linkPath(from, to), i }];
   });
@@ -68,7 +78,7 @@ function PresenceNetwork({ reduced }: { reduced: boolean }) {
           </linearGradient>
         </defs>
 
-        {links.map((link) => (
+        {paths.map((link) => (
           <path
             key={link.id}
             d={link.d}
@@ -83,7 +93,7 @@ function PresenceNetwork({ reduced }: { reduced: boolean }) {
           />
         ))}
 
-        {HOME_COVERAGE_CITIES.map((city) => {
+        {cities.map((city) => {
           const r = 1.1 + city.strength * 1.4;
           return (
             <g key={city.id}>
@@ -108,7 +118,7 @@ function PresenceNetwork({ reduced }: { reduced: boolean }) {
         })}
       </svg>
 
-      {HOME_COVERAGE_CITIES.map((city) => (
+      {cities.map((city) => (
         <span
           key={`${city.id}-label`}
           className="pointer-events-none absolute -translate-x-1/2 text-[10px] font-semibold tracking-wide text-text-primary sm:text-[11px]"
@@ -128,11 +138,18 @@ function PresenceNetwork({ reduced }: { reduced: boolean }) {
   );
 }
 
-export function HomeCoverageMapSection() {
+export function HomeCoverageMapSection({
+  cities,
+  links,
+  status,
+}: {
+  cities: PublicCoverageCity[];
+  links: PublicCoverageLink[];
+  status: "loading" | "ready" | "error";
+}) {
   const reduced = usePrefersReducedMotion();
-  const ranked = [...HOME_COVERAGE_CITIES].sort(
-    (a, b) => b.strength - a.strength,
-  );
+  const ranked = [...cities].sort((a, b) => b.strength - a.strength);
+  const ready = status === "ready" && cities.length > 0;
 
   return (
     <section className="w-full" aria-labelledby="coverage-map-heading">
@@ -153,44 +170,54 @@ export function HomeCoverageMapSection() {
             matter.
           </p>
 
-          <ul
-            className="mt-8 flex flex-col gap-3.5"
-            aria-label="Sample city readiness"
-          >
-            {ranked.map((city) => (
-              <li key={city.id} className="flex items-center gap-3">
-                <span className="w-28 shrink-0 text-sm font-medium text-text-primary sm:w-32">
-                  {city.label}
-                </span>
-                <span
-                  className="relative h-1 flex-1 overflow-hidden bg-[#E8E4E1] dark:bg-white/10"
-                  aria-hidden
-                >
+          {ready ? (
+            <ul
+              className="mt-8 flex flex-col gap-3.5"
+              aria-label="City readiness"
+            >
+              {ranked.map((city) => (
+                <li key={city.id} className="flex items-center gap-3">
+                  <span className="w-28 shrink-0 text-sm font-medium text-text-primary sm:w-32">
+                    {city.label}
+                  </span>
                   <span
-                    className={cn(
-                      "absolute inset-y-0 left-0 bg-primary",
-                      !reduced && "home-coverage-meter",
-                    )}
-                    style={{
-                      width: `${Math.round(city.strength * 100)}%`,
-                      animationDelay: `${city.delay}s`,
-                    }}
-                  />
-                </span>
-                <span className="w-8 text-right text-[11px] tabular-nums text-text-tertiary">
-                  {Math.round(city.strength * 100)}
-                </span>
-              </li>
-            ))}
-          </ul>
+                    className="relative h-1 flex-1 overflow-hidden bg-[#E8E4E1] dark:bg-white/10"
+                    aria-hidden
+                  >
+                    <span
+                      className={cn(
+                        "absolute inset-y-0 left-0 bg-primary",
+                        !reduced && "home-coverage-meter",
+                      )}
+                      style={{
+                        width: `${Math.round(city.strength * 100)}%`,
+                        animationDelay: `${city.delay}s`,
+                      }}
+                    />
+                  </span>
+                  <span className="w-8 text-right text-[11px] tabular-nums text-text-tertiary">
+                    {Math.round(city.strength * 100)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-8 text-sm text-text-secondary">
+              {status === "error"
+                ? "City presence is unavailable right now."
+                : "Checking donor presence."}
+            </p>
+          )}
         </ScrollReveal>
 
-        <ScrollReveal
-          delay={0.12}
-          className="overflow-hidden lg:col-span-7 lg:ml-4"
-        >
-          <PresenceNetwork reduced={reduced} />
-        </ScrollReveal>
+        {ready ? (
+          <ScrollReveal
+            delay={0.12}
+            className="overflow-hidden lg:col-span-7 lg:ml-4"
+          >
+            <PresenceNetwork reduced={reduced} cities={cities} links={links} />
+          </ScrollReveal>
+        ) : null}
       </div>
     </section>
   );

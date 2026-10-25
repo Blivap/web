@@ -1,14 +1,18 @@
 "use client";
 
+import { $api } from "@/app/api";
+import { liveStoreUrl, type WaitlistStore } from "@/app/api/publicRepository";
+import { HoneypotField } from "@/components/forms/honeypot-field";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/config/routes";
+import { usePublicApp } from "@/hooks/public/usePublicSite.hooks";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, useState, useSyncExternalStore } from "react";
 
-const STORAGE_KEY = "blivap-app-waitlist";
+const STORAGE_KEY = "blivap-app-waitlist-v2";
 
 const stores = [
   { id: "ios", label: "App Store" },
@@ -16,11 +20,12 @@ const stores = [
   { id: "both", label: "Both" },
 ] as const;
 
-type StoreId = (typeof stores)[number]["id"];
+type StoreId = WaitlistStore;
 
 type SavedJoin = {
   email: string;
   store: StoreId;
+  alreadyJoined: boolean;
 };
 
 function isStoreId(value: string | null): value is StoreId {
@@ -38,14 +43,19 @@ function readSavedJoin(): SavedJoin | null {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<SavedJoin>;
+    const store = parsed.store ?? null;
     if (
       typeof parsed.email !== "string" ||
       !parsed.email.includes("@") ||
-      !isStoreId(parsed.store ?? null)
+      !isStoreId(store)
     ) {
       return null;
     }
-    return { email: parsed.email, store: parsed.store };
+    return {
+      email: parsed.email,
+      store,
+      alreadyJoined: parsed.alreadyJoined === true,
+    };
   } catch {
     return null;
   }
@@ -120,29 +130,73 @@ export function WaitlistJoin() {
   const store =
     storeChoice?.query === requestedStore ? storeChoice.store : storeFromQuery;
 
+  const { stores: appStores, status: appStatus } = usePublicApp();
+  const iosUrl = liveStoreUrl(appStores?.ios);
+  const androidUrl = liveStoreUrl(appStores?.android);
+  const waitlistStores = stores.filter((option) => {
+    if (option.id === "ios") return !iosUrl;
+    if (option.id === "android") return !androidUrl;
+    return !iosUrl && !androidUrl;
+  });
+  const storeIsOpen = waitlistStores.some((option) => option.id === store);
+  const activeStore = storeIsOpen ? store : (waitlistStores[0]?.id ?? store);
+
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   const saved = useSyncExternalStore(
     subscribeSaved,
     getSavedSnapshot,
     getServerSavedSnapshot,
   );
 
-  const headingStore = readyLine(store);
+  const headingStore = readyLine(activeStore);
+  const storesLive = Boolean(iosUrl || androidUrl);
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const company = String(form.get("company") ?? "");
     const nextEmail = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextEmail)) {
       setError("Enter a valid email address.");
       return;
     }
-    const join = { email: nextEmail, store };
-    if (!persistSaved(join)) {
-      setError("Could not save your place on this device. Try again.");
+    setPending(true);
+    setError(null);
+    const response = await $api.public.joinWaitlist({
+      email: nextEmail,
+      store: activeStore,
+      source: "waitlist",
+      company,
+    });
+    setPending(false);
+    if (!response.data) {
+      setError(response.error ?? "Could not join the waitlist.");
       return;
     }
+    const join = {
+      email: nextEmail,
+      store: activeStore,
+      alreadyJoined: response.data.alreadyJoined,
+    };
+    if (!persistSaved(join)) {
+      setError("You're on the list, but this device could not remember it.");
+    }
+  };
+
+  const onLeave = async () => {
+    if (!saved) return;
+    setPending(true);
     setError(null);
+    const response = await $api.public.leaveWaitlist({ email: saved.email });
+    setPending(false);
+    if (!response.data) {
+      setError(response.error ?? "Could not update the waitlist.");
+      return;
+    }
+    persistSaved(null);
+    setEmail("");
   };
 
   return (
@@ -150,7 +204,11 @@ export function WaitlistJoin() {
       <section className="grid grid-cols-1 items-center gap-10 overflow-hidden border border-[#E5E7EB] bg-[#FDF2F4] dark:border-primary/20 dark:bg-[#2A1117] lg:grid-cols-2 lg:gap-12">
         <div className="px-5 py-8 sm:px-8 sm:py-10 lg:pl-12">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-            Coming soon
+            {appStatus === "loading"
+              ? "The app"
+              : storesLive
+                ? "Get the app"
+                : "Coming soon"}
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">
             Carry Blivap in your pocket
@@ -158,14 +216,46 @@ export function WaitlistJoin() {
           <p className="mt-3 max-w-md text-sm leading-relaxed text-text-secondary">
             {saved
               ? "The mobile app will bring live matches, alerts, and secure messaging to your phone."
-              : `Leave your email and the store you use. We'll tell you when ${headingStore}.`}
+              : storesLive
+                ? "Download a live store listing, or leave your email for a store that is still opening."
+                : `Leave your email and the store you use. We'll tell you when ${headingStore}.`}
           </p>
 
-          {saved ? (
+          {iosUrl || androidUrl ? (
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              {iosUrl ? (
+                <Button
+                  href={iosUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-fit rounded-full px-6"
+                >
+                  Download on the App Store
+                </Button>
+              ) : null}
+              {androidUrl ? (
+                <Button
+                  href={androidUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="outline"
+                  className="w-fit rounded-full px-6"
+                >
+                  Get it on Google Play
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+
+          {appStatus === "loading" ? (
+            <div className="mt-6 h-40 max-w-md animate-pulse rounded-2xl bg-white/70 dark:bg-white/5" />
+          ) : saved ? (
             <div className="mt-6 max-w-md rounded-2xl border border-primary/20 bg-white p-5 dark:border-white/10 dark:bg-[#14141a]">
               <p className="inline-flex items-center gap-2 text-sm font-semibold text-text-primary">
                 <Check className="size-4 text-primary" aria-hidden />
-                You&apos;re on the list
+                {saved.alreadyJoined
+                  ? "You're already on the list"
+                  : "You're on the list"}
               </p>
               <p className="mt-2 text-sm leading-relaxed text-text-secondary">
                 We&apos;ll email{" "}
@@ -174,22 +264,33 @@ export function WaitlistJoin() {
                 </span>{" "}
                 when {readyLine(saved.store)}.
               </p>
+              {error ? (
+                <p
+                  className="mt-3 text-sm text-red-600 dark:text-red-400"
+                  role="alert"
+                >
+                  {error}
+                </p>
+              ) : null}
               <button
                 type="button"
-                className="mt-4 text-sm font-medium text-primary underline-offset-2 hover:underline"
+                className="mt-4 text-sm font-medium text-primary underline-offset-2 hover:underline disabled:opacity-60"
+                disabled={pending}
                 onClick={() => {
-                  persistSaved(null);
-                  setEmail("");
+                  void onLeave();
                 }}
               >
                 Use a different email
               </button>
             </div>
-          ) : (
+          ) : waitlistStores.length > 0 ? (
             <form
-              className="mt-6 flex max-w-md flex-col gap-4"
-              onSubmit={onSubmit}
+              className="relative mt-6 flex max-w-md flex-col gap-4"
+              onSubmit={(event) => {
+                void onSubmit(event);
+              }}
             >
+              <HoneypotField />
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="waitlist-email"
@@ -219,8 +320,8 @@ export function WaitlistJoin() {
                   Store
                 </legend>
                 <div className="flex flex-wrap gap-2">
-                  {stores.map((option) => {
-                    const selected = store === option.id;
+                  {waitlistStores.map((option) => {
+                    const selected = activeStore === option.id;
                     return (
                       <label
                         key={option.id}
@@ -260,11 +361,15 @@ export function WaitlistJoin() {
                 </p>
               ) : null}
 
-              <Button type="submit" className="w-fit rounded-full px-6">
+              <Button
+                type="submit"
+                loading={pending}
+                className="w-fit rounded-full px-6"
+              >
                 Join the waitlist
               </Button>
             </form>
-          )}
+          ) : null}
 
           <p className="mt-4 max-w-sm text-xs leading-relaxed text-text-tertiary">
             Prefer the web today?{" "}
