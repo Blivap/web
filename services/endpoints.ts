@@ -97,6 +97,13 @@ export const endpoints = {
 
   news: "/news",
 
+  public: {
+    landing: "/public/landing",
+    app: "/public/app",
+    waitlist: "/public/waitlist",
+    contact: "/public/contact",
+  },
+
   welfare: {
     packages: "/welfare-packages",
   },

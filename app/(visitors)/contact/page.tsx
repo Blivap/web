@@ -1,6 +1,8 @@
 "use client";
 
+import { $api } from "@/app/api";
 import { Button } from "@/components/button/button.component";
+import { HoneypotField } from "@/components/forms/honeypot-field";
 import { Input } from "@/components/forms/inputs/input.component";
 import { Textarea } from "@/components/ui/textarea";
 import { HomeLayout } from "@/layout/home.layout.component";
@@ -12,7 +14,7 @@ import {
   Send,
   ShieldCheck,
 } from "lucide-react";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -20,9 +22,33 @@ export default function Contact() {
     email: "",
     message: "",
   });
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sentEmail, setSentEmail] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const company = String(
+      new FormData(event.currentTarget).get("company") ?? "",
+    );
+    const name = formData.name.trim();
+    const email = formData.email.trim().toLowerCase();
+    const message = formData.message.trim();
+    setPending(true);
+    setError(null);
+    const response = await $api.public.sendContact({
+      name,
+      email,
+      message,
+      company,
+    });
+    setPending(false);
+    if (!response.data) {
+      setError(response.error ?? "Could not send your message.");
+      return;
+    }
+    setSentEmail(email);
+    setFormData({ name: "", email: "", message: "" });
   };
 
   const contactMethods = [
@@ -207,72 +233,107 @@ export default function Contact() {
                 </div>
               </div>
 
-              <form
-                onSubmit={handleSubmit}
-                className="px-5 py-6 sm:px-6 sm:py-7"
-              >
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <Input
-                    name="name"
-                    id="contact-name"
-                    label="Name"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="Your full name"
-                    required
-                  />
-                  <Input
-                    name="email"
-                    id="contact-email"
-                    label="Email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-
-                <div className="mt-5 flex flex-col gap-2">
-                  <label
-                    htmlFor="contact-message"
-                    className="text-sm font-medium text-black dark:text-white"
-                  >
-                    Message
-                  </label>
-                  <Textarea
-                    id="contact-message"
-                    name="message"
-                    rows={5}
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
-                    className="rounded-2xl focus:ring-4 focus:ring-primary/8"
-                    placeholder="Tell us how we can help."
-                    required
-                  />
-                </div>
-
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs leading-relaxed text-[#6B7280] dark:text-slate-400">
-                    By sending a message, you agree that our team may contact
-                    you using the details you provided.
+              {sentEmail ? (
+                <div className="px-5 py-8 sm:px-6" role="status">
+                  <h2 className="text-lg font-semibold text-black dark:text-white">
+                    Message sent
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-[#6B7280] dark:text-slate-400">
+                    We&apos;ll reply to{" "}
+                    <span className="font-medium text-black dark:text-white">
+                      {sentEmail}
+                    </span>
+                    .
                   </p>
-                  <Button
-                    type="submit"
-                    className="min-w-37.5 rounded-full bg-primary px-5 py-3 text-sm font-medium text-white hover:bg-primary/90"
+                  <button
+                    type="button"
+                    className="mt-4 text-sm font-medium text-primary underline-offset-2 hover:underline"
+                    onClick={() => setSentEmail(null)}
                   >
-                    <Send size={16} />
-                    Send message
-                  </Button>
+                    Send another message
+                  </button>
                 </div>
-              </form>
+              ) : (
+                <form
+                  onSubmit={(event) => {
+                    void handleSubmit(event);
+                  }}
+                  className="relative px-5 py-6 sm:px-6 sm:py-7"
+                >
+                  <HoneypotField />
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <Input
+                      name="name"
+                      id="contact-name"
+                      label="Name"
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      placeholder="Your full name"
+                      required
+                    />
+                    <Input
+                      name="email"
+                      id="contact-email"
+                      label="Email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </div>
+
+                  <div className="mt-5 flex flex-col gap-2">
+                    <label
+                      htmlFor="contact-message"
+                      className="text-sm font-medium text-black dark:text-white"
+                    >
+                      Message
+                    </label>
+                    <Textarea
+                      id="contact-message"
+                      name="message"
+                      rows={5}
+                      value={formData.message}
+                      onChange={(e) =>
+                        setFormData({ ...formData, message: e.target.value })
+                      }
+                      className="rounded-2xl focus:ring-4 focus:ring-primary/8"
+                      placeholder="Tell us how we can help."
+                      required
+                    />
+                  </div>
+
+                  {error ? (
+                    <p
+                      className="mt-4 text-sm text-red-600 dark:text-red-400"
+                      role="alert"
+                    >
+                      {error}
+                    </p>
+                  ) : null}
+
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-xs leading-relaxed text-[#6B7280] dark:text-slate-400">
+                      By sending a message, you agree that our team may contact
+                      you using the details you provided.
+                    </p>
+                    <Button
+                      type="submit"
+                      loading={pending}
+                      className="min-w-37.5 rounded-full bg-primary px-5 py-3 text-sm font-medium text-white hover:bg-primary/90"
+                    >
+                      <Send size={16} />
+                      Send message
+                    </Button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </section>

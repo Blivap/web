@@ -7,6 +7,7 @@ import DonorRepository from "./donorRepository";
 import QuestionnaireRepository from "./questionnaireRepository";
 import HospitalRepository from "./hospitalRepository";
 import NewsRepository from "./newsRepository";
+import PublicRepository from "./publicRepository";
 import NinRepository from "./ninRepository";
 import NotificationRepository from "./notificationRepository";
 import WalletRepository from "./walletRepository";
@@ -21,6 +22,7 @@ export const $api = {
   questionnaire: QuestionnaireRepository(),
   hospitals: HospitalRepository(),
   news: NewsRepository(),
+  public: PublicRepository(),
   nin: NinRepository(),
   notifications: NotificationRepository(),
   wallet: WalletRepository(),

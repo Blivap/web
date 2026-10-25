@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { Lock, MapPin, ShieldCheck, Zap } from "lucide-react";
 import { ScrollReveal } from "../motion/scroll-reveal";
 import { usePrefersReducedMotion } from "../motion/use-prefers-reduced-motion";
-import { HOME_STATS } from "../data/home-landing.mock";
+import type { PublicStat } from "@/app/api/publicRepository";
 import { useInView } from "@/components/in-view";
 
 const DIFFERENTIATORS = [
@@ -88,7 +88,13 @@ function StatCount({
   );
 }
 
-export function HomeWhyBlivapSection() {
+export function HomeWhyBlivapSection({
+  stats,
+  status,
+}: {
+  stats: PublicStat[];
+  status: "loading" | "ready" | "error";
+}) {
   const reduced = usePrefersReducedMotion();
 
   return (
@@ -129,23 +135,28 @@ export function HomeWhyBlivapSection() {
           ))}
         </div>
 
-        <ScrollReveal className="mt-10" delay={0.1}>
-          <div
-            className="grid grid-cols-1 gap-8 border border-[#E5E7EB] bg-white px-5 py-8 dark:border-white/10 dark:bg-[#111827] sm:grid-cols-3 sm:px-8"
-            aria-label="Blivap impact statistics"
-          >
-            {HOME_STATS.map((stat) => (
-              <StatCount
-                key={stat.id}
-                value={stat.value}
-                suffix={stat.suffix}
-                prefix={stat.prefix}
-                label={stat.label}
-                reduced={reduced}
-              />
-            ))}
-          </div>
-        </ScrollReveal>
+        {status === "ready" && stats.length > 0 ? (
+          <ScrollReveal className="mt-10" delay={0.1}>
+            <div
+              className="grid grid-cols-1 gap-8 border border-[#E5E7EB] bg-white px-5 py-8 dark:border-white/10 dark:bg-[#111827] sm:grid-cols-3 sm:px-8"
+              aria-label="Blivap impact statistics"
+            >
+              {stats.map((stat) => (
+                <StatCount
+                  key={stat.id}
+                  value={stat.value}
+                  suffix={stat.suffix}
+                  label={stat.label}
+                  reduced={reduced}
+                />
+              ))}
+            </div>
+          </ScrollReveal>
+        ) : status === "error" ? (
+          <p className="mt-10 text-sm text-text-secondary">
+            Impact numbers are unavailable right now.
+          </p>
+        ) : null}
       </div>
     </section>
   );

@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { routes } from "@/config/routes";
 import { HomeCtaButton } from "../motion/home-cta-button";
 import { usePrefersReducedMotion } from "../motion/use-prefers-reduced-motion";
-import { HOME_URGENCY_BASE } from "../data/home-landing.mock";
 import { cn } from "@/lib/utils";
 
 type PathMode = "donate" | "need";
@@ -40,21 +39,21 @@ function HeartbeatWave({ animate }: { animate: boolean }) {
   );
 }
 
-export function HomeHeroSection() {
+function openNeedsHeadline(count: number): string {
+  if (count === 0) return "No open requests right now";
+  if (count === 1) return "1 person needs a donation right now";
+  return `${count.toLocaleString()} people need a donation right now`;
+}
+
+export function HomeHeroSection({
+  openNeeds,
+  status,
+}: {
+  openNeeds: number | null;
+  status: "loading" | "ready" | "error";
+}) {
   const reduced = usePrefersReducedMotion();
   const [mode, setMode] = useState<PathMode>("donate");
-  const [needCount, setNeedCount] = useState(HOME_URGENCY_BASE);
-
-  useEffect(() => {
-    if (reduced) return;
-    const id = window.setInterval(() => {
-      setNeedCount((n) => {
-        const delta = Math.random() > 0.55 ? 1 : -1;
-        return Math.min(96, Math.max(32, n + delta));
-      });
-    }, 4200);
-    return () => window.clearInterval(id);
-  }, [reduced]);
 
   const primary =
     mode === "donate"
@@ -122,8 +121,22 @@ export function HomeHeroSection() {
             id="home-hero-heading"
             className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl lg:text-[2.75rem]"
           >
-            <span className="tabular-nums">{needCount}</span> people need a
-            donation right now
+            {status === "ready" && openNeeds !== null ? (
+              openNeeds > 1 ? (
+                <>
+                  <span className="tabular-nums">
+                    {openNeeds.toLocaleString()}
+                  </span>{" "}
+                  people need a donation right now
+                </>
+              ) : (
+                openNeedsHeadline(openNeeds)
+              )
+            ) : status === "error" ? (
+              "Open requests are unavailable right now"
+            ) : (
+              "Checking open requests"
+            )}
           </h1>
           <p className="max-w-lg text-sm leading-relaxed text-white/85 sm:text-base">
             {primary.hint} Blivap matches donors and recipients across Nigeria —
