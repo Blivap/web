@@ -473,11 +473,8 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const emojiWrapRef = useRef<HTMLDivElement>(null);
   const moreWrapRef = useRef<HTMLDivElement>(null);
   const didInitialChatScrollRef = useRef(false);
-  const knownMessageIdsRef = useRef<Set<string>>(new Set());
-  const [motionMessageIds, setMotionMessageIds] = useState<Set<string>>(
-    () => new Set(),
-  );
   const lastChatMessageIdRef = useRef<string | null>(null);
+  const wasTypingRef = useRef(false);
   const newestChatMessageId =
     visibleChatMessages.length > 0
       ? visibleChatMessages[visibleChatMessages.length - 1]!.id
@@ -500,18 +497,19 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [newestChatMessageId]);
 
-  useEffect(() => {
-    const incoming = visibleChatMessages
-      .map((message) => message.id)
-      .filter((id) => !knownMessageIdsRef.current.has(id));
-    const firstPaint = knownMessageIdsRef.current.size === 0;
-    for (const message of visibleChatMessages) {
-      knownMessageIdsRef.current.add(message.id);
+  useLayoutEffect(() => {
+    const el = chatScrollRef.current;
+    const typing = Boolean(donationChat.typingLabel);
+    const started = typing && !wasTypingRef.current;
+    wasTypingRef.current = typing;
+    if (!started || !el) return;
+    if (!didInitialChatScrollRef.current) {
+      el.scrollTop = el.scrollHeight;
+      didInitialChatScrollRef.current = true;
+      return;
     }
-    if (incoming.length === 0) return;
-    const animate = firstPaint ? incoming.slice(-6) : incoming;
-    setMotionMessageIds(new Set(animate));
-  }, [visibleChatMessages]);
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [donationChat.typingLabel]);
 
   useEffect(() => {
     if (!emojiOpen && !moreOpen) return;
@@ -1224,10 +1222,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     );
   }
 
-  const motionOrder = new Map(
-    [...motionMessageIds].map((id, order) => [id, order]),
-  );
-
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
       {!ninOk ? (
@@ -1257,7 +1251,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div
             ref={chatScrollRef}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 sm:px-8"
+            className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 [scrollbar-gutter:auto] sm:px-8"
           >
             {sessionChipDate ? (
               <div className="mb-6 flex justify-center">
@@ -1282,7 +1276,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               </div>
             ) : null}
 
-            {visibleChatMessages.length === 0 ? (
+            {visibleChatMessages.length === 0 && !donationChat.typingLabel ? (
               <p className="animate-in fade-in py-10 text-center text-sm text-text-tertiary duration-300 motion-reduce:animate-none">
                 {chatLocked ? "No messages to show." : "No messages yet."}
               </p>
@@ -1296,25 +1290,13 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                   );
                   const timeLabel = formatChatTime(message.createdAt);
                   const handle = mine ? "(Me)" : peerHandle;
-                  const animate = motionMessageIds.has(message.id);
-                  const motionIndex = motionOrder.get(message.id) ?? 0;
                   return (
                     <div
                       key={message.id}
                       className={cn(
                         "flex",
                         mine ? "justify-end" : "justify-start",
-                        animate &&
-                          "animate-in fade-in slide-in-from-bottom-2 zoom-in-95 duration-300 fill-mode-backwards motion-reduce:animate-none",
                       )}
-                      style={
-                        animate
-                          ? {
-                              animationDelay: `${Math.max(0, motionIndex) * 40}ms`,
-                              animationFillMode: "backwards",
-                            }
-                          : undefined
-                      }
                     >
                       <div
                         className={cn(
@@ -1365,26 +1347,30 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                     </div>
                   );
                 })}
+                {donationChat.typingLabel ? (
+                  <div
+                    key="peer-typing"
+                    className="flex justify-start pb-2"
+                    aria-live="polite"
+                  >
+                    <div className="flex max-w-[min(100%,26rem)] items-start gap-2">
+                      <PartyAvatar src={peerProfileImage} className="mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="mb-1 text-xs text-text-secondary">
+                          {peerHandle} is typing
+                        </p>
+                        <div className="inline-flex items-center gap-1 rounded-xl bg-[#F2F4F6] px-3 py-2 dark:bg-white/8">
+                          <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:0ms] motion-reduce:animate-none" />
+                          <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:120ms] motion-reduce:animate-none" />
+                          <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:240ms] motion-reduce:animate-none" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
-
-          {donationChat.typingLabel ? (
-            <div
-              className="flex shrink-0 items-center gap-2 border-t border-border px-4 py-2 sm:px-6 dark:border-white/10"
-              aria-live="polite"
-            >
-              <PartyAvatar src={peerProfileImage} className="size-6" />
-              <p className="min-w-0 truncate text-xs text-text-secondary">
-                {peerHandle} is typing
-              </p>
-              <span className="inline-flex shrink-0 items-center gap-1" aria-hidden>
-                <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:0ms] motion-reduce:animate-none" />
-                <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:120ms] motion-reduce:animate-none" />
-                <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:240ms] motion-reduce:animate-none" />
-              </span>
-            </div>
-          ) : null}
 
           {ninOk && showCodePath && qrPanelOpen && swapCodeQrUrl ? (
             <div className="flex flex-col items-center gap-2 border-t border-border bg-[#FAFAFB] px-4 py-3 dark:border-white/10 dark:bg-black/25">
