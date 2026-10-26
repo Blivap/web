@@ -67,7 +67,7 @@ export function BookingReportModal({
   }, [bookingId, details, onClose, onSubmit, reason]);
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label="Report booking">
       <div className="w-full max-w-md text-left">
         <h3 className="text-lg font-semibold text-text-primary">
           Report this booking
