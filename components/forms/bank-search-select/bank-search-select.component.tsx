@@ -103,7 +103,6 @@ export function BankSearchSelect({
         aria-expanded={open}
         aria-controls={listId}
         aria-labelledby={label ? labelId : undefined}
-        aria-invalid={error ? true : undefined}
         aria-describedby={
           typeof error === "string" && error ? errorId : undefined
         }
