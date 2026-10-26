@@ -19,8 +19,11 @@ type ToastPhase = "closed" | "open" | "leaving";
 
 export function NotificationToast() {
   const router = useRouter();
-  const { activeToast: current, enqueueToast, dismissActiveToast } =
-    useSnackbar();
+  const {
+    activeToast: current,
+    enqueueToast,
+    dismissActiveToast,
+  } = useSnackbar();
   const [phase, setPhase] = useState<ToastPhase>("closed");
   const [paused, setPaused] = useState(false);
 
@@ -60,9 +63,7 @@ export function NotificationToast() {
   const href = current
     ? resolveNotificationHref(current.type, current.data)
     : null;
-  const presentation = current
-    ? notificationPresentation(current.type)
-    : null;
+  const presentation = current ? notificationPresentation(current.type) : null;
   const Icon = presentation?.Icon;
   const preview = current ? notificationBodyToPlainText(current.body) : "";
 
