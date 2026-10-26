@@ -165,6 +165,7 @@ export function OverviewNotificationsTab() {
                   {notification.href ? (
                     <Link
                       href={notification.href}
+                      prefetch={false}
                       className={rowClassName}
                       onClick={() => {
                         if (!notification.read) {

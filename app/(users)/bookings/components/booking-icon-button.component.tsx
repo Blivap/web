@@ -45,6 +45,7 @@ export function BookingIconButton({
     return (
       <Link
         href={href}
+        prefetch={false}
         className={className}
         title={label}
         aria-label={label}

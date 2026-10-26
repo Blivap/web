@@ -549,6 +549,7 @@ export default function News() {
                         alt={featured.title}
                         className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                         sizes="(max-width: 1280px) 100vw, 60vw"
+                        priority
                       />
                     </div>
                     <div className="flex flex-col gap-3 p-5 sm:p-6">

@@ -9,7 +9,7 @@ import { Formik } from "formik";
 import { useEffect, useMemo, useRef } from "react";
 import { Avatar } from "@/components/ui/Avatar/avatar.component";
 import { useAvatarModal } from "@/hooks/select-avatar/useAvatarModal.hook";
-import { FaPencilAlt } from "react-icons/fa";
+import { Pencil } from "lucide-react";
 import { Button } from "@/components/button/button.component";
 import { buildE164Phone, splitStoredPhone } from "@/lib/phone-country-codes";
 import { useAppDispatch } from "@/store/hooks";
@@ -123,7 +123,7 @@ export default function PersonalInformationPage() {
                         openAvatarModal();
                       }}
                     >
-                      <FaPencilAlt size={12} className="size-3 " />
+                      <Pencil className="size-3" aria-hidden />
                     </Button>
                   </div>
                 </div>

@@ -4,8 +4,7 @@ import { Button } from "@/components/button/button.component";
 import classNames from "classnames";
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
-import { FiBell } from "react-icons/fi";
-import { Check, CheckCheck } from "lucide-react";
+import { Bell, Check, CheckCheck } from "lucide-react";
 import { useNotifications } from "@/hooks/notifications/useNotifications.hook";
 import { formatNotificationTime } from "@/lib/notifications/formatNotificationTime";
 import { useAppSelector } from "@/store/hooks";
@@ -87,9 +86,9 @@ export const NotificationBell = () => {
       {unreadCount > 0 && (
         <span className="absolute top-2 right-2 flex  items-center justify-center rounded-full bg-[#FF0000] size-2 font-semibold leading-none border border-[#FFFFFF] " />
       )}
-      <FiBell
-        size={18}
-        className="stroke-2 text-sm text-[#374151] dark:text-white/85"
+      <Bell
+        className="size-[18px] stroke-2 text-[#374151] dark:text-white/85"
+        aria-hidden
       />
 
       <span

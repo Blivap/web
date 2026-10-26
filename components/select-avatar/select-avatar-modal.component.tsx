@@ -86,6 +86,7 @@ export function SelectAvatarModal() {
                     src={avatar.url}
                     alt="Avatar option"
                     fill
+                    sizes="60px"
                     className="object-cover"
                     unoptimized
                   />
