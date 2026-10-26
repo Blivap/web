@@ -473,10 +473,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const emojiWrapRef = useRef<HTMLDivElement>(null);
   const moreWrapRef = useRef<HTMLDivElement>(null);
   const didInitialChatScrollRef = useRef(false);
-  const knownMessageIdsRef = useRef<Set<string>>(new Set());
-  const [motionMessageIds, setMotionMessageIds] = useState<Set<string>>(
-    () => new Set(),
-  );
   const lastChatMessageIdRef = useRef<string | null>(null);
   const wasTypingRef = useRef(false);
   const newestChatMessageId =
@@ -514,19 +510,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     }
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [donationChat.typingLabel]);
-
-  useEffect(() => {
-    const incoming = visibleChatMessages
-      .map((message) => message.id)
-      .filter((id) => !knownMessageIdsRef.current.has(id));
-    const firstPaint = knownMessageIdsRef.current.size === 0;
-    for (const message of visibleChatMessages) {
-      knownMessageIdsRef.current.add(message.id);
-    }
-    if (incoming.length === 0) return;
-    const animate = firstPaint ? incoming.slice(-6) : incoming;
-    setMotionMessageIds(new Set(animate));
-  }, [visibleChatMessages]);
 
   useEffect(() => {
     if (!emojiOpen && !moreOpen) return;
@@ -1239,10 +1222,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     );
   }
 
-  const motionOrder = new Map(
-    [...motionMessageIds].map((id, order) => [id, order]),
-  );
-
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
       {!ninOk ? (
@@ -1272,7 +1251,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div
             ref={chatScrollRef}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 sm:px-8"
+            className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 [scrollbar-gutter:auto] sm:px-8"
           >
             {sessionChipDate ? (
               <div className="mb-6 flex justify-center">
@@ -1311,25 +1290,13 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                   );
                   const timeLabel = formatChatTime(message.createdAt);
                   const handle = mine ? "(Me)" : peerHandle;
-                  const animate = motionMessageIds.has(message.id);
-                  const motionIndex = motionOrder.get(message.id) ?? 0;
                   return (
                     <div
                       key={message.id}
                       className={cn(
                         "flex",
                         mine ? "justify-end" : "justify-start",
-                        animate &&
-                          "animate-in fade-in slide-in-from-bottom-2 zoom-in-95 duration-300 fill-mode-backwards motion-reduce:animate-none",
                       )}
-                      style={
-                        animate
-                          ? {
-                              animationDelay: `${Math.max(0, motionIndex) * 40}ms`,
-                              animationFillMode: "backwards",
-                            }
-                          : undefined
-                      }
                     >
                       <div
                         className={cn(
