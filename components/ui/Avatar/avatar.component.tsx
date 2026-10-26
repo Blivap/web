@@ -20,7 +20,13 @@ export const Avatar = (
       )}
     >
       {src ? (
-        <Image src={src} alt="Avatar" fill className="object-cover" />
+        <Image
+          src={src}
+          alt="Avatar"
+          fill
+          sizes="44px"
+          className="object-cover"
+        />
       ) : (
         <User />
       )}

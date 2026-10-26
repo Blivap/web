@@ -126,20 +126,24 @@ function DonorCard({
         >
           {donor.location}, {donor.country}
         </p>
-        {bookingBlocked && !isOwner ? (
-          <span
-            className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-lg border border-border bg-[#F4F4F5] px-3 py-1.5 text-[11px] font-medium text-text-tertiary sm:px-4 sm:py-2 sm:text-xs dark:border-white/10 dark:bg-white/8"
-            aria-disabled
-          >
-            Cooling down
-          </span>
-        ) : (
+        {isOwner ? (
           <Link
             href={routeOwner}
+            prefetch={false}
             className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-primary/90 sm:px-4 sm:py-2 sm:text-xs"
           >
-            {!isOwner ? "Book Appointment" : "Settings"}
+            Settings
           </Link>
+        ) : (
+          <Button
+            type="button"
+            size="xs"
+            disabled={bookingBlocked}
+            className="px-3 py-1.5 text-[11px] sm:px-4 sm:py-2 sm:text-xs"
+            {...(bookingBlocked ? {} : { href: routeOwner, prefetch: false })}
+          >
+            Book Appointment
+          </Button>
         )}
       </div>
     </article>

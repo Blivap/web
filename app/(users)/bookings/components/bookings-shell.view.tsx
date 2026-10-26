@@ -169,6 +169,7 @@ function BookingRowMeta({
           alt=""
           width={36}
           height={36}
+          sizes="36px"
           className="size-9 shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
         />
       ) : (

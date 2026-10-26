@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import debounce from "lodash/debounce";
+import { useEffect, useRef, useState } from "react";
 
 export const SEARCH_DEBOUNCE_MS = 400;
 
 /**
- * Lodash-debounced mirror of a rapidly changing value (local filter queries).
+ * Debounced mirror of a rapidly changing value (local filter queries).
  */
 export function useDebouncedValue<T>(
   value: T,
@@ -14,21 +13,16 @@ export function useDebouncedValue<T>(
 ): T {
   const [debounced, setDebounced] = useState(value);
 
-  const debouncedSet = useMemo(
-    () => debounce((next: T) => setDebounced(next), delayMs),
-    [delayMs],
-  );
-
   useEffect(() => {
-    debouncedSet(value);
-    return () => debouncedSet.cancel();
-  }, [value, debouncedSet]);
+    const timeout = window.setTimeout(() => setDebounced(value), delayMs);
+    return () => window.clearTimeout(timeout);
+  }, [value, delayMs]);
 
   return debounced;
 }
 
 /**
- * Local search input with a lodash-debounced commit (URL params, API refetch, etc.).
+ * Local search input with a debounced commit (URL params, API refetch, etc.).
  * Skips commit when the trimmed input already matches `committedValue`.
  */
 export function useDebouncedSearch(

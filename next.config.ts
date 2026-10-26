@@ -1,12 +1,29 @@
 import type { NextConfig } from "next";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const nextConfig: NextConfig = {
-  // Ensure Fast Refresh is enabled
   reactStrictMode: true,
-  // Turbopack can be enabled via --turbo flag instead
-  // This ensures Fast Refresh works properly
-  // Allow any device to access the dev server
   allowedDevOrigins: ["*"],
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? { exclude: ["error", "warn"] }
+        : false,
+  },
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "date-fns",
+      "framer-motion",
+      "radix-ui",
+      "@radix-ui/react-select",
+      "@radix-ui/react-tabs",
+    ],
+  },
 
   // Serve manifest at both URLs (browsers/PWA often request manifest.webmanifest)
   async rewrites() {
@@ -34,4 +51,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

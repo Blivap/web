@@ -6,7 +6,7 @@ import {
   InputHTMLAttributes,
   useState,
 } from "react";
-import { BsEye, BsEyeSlash } from "react-icons/bs";
+import { Eye, EyeOff } from "lucide-react";
 
 type InputProps = {
   name: string;
@@ -84,7 +84,11 @@ export const Input = (props: InputProps) => {
               onClick={() => setTogglePassword((prev) => !prev)}
               className="cursor-pointer text-[#6B7280] transition-colors dark:text-slate-400 pr-4"
             >
-              {toggelePassword ? <BsEye size={16} /> : <BsEyeSlash size={16} />}
+              {toggelePassword ? (
+                <Eye className="size-4" aria-hidden />
+              ) : (
+                <EyeOff className="size-4" aria-hidden />
+              )}
             </button>
           )}
         </div>

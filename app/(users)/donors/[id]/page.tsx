@@ -312,25 +312,21 @@ export default function DonorDetailsPage() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-              {bookingBlocked ? (
-                <p className="text-sm text-text-secondary">
-                  Cooling down. Booking opens when this rest period ends.
-                </p>
-              ) : (
-                <Button
-                  variant="default"
-                  onClick={() =>
-                    router.push(
-                      user?.nationalIdentificationNumberVerified
-                        ? routes.scheduleAppointment(donorId)
-                        : routes.verifyId(donorId),
-                    )
-                  }
-                  className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold"
-                >
-                  Continue
-                </Button>
-              )}
+              <Button
+                type="button"
+                variant="default"
+                disabled={bookingBlocked}
+                onClick={() =>
+                  router.push(
+                    user?.nationalIdentificationNumberVerified
+                      ? routes.scheduleAppointment(donorId)
+                      : routes.verifyId(donorId),
+                  )
+                }
+                className="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold"
+              >
+                Continue
+              </Button>
             </div>
           </div>
         ) : null}

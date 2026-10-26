@@ -35,6 +35,7 @@ export default function AboutBlood() {
                 src="/images/hero_image.jpg"
                 alt="Blood donation"
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover rounded-lg"
               />
             </div>

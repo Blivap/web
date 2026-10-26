@@ -1,4 +1,5 @@
 "use client";
+import dynamic from "next/dynamic";
 import {
   DashBoardIcon,
   WalletIcon,
@@ -16,17 +17,31 @@ import { usePathname } from "next/navigation";
 import { PropsWithChildren, useState, ReactElement } from "react";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 import { NotificationBell } from "../components/feedback/notification/notification.component";
+import { NotificationToast } from "../components/feedback/notification/notification-toast.component";
 import { PushNotificationRegistrar } from "../components/feedback/notification/push-registrar.component";
 import { useNotificationNavigationListener } from "@/hooks/notifications/useNotificationNavigationListener.hook";
 import { Info, Menu } from "lucide-react";
 import { routes } from "@/config/routes";
 import { useThemePreference } from "@/hooks/theme/useThemePreference.hook";
-import { SelectAvatarModal } from "@/components/select-avatar/select-avatar-modal.component";
 import { ProfileAccountMenu } from "./profile-account-menu.component";
 import { Button } from "@/components/button/button.component";
 import { BlivapLogo } from "@/public/svg";
 import { LayoutBreadcrumbs } from "./layout-breadcrumbs.component";
-import { SupportChatButton } from "@/components/support/support-chat-button";
+
+const SupportChatButton = dynamic(
+  () =>
+    import("@/components/support/support-chat-button").then(
+      (mod) => mod.SupportChatButton,
+    ),
+  { ssr: false },
+);
+const SelectAvatarModal = dynamic(
+  () =>
+    import("@/components/select-avatar/select-avatar-modal.component").then(
+      (mod) => mod.SelectAvatarModal,
+    ),
+  { ssr: false },
+);
 
 // Define navigation item structure
 interface NavItem {
@@ -51,6 +66,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
   return (
     <div className="fixed inset-0 flex overflow-hidden overscroll-none bg-[#f8f8f8] transition-colors duration-200 dark:bg-[#0a0a0a]">
       <PushNotificationRegistrar />
+      <NotificationToast />
       <SelectAvatarModal />
       {/* Overlay for mobile when drawer is open */}
 

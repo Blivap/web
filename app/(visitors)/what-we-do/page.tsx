@@ -31,6 +31,7 @@ export default function WhatWeDo() {
                 src="/images/hero_image.jpg"
                 alt="What we do"
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover rounded-lg opacity-90"
               />
             </div>

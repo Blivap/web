@@ -93,13 +93,16 @@ export function donorIsCoolingDown(donor: {
   isInDonationCooldown?: boolean;
   isPermanentDonationBlock?: boolean;
 }): boolean {
+  if (
+    donor.isPermanentDonationBlock === true ||
+    donor.isInDonationCooldown === true
+  ) {
+    return true;
+  }
   if (donor.cooldownEndsAt) {
     return resolveDonorCooldown(donor.cooldownEndsAt).isActive;
   }
-  return (
-    donor.isPermanentDonationBlock === true ||
-    donor.isInDonationCooldown === true
-  );
+  return false;
 }
 
 export function cooldownPartsFromMs(remainingMs: number): CooldownParts {
