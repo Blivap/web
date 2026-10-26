@@ -56,6 +56,7 @@ export function SelectAvatarModal() {
     <Modal
       open={open}
       onClose={() => dispatch(closeAvatarModal())}
+      label="Select avatar"
       className=" w-fit px-6 py-9 sm:px-7 sm:py-10"
     >
       <div className="flex flex-col gap-6 md:gap-8">
