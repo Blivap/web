@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -33,8 +34,20 @@ import {
   BookingsShellSkeleton,
   BookingsSingleList,
 } from "./bookings-shell.view";
-import { BookingReportModal } from "./booking-report-modal.component";
-import { DonationRatingModal } from "./donation-rating-modal.component";
+const BookingReportModal = dynamic(
+  () =>
+    import("./booking-report-modal.component").then(
+      (mod) => mod.BookingReportModal,
+    ),
+  { ssr: false },
+);
+const DonationRatingModal = dynamic(
+  () =>
+    import("./donation-rating-modal.component").then(
+      (mod) => mod.DonationRatingModal,
+    ),
+  { ssr: false },
+);
 
 function rowsById(
   rows: readonly BookingsShellRow[],

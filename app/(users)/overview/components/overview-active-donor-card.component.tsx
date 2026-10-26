@@ -34,7 +34,11 @@ export function OverviewActiveDonorCard({
 
   return (
     <article className="flex flex-col gap-2 rounded-xl border border-border bg-[#FAFAFA] p-4 transition-colors hover:border-primary/20 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:border-primary/25 dark:hover:bg-white/8">
-      <Link href={profileHref} className="group flex min-w-0 items-start gap-3">
+      <Link
+        href={profileHref}
+        prefetch={false}
+        className="group flex min-w-0 items-start gap-3"
+      >
         <Avatar
           className="size-12! shrink-0"
           src={donor.profileImage ?? undefined}
@@ -68,15 +72,7 @@ export function OverviewActiveDonorCard({
         />
       </Link>
 
-      {coolingDown ? (
-        <p className="mt-3 text-xs font-medium text-amber-800 dark:text-amber-200">
-          Cooling down. Booking opens when this rest period ends.
-        </p>
-      ) : isOwner ? (
-        <p className="mt-3 text-xs text-text-tertiary">
-          This is your donor profile
-        </p>
-      ) : null}
+      {isOwner && <p className="mt-3 text-xs text-text-tertiary">( M E )</p>}
 
       <div className="mt-auto">
         {bookingBlocked ? (
@@ -95,6 +91,7 @@ export function OverviewActiveDonorCard({
             size="sm"
             className="w-full mt-auto"
             href={profileHref}
+            prefetch={false}
           >
             Manage profile
           </Button>
@@ -103,6 +100,7 @@ export function OverviewActiveDonorCard({
             size="sm"
             className="w-full mt-auto"
             href={routes.scheduleAppointment(donor.id)}
+            prefetch={false}
           >
             Book appointment
           </Button>

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -28,6 +29,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   loadReceivedBookings,
   loadSentBookings,
+  patchBookingInLists,
 } from "@/store/slices/bookingsSlice";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import QRCode from "react-qr-code";
@@ -48,12 +50,8 @@ import {
   meetupPendingVerifyCodeStorageKey,
   parseCodeFromScannedMeetupPayload,
 } from "@/lib/meetups/meetupVerifyQrUrl";
-import { MeetupQrScanner } from "./meetup-qr-scanner.component";
 import { routes } from "@/config/routes";
-import { DonationRatingModal } from "@/app/(users)/bookings/components/donation-rating-modal.component";
-import { MeetupReportModal } from "./meetup-report-modal.component";
 import { isBookingRatedLocally } from "@/lib/ratings/ratedBookingsStorage";
-import { patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { MeetupPageSkeleton } from "./meetup-page-skeleton.component";
 import { Button } from "@/components/ui/button";
 import { InfoHint } from "@/components/ui/info-hint/info-hint.component";
@@ -66,6 +64,26 @@ import {
 } from "@/lib/bookings/axiosErrorMessage";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import { formatPublicId } from "@/lib/users/formatPublicId";
+
+const MeetupQrScanner = dynamic(
+  () =>
+    import("./meetup-qr-scanner.component").then((mod) => mod.MeetupQrScanner),
+  { ssr: false },
+);
+const DonationRatingModal = dynamic(
+  () =>
+    import("@/app/(users)/bookings/components/donation-rating-modal.component").then(
+      (mod) => mod.DonationRatingModal,
+    ),
+  { ssr: false },
+);
+const MeetupReportModal = dynamic(
+  () =>
+    import("./meetup-report-modal.component").then(
+      (mod) => mod.MeetupReportModal,
+    ),
+  { ssr: false },
+);
 
 const cardClass =
   "rounded-xl border border-border bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#1a1a22]";
@@ -415,24 +433,18 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     if (chatHistoryRefetchRef.current === donationChatBookingId) return;
     chatHistoryRefetchRef.current = donationChatBookingId;
     void donationChat.refetchHistory();
-  }, [
-    donationChat.refetchHistory,
-    donationChatBookingId,
-    donationChatEnabled,
-  ]);
+  }, [donationChat.refetchHistory, donationChatBookingId, donationChatEnabled]);
 
   useEffect(() => {
     if (!donationChatBookingId) return;
 
     const row =
       sentBookings.find((booking) => booking.id === donationChatBookingId) ??
-      receivedBookings.find(
-        (booking) => booking.id === donationChatBookingId,
-      );
+      receivedBookings.find((booking) => booking.id === donationChatBookingId);
     const hasPeerImage = Boolean(
       session?.peer.profileImage ||
-        row?.donorProfileImage ||
-        row?.requesterProfileImage,
+      row?.donorProfileImage ||
+      row?.requesterProfileImage,
     );
     const hasMeetupCode = Boolean(
       normalizeMeetupSixDigitCode(row?.meetingCode),

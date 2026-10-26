@@ -38,6 +38,7 @@ export default function AboutDonating() {
                 src="/images/africa-humanitarian-aid-doctor-taking-care-patient.png"
                 alt="Donation"
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover rounded-lg"
               />
             </div>

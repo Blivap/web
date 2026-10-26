@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Geist, Geist_Mono, Inter, Poppins } from "next/font/google";
+import { Geist_Mono, Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "@/styles/globals.css";
@@ -14,25 +14,18 @@ import { AuthChecker } from "@/components/auth/auth-checker";
 import { AuthRoutesPrefetch } from "@/components/auth/auth-routes-prefetch";
 import { ApiConnectivityGate } from "@/components/feedback/api-connectivity/api-connectivity-gate.component";
 import { BlivapLogo } from "@/public/svg";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import { WebVitals } from "@/components/analytics/web-vitals";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-});
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
+  display: "swap",
 });
 const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-poppins",
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const helvetica = localFont({
@@ -90,6 +83,18 @@ const themeBootstrapScript = `
 `;
 
 const siteUrl = getSiteOrigin();
+
+function resourceOrigin(url: string): string | null {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
+const apiOrigin = resourceOrigin(config.apiUrl);
+const preconnectApi =
+  apiOrigin && apiOrigin !== resourceOrigin(siteUrl) ? apiOrigin : null;
 const ogImageUrl = new URL("/og.png", siteUrl).toString();
 
 export const viewport: Viewport = {
@@ -238,11 +243,20 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="apple-mobile-web-app-title" content="Blivap" />
+        {preconnectApi ? (
+          <>
+            <link rel="preconnect" href={preconnectApi} crossOrigin="" />
+            <link rel="dns-prefetch" href={preconnectApi} />
+          </>
+        ) : null}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
       <body
-        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${helvetica.variable}  antialiased text-sm min-h-screen w-full`}
+        className={`${geistMono.variable} ${poppins.variable} ${helvetica.variable} antialiased text-sm min-h-screen w-full`}
       >
+        <WebVitals />
         <ThemePreferenceProvider>
           <StoreProvider>
             <AuthRoutesPrefetch />

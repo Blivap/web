@@ -1,15 +1,37 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { usePublicLanding } from "@/hooks/public/usePublicSite.hooks";
 import { HomeLayout } from "../../layout/home.layout.component";
 import { HomeClassicOpeningSection } from "./sections/home-classic-opening.section";
 import { HomeHeroSection } from "./sections/home-hero.section";
 import { HomeImpactTickerSection } from "./sections/home-impact-ticker.section";
-import { HomeHowItWorksSection } from "./sections/home-how-it-works.section";
-import { HomeWhyBlivapSection } from "./sections/home-why-blivap.section";
-import { HomeCoverageMapSection } from "./sections/home-coverage-map.section";
-import { HomeTestimonialsSection } from "./sections/home-testimonials.section";
-import { HomeDownloadCtaSection } from "./sections/home-download-cta.section";
+
+const HomeHowItWorksSection = dynamic(() =>
+  import("./sections/home-how-it-works.section").then(
+    (mod) => mod.HomeHowItWorksSection,
+  ),
+);
+const HomeWhyBlivapSection = dynamic(() =>
+  import("./sections/home-why-blivap.section").then(
+    (mod) => mod.HomeWhyBlivapSection,
+  ),
+);
+const HomeCoverageMapSection = dynamic(() =>
+  import("./sections/home-coverage-map.section").then(
+    (mod) => mod.HomeCoverageMapSection,
+  ),
+);
+const HomeTestimonialsSection = dynamic(() =>
+  import("./sections/home-testimonials.section").then(
+    (mod) => mod.HomeTestimonialsSection,
+  ),
+);
+const HomeDownloadCtaSection = dynamic(() =>
+  import("./sections/home-download-cta.section").then(
+    (mod) => mod.HomeDownloadCtaSection,
+  ),
+);
 
 export const HomeComponent = () => {
   const { landing, status } = usePublicLanding();

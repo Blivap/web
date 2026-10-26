@@ -17,10 +17,14 @@ export function resolveNotificationHref(
   const bookingId = str(d.bookingId);
   const donorId = str(d.donorId);
   const bloodRequestId = str(d.bloodRequestId);
-  const directUrl = str(d.url);
+  const sessionId = str(d.sessionId) ?? str(d.meetupSessionId);
+  const directUrl = str(d.url) ?? str(d.href) ?? str(d.path);
 
-  if (directUrl?.startsWith("/")) {
+  if (directUrl?.startsWith("/") && !directUrl.startsWith("//")) {
     return directUrl;
+  }
+  if (sessionId) {
+    return `/bookings/meetup/${encodeURIComponent(sessionId)}`;
   }
 
   switch (type) {

@@ -62,6 +62,8 @@ type ButtonAsLinkProps = ButtonVariantProps &
     href: string;
     asChild?: never;
     loading?: boolean;
+    /** Next.js viewport prefetch. Pass false on long lists of rarely used links. */
+    prefetch?: boolean;
   };
 
 type ButtonProps = ButtonAsButtonProps | ButtonAsLinkProps;
@@ -112,7 +114,7 @@ function Button({
     size === "icon-lg";
 
   if ("href" in props && props.href !== undefined) {
-    const { href, children, ...anchorProps } = props;
+    const { href, children, prefetch, ...anchorProps } = props;
     const linkClassName = cn(
       buttonVariants({ variant, size, className }),
       variant === "default" || variant === "primary"
@@ -161,7 +163,7 @@ function Button({
           data-variant={variant}
           data-size={size}
           href={href}
-          prefetch
+          prefetch={prefetch}
           className={linkClassName}
         >
           {children}

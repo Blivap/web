@@ -139,7 +139,7 @@ export default function OverviewPage() {
                 <div className="flex min-w-0 flex-col gap-0.5 sm:border-l sm:border-border sm:pl-6 dark:border-white/10">
                   <span className="text-text-secondary">Cooldown</span>
                   {myCooldownEndsAt === undefined ? (
-                    <Skeleton className="w-40 h-6 rounded-full" />
+                    <Skeleton className="size-8 rounded-full" />
                   ) : (
                     <DonorCooldownDisplay
                       cooldownEndsAt={myCooldownEndsAt}
