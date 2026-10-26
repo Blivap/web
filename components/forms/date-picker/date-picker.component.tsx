@@ -357,7 +357,6 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               aria-expanded={open}
               aria-controls={listboxId}
               aria-labelledby={label ? `${labelId} ${valueId}` : valueId}
-              aria-invalid={error ? true : undefined}
               aria-describedby={
                 typeof error === "string" && error ? errorId : undefined
               }
@@ -613,7 +612,11 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
           ) : null}
 
           {typeof error === "string" && error ? (
-            <span id={errorId} className="text-red-500 text-[10px]" role="alert">
+            <span
+              id={errorId}
+              className="text-red-500 text-[10px]"
+              role="alert"
+            >
               {error}
             </span>
           ) : null}
