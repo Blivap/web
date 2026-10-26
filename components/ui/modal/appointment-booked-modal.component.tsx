@@ -48,6 +48,7 @@ export function AppointmentBookedModal({
     <Modal
       open={open}
       onClose={onClose}
+      label="Appointment booked"
       className="max-w-lg px-6 py-9 sm:px-10 sm:py-10"
       closeOnBackdropClick={false}
     >

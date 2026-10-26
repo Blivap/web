@@ -22,13 +22,7 @@ export const Avatar = (
       )}
     >
       {src ? (
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          sizes="44px"
-          className="object-cover"
-        />
+        <Image src={src} alt={alt} fill sizes="44px" className="object-cover" />
       ) : (
         <User aria-hidden />
       )}

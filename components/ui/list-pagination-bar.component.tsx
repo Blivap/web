@@ -1,10 +1,7 @@
 "use client";
 
 import { PageSizeSelect } from "@/components/ui/page-size-select.component";
-import {
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { PaginationControls } from "@/components/ui/pagination-controls.component";
 import { cn } from "@/lib/utils";
 
@@ -50,9 +47,7 @@ export function ListPaginationBar({
             Page{" "}
             <span className="font-semibold text-text-primary">{safePage}</span>{" "}
             of{" "}
-            <span className="font-semibold text-text-primary">
-              {safeTotal}
-            </span>
+            <span className="font-semibold text-text-primary">{safeTotal}</span>
           </p>
           <PaginationNext
             aria-label="Next page"

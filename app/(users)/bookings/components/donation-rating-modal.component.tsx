@@ -53,7 +53,7 @@ export function DonationRatingModal({
   }, [score, comment, submitRating, bookingId, onSuccess, onClose]);
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} label="Rate your donation">
       <div className="w-full max-w-md text-left">
         <h3 className="text-lg font-semibold text-text-primary">
           Rate your donation experience

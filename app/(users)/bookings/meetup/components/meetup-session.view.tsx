@@ -1719,6 +1719,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       <Modal
         open={terminateAlertOpen}
         onClose={() => onTerminateDialogOpenChange(false)}
+        label="Terminate meetup"
         className="w-full max-w-lg items-stretch px-0 py-0 pr-0 sm:pr-0"
       >
         <div className="w-full p-6">

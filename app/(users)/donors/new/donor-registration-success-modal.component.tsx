@@ -34,6 +34,7 @@ export function DonorRegistrationSuccessModal({
     <Modal
       open={open}
       onClose={onClose}
+      label="Donor registration complete"
       className="max-w-2xl overflow-hidden px-0! py-0!"
       closeOnBackdropClick={false}
     >
