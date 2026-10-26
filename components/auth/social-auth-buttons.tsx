@@ -87,9 +87,6 @@ export function SocialAuthButtons({ enabled = true }: SocialAuthButtonsProps) {
           );
         })}
       </div>
-      <p className="max-w-xs text-center text-xs text-text-tertiary">
-        Apple and Facebook sign-in are under construction.
-      </p>
     </div>
   );
 }

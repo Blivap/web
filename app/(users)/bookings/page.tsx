@@ -20,7 +20,7 @@ function BookingsContent() {
 export default function BookingsPage() {
   return (
     <Layout>
-      <div className="flex min-h-0 flex-col">
+      <div className="flex w-full shrink-0 flex-col pb-10">
         <Suspense fallback={<BookingsShellSkeleton />}>
           <BookingsContent />
         </Suspense>

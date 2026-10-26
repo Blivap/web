@@ -24,7 +24,7 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
           <input
             ref={ref}
             type="radio"
-            className="peer sr-only hidden"
+            className="peer sr-only"
             {...inputProps}
           />
           <span

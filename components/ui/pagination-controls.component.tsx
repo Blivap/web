@@ -65,16 +65,12 @@ export function PaginationControls({
   );
 
   return (
-    <Pagination
-      className={cn(
-        "mx-0 w-full min-w-0 shrink-0 sm:ms-auto sm:w-auto sm:justify-end",
-        className,
-      )}
-    >
-      <PaginationContent className="flex-wrap justify-center gap-1 sm:justify-end">
+    <Pagination className={cn("mx-0 w-auto shrink-0 justify-end", className)}>
+      <PaginationContent className="flex-wrap justify-end gap-1">
         <PaginationItem>
           <PaginationPrevious
             aria-label="Previous page"
+            className="size-8 p-0"
             disabled={!canGoPrevious || disabled}
             onClick={() => onPageChange(Math.max(1, safePage - 1))}
           />
@@ -82,11 +78,11 @@ export function PaginationControls({
         {totalPages > 1
           ? pageItems.map((item, idx) =>
               item === "ellipsis" ? (
-                <PaginationItem key={`e-${idx}`}>
+                <PaginationItem key={`e-${idx}`} className="max-sm:hidden">
                   <PaginationEllipsis />
                 </PaginationItem>
               ) : (
-                <PaginationItem key={`page-${item}`}>
+                <PaginationItem key={`page-${item}`} className="max-sm:hidden">
                   <PaginationLink
                     aria-label={`Page ${item}`}
                     isActive={item === safePage}
@@ -102,6 +98,7 @@ export function PaginationControls({
         <PaginationItem>
           <PaginationNext
             aria-label="Next page"
+            className="size-8 p-0"
             disabled={!canGoNext || disabled}
             onClick={() => onPageChange(Math.min(totalPages, safePage + 1))}
           />
