@@ -104,14 +104,15 @@ function partyHandle(publicId?: string | null): string {
   return formatPublicId(publicId) ?? "";
 }
 
-function publicIdFromProfileBody(body: unknown): string | null {
+function profileRecord(body: unknown): Record<string, unknown> | null {
   const root = unwrapApiRecord(body);
-  const record =
-    root && typeof root === "object"
-      ? (root as Record<string, unknown>)
-      : body && typeof body === "object"
-        ? (body as Record<string, unknown>)
-        : null;
+  if (root && typeof root === "object") return root as Record<string, unknown>;
+  if (body && typeof body === "object") return body as Record<string, unknown>;
+  return null;
+}
+
+function publicIdFromProfileBody(body: unknown): string | null {
+  const record = profileRecord(body);
   if (!record) return null;
   const direct = formatPublicId(
     typeof record.publicId === "string"
@@ -131,6 +132,19 @@ function publicIdFromProfileBody(body: unknown): string | null {
         ? nested.public_id
         : null,
   );
+}
+
+function profileImageFromProfileBody(body: unknown): string | null {
+  const record = profileRecord(body);
+  if (!record) return null;
+  const raw =
+    record.profileImageUrl ??
+    record.profile_image_url ??
+    record.profileImage ??
+    record.profile_image ??
+    record.avatarUrl ??
+    record.avatar;
+  return typeof raw === "string" && raw.trim() ? raw.trim() : null;
 }
 
 /** Server posts this when a request is accepted. It is not a user message. */
@@ -246,8 +260,8 @@ function PartyAvatar({
   src?: string | null;
   className?: string;
 }) {
-  const [failed, setFailed] = useState(false);
-  const showImage = Boolean(src) && !failed;
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const showImage = Boolean(src) && failedSrc !== src;
 
   return (
     <span
@@ -264,7 +278,7 @@ function PartyAvatar({
           src={src!}
           alt=""
           className="size-full object-cover"
-          onError={() => setFailed(true)}
+          onError={() => setFailedSrc(src ?? null)}
         />
       ) : (
         <UserRound className="size-4" />
@@ -393,6 +407,48 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   }, [user?.id, session]);
 
   const canPromptRequesterRating = isRequester === true && !isDonorViewer;
+  const chatHistoryRefetchRef = useRef<string | null>(null);
+  const bookingHydrateRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!donationChatEnabled || !donationChatBookingId) return;
+    if (chatHistoryRefetchRef.current === donationChatBookingId) return;
+    chatHistoryRefetchRef.current = donationChatBookingId;
+    void donationChat.refetchHistory();
+  }, [
+    donationChat.refetchHistory,
+    donationChatBookingId,
+    donationChatEnabled,
+  ]);
+
+  useEffect(() => {
+    if (!donationChatBookingId) return;
+
+    const row =
+      sentBookings.find((booking) => booking.id === donationChatBookingId) ??
+      receivedBookings.find(
+        (booking) => booking.id === donationChatBookingId,
+      );
+    const hasPeerImage = Boolean(
+      session?.peer.profileImage ||
+        row?.donorProfileImage ||
+        row?.requesterProfileImage,
+    );
+    const hasMeetupCode = Boolean(
+      normalizeMeetupSixDigitCode(row?.meetingCode),
+    );
+    if (hasPeerImage && hasMeetupCode) return;
+    if (bookingHydrateRef.current === donationChatBookingId) return;
+    bookingHydrateRef.current = donationChatBookingId;
+    void dispatch(loadSentBookings({ silent: true }));
+    void dispatch(loadReceivedBookings({ silent: true }));
+  }, [
+    donationChatBookingId,
+    dispatch,
+    receivedBookings,
+    sentBookings,
+    session?.peer.profileImage,
+  ]);
 
   const sortedChatMessages = useMemo(() => {
     return [...donationChat.messages].sort((a, b) => {
@@ -1010,14 +1066,27 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const [resolvedPeerPublicId, setResolvedPeerPublicId] = useState<
     string | null
   >(null);
+  const [resolvedPeerProfile, setResolvedPeerProfile] = useState<{
+    userId: string;
+    image: string;
+  } | null>(null);
+  const resolvedPeerProfileImage =
+    resolvedPeerProfile?.userId === peerUserId.trim()
+      ? resolvedPeerProfile.image
+      : null;
+  const bookingPeerProfileImage =
+    isRequester === true
+      ? bookingRow?.donorProfileImage
+      : isRequester === false
+        ? bookingRow?.requesterProfileImage
+        : (bookingRow?.donorProfileImage ?? bookingRow?.requesterProfileImage);
 
   useEffect(() => {
-    if (
-      partyHandle(peerPublicIdFromSession) ||
-      partyHandle(peerPublicIdFromChat)
-    ) {
-      return;
-    }
+    const needsPublicId =
+      !partyHandle(peerPublicIdFromSession) &&
+      !partyHandle(peerPublicIdFromChat);
+    const needsImage = !bookingPeerProfileImage;
+    if (!needsPublicId && !needsImage) return;
     const id = peerUserId.trim();
     if (!id) return;
     let cancelled = false;
@@ -1025,8 +1094,14 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       try {
         const { status, data } = await $api.donors.publicByUserId(id);
         if (cancelled || status < 200 || status >= 300) return;
-        const publicId = publicIdFromProfileBody(data);
-        if (publicId) setResolvedPeerPublicId(publicId);
+        if (needsPublicId) {
+          const publicId = publicIdFromProfileBody(data);
+          if (publicId) setResolvedPeerPublicId(publicId);
+        }
+        if (needsImage) {
+          const image = profileImageFromProfileBody(data);
+          if (image) setResolvedPeerProfile({ userId: id, image });
+        }
       } catch {
         /* public profile may be unavailable for non-donors */
       }
@@ -1034,7 +1109,12 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     return () => {
       cancelled = true;
     };
-  }, [peerPublicIdFromSession, peerPublicIdFromChat, peerUserId]);
+  }, [
+    bookingPeerProfileImage,
+    peerPublicIdFromSession,
+    peerPublicIdFromChat,
+    peerUserId,
+  ]);
 
   const peerHandle =
     partyHandle(peerPublicIdFromSession) ||
@@ -1042,11 +1122,10 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     partyHandle(resolvedPeerPublicId) ||
     "Other person";
   const peerProfileImage =
-    isRequester === true
-      ? bookingRow?.donorProfileImage
-      : isRequester === false
-        ? bookingRow?.requesterProfileImage
-        : (bookingRow?.donorProfileImage ?? bookingRow?.requesterProfileImage);
+    session?.peer.profileImage ||
+    bookingPeerProfileImage ||
+    resolvedPeerProfileImage ||
+    undefined;
   const sessionChipDate = formatSessionChipDate(
     session?.scheduledAt ??
       sortedChatMessages[0]?.createdAt ??

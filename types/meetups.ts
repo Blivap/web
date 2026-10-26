@@ -10,6 +10,8 @@ export type MeetupParticipant = {
   userId?: string;
   /** Anonymous 8-character handle when returned on `me` / `peer`. */
   publicId?: string;
+  /** Profile photo when the session payload includes it. */
+  profileImage?: string | null;
   /** Present when API labels the current user’s role in the meetup. */
   role?: string;
   /** This participant’s six-digit meetup code (when returned on `me` / `peer`). */

@@ -35,6 +35,14 @@ export function MeetupPageSkeleton() {
           </div>
 
           <div className="border-t border-border px-4 py-4 sm:px-6 dark:border-white/10">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2">
+                <Sk className="size-6 shrink-0 rounded-full" />
+                <Sk className="hidden h-4 w-24 sm:block" />
+                <Sk className="hidden h-5 w-12 rounded-full sm:block" />
+              </div>
+              <Sk className="h-6 w-[4.5rem] shrink-0 rounded-full" />
+            </div>
             <div className="rounded-xl border border-[#C5CDD6] bg-white p-3 dark:border-white/15 dark:bg-[#111118]">
               <Sk className="h-16 w-full bg-transparent" />
               <div className="mt-2 flex items-center justify-end gap-1.5">
