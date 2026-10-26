@@ -1282,7 +1282,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
               </div>
             ) : null}
 
-            {visibleChatMessages.length === 0 && !donationChat.typingLabel ? (
+            {visibleChatMessages.length === 0 ? (
               <p className="animate-in fade-in py-10 text-center text-sm text-text-tertiary duration-300 motion-reduce:animate-none">
                 {chatLocked ? "No messages to show." : "No messages yet."}
               </p>
@@ -1365,30 +1365,26 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                     </div>
                   );
                 })}
-                {donationChat.typingLabel ? (
-                  <div
-                    key="peer-typing"
-                    className="flex justify-start"
-                    aria-live="polite"
-                  >
-                    <div className="flex max-w-[min(100%,26rem)] items-start gap-2">
-                      <PartyAvatar src={peerProfileImage} className="mt-0.5" />
-                      <div className="min-w-0">
-                        <p className="mb-1 text-xs text-text-secondary">
-                          {peerHandle} is typing
-                        </p>
-                        <div className="inline-flex items-center gap-1 rounded-xl bg-[#F2F4F6] px-3 py-2 dark:bg-white/8">
-                          <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:0ms] motion-reduce:animate-none" />
-                          <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:120ms] motion-reduce:animate-none" />
-                          <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:240ms] motion-reduce:animate-none" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
               </div>
             )}
           </div>
+
+          {donationChat.typingLabel ? (
+            <div
+              className="flex shrink-0 items-center gap-2 border-t border-border px-4 py-2 sm:px-6 dark:border-white/10"
+              aria-live="polite"
+            >
+              <PartyAvatar src={peerProfileImage} className="size-6" />
+              <p className="min-w-0 truncate text-xs text-text-secondary">
+                {peerHandle} is typing
+              </p>
+              <span className="inline-flex shrink-0 items-center gap-1" aria-hidden>
+                <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:0ms] motion-reduce:animate-none" />
+                <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:120ms] motion-reduce:animate-none" />
+                <span className="size-1.5 animate-bounce rounded-full bg-text-tertiary [animation-delay:240ms] motion-reduce:animate-none" />
+              </span>
+            </div>
+          ) : null}
 
           {ninOk && showCodePath && qrPanelOpen && swapCodeQrUrl ? (
             <div className="flex flex-col items-center gap-2 border-t border-border bg-[#FAFAFB] px-4 py-3 dark:border-white/10 dark:bg-black/25">
