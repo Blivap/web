@@ -19,6 +19,7 @@ type PageSizeSelectProps = {
   disabled?: boolean;
   options?: readonly number[];
   className?: string;
+  triggerClassName?: string;
 };
 
 export function PageSizeSelect({
@@ -27,15 +28,11 @@ export function PageSizeSelect({
   disabled = false,
   options = PAGE_SIZE_OPTIONS,
   className,
+  triggerClassName,
 }: PageSizeSelectProps) {
   return (
-    <div
-      className={cn(
-        "flex items-center justify-center gap-2 sm:justify-start",
-        className,
-      )}
-    >
-      <span className="text-xs text-text-secondary whitespace-nowrap">
+    <div className={cn("flex items-center gap-1.5 sm:gap-2", className)}>
+      <span className="text-xs whitespace-nowrap text-text-secondary">
         Per page
       </span>
       <Select
@@ -45,7 +42,10 @@ export function PageSizeSelect({
       >
         <SelectTrigger
           aria-label="Items per page"
-          className="h-8 w-[4.75rem] border-border bg-white text-xs shadow-none dark:border-white/10 dark:bg-[#1a1a22]"
+          className={cn(
+            "h-8 w-[4.75rem] border-border bg-white text-xs shadow-none dark:border-white/10 dark:bg-[#1a1a22]",
+            triggerClassName,
+          )}
         >
           <SelectValue />
         </SelectTrigger>

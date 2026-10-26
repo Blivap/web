@@ -7,59 +7,66 @@ import {
   markNotificationRead,
   subscribeNotificationToasts,
 } from "@/lib/notifications/notificationInboxStore";
-import type { InAppNotification } from "@/types/notifications";
+import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const VISIBLE_MS = 5600;
-const SLIDE_MS = 480;
+const SLIDE_MS = 500;
+
+type ToastPhase = "closed" | "open" | "leaving";
 
 export function NotificationToast() {
   const router = useRouter();
-  const [queue, setQueue] = useState<InAppNotification[]>([]);
-  const [current, setCurrent] = useState<InAppNotification | null>(null);
-  const [shown, setShown] = useState(false);
+  const { activeToast: current, enqueueToast, dismissActiveToast } =
+    useSnackbar();
+  const [phase, setPhase] = useState<ToastPhase>("closed");
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    return subscribeNotificationToasts((notification) => {
-      setQueue((items) =>
-        items.some((item) => item.id === notification.id)
-          ? items
-          : [...items, notification],
-      );
-    });
-  }, []);
+    return subscribeNotificationToasts(enqueueToast);
+  }, [enqueueToast]);
 
   useEffect(() => {
-    if (current || queue.length === 0) return;
-    const [next, ...rest] = queue;
-    setQueue(rest);
-    setCurrent(next ?? null);
-    setShown(false);
-    const frame = requestAnimationFrame(() => setShown(true));
+    if (!current || phase !== "closed") return;
+    // Paint the off-screen position first, then slide in.
+    const frame = requestAnimationFrame(() => setPhase("open"));
     return () => cancelAnimationFrame(frame);
-  }, [current, queue]);
+  }, [current, phase]);
 
   const dismiss = useCallback(() => {
-    setShown(false);
     setPaused(false);
-    window.setTimeout(() => setCurrent(null), SLIDE_MS);
+    setPhase((currentPhase) =>
+      currentPhase === "open" ? "leaving" : currentPhase,
+    );
   }, []);
 
   useEffect(() => {
-    if (!current || !shown || paused) return;
+    if (phase !== "leaving") return;
+    const id = window.setTimeout(() => {
+      dismissActiveToast();
+      setPhase("closed");
+    }, SLIDE_MS);
+    return () => window.clearTimeout(id);
+  }, [dismissActiveToast, phase]);
+
+  useEffect(() => {
+    if (!current || phase !== "open" || paused) return;
     const id = window.setTimeout(dismiss, VISIBLE_MS);
     return () => window.clearTimeout(id);
-  }, [current, shown, paused, dismiss]);
+  }, [current, phase, paused, dismiss]);
 
-  if (!current) return null;
+  const href = current
+    ? resolveNotificationHref(current.type, current.data)
+    : null;
+  const presentation = current
+    ? notificationPresentation(current.type)
+    : null;
+  const Icon = presentation?.Icon;
+  const preview = current ? notificationBodyToPlainText(current.body) : "";
 
-  const href = resolveNotificationHref(current.type, current.data);
-  const presentation = notificationPresentation(current.type);
-  const Icon = presentation.Icon;
-  const preview = notificationBodyToPlainText(current.body);
+  if (!current || !Icon || !presentation) return null;
 
   const open = () => {
     if (!current.readAt) void markNotificationRead(current.id);
@@ -71,9 +78,10 @@ export function NotificationToast() {
     <div
       className={cn(
         "pointer-events-none fixed inset-x-0 top-0 z-[80] flex justify-center px-3",
-        "transition-transform duration-500 ease-out motion-reduce:transition-none",
-        shown ? "translate-y-[4.5rem]" : "-translate-y-full",
+        "transition-transform ease-out motion-reduce:transition-none",
+        phase === "open" ? "translate-y-3" : "-translate-y-full",
       )}
+      style={{ transitionDuration: `${SLIDE_MS}ms` }}
     >
       <div
         role="status"

@@ -428,12 +428,14 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   const chatHistoryRefetchRef = useRef<string | null>(null);
   const bookingHydrateRef = useRef<string | null>(null);
 
+  const refetchChatHistory = donationChat.refetchHistory;
+
   useEffect(() => {
     if (!donationChatEnabled || !donationChatBookingId) return;
     if (chatHistoryRefetchRef.current === donationChatBookingId) return;
     chatHistoryRefetchRef.current = donationChatBookingId;
-    void donationChat.refetchHistory();
-  }, [donationChat.refetchHistory, donationChatBookingId, donationChatEnabled]);
+    void refetchChatHistory();
+  }, [refetchChatHistory, donationChatBookingId, donationChatEnabled]);
 
   useEffect(() => {
     if (!donationChatBookingId) return;

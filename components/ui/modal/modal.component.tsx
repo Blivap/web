@@ -16,6 +16,8 @@ export type ModalProps = {
   children: ReactNode;
   className?: string;
   closeOnBackdropClick?: boolean;
+  /** Name announced when the dialog opens. */
+  label: string;
 };
 
 export function Modal({
@@ -24,6 +26,7 @@ export function Modal({
   children,
   className,
   closeOnBackdropClick = true,
+  label,
 }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -111,6 +114,7 @@ export function Modal({
   return (
     <dialog
       ref={dialogRef}
+      aria-label={label}
       className={classNames(
         "fixed inset-0 z-[140] m-0 h-full max-h-none w-full max-w-none border-0 bg-transparent p-0",
       )}

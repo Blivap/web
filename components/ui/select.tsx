@@ -65,8 +65,11 @@ function SelectContent({
         position={position}
         {...props}
       >
-        <SelectPrimitive.ScrollUpButton className="flex cursor-default items-center justify-center py-1">
-          <ChevronUp className="size-4" />
+        <SelectPrimitive.ScrollUpButton
+          aria-label="Scroll up"
+          className="flex cursor-default items-center justify-center py-1"
+        >
+          <ChevronUp className="size-4" aria-hidden />
         </SelectPrimitive.ScrollUpButton>
         <SelectPrimitive.Viewport
           className={cn(
@@ -77,8 +80,11 @@ function SelectContent({
         >
           {children}
         </SelectPrimitive.Viewport>
-        <SelectPrimitive.ScrollDownButton className="flex cursor-default items-center justify-center py-1">
-          <ChevronDown className="size-4" />
+        <SelectPrimitive.ScrollDownButton
+          aria-label="Scroll down"
+          className="flex cursor-default items-center justify-center py-1"
+        >
+          <ChevronDown className="size-4" aria-hidden />
         </SelectPrimitive.ScrollDownButton>
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>

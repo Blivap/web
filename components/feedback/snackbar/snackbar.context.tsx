@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import type { InAppNotification } from "@/types/notifications";
 import { SnackbarSeverity } from "./snackbar.component";
 
 export interface SnackbarState {
@@ -17,14 +18,21 @@ export interface SnackbarState {
   duration?: number;
 }
 
+type ScreenNotice =
+  | { kind: "snackbar"; snackbar: SnackbarState }
+  | { kind: "toast"; notification: InAppNotification };
+
 interface SnackbarContextType {
   snackbar: SnackbarState | null;
+  activeToast: InAppNotification | null;
   showSnackbar: (
     message: string,
     severity?: SnackbarSeverity,
     duration?: number,
   ) => void;
   hideSnackbar: () => void;
+  enqueueToast: (notification: InAppNotification) => void;
+  dismissActiveToast: () => void;
 }
 
 const SnackbarContext = createContext<SnackbarContextType | undefined>(
@@ -32,8 +40,11 @@ const SnackbarContext = createContext<SnackbarContextType | undefined>(
 );
 
 export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
-  const [snackbar, setSnackbar] = useState<SnackbarState | null>(null);
+  const [notices, setNotices] = useState<ScreenNotice[]>([]);
   const nextIdRef = useRef(1);
+  const head = notices[0] ?? null;
+  const snackbar = head?.kind === "snackbar" ? head.snackbar : null;
+  const activeToast = head?.kind === "toast" ? head.notification : null;
 
   const showSnackbar = useCallback(
     (
@@ -41,23 +52,60 @@ export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
       severity: SnackbarSeverity = "info",
       duration: number = 3000,
     ) => {
-      setSnackbar({
-        id: nextIdRef.current++,
-        message,
-        severity,
-        duration,
-      });
+      const notice: ScreenNotice = {
+        kind: "snackbar",
+        snackbar: {
+          id: nextIdRef.current++,
+          message,
+          severity,
+          duration,
+        },
+      };
+      setNotices((items) => [...items, notice]);
     },
     [],
   );
 
   const hideSnackbar = useCallback(() => {
-    setSnackbar(null);
+    setNotices((items) =>
+      items[0]?.kind === "snackbar" ? items.slice(1) : items,
+    );
+  }, []);
+
+  const enqueueToast = useCallback((notification: InAppNotification) => {
+    setNotices((items) =>
+      items.some(
+        (item) =>
+          item.kind === "toast" && item.notification.id === notification.id,
+      )
+        ? items
+        : [...items, { kind: "toast", notification }],
+    );
+  }, []);
+
+  const dismissActiveToast = useCallback(() => {
+    setNotices((items) =>
+      items[0]?.kind === "toast" ? items.slice(1) : items,
+    );
   }, []);
 
   const value = useMemo(
-    () => ({ snackbar, showSnackbar, hideSnackbar }),
-    [snackbar, showSnackbar, hideSnackbar],
+    () => ({
+      snackbar,
+      activeToast,
+      showSnackbar,
+      hideSnackbar,
+      enqueueToast,
+      dismissActiveToast,
+    }),
+    [
+      snackbar,
+      activeToast,
+      showSnackbar,
+      hideSnackbar,
+      enqueueToast,
+      dismissActiveToast,
+    ],
   );
 
   return (

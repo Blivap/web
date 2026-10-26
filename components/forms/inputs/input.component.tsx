@@ -1,9 +1,12 @@
+"use client";
+
 import classNames from "classnames";
 import {
   ChangeEventHandler,
   DetailedHTMLProps,
   FocusEventHandler,
   InputHTMLAttributes,
+  useId,
   useState,
 } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -24,6 +27,7 @@ type InputProps = {
 } & DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export const Input = (props: InputProps) => {
   const [toggelePassword, setTogglePassword] = useState(false);
+  const generatedId = useId();
   const {
     name,
     error,
@@ -37,20 +41,25 @@ export const Input = (props: InputProps) => {
     inputClassName,
     containerClassName,
     icon,
+    id,
     ...rest
   } = props;
+  const inputId = id ?? generatedId;
+  const errorId = `${inputId}-error`;
+  const errorText = typeof error === "string" ? error : "";
   return (
     <div
       className={classNames("flex flex-col gap-2 w-full", containerClassName)}
     >
-      <p
+      <label
+        htmlFor={inputId}
         className={classNames(
           "text-xs font-medium text-[#9794AA] dark:text-slate-400",
           labelClassName,
         )}
       >
         {label}
-      </p>
+      </label>
       <div className="grid gap-px">
         <div
           className={classNames(
@@ -58,7 +67,11 @@ export const Input = (props: InputProps) => {
             { "border-red-500": error },
           )}
         >
-          {icon && <div className="pl-4">{icon}</div>}
+          {icon && (
+            <div className="pl-4" aria-hidden>
+              {icon}
+            </div>
+          )}
           <input
             className={classNames(
               "w-full bg-transparent py-2.5 px-4 text-base font-medium text-[#100F14] outline-none placeholder:text-base placeholder:text-[#9794AA] dark:text-white dark:placeholder:text-slate-500",
@@ -77,11 +90,20 @@ export const Input = (props: InputProps) => {
             onChange={onChange}
             onBlur={onBlur}
             {...rest}
+            id={inputId}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={
+              errorText
+                ? errorId
+                : (rest["aria-describedby"] as string | undefined)
+            }
           />
           {type === "password" && (
             <button
               type="button"
               onClick={() => setTogglePassword((prev) => !prev)}
+              aria-label={toggelePassword ? "Hide password" : "Show password"}
+              aria-pressed={toggelePassword}
               className="cursor-pointer text-[#6B7280] transition-colors dark:text-slate-400 pr-4"
             >
               {toggelePassword ? (
@@ -92,7 +114,11 @@ export const Input = (props: InputProps) => {
             </button>
           )}
         </div>
-        {error && <span className="text-red-500 text-[10px]">{error}</span>}
+        {errorText ? (
+          <span id={errorId} className="text-red-500 text-[10px]" role="alert">
+            {errorText}
+          </span>
+        ) : null}
       </div>
     </div>
   );
