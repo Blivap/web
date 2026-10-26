@@ -5,7 +5,7 @@ interface IconProps {
 }
 
 export const DashBoardIcon = ({ color = "#960018", className }: IconProps) => (
-  <svg
+  <svg aria-hidden="true"
     width="24"
     height="24"
     viewBox="0 0 24 24"
@@ -46,7 +46,7 @@ export const DashBoardIcon = ({ color = "#960018", className }: IconProps) => (
 
 // Add more icon components as needed
 export const WalletIcon = ({ color = "#070416", className }: IconProps) => (
-  <svg
+  <svg aria-hidden="true"
     width="24"
     height="24"
     viewBox="0 0 24 24"
@@ -79,7 +79,7 @@ export const WalletIcon = ({ color = "#070416", className }: IconProps) => (
 );
 
 export const DonorsIcon = ({ color = "#070416", className }: IconProps) => (
-  <svg
+  <svg aria-hidden="true"
     width="24"
     height="24"
     viewBox="0 0 24 24"
@@ -115,7 +115,7 @@ export const DonorsIcon = ({ color = "#070416", className }: IconProps) => (
 );
 
 export const BookingsIcon = ({ color = "#070416", className }: IconProps) => (
-  <svg
+  <svg aria-hidden="true"
     width="24"
     height="24"
     viewBox="0 0 24 24"
@@ -180,7 +180,7 @@ export const BookingsIcon = ({ color = "#070416", className }: IconProps) => (
 );
 
 export const HistoryIcon = ({ color = "#070416", className }: IconProps) => (
-  <svg
+  <svg aria-hidden="true"
     width="24"
     height="24"
     viewBox="0 0 24 24"
@@ -206,7 +206,7 @@ export const HistoryIcon = ({ color = "#070416", className }: IconProps) => (
 );
 
 export const SettingsIcon = ({ color = "#070416", className }: IconProps) => (
-  <svg
+  <svg aria-hidden="true"
     width="24"
     height="24"
     viewBox="0 0 24 24"
@@ -232,7 +232,7 @@ export const SettingsIcon = ({ color = "#070416", className }: IconProps) => (
 );
 
 export const ModeIcon = ({ color = "#070416", className }: IconProps) => (
-  <svg
+  <svg aria-hidden="true"
     width="24"
     height="24"
     viewBox="0 0 24 24"
@@ -257,7 +257,7 @@ export const ModeIcon = ({ color = "#070416", className }: IconProps) => (
 );
 
 export const MoonIcon = ({ color = "#070416", fill, className }: IconProps) => (
-  <svg
+  <svg aria-hidden="true"
     width="22"
     height="22"
     viewBox="0 0 22 22"
@@ -278,7 +278,7 @@ export const MoonIcon = ({ color = "#070416", fill, className }: IconProps) => (
 );
 
 export const SunIcon = ({ color = "#5429FF", fill, className }: IconProps) => (
-  <svg
+  <svg aria-hidden="true"
     width="14"
     height="14"
     viewBox="0 0 14 14"

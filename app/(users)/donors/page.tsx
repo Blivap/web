@@ -19,8 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PaginationControls } from "@/components/ui/pagination-controls.component";
-import { PageSizeSelect } from "@/components/ui/page-size-select.component";
+import { ListPaginationBar } from "@/components/ui/list-pagination-bar.component";
 import { DonorsPageSkeleton } from "./components/donors-page-skeleton.component";
 import { Input } from "@/components/forms/inputs/input.component";
 import Image from "next/image";
@@ -196,31 +195,17 @@ function DonorsPaginatedGrid({
         ))}
       </div>
 
-      <div className="mt-auto flex flex-col gap-3 rounded-lg border border-border bg-[#F9FAFB] px-3 py-3 dark:border-white/10 dark:bg-white/6 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-        <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
-          <p className="text-center text-xs text-text-secondary sm:text-left">
-            Page{" "}
-            <span className="font-semibold text-text-primary">{safePage}</span>{" "}
-            of{" "}
-            <span className="font-semibold text-text-primary">
-              {totalPages}
-            </span>
-          </p>
-          <PageSizeSelect
-            value={pageSize}
-            onChange={onPageSizeChange}
-            disabled={isRefetching}
-          />
-        </div>
-        <PaginationControls
-          page={safePage}
-          totalPages={totalPages}
-          hasNextPage={meta.hasNextPage}
-          hasPreviousPage={meta.hasPreviousPage}
-          disabled={isRefetching}
-          onPageChange={onPageChange}
-        />
-      </div>
+      <ListPaginationBar
+        className="mt-auto"
+        page={safePage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+        pageSize={pageSize}
+        onPageSizeChange={onPageSizeChange}
+        hasNextPage={meta.hasNextPage}
+        hasPreviousPage={meta.hasPreviousPage}
+        disabled={isRefetching}
+      />
     </div>
   );
 }

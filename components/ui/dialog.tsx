@@ -71,7 +71,7 @@ function DialogContent({
             className="absolute top-4 right-4 rounded-lg p-1 text-text-tertiary opacity-80 transition hover:bg-[#F4F4F5] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 dark:hover:bg-white/10 [&_svg]:pointer-events-none [&_svg]:shrink-0"
             aria-label="Close"
           >
-            <X className="size-4" />
+            <X className="size-4" aria-hidden />
           </DialogPrimitive.Close>
         ) : null}
       </DialogPrimitive.Content>

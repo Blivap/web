@@ -5,16 +5,7 @@ import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { PageSizeSelect } from "@/components/ui/page-size-select.component";
+import { ListPaginationBar } from "@/components/ui/list-pagination-bar.component";
 import { usePageSize } from "@/hooks/navigation/usePageSize.hook";
 import {
   useQueryParamNumber,
@@ -84,33 +75,6 @@ const LEGACY_TAB_QUERY: Record<string, string> = {
   referrals: "confirmed",
   archived: "past",
 };
-
-/** Page numbers + ellipsis for shadcn-style pagination controls. */
-function bookingPaginationPages(
-  current: number,
-  total: number,
-): (number | "ellipsis")[] {
-  if (total <= 7) {
-    return Array.from({ length: total }, (_, i) => i + 1);
-  }
-  const set = new Set<number>();
-  set.add(1);
-  set.add(total);
-  for (let p = current - 1; p <= current + 1; p++) {
-    if (p >= 1 && p <= total) set.add(p);
-  }
-  const sorted = [...set].sort((a, b) => a - b);
-  const out: (number | "ellipsis")[] = [];
-  let prev = 0;
-  for (const p of sorted) {
-    if (prev > 0 && p - prev > 1) {
-      out.push("ellipsis");
-    }
-    out.push(p);
-    prev = p;
-  }
-  return out;
-}
 
 const tabTriggerClass =
   "min-h-10 min-w-0 flex-1 basis-0 rounded-lg border-0 px-2 py-2.5 text-center text-xs font-medium transition-colors sm:px-3 sm:text-sm " +
@@ -244,11 +208,6 @@ function BookingsRowsTable({
     const start = (safePage - 1) * pageSize;
     return rows.slice(start, start + pageSize);
   }, [rows, safePage, pageSize]);
-
-  const pageItems = useMemo(
-    () => bookingPaginationPages(safePage, totalPages),
-    [safePage, totalPages],
-  );
 
   const hasRows = rows.length > 0;
 
@@ -388,58 +347,14 @@ function BookingsRowsTable({
         </div>
       </div>
       {hasRows ? (
-        <div className="mt-4 flex shrink-0 flex-col gap-3 rounded-lg border border-border bg-[#F9FAFB] px-3 py-3 dark:border-white/10 dark:bg-white/6 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-          <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
-            <p className="text-center text-xs text-text-secondary sm:text-left">
-              Page{" "}
-              <span className="font-semibold text-text-primary">
-                {safePage}
-              </span>{" "}
-              of{" "}
-              <span className="font-semibold text-text-primary">
-                {totalPages}
-              </span>
-            </p>
-            <PageSizeSelect value={pageSize} onChange={setPageSize} />
-          </div>
-          <Pagination className="mx-0 w-full min-w-0 shrink-0 sm:ms-auto sm:w-auto sm:justify-end">
-            <PaginationContent className="flex-wrap justify-center gap-1 sm:justify-end">
-              <PaginationItem>
-                <PaginationPrevious
-                  aria-label="Previous page"
-                  disabled={safePage <= 1}
-                  onClick={() => setPage(Math.max(1, safePage - 1))}
-                />
-              </PaginationItem>
-              {totalPages > 1
-                ? pageItems.map((item, idx) =>
-                    item === "ellipsis" ? (
-                      <PaginationItem key={`e-${idx}`}>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    ) : (
-                      <PaginationItem key={`page-${item}`}>
-                        <PaginationLink
-                          aria-label={`Page ${item}`}
-                          isActive={item === safePage}
-                          onClick={() => setPage(item)}
-                        >
-                          {item}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ),
-                  )
-                : null}
-              <PaginationItem>
-                <PaginationNext
-                  aria-label="Next page"
-                  disabled={safePage >= totalPages}
-                  onClick={() => setPage(Math.min(totalPages, safePage + 1))}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+        <ListPaginationBar
+          className="mt-4 shrink-0"
+          page={safePage}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          pageSize={pageSize}
+          onPageSizeChange={setPageSize}
+        />
       ) : null}
     </div>
   );
@@ -684,12 +599,18 @@ export function BookingsShellSkeleton({
           </div>
         </div>
 
-        <div className="mt-4 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <BookingsSk className="h-4 w-24 max-w-full" />
-          <div className="flex min-w-0 items-center gap-2">
-            <BookingsSk className="h-8 min-w-0 flex-1 rounded-md sm:w-24 sm:flex-none" />
-            <BookingsSk className="size-8 shrink-0 rounded-md" />
-            <BookingsSk className="size-8 shrink-0 rounded-md" />
+        <div className="mt-4 flex flex-col rounded-lg border border-border px-2.5 py-2 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4">
+          <div className="flex items-center justify-between sm:contents">
+            <BookingsSk className="size-8 rounded-md sm:hidden" />
+            <BookingsSk className="mx-auto h-4 w-16 sm:mx-0" />
+            <BookingsSk className="size-8 rounded-md sm:hidden" />
+          </div>
+          <div className="-mx-2.5 my-2 border-t border-border sm:hidden dark:border-white/10" />
+          <div className="flex items-center justify-end gap-2 sm:ms-auto">
+            <BookingsSk className="h-4 w-12" />
+            <BookingsSk className="h-8 w-16 rounded-md" />
+            <BookingsSk className="hidden size-8 rounded-md sm:block" />
+            <BookingsSk className="hidden size-8 rounded-md sm:block" />
           </div>
         </div>
       </section>

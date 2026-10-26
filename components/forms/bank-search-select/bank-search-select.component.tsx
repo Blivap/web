@@ -32,6 +32,9 @@ export function BankSearchSelect({
   placeholder = "Search banks",
 }: BankSearchSelectProps) {
   const listId = useId();
+  const labelId = useId();
+  const triggerId = useId();
+  const errorId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -83,17 +86,27 @@ export function BankSearchSelect({
   return (
     <div ref={rootRef} className="relative flex w-full flex-col gap-1">
       {label ? (
-        <p className="text-[11px] font-medium text-[#9794AA] dark:text-slate-400">
+        <label
+          id={labelId}
+          htmlFor={triggerId}
+          className="text-[11px] font-medium text-[#9794AA] dark:text-slate-400"
+        >
           {label}
-        </p>
+        </label>
       ) : null}
 
       <button
         type="button"
+        id={triggerId}
         disabled={disabled || loading}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
+        aria-labelledby={label ? labelId : undefined}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={
+          typeof error === "string" && error ? errorId : undefined
+        }
         onClick={() => {
           if (!disabled && !loading) setOpen((prev) => !prev);
         }}
@@ -126,12 +139,16 @@ export function BankSearchSelect({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Type to search…"
+              aria-label="Search banks"
+              aria-controls={listId}
               className="h-8 w-full bg-transparent text-sm text-[#100F14] outline-none placeholder:text-[#9794AA] dark:text-white"
             />
           </div>
           <ul
             id={listId}
             role="listbox"
+            aria-labelledby={label ? labelId : undefined}
+            aria-label={label ? undefined : "Banks"}
             className="max-h-56 overflow-y-auto p-1"
           >
             {filtered.length === 0 ? (
@@ -184,7 +201,9 @@ export function BankSearchSelect({
       ) : null}
 
       {typeof error === "string" && error ? (
-        <p className="text-[11px] text-red-500">{error}</p>
+        <p id={errorId} className="text-[11px] text-red-500" role="alert">
+          {error}
+        </p>
       ) : null}
     </div>
   );

@@ -143,6 +143,9 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
   ) {
     const id = useId();
     const listboxId = `${id}-calendar`;
+    const labelId = `${id}-label`;
+    const valueId = `${id}-value`;
+    const errorId = `${id}-error`;
     const containerRef = useRef<HTMLDivElement>(null);
     const monthDropdownRef = useRef<HTMLDivElement>(null);
     const yearDropdownRef = useRef<HTMLDivElement>(null);
@@ -324,14 +327,16 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
         )}
       >
         {label ? (
-          <p
+          <label
+            id={labelId}
+            htmlFor={id}
             className={classNames(
               "text-xs font-medium text-[#9794AA] dark:text-slate-400",
               labelClassName,
             )}
           >
             {label}
-          </p>
+          </label>
         ) : null}
         <div className="grid gap-px">
           <div
@@ -345,11 +350,17 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
             <button
               type="button"
               ref={ref}
-              id={id}
               disabled={disabled}
+              {...rest}
+              id={id}
               aria-haspopup="dialog"
               aria-expanded={open}
               aria-controls={listboxId}
+              aria-labelledby={label ? `${labelId} ${valueId}` : valueId}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={
+                typeof error === "string" && error ? errorId : undefined
+              }
               className={classNames(
                 "w-full min-w-0 bg-transparent py-2.5 text-left text-base font-medium text-[#100F14] outline-none dark:text-white",
                 !displayText && "text-[#9794AA] dark:text-slate-500",
@@ -362,12 +373,16 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                   onBlur?.(createBlurEvent(name));
                 }
               }}
-              {...rest}
             >
               {displayText ? (
-                <span className={valueClassName}>{displayText}</span>
+                <span id={valueId} className={valueClassName}>
+                  {displayText}
+                </span>
               ) : (
-                <span className="text-xs font-medium text-[#9794AA] dark:text-slate-500">
+                <span
+                  id={valueId}
+                  className="text-xs font-medium text-[#9794AA] dark:text-slate-500"
+                >
                   {placeholder}
                 </span>
               )}
@@ -537,12 +552,23 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               </div>
 
               <div className="mb-1 grid grid-cols-7 gap-px text-center">
-                {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
+                {(
+                  [
+                    ["Mo", "Monday"],
+                    ["Tu", "Tuesday"],
+                    ["We", "Wednesday"],
+                    ["Th", "Thursday"],
+                    ["Fr", "Friday"],
+                    ["Sa", "Saturday"],
+                    ["Su", "Sunday"],
+                  ] as const
+                ).map(([short, long]) => (
                   <span
-                    key={d}
+                    key={short}
                     className="text-[8px] font-semibold leading-none text-[#9794AA] dark:text-slate-500"
                   >
-                    {d}
+                    <span aria-hidden>{short}</span>
+                    <span className="sr-only">{long}</span>
                   </span>
                 ))}
               </div>
@@ -561,6 +587,11 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                       key={ymd}
                       type="button"
                       disabled={dimmed}
+                      aria-label={format(
+                        new Date(cursor.year, cursor.month, day),
+                        "EEEE d MMMM yyyy",
+                      )}
+                      aria-pressed={Boolean(isSelected)}
                       onClick={() => !dimmed && commitValue(ymd)}
                       className={classNames(
                         "flex h-7 w-7 items-center justify-center rounded text-[11px] font-medium transition-colors",
@@ -581,8 +612,10 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
             </div>
           ) : null}
 
-          {error ? (
-            <span className="text-red-500 text-[10px]">{error}</span>
+          {typeof error === "string" && error ? (
+            <span id={errorId} className="text-red-500 text-[10px]" role="alert">
+              {error}
+            </span>
           ) : null}
         </div>
       </div>

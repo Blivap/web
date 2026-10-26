@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Clock, HeartPulse, Sparkles } from "lucide-react";
 import {
   Popover,
@@ -232,14 +232,12 @@ function CooldownClock({
   label: string;
   className?: string;
 }) {
-  const previousSeconds = useRef<number | null>(null);
-  const animateSeconds =
-    previousSeconds.current === null ||
-    parts.seconds <= previousSeconds.current;
-
-  useEffect(() => {
-    previousSeconds.current = parts.seconds;
-  }, [parts.seconds]);
+  const [trackedSeconds, setTrackedSeconds] = useState(parts.seconds);
+  // Jump the seconds ring when the minute rolls over; ease it on the way down.
+  const animateSeconds = parts.seconds <= trackedSeconds;
+  if (parts.seconds !== trackedSeconds) {
+    setTrackedSeconds(parts.seconds);
+  }
 
   return (
     <Popover>
