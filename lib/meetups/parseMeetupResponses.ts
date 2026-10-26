@@ -50,10 +50,20 @@ function parseParticipant(raw: unknown): MeetupParticipant {
       ? String(meetingRaw).padStart(6, "0")
       : null);
 
+  const profileImage = pickString(
+    o.profileImage ??
+      o.profile_image ??
+      o.profileImageUrl ??
+      o.profile_image_url ??
+      o.avatarUrl ??
+      o.avatar,
+  );
+
   return {
     ...(userId ? { userId } : {}),
     ...(publicId ? { publicId } : {}),
     ...(role ? { role } : {}),
+    ...(profileImage ? { profileImage } : {}),
     ...(meetingCode ? { meetingCode } : {}),
     ...(() => {
       const iv = pickBool(o.identityVerified ?? o.identity_verified);
@@ -226,6 +236,8 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
   }
 
   const myMeetingRaw =
+    r.myMeetupCode ??
+    r.my_meetup_code ??
     r.myMeetingCode ??
     r.my_meeting_code ??
     r.myCode ??
@@ -437,7 +449,11 @@ export function parseMeetupEnsureSessionBody(
       ? String(meetingRaw).padStart(6, "0")
       : null);
   const myMeetingRaw =
-    o.myMeetingCode ?? o.my_meeting_code ?? o.viewerMeetingCode;
+    o.myMeetupCode ??
+    o.my_meetup_code ??
+    o.myMeetingCode ??
+    o.my_meeting_code ??
+    o.viewerMeetingCode;
   const myMeetingCode =
     pickString(myMeetingRaw) ??
     (typeof myMeetingRaw === "number" && Number.isFinite(myMeetingRaw)
