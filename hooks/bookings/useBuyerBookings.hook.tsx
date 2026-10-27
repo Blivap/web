@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useStore } from "react-redux";
 import { $api } from "@/app/api";
@@ -8,7 +8,7 @@ import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import type { BookingsShellTabItem } from "@/app/(users)/bookings/components/bookings-shell.view";
 import { useSetQueryParams } from "@/hooks/navigation/useQueryParamState.hook";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import type { AppDispatch, RootState } from "@/store/store";
+import type { RootState } from "@/store/store";
 import {
   loadSentBookings,
   patchBookingInLists,
@@ -19,8 +19,12 @@ import {
   BUYER_TAB_ORDER,
   type BuyerPanelKey,
 } from "@/lib/bookings/buyerBookingsTabPanels";
-import { bookingNeedsRequesterRating } from "@/lib/ratings/ratedBookingsStorage";
+import {
+  bookingListLoadArg,
+  type BookingsListSourceOptions,
+} from "@/lib/bookings/bookingListFilters";
 import { formatPublicId } from "@/lib/users/formatPublicId";
+import { bookingNeedsRequesterRating } from "@/lib/ratings/ratedBookingsStorage";
 import type { Booking } from "@/types/bookings";
 import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook";
 import {
@@ -32,24 +36,24 @@ import {
 export type { BuyerPanelKey } from "@/lib/bookings/buyerBookingsTabPanels";
 export { BUYER_TAB_ORDER } from "@/lib/bookings/buyerBookingsTabPanels";
 
-const BOOKINGS_POLL_MS = 20_000;
-
 function donorLabelFromBooking(b: Booking): string {
   return formatPublicId(b.donorPublicId) ?? "";
 }
 
-function scheduleBookingsResync(dispatch: AppDispatch) {
-  window.setTimeout(() => {
-    void dispatch(loadSentBookings({ silent: true }));
-  }, 800);
-}
-
-export function useBuyerBookings() {
+export function useBuyerBookings(options?: BookingsListSourceOptions) {
+  const enabled = options?.enabled !== false;
+  const query = options?.query;
+  const queryKey = JSON.stringify(query ?? {});
+  const queryRef = useRef(query);
+  queryRef.current = query;
+  const onBookingPatchedRef = useRef(options?.onBookingPatched);
+  onBookingPatchedRef.current = options?.onBookingPatched;
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
   const store = useStore<RootState>();
   const user = useAppSelector((s) => s.auth.user);
-  const bookings = useAppSelector((s) => s.bookings.sent.items);
+  const storedBookings = useAppSelector((s) => s.bookings.sent.items);
+  const bookings = options?.bookings ?? storedBookings;
   const loadState = useAppSelector((s) => s.bookings.sent.status);
   const loadError = useAppSelector((s) => s.bookings.sent.error);
 
@@ -61,7 +65,10 @@ export function useBuyerBookings() {
     ratingOpen && highlightBookingId ? highlightBookingId : null;
 
   const [mutatingId, setMutatingId] = useState<string | null>(null);
-  const [remindingId, setRemindingId] = useState<string | null>(null);
+
+  const publishBookingPatch = useCallback((id: string, patch: Partial<Booking>) => {
+    onBookingPatchedRef.current?.(id, patch);
+  }, []);
 
   const openRatingForBooking = useCallback(
     (id: string) => {
@@ -104,49 +111,39 @@ export function useBuyerBookings() {
     }
     closeRating();
     showSnackbar("Thanks for your rating.", "success");
-    void dispatch(loadSentBookings({ silent: true }));
-  }, [ratingBookingId, dispatch, closeRating, showSnackbar]);
+    if (bid) {
+      publishBookingPatch(bid, {
+        requesterHasRated: true,
+        status: "completed",
+      });
+    }
+  }, [ratingBookingId, dispatch, closeRating, publishBookingPatch, showSnackbar]);
 
   const loadData = useCallback(() => {
-    if (!user?.id) return Promise.resolve();
-    return dispatch(loadSentBookings()).unwrap();
-  }, [dispatch, user?.id]);
+    if (!user?.id || !enabled) return Promise.resolve();
+    return dispatch(
+      loadSentBookings(
+        bookingListLoadArg(
+          queryRef.current,
+          store.getState().bookings.sent.status === "ok",
+        ),
+      ),
+    ).unwrap();
+  }, [dispatch, enabled, store, user?.id]);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || !enabled) return;
     const status = store.getState().bookings.sent.status;
     void dispatch(
-      loadSentBookings(status === "ok" ? { silent: true } : undefined),
+      loadSentBookings(bookingListLoadArg(queryRef.current, status === "ok")),
     );
-  }, [dispatch, user?.id, store]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    const timer = window.setInterval(() => {
-      void dispatch(loadSentBookings({ silent: true }));
-    }, BOOKINGS_POLL_MS);
-    return () => window.clearInterval(timer);
-  }, [dispatch, user?.id]);
-
-  useEffect(() => {
-    const onVis = () => {
-      if (document.visibilityState === "visible" && user?.id) {
-        void dispatch(loadSentBookings({ silent: true }));
-      }
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
-  }, [dispatch, user?.id]);
+  }, [dispatch, enabled, queryKey, store, user?.id]);
 
   const rowIdsFingerprint = useMemo(
     () => bookings.map((b) => b.id).join(","),
     [bookings],
   );
   useBookingDeepLinkHighlight(highlightBookingId, loadState, rowIdsFingerprint);
-
-  const refreshSent = useCallback(() => {
-    void dispatch(loadSentBookings({ silent: true }));
-  }, [dispatch]);
 
   const withdrawBooking = useCallback(
     async (id: string) => {
@@ -164,8 +161,10 @@ export function useBuyerBookings() {
           return;
         }
         trackSuccess("booking_cancelled");
+        const patch: Partial<Booking> = { status: "cancelled" };
+        dispatch(patchBookingInLists({ id, ...patch }));
+        publishBookingPatch(id, patch);
         showSnackbar("Request withdrawn — booking cancelled.");
-        scheduleBookingsResync(dispatch);
       } catch (e) {
         trackFailure("booking_cancelled", classifyAnalyticsError(e));
         dispatch(patchBookingInLists({ id, status: prev }));
@@ -179,30 +178,7 @@ export function useBuyerBookings() {
         setMutatingId(null);
       }
     },
-    [dispatch, showSnackbar, store],
-  );
-
-  const remindDonor = useCallback(
-    async (id: string) => {
-      setRemindingId(id);
-      try {
-        const { status } = await $api.bookings.remind(id);
-        if (status < 200 || status >= 300) {
-          showSnackbar("Could not send reminder.");
-          return;
-        }
-        showSnackbar("Reminder sent to the donor.");
-        refreshSent();
-      } catch (e) {
-        showSnackbar(
-          getAxiosErrorMessage(e, "Reminder didnt go through"),
-          "error",
-        );
-      } finally {
-        setRemindingId(null);
-      }
-    },
-    [refreshSent, showSnackbar],
+    [dispatch, publishBookingPatch, showSnackbar, store],
   );
 
   const tabPanels = useMemo(
@@ -212,9 +188,7 @@ export function useBuyerBookings() {
         user,
         highlightBookingId,
         mutatingId,
-        remindingId,
         withdrawBooking: (id) => void withdrawBooking(id),
-        remindDonor: (id) => void remindDonor(id),
         openRatingForBooking,
       }),
     [
@@ -222,9 +196,7 @@ export function useBuyerBookings() {
       user,
       highlightBookingId,
       mutatingId,
-      remindingId,
       withdrawBooking,
-      remindDonor,
       openRatingForBooking,
     ],
   );

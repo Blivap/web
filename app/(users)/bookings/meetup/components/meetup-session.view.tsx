@@ -26,11 +26,7 @@ import { useDonationChat } from "@/hooks/chat/useDonationChat.hook";
 import { useMeetupSession } from "@/hooks/meetups/useMeetupSession.hook";
 import { $api } from "@/app/api";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {
-  loadReceivedBookings,
-  loadSentBookings,
-  patchBookingInLists,
-} from "@/store/slices/bookingsSlice";
+import { patchBookingInLists } from "@/store/slices/bookingsSlice";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import QRCode from "react-qr-code";
 import type { DonationChatMessage } from "@/types/donation-chat";
@@ -62,7 +58,6 @@ import {
   getApiMessageFromData,
   getAxiosErrorMessage,
 } from "@/lib/bookings/axiosErrorMessage";
-import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import { formatPublicId } from "@/lib/users/formatPublicId";
 
 const MeetupQrScanner = dynamic(
@@ -120,49 +115,6 @@ function formatSessionChipDate(iso: string | null | undefined): string | null {
 
 function partyHandle(publicId?: string | null): string {
   return formatPublicId(publicId) ?? "";
-}
-
-function profileRecord(body: unknown): Record<string, unknown> | null {
-  const root = unwrapApiRecord(body);
-  if (root && typeof root === "object") return root as Record<string, unknown>;
-  if (body && typeof body === "object") return body as Record<string, unknown>;
-  return null;
-}
-
-function publicIdFromProfileBody(body: unknown): string | null {
-  const record = profileRecord(body);
-  if (!record) return null;
-  const direct = formatPublicId(
-    typeof record.publicId === "string"
-      ? record.publicId
-      : typeof record.public_id === "string"
-        ? record.public_id
-        : null,
-  );
-  if (direct) return direct;
-  const user = record.user;
-  if (!user || typeof user !== "object") return null;
-  const nested = user as Record<string, unknown>;
-  return formatPublicId(
-    typeof nested.publicId === "string"
-      ? nested.publicId
-      : typeof nested.public_id === "string"
-        ? nested.public_id
-        : null,
-  );
-}
-
-function profileImageFromProfileBody(body: unknown): string | null {
-  const record = profileRecord(body);
-  if (!record) return null;
-  const raw =
-    record.profileImageUrl ??
-    record.profile_image_url ??
-    record.profileImage ??
-    record.profile_image ??
-    record.avatarUrl ??
-    record.avatar;
-  return typeof raw === "string" && raw.trim() ? raw.trim() : null;
 }
 
 /** Server posts this when a request is accepted. It is not a user message. */
@@ -426,7 +378,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
 
   const canPromptRequesterRating = isRequester === true && !isDonorViewer;
   const chatHistoryRefetchRef = useRef<string | null>(null);
-  const bookingHydrateRef = useRef<string | null>(null);
 
   const refetchChatHistory = donationChat.refetchHistory;
 
@@ -436,33 +387,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     chatHistoryRefetchRef.current = donationChatBookingId;
     void refetchChatHistory();
   }, [refetchChatHistory, donationChatBookingId, donationChatEnabled]);
-
-  useEffect(() => {
-    if (!donationChatBookingId) return;
-
-    const row =
-      sentBookings.find((booking) => booking.id === donationChatBookingId) ??
-      receivedBookings.find((booking) => booking.id === donationChatBookingId);
-    const hasPeerImage = Boolean(
-      session?.peer.profileImage ||
-      row?.donorProfileImage ||
-      row?.requesterProfileImage,
-    );
-    const hasMeetupCode = Boolean(
-      normalizeMeetupSixDigitCode(row?.meetingCode),
-    );
-    if (hasPeerImage && hasMeetupCode) return;
-    if (bookingHydrateRef.current === donationChatBookingId) return;
-    bookingHydrateRef.current = donationChatBookingId;
-    void dispatch(loadSentBookings({ silent: true }));
-    void dispatch(loadReceivedBookings({ silent: true }));
-  }, [
-    donationChatBookingId,
-    dispatch,
-    receivedBookings,
-    sentBookings,
-    session?.peer.profileImage,
-  ]);
 
   const sortedChatMessages = useMemo(() => {
     return [...donationChat.messages].sort((a, b) => {
@@ -698,7 +622,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       );
     }
     showSnackbar("Thanks for your rating.", "success");
-    void dispatch(loadSentBookings({ silent: true }));
   }, [donationChatBookingId, dispatch, showSnackbar]);
 
   const onConfirmDonation = useCallback(async () => {
@@ -709,13 +632,11 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       setLocalError(res.message);
       return;
     }
-    void dispatch(loadSentBookings({ silent: true }));
-    void dispatch(loadReceivedBookings({ silent: true }));
     // Fully completed → effect shows success and routes to bookings.
     if (!res.completed) {
       showSnackbar("Your donation confirmation was recorded.");
     }
-  }, [user, confirmDonation, showSnackbar, dispatch]);
+  }, [user, confirmDonation, showSnackbar]);
 
   useEffect(() => {
     if (sessionLoad !== "ok" || !session) return;
@@ -746,8 +667,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         }),
       );
     }
-    void dispatch(loadSentBookings({ silent: true }));
-    void dispatch(loadReceivedBookings({ silent: true }));
 
     showSnackbar("Booking completed. Taking you to your bookings…", "success");
 
@@ -769,11 +688,6 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     showSnackbar,
     router,
   ]);
-
-  useEffect(() => {
-    if (!canPromptRequesterRating) return;
-    void dispatch(loadSentBookings({ silent: true }));
-  }, [canPromptRequesterRating, dispatch]);
 
   useEffect(() => {
     if (!donationChat.roomClosed) return;
@@ -839,15 +753,12 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     setTerminateAlertOpen(false);
     setTerminateReason("");
     showSnackbar("Meetup terminated.", "success");
-    void dispatch(loadSentBookings({ silent: true }));
-    void dispatch(loadReceivedBookings({ silent: true }));
     router.push(routes.bookings);
   }, [
     readOnly,
     terminateReason,
     terminateMeet,
     showSnackbar,
-    dispatch,
     router,
   ]);
 
@@ -1061,31 +972,11 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
       : isRequester === false
         ? bookingRow?.requesterPublicId
         : (bookingRow?.donorPublicId ?? bookingRow?.requesterPublicId));
-  const peerUserId =
-    isRequester === true
-      ? (session?.donorUserId ?? bookingRow?.donorUserId ?? "")
-      : isRequester === false
-        ? (session?.requesterUserId ?? bookingRow?.requesterId ?? "")
-        : (session?.peer.userId ??
-          session?.donorUserId ??
-          bookingRow?.donorUserId ??
-          "");
   const peerPublicIdFromChat = sortedChatMessages.find(
     (message) =>
       message.senderPublicId &&
       !messageIsMine(message, user?.id, session?.me.role),
   )?.senderPublicId;
-  const [resolvedPeerPublicId, setResolvedPeerPublicId] = useState<
-    string | null
-  >(null);
-  const [resolvedPeerProfile, setResolvedPeerProfile] = useState<{
-    userId: string;
-    image: string;
-  } | null>(null);
-  const resolvedPeerProfileImage =
-    resolvedPeerProfile?.userId === peerUserId.trim()
-      ? resolvedPeerProfile.image
-      : null;
   const bookingPeerProfileImage =
     isRequester === true
       ? bookingRow?.donorProfileImage
@@ -1093,51 +984,12 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         ? bookingRow?.requesterProfileImage
         : (bookingRow?.donorProfileImage ?? bookingRow?.requesterProfileImage);
 
-  useEffect(() => {
-    const needsPublicId =
-      !partyHandle(peerPublicIdFromSession) &&
-      !partyHandle(peerPublicIdFromChat);
-    const needsImage = !bookingPeerProfileImage;
-    if (!needsPublicId && !needsImage) return;
-    const id = peerUserId.trim();
-    if (!id) return;
-    let cancelled = false;
-    void (async () => {
-      try {
-        const { status, data } = await $api.donors.publicByUserId(id);
-        if (cancelled || status < 200 || status >= 300) return;
-        if (needsPublicId) {
-          const publicId = publicIdFromProfileBody(data);
-          if (publicId) setResolvedPeerPublicId(publicId);
-        }
-        if (needsImage) {
-          const image = profileImageFromProfileBody(data);
-          if (image) setResolvedPeerProfile({ userId: id, image });
-        }
-      } catch {
-        /* public profile may be unavailable for non-donors */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    bookingPeerProfileImage,
-    peerPublicIdFromSession,
-    peerPublicIdFromChat,
-    peerUserId,
-  ]);
-
   const peerHandle =
     partyHandle(peerPublicIdFromSession) ||
     partyHandle(peerPublicIdFromChat) ||
-    partyHandle(resolvedPeerPublicId) ||
     "Other person";
   const peerProfileImage =
-    session?.peer.profileImage ||
-    bookingPeerProfileImage ||
-    resolvedPeerProfileImage ||
-    undefined;
+    session?.peer.profileImage || bookingPeerProfileImage || undefined;
   const sessionChipDate = formatSessionChipDate(
     session?.scheduledAt ??
       sortedChatMessages[0]?.createdAt ??
@@ -1473,7 +1325,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                   <Button
                     type="button"
                     size="xs"
-                    disabled={verifyBusy}
+                    disabled={verifyBusy || codeInput.length !== 6}
                     loading={verifyBusy}
                     onClick={() => void onVerifyCode()}
                   >

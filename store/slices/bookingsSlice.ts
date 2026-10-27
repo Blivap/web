@@ -17,6 +17,8 @@ type BookingListBranch = {
   items: Booking[];
   status: BookingListLoadState;
   error: string | null;
+  /** Latest dispatched load. Older responses are ignored. */
+  requestId: string | null;
 };
 
 export type BookingsState = {
@@ -28,6 +30,7 @@ const emptyBranch = (): BookingListBranch => ({
   items: [],
   status: "idle",
   error: null,
+  requestId: null,
 });
 
 const initialState: BookingsState = {
@@ -37,9 +40,11 @@ const initialState: BookingsState = {
 
 async function loadBookingsList(
   listFetcher: (params: BookingListQuery) => Promise<IResponse<unknown>>,
+  query?: Pick<BookingListQuery, "filter" | "date">,
 ): Promise<Booking[]> {
-  const listRes = await fetchAllBookingListPages((params) =>
-    listFetcher(params),
+  const listRes = await fetchAllBookingListPages(
+    (params) => listFetcher(params),
+    query,
   );
 
   if (!listRes.ok) {
@@ -50,14 +55,22 @@ async function loadBookingsList(
 }
 
 /** Optional `silent` refetch keeps list on screen (no loading skeleton). */
-type LoadBookingsArg = { silent?: boolean } | undefined;
+export type LoadBookingsArg =
+  | {
+      silent?: boolean;
+      /** Replace stored rows instead of merging. Use when a server filter is active. */
+      replace?: boolean;
+      query?: Pick<BookingListQuery, "filter" | "date">;
+    }
+  | undefined;
 
 export const loadSentBookings = createAsyncThunk(
   "bookings/loadSent",
-  async (_arg: LoadBookingsArg, { rejectWithValue }) => {
+  async (arg: LoadBookingsArg, { rejectWithValue }) => {
     try {
-      const bookings = await loadBookingsList((params) =>
-        $api.bookings.sent(params),
+      const bookings = await loadBookingsList(
+        (params) => $api.bookings.list(params),
+        arg?.query,
       );
       return { bookings };
     } catch (e) {
@@ -72,10 +85,11 @@ export const loadSentBookings = createAsyncThunk(
 
 export const loadReceivedBookings = createAsyncThunk(
   "bookings/loadReceived",
-  async (_arg: LoadBookingsArg, { rejectWithValue }) => {
+  async (arg: LoadBookingsArg, { rejectWithValue }) => {
     try {
-      const bookings = await loadBookingsList((params) =>
-        $api.bookings.received(params),
+      const bookings = await loadBookingsList(
+        (params) => $api.bookings.list(params),
+        arg?.query,
       );
       return { bookings };
     } catch (e) {
@@ -128,22 +142,48 @@ const bookingsSlice = createSlice({
         ];
       }
     },
+    /** Inserts a booking returned by create (or replaces the same id). */
+    upsertBookingInLists: (
+      state,
+      action: PayloadAction<{
+        branch: "sent" | "received";
+        booking: Booking;
+      }>,
+    ) => {
+      const { branch, booking } = action.payload;
+      const items = state[branch].items;
+      const idx = items.findIndex((row) => row.id === booking.id);
+      state[branch].items =
+        idx === -1
+          ? [booking, ...items]
+          : [
+              ...items.slice(0, idx),
+              { ...items[idx], ...booking },
+              ...items.slice(idx + 1),
+            ];
+      if (state[branch].status === "idle") state[branch].status = "ok";
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(loadSentBookings.pending, (state, action) => {
+        state.sent.requestId = action.meta.requestId;
         if (!action.meta.arg?.silent) {
           state.sent.status = "loading";
+          state.sent.error = null;
         }
-        state.sent.error = null;
       })
       .addCase(loadSentBookings.fulfilled, (state, action) => {
+        if (state.sent.requestId !== action.meta.requestId) return;
         state.sent.status = "ok";
-        state.sent.items = action.meta.arg?.silent
-          ? mergeBookingsList(state.sent.items, action.payload.bookings)
-          : action.payload.bookings;
+        state.sent.error = null;
+        const replace = !action.meta.arg?.silent || action.meta.arg?.replace;
+        state.sent.items = replace
+          ? action.payload.bookings
+          : mergeBookingsList(state.sent.items, action.payload.bookings);
       })
       .addCase(loadSentBookings.rejected, (state, action) => {
+        if (state.sent.requestId !== action.meta.requestId) return;
         state.sent.status = "error";
         state.sent.error =
           (action.payload as string | undefined) ?? "Could not load bookings.";
@@ -152,18 +192,24 @@ const bookingsSlice = createSlice({
         }
       })
       .addCase(loadReceivedBookings.pending, (state, action) => {
+        state.received.requestId = action.meta.requestId;
         if (!action.meta.arg?.silent) {
           state.received.status = "loading";
+          state.received.error = null;
         }
-        state.received.error = null;
       })
       .addCase(loadReceivedBookings.fulfilled, (state, action) => {
+        if (state.received.requestId !== action.meta.requestId) return;
         state.received.status = "ok";
-        state.received.items = action.meta.arg?.silent
-          ? mergeBookingsList(state.received.items, action.payload.bookings)
-          : action.payload.bookings;
+        state.received.error = null;
+        const replace =
+          !action.meta.arg?.silent || action.meta.arg?.replace;
+        state.received.items = replace
+          ? action.payload.bookings
+          : mergeBookingsList(state.received.items, action.payload.bookings);
       })
       .addCase(loadReceivedBookings.rejected, (state, action) => {
+        if (state.received.requestId !== action.meta.requestId) return;
         state.received.status = "error";
         state.received.error =
           (action.payload as string | undefined) ?? "Could not load bookings.";
@@ -175,5 +221,6 @@ const bookingsSlice = createSlice({
   },
 });
 
-export const { patchBookingInLists } = bookingsSlice.actions;
+export const { patchBookingInLists, upsertBookingInLists } =
+  bookingsSlice.actions;
 export default bookingsSlice.reducer;

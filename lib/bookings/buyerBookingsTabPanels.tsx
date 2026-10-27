@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Bell, MessageCircle, Send, Star, Undo2, X } from "lucide-react";
+import { MessageCircle, Send, Star, Undo2, X } from "lucide-react";
 import { bookingNeedsRequesterRating } from "@/lib/ratings/ratedBookingsStorage";
 import type {
   BookingsShellRow,
@@ -11,6 +11,7 @@ import {
 } from "@/app/(users)/bookings/components/booking-icon-button.component";
 import {
   bookingRowDetailPartsForViewer,
+  formatBookingCreatedShort,
   formatScheduledShort,
   statusToPill,
 } from "@/lib/bookings/formatBookingDisplay";
@@ -43,9 +44,7 @@ export type BuyerBookingsTabPanelsInput = {
   user: IUser | null;
   highlightBookingId: string;
   mutatingId: string | null;
-  remindingId: string | null;
   withdrawBooking: (id: string) => void;
-  remindDonor: (id: string) => void;
   openRatingForBooking: (id: string) => void;
 };
 
@@ -57,9 +56,7 @@ export function buildBuyerBookingsTabPanels(
     user,
     highlightBookingId,
     mutatingId,
-    remindingId,
     withdrawBooking,
-    remindDonor,
     openRatingForBooking,
   } = input;
 
@@ -71,24 +68,15 @@ export function buildBuyerBookingsTabPanels(
     let actionsSlot: ReactNode;
 
     const pendingActions = () => {
-      const busyWithdraw = mutatingId === b.id;
-      const busyRemind = remindingId === b.id;
-      const busy = busyWithdraw || busyRemind;
+      const busy = mutatingId === b.id;
       return (
         <BookingIconActions>
           <BookingIconButton
-            label={busyWithdraw ? "Withdrawing…" : "Withdraw request"}
+            label={busy ? "Withdrawing…" : "Withdraw request"}
             icon={<Undo2 className="size-4" />}
             variant="default"
             disabled={busy}
             onClick={() => withdrawBooking(b.id)}
-          />
-          <BookingIconButton
-            label={busyRemind ? "Sending reminder…" : "Remind donor"}
-            icon={<Bell className="size-4" />}
-            variant="primary"
-            disabled={busy}
-            onClick={() => remindDonor(b.id)}
           />
         </BookingIconActions>
       );
@@ -152,9 +140,11 @@ export function buildBuyerBookingsTabPanels(
 
     return {
       id: b.id,
-      dateCol: formatScheduledShort(b.scheduledAt),
+      dateCol: formatBookingCreatedShort(b.createdAt),
+      whenCol: formatScheduledShort(b.scheduledAt),
       title: parts.who,
       subtitle: parts.hospital,
+      direction: "outgoing",
       pillLabel: pill.label,
       pillVariant: pill.variant,
       reported: (b.reportsCount ?? 0) > 0,
@@ -174,7 +164,7 @@ export function buildBuyerBookingsTabPanels(
 
   const rowsSent = () => bookings.map((b) => mapRow(b, "sent"));
 
-  const columns = ["When", "Donor", "Status"] as const;
+  const columns = ["Date", "Donor", "When", "Status"] as const;
 
   return {
     sent: {

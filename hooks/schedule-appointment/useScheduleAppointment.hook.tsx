@@ -20,7 +20,7 @@ import {
   type ScheduleAppointmentDetails,
 } from "@/lib/schedule-appointment/scheduleAppointment.utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { loadSentBookings } from "@/store/slices/bookingsSlice";
+import { upsertBookingInLists } from "@/store/slices/bookingsSlice";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import {
   classifyAnalyticsError,
@@ -188,9 +188,11 @@ export function useScheduleAppointment() {
         }
         trackSuccess("booking_requested");
         clearScheduleAppointmentDraft();
-        void dispatch(loadSentBookings({ silent: true }));
 
         const created = parseBookingRecord(data);
+        if (created) {
+          dispatch(upsertBookingInLists({ branch: "sent", booking: created }));
+        }
         const bookingsHref = new URLSearchParams({ tab: "sent" });
         if (created?.id) bookingsHref.set("bookingId", created.id);
 
