@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/button/button.component";
@@ -14,20 +14,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { $api } from "@/app/api";
-import { useSetQueryParams } from "@/hooks/navigation/useQueryParamState.hook";
-import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
-import { formatPublicId } from "@/lib/users/formatPublicId";
+import { useSetQueryParams, useQueryParamNumber } from "@/hooks/navigation/useQueryParamState.hook";
+import { usePageSize } from "@/hooks/navigation/usePageSize.hook";
+import { useAppSelector } from "@/store/hooks";
 import { useBuyerBookings } from "@/hooks/bookings/useBuyerBookings.hook";
 import { useDonorBookings } from "@/hooks/bookings/useDonorBookings.hook";
 import {
   BOOKING_LIST_FILTERS,
   BOOKING_LIST_FILTER_LABELS,
+  bookingDirectionForViewer,
+  bookingListApiQuery,
   bookingListEmptyCopy,
-  bookingMatchesDate,
-  bookingMatchesListFilter,
+  bookingStillMatchesListQuery,
   isBookingListFilter,
   type BookingListFilter,
 } from "@/lib/bookings/bookingListFilters";
+import { parseBookingsPaginatedResponse } from "@/lib/bookings/parseBookingsMineResponse";
 import type { Booking } from "@/types/bookings";
 import type { BookingsShellRow } from "./bookings-shell.view";
 import {
@@ -55,42 +57,12 @@ function rowsById(
   return new Map(rows.map((row) => [row.id, row]));
 }
 
-function publicIdFromProfileBody(body: unknown): string | null {
-  const root = unwrapApiRecord(body);
-  const record =
-    root ??
-    (body && typeof body === "object"
-      ? (body as Record<string, unknown>)
-      : null);
-  if (!record) return null;
-  const direct = formatPublicId(
-    typeof record.publicId === "string"
-      ? record.publicId
-      : typeof record.public_id === "string"
-        ? record.public_id
-        : null,
-  );
-  if (direct) return direct;
-  const user = record.user;
-  if (!user || typeof user !== "object") return null;
-  const nested = user as Record<string, unknown>;
-  return formatPublicId(
-    typeof nested.publicId === "string"
-      ? nested.publicId
-      : typeof nested.public_id === "string"
-        ? nested.public_id
-        : null,
-  );
-}
-
 function scheduledTime(booking: Booking): number {
   const time = Date.parse(booking.scheduledAt);
   return Number.isFinite(time) ? time : 0;
 }
 
 export function BookingsListView() {
-  const donor = useDonorBookings();
-  const buyer = useBuyerBookings();
   const setParams = useSetQueryParams();
   const searchParams = useSearchParams();
   const rawFilter = searchParams.get("filter") ?? "";
@@ -111,51 +83,122 @@ export function BookingsListView() {
             ? "pending"
             : "all";
 
-  const [resolvedHandles, setResolvedHandles] = useState<
-    Record<string, string>
-  >({});
-
-  const missingHandleIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const booking of buyer.bookings) {
-      if (!formatPublicId(booking.donorPublicId) && booking.donorUserId) {
-        ids.add(booking.donorUserId);
-      }
-    }
-    for (const booking of donor.bookings) {
-      if (!formatPublicId(booking.requesterPublicId) && booking.requesterId) {
-        ids.add(booking.requesterId);
-      }
-    }
-    return [...ids].sort();
-  }, [buyer.bookings, donor.bookings]);
+  const listQuery = useMemo(
+    () => bookingListApiQuery(filter, dateFilter),
+    [dateFilter, filter],
+  );
+  const [page] = useQueryParamNumber("page", 1, { omitWhen: 1 });
+  const [pageSize] = usePageSize();
+  const user = useAppSelector((state) => state.auth.user);
+  const [retryKey, setRetryKey] = useState(0);
+  const retry = useCallback(() => setRetryKey((key) => key + 1), []);
+  const requestKey = `${page}|${pageSize}|${filter}|${dateFilter}`;
+  const requestKeyRef = useRef(requestKey);
+  const [pageBookings, setPageBookings] = useState<Booking[]>([]);
+  const pageBookingsRef = useRef(pageBookings);
+  useEffect(() => {
+    pageBookingsRef.current = pageBookings;
+  }, [pageBookings]);
+  const [totalCount, setTotalCount] = useState<number | undefined>(undefined);
+  const [loadState, setLoadState] = useState<"loading" | "ok" | "error">(
+    "loading",
+  );
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    const pending = missingHandleIds.filter((id) => !(id in resolvedHandles));
-    if (pending.length === 0) return;
+    if (!user?.id) return;
+    const queryChanged = requestKeyRef.current !== requestKey;
+    requestKeyRef.current = requestKey;
     let cancelled = false;
-    void Promise.all(
-      pending.map(async (userId) => {
-        try {
-          const { data, status } = await $api.donors.publicByUserId(userId);
-          if (status < 200 || status >= 300) return [userId, ""] as const;
-          return [userId, publicIdFromProfileBody(data) ?? ""] as const;
-        } catch {
-          return [userId, ""] as const;
-        }
-      }),
-    ).then((pairs) => {
+    void (async () => {
+      await Promise.resolve();
       if (cancelled) return;
-      setResolvedHandles((current) => {
-        const next = { ...current };
-        for (const [userId, publicId] of pairs) next[userId] = publicId;
-        return next;
-      });
-    });
+      setLoadState("loading");
+      setLoadError(null);
+      if (queryChanged) {
+        setPageBookings([]);
+        setTotalCount(undefined);
+      }
+      try {
+        const response = await $api.bookings.list({
+          page,
+          limit: pageSize,
+          ...listQuery,
+        });
+        if (cancelled) return;
+        if (response.status < 200 || response.status >= 300) {
+          setLoadState("error");
+          setLoadError("Could not load bookings.");
+          setPageBookings([]);
+          setTotalCount(undefined);
+          return;
+        }
+        const parsed = parseBookingsPaginatedResponse(response.data);
+        setPageBookings(parsed.bookings);
+        setTotalCount(parsed.meta?.total);
+        setLoadState("ok");
+      } catch {
+        if (cancelled) return;
+        setLoadState("error");
+        setLoadError("Could not load bookings.");
+        setPageBookings([]);
+        setTotalCount(undefined);
+      }
+    })();
     return () => {
       cancelled = true;
     };
-  }, [missingHandleIds, resolvedHandles]);
+  }, [dateFilter, filter, listQuery, page, pageSize, requestKey, retryKey, user?.id]);
+
+  const onBookingPatched = useCallback(
+    (id: string, patch: Partial<Booking>) => {
+      const current = pageBookingsRef.current;
+      let removed = 0;
+      const next = current.flatMap((row) => {
+        if (row.id !== id) return [row];
+        const updated = { ...row, ...patch };
+        if (
+          bookingStillMatchesListQuery(updated, filter, dateFilter, user?.id)
+        ) {
+          return [updated];
+        }
+        removed += 1;
+        return [];
+      });
+      pageBookingsRef.current = next;
+      setPageBookings(next);
+      if (removed > 0) {
+        setTotalCount((total) =>
+          typeof total === "number" ? Math.max(0, total - removed) : total,
+        );
+      }
+    },
+    [dateFilter, filter, user?.id],
+  );
+
+  const { incomingBookings, outgoingBookings } = useMemo(() => {
+    const incomingBookings: Booking[] = [];
+    const outgoingBookings: Booking[] = [];
+    for (const booking of pageBookings) {
+      if (bookingDirectionForViewer(booking, user?.id, filter) === "incoming") {
+        incomingBookings.push(booking);
+      } else {
+        outgoingBookings.push(booking);
+      }
+    }
+    return { incomingBookings, outgoingBookings };
+  }, [filter, pageBookings, user?.id]);
+
+  const donor = useDonorBookings({
+    enabled: false,
+    bookings: incomingBookings,
+    onBookingPatched,
+  });
+  const buyer = useBuyerBookings({
+    enabled: false,
+    bookings: outgoingBookings,
+    onBookingPatched,
+  });
 
   const incomingRows = useMemo(() => {
     return donor.shellTabs.flatMap((tab) => tab.panel.rows);
@@ -172,58 +215,18 @@ export function BookingsListView() {
     const outgoing = rowsById(outgoingRows);
     const picked: { row: BookingsShellRow; at: number }[] = [];
 
-    const titleFor = (
-      booking: Booking,
-      direction: "incoming" | "outgoing",
-      row: BookingsShellRow,
-    ): BookingsShellRow => {
-      const fromBooking =
-        direction === "outgoing"
-          ? booking.donorPublicId
-          : booking.requesterPublicId;
-      const userId =
-        direction === "outgoing" ? booking.donorUserId : booking.requesterId;
-      const handle =
-        formatPublicId(fromBooking) ??
-        formatPublicId(resolvedHandles[userId]) ??
-        "";
-      return handle === row.title ? row : { ...row, title: handle };
-    };
-
-    for (const booking of donor.bookings) {
-      if (!bookingMatchesListFilter(booking, "incoming", filter)) continue;
-      if (!bookingMatchesDate(booking, dateFilter)) continue;
+    for (const booking of incomingBookings) {
       const row = incoming.get(booking.id);
-      if (row) {
-        picked.push({
-          row: titleFor(booking, "incoming", row),
-          at: scheduledTime(booking),
-        });
-      }
+      if (row) picked.push({ row, at: scheduledTime(booking) });
     }
-    for (const booking of buyer.bookings) {
-      if (!bookingMatchesListFilter(booking, "outgoing", filter)) continue;
-      if (!bookingMatchesDate(booking, dateFilter)) continue;
+    for (const booking of outgoingBookings) {
       const row = outgoing.get(booking.id);
-      if (row) {
-        picked.push({
-          row: titleFor(booking, "outgoing", row),
-          at: scheduledTime(booking),
-        });
-      }
+      if (row) picked.push({ row, at: scheduledTime(booking) });
     }
 
     picked.sort((a, b) => b.at - a.at);
     return picked.map((item) => item.row);
-  }, [
-    buyer.bookings,
-    dateFilter,
-    donor.bookings,
-    filter,
-    incomingRows,
-    outgoingRows,
-    resolvedHandles,
-  ]);
+  }, [incomingBookings, incomingRows, outgoingBookings, outgoingRows]);
 
   const selectFilter = (next: BookingListFilter) => {
     setParams({
@@ -241,7 +244,7 @@ export function BookingsListView() {
     });
   };
 
-  if (!donor.user?.id && !buyer.user?.id) {
+  if (!user?.id) {
     return (
       <div className="rounded-2xl border border-border bg-white p-6 text-center shadow-sm dark:border-white/10 dark:bg-[#1a1a22]">
         <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20">
@@ -257,30 +260,22 @@ export function BookingsListView() {
     );
   }
 
-  const donorLoading =
-    donor.loadState === "loading" || donor.loadState === "idle";
-  const buyerLoading =
-    buyer.loadState === "loading" || buyer.loadState === "idle";
-  if (donorLoading && buyerLoading) {
+  if (loadState === "loading" && pageBookings.length === 0) {
     return <BookingsShellSkeleton tabLabels={["Bookings"]} />;
   }
 
-  const bothFailed = donor.loadState === "error" && buyer.loadState === "error";
-  if (bothFailed) {
+  if (loadState === "error" && pageBookings.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-white p-5 dark:border-white/10 dark:bg-[#1a1a22]">
         <p className="text-sm font-medium text-text-primary">
-          {donor.loadError ?? buyer.loadError ?? "Something went wrong."}
+          {loadError ?? "Something went wrong."}
         </p>
         <Button
           type="button"
           variant="link"
           size="xs"
           className="mt-3 h-auto p-0 text-xs"
-          onClick={() => {
-            void donor.loadData();
-            void buyer.loadData();
-          }}
+          onClick={retry}
         >
           Try again
         </Button>
@@ -320,8 +315,9 @@ export function BookingsListView() {
       <BookingsSingleList
         summarySections={[]}
         mainListTitle={BOOKING_LIST_FILTER_LABELS[filter]}
-        columnLabels={["When", "Booking", "Status"]}
+        columnLabels={["Date", "Booking", "When", "Status"]}
         rows={rows}
+        totalCount={totalCount}
         actionsColumnLabel="Actions"
         tableEmptyMessage={emptyCopy.title}
         emptyDescription={emptyCopy.description}

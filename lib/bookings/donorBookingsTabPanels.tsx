@@ -10,6 +10,7 @@ import {
 } from "@/app/(users)/bookings/components/booking-icon-button.component";
 import {
   bookingRowDetailPartsForViewer,
+  formatBookingCreatedShort,
   formatScheduledShort,
   statusToPill,
 } from "@/lib/bookings/formatBookingDisplay";
@@ -124,9 +125,11 @@ export function buildDonorBookingsTabPanels(
 
     return {
       id: b.id,
-      dateCol: formatScheduledShort(b.scheduledAt),
+      dateCol: formatBookingCreatedShort(b.createdAt),
+      whenCol: formatScheduledShort(b.scheduledAt),
       title: parts.who,
       subtitle: parts.hospital,
+      direction: "incoming",
       pillLabel: pill.label,
       pillVariant: pill.variant,
       reported: (b.reportsCount ?? 0) > 0,
@@ -141,7 +144,7 @@ export function buildDonorBookingsTabPanels(
       .filter((b) => donorTabForBooking(b) === t)
       .map((b) => mapRow(b, t));
 
-  const columns = ["When", "Request", "Status"] as const;
+  const columns = ["Date", "Request", "When", "Status"] as const;
 
   return {
     pending: {

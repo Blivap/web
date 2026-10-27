@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
-import { parseBookingsMineResponse } from "@/lib/bookings/parseBookingsMineResponse";
+import { fetchAllBookingListPages } from "@/lib/bookings/fetchAllBookingListPages";
 import type { Booking } from "@/types/bookings";
 
 export function useDonationHistory() {
@@ -15,23 +15,17 @@ export function useDonationHistory() {
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      const [received, sent] = await Promise.all([
-        $api.bookings.received({ status: "completed", limit: 50 }),
-        $api.bookings.sent({ status: "completed", limit: 50 }),
-      ]);
-      const rows = [
-        ...parseBookingsMineResponse(received.data ?? received),
-        ...parseBookingsMineResponse(sent.data ?? sent),
-      ]
+      const result = await fetchAllBookingListPages(
+        (params) => $api.bookings.list(params),
+        { filter: "completed" },
+      );
+      if (!result.ok) {
+        showSnackbar(result.error, "error");
+        return;
+      }
+      const unique = result.bookings
         .filter((booking) => booking.status === "completed")
         .sort((a, b) => b.scheduledAt.localeCompare(a.scheduledAt));
-
-      const seen = new Set<string>();
-      const unique = rows.filter((b) => {
-        if (seen.has(b.id)) return false;
-        seen.add(b.id);
-        return true;
-      });
       setBookings(unique);
     } catch (error) {
       showSnackbar(

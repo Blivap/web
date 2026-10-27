@@ -28,16 +28,10 @@ export default function BookingRepository() {
       });
     },
 
-    sent(params?: BookingListQuery): Promise<IResponse<unknown>> {
+    /** GET /bookings?page=&limit=&filter=&date= */
+    list(params?: BookingListQuery): Promise<IResponse<unknown>> {
       const qs = toBookingsListQueryString(params);
-      return fetcher(`${endpoints.bookings.sent}${qs}`, { method: "GET" });
-    },
-
-    received(params?: BookingListQuery): Promise<IResponse<unknown>> {
-      const qs = toBookingsListQueryString(params);
-      return fetcher(`${endpoints.bookings.received}${qs}`, {
-        method: "GET",
-      });
+      return fetcher(`${endpoints.bookings.list}${qs}`, { method: "GET" });
     },
 
     mine(): Promise<IResponse<unknown>> {
@@ -85,11 +79,6 @@ export default function BookingRepository() {
         method: "PATCH",
         data: payload,
       });
-    },
-
-    /** Optional PATCH — sends another notification to the donor (rebuzz). No body. */
-    remind(id: string): Promise<IResponse<unknown>> {
-      return fetcher(endpoints.bookings.remind(id), { method: "PATCH" });
     },
 
     submitRating(

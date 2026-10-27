@@ -3,9 +3,6 @@
 export const buyerBtnSecondary =
   "rounded-md border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-xs font-medium text-text-primary transition-colors hover:bg-[#F9FAFB] disabled:opacity-50 dark:border-white/10 dark:bg-[#1a1a22] dark:hover:bg-white/6";
 
-export const buyerBtnReminder =
-  "inline-flex items-center justify-center gap-1 rounded-md border border-primary/35 bg-primary/[0.08] px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/[0.14] disabled:opacity-50 dark:border-primary/45 dark:bg-primary/15 dark:hover:bg-primary/25";
-
 export const buyerBtnGhost =
   "rounded-md px-2.5 py-1.5 text-xs font-medium text-[#6B7280] underline-offset-2 hover:text-primary hover:underline";
 

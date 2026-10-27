@@ -50,8 +50,8 @@ export const endpoints = {
     /** Preferred: same body as legacy POST /bookings */
     request: "/bookings/request",
     create: "/bookings",
-    sent: "/bookings/sent",
-    received: "/bookings/received",
+    /** GET /bookings?page=&limit=&filter=&date= */
+    list: "/bookings",
     mine: "/bookings/mine",
     meetupCareQuote: "/bookings/meetup-care-quote",
     respond: (id: string) => `/bookings/${encodeURIComponent(id)}/respond`,
@@ -59,8 +59,6 @@ export const endpoints = {
     decline: (id: string) => `/bookings/${encodeURIComponent(id)}/decline`,
     cancel: (id: string) => `/bookings/${encodeURIComponent(id)}/cancel`,
     report: (id: string) => `/bookings/${encodeURIComponent(id)}/report`,
-    /** Optional: notify donor again (rebuzz / reminder). Backend must implement. */
-    remind: (id: string) => `/bookings/${encodeURIComponent(id)}/remind`,
     rating: (bookingId: string) =>
       `/bookings/${encodeURIComponent(bookingId)}/rating`,
   },

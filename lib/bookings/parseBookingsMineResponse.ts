@@ -88,6 +88,20 @@ function coerceArray(raw: unknown): unknown[] {
   return [];
 }
 
+function parseBookingDirection(
+  raw: unknown,
+): "incoming" | "outgoing" | undefined {
+  const value = pickString(raw)?.toLowerCase();
+  if (!value) return undefined;
+  if (value === "incoming" || value === "in" || value === "received") {
+    return "incoming";
+  }
+  if (value === "outgoing" || value === "out" || value === "sent") {
+    return "outgoing";
+  }
+  return undefined;
+}
+
 function parseStatus(raw: unknown): BookingStatus | null {
   const s = pickString(raw);
   if (!s) return null;
@@ -127,6 +141,20 @@ export function parseBookingRecord(raw: unknown): Booking | null {
   const scheduledAt = pickString(
     unwrapped.scheduledAt ?? r.scheduledAt ?? unwrapped.scheduled_at,
   );
+  const createdAt = pickString(
+    unwrapped.createdAt ??
+      r.createdAt ??
+      unwrapped.created_at ??
+      r.created_at,
+  );
+  const direction = parseBookingDirection(
+    unwrapped.direction ??
+      r.direction ??
+      unwrapped.flow ??
+      r.flow ??
+      unwrapped.side ??
+      r.side,
+  );
   const status = parseStatus(unwrapped.status ?? r.status);
   if (!donorUserId || !requesterId || !hospitalId || !scheduledAt || !status) {
     return null;
@@ -134,7 +162,33 @@ export function parseBookingRecord(raw: unknown): Booking | null {
 
   const donorPerson = pickPersonFromRef(donorRaw);
   const requesterPerson = pickPersonFromRef(requesterRaw);
-  const hospitalDisplayName = pickHospitalNameFromRef(hospitalRaw);
+  const hospitalDisplayName =
+    pickHospitalNameFromRef(hospitalRaw) ??
+    pickString(
+      unwrapped.hospitalName ??
+        r.hospitalName ??
+        unwrapped.hospital_name ??
+        r.hospital_name,
+    ) ??
+    undefined;
+  const donorProfileImage =
+    donorPerson.profileImage ??
+    pickString(
+      unwrapped.donorProfileImage ??
+        r.donorProfileImage ??
+        unwrapped.donor_profile_image ??
+        r.donor_profile_image,
+    ) ??
+    undefined;
+  const requesterProfileImage =
+    requesterPerson.profileImage ??
+    pickString(
+      unwrapped.requesterProfileImage ??
+        r.requesterProfileImage ??
+        unwrapped.requester_profile_image ??
+        r.requester_profile_image,
+    ) ??
+    undefined;
 
   const slotEndAt = pickString(
     unwrapped.slotEndAt ?? r.slotEndAt ?? unwrapped.slot_end_at,
@@ -181,6 +235,8 @@ export function parseBookingRecord(raw: unknown): Booking | null {
     requesterId,
     hospitalId,
     scheduledAt,
+    ...(createdAt ? { createdAt } : {}),
+    ...(direction ? { direction } : {}),
     ...(slotEndAt ? { slotEndAt } : {}),
     status,
     ...(meetingCode ? { meetingCode } : { meetingCode: null }),
@@ -199,9 +255,7 @@ export function parseBookingRecord(raw: unknown): Booking | null {
           ).toUpperCase(),
         }
       : {}),
-    ...(donorPerson.profileImage
-      ? { donorProfileImage: donorPerson.profileImage }
-      : {}),
+    ...(donorProfileImage ? { donorProfileImage } : {}),
     ...(requesterPerson.displayName
       ? { requesterDisplayName: requesterPerson.displayName }
       : {}),
@@ -217,9 +271,7 @@ export function parseBookingRecord(raw: unknown): Booking | null {
           ).toUpperCase(),
         }
       : {}),
-    ...(requesterPerson.profileImage
-      ? { requesterProfileImage: requesterPerson.profileImage }
-      : {}),
+    ...(requesterProfileImage ? { requesterProfileImage } : {}),
     ...(hospitalDisplayName ? { hospitalName: hospitalDisplayName } : {}),
     ...(reportsCount > 0 ? { reportsCount } : {}),
     ...(requesterHasRated === true ? { requesterHasRated: true } : {}),

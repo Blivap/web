@@ -58,6 +58,23 @@ export function formatScheduledLabel(iso: string): string {
   }
 }
 
+/** Created-at label for the bookings table Date column: day, month, year. */
+export function formatBookingCreatedShort(
+  createdAt: string | null | undefined,
+): string {
+  if (!createdAt) return "—";
+  try {
+    const d = new Date(createdAt);
+    if (Number.isNaN(d.getTime())) return createdAt;
+    const day = d.getDate();
+    const month = d.toLocaleString(undefined, { month: "short" });
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  } catch {
+    return createdAt;
+  }
+}
+
 /** Compact date for booking table rows. */
 export function formatScheduledShort(iso: string): string {
   try {

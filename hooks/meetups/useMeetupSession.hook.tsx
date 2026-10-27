@@ -21,8 +21,6 @@ import {
   trackSuccess,
 } from "@/lib/analytics/ga";
 
-const POLL_MS = 5000;
-
 function statusFromAxios(e: unknown): number | undefined {
   if (!axios.isAxiosError(e)) return undefined;
   return e.response?.status;
@@ -41,8 +39,27 @@ export function useMeetupSession(sessionId: string | undefined) {
   const [reportBusy, setReportBusy] = useState(false);
   const [terminateBusy, setTerminateBusy] = useState(false);
 
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const completedTrackedRef = useRef(false);
+
+  const applyParsedSession = useCallback((parsed: MeetupSession) => {
+    if (parsed.status === "completed" && !completedTrackedRef.current) {
+      completedTrackedRef.current = true;
+      trackSuccess("meetup_completed");
+    }
+    setSession(parsed);
+    setSessionLoad("ok");
+    setSessionError(null);
+    return parsed;
+  }, []);
+
+  const applySessionBody = useCallback(
+    (data: unknown) => {
+      const parsed = parseMeetupSessionBody(data);
+      if (!parsed) return null;
+      return applyParsedSession(parsed);
+    },
+    [applyParsedSession],
+  );
 
   const refreshSession = useCallback(async () => {
     if (!sessionId) return null;
@@ -66,13 +83,7 @@ export function useMeetupSession(sessionId: string | undefined) {
         setSessionError("Unexpected response from the server.");
         return null;
       }
-      if (parsed.status === "completed" && !completedTrackedRef.current) {
-        completedTrackedRef.current = true;
-        trackSuccess("meetup_completed");
-      }
-      setSession(parsed);
-      setSessionLoad("ok");
-      return parsed;
+      return applyParsedSession(parsed);
     } catch (e) {
       setSession(null);
       setSessionLoad("error");
@@ -81,7 +92,7 @@ export function useMeetupSession(sessionId: string | undefined) {
       );
       return null;
     }
-  }, [sessionId]);
+  }, [applyParsedSession, sessionId]);
 
   useEffect(() => {
     completedTrackedRef.current = false;
@@ -89,22 +100,6 @@ export function useMeetupSession(sessionId: string | undefined) {
     setSessionLoad("loading");
     void refreshSession();
   }, [sessionId, refreshSession]);
-
-  useEffect(() => {
-    if (!sessionId || !session) return;
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-    if (meetupReadOnly(session)) return;
-    pollRef.current = setInterval(() => {
-      void refreshSession();
-    }, POLL_MS);
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset poll only when `session.status` changes, not every session poll payload
-  }, [sessionId, session?.status, refreshSession]);
 
   const verifyCode = useCallback(
     async (code: string) => {
@@ -130,7 +125,7 @@ export function useMeetupSession(sessionId: string | undefined) {
               "That code did not work. Check the digits and try again.",
           );
         }
-        await refreshSession();
+        if (!applySessionBody(data)) await refreshSession();
         trackSuccess("meetup_code_verified");
         return { ok: true as const };
       } catch (e) {
@@ -148,7 +143,7 @@ export function useMeetupSession(sessionId: string | undefined) {
         setVerifyBusy(false);
       }
     },
-    [sessionId, refreshSession, showSnackbar],
+    [applySessionBody, sessionId, refreshSession, showSnackbar],
   );
 
   const verifyQr = useCallback(
@@ -184,7 +179,7 @@ export function useMeetupSession(sessionId: string | undefined) {
               "Could not verify from this QR code.",
           };
         }
-        await refreshSession();
+        if (!applySessionBody(data)) await refreshSession();
         trackSuccess("meetup_qr_verified");
         return { ok: true as const };
       } catch (e) {
@@ -211,7 +206,7 @@ export function useMeetupSession(sessionId: string | undefined) {
         setVerifyBusy(false);
       }
     },
-    [sessionId, refreshSession],
+    [applySessionBody, sessionId, refreshSession],
   );
 
   const confirmDonation = useCallback(
@@ -245,9 +240,15 @@ export function useMeetupSession(sessionId: string | undefined) {
               "Could not record your confirmation.",
           };
         }
-        await refreshSession();
-        await $api.meetups.complete(sessionId).catch(() => undefined);
-        const after = await refreshSession();
+        let after = applySessionBody(data) ?? (await refreshSession());
+        try {
+          const completeRes = await $api.meetups.complete(sessionId);
+          if (completeRes.status >= 200 && completeRes.status < 300) {
+            after = applySessionBody(completeRes.data) ?? after;
+          }
+        } catch {
+          // Complete is only valid once both sides have confirmed.
+        }
         const completed =
           after?.status?.toLowerCase() === "completed" ||
           (after?.requesterDonationConfirmed === true &&
@@ -269,7 +270,7 @@ export function useMeetupSession(sessionId: string | undefined) {
         setConfirmBusy(false);
       }
     },
-    [sessionId, session, refreshSession],
+    [applySessionBody, sessionId, session, refreshSession],
   );
 
   const terminateMeet = useCallback(
@@ -294,7 +295,7 @@ export function useMeetupSession(sessionId: string | undefined) {
           showSnackbar(message, "error");
           return { ok: false as const, message };
         }
-        await refreshSession();
+        if (!applySessionBody(data)) await refreshSession();
         return { ok: true as const };
       } catch (e) {
         const message = getAxiosErrorMessage(
@@ -307,7 +308,7 @@ export function useMeetupSession(sessionId: string | undefined) {
         setTerminateBusy(false);
       }
     },
-    [sessionId, refreshSession, showSnackbar],
+    [applySessionBody, sessionId, refreshSession, showSnackbar],
   );
 
   const submitReport = useCallback(

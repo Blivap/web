@@ -1,7 +1,8 @@
 "use client";
 
 import classNames from "classnames";
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { UserRound } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,7 +20,12 @@ import {
 
 export type BookingsShellRow = {
   id: string;
+  /** When the booking was created. */
   dateCol: string;
+  /** When the appointment is scheduled. */
+  whenCol: string;
+  /** Combined list: request received vs request sent. */
+  direction?: "incoming" | "outgoing";
   title: string;
   subtitle?: ReactNode;
   pillLabel: string;
@@ -48,15 +54,17 @@ export type BookingsTabPanel = {
   listEyebrow?: string;
   summarySections: readonly BookingsShellSummary[];
   mainListTitle: string;
-  columnLabels: readonly [string, string, string];
+  columnLabels: readonly [string, string, string, string];
   rows: readonly BookingsShellRow[];
+  /** Server total when `rows` is already a single page. */
+  totalCount?: number;
   /** Shown when `rows` is empty. */
   tableEmptyMessage?: string;
   /** Supporting line under the empty-state title. */
   emptyDescription?: string;
   /** Stretch the list card to fill the remaining page height. */
   fill?: boolean;
-  /** When set, table renders a fourth column for `actionsSlot` on each row. */
+  /** When set, table renders a column for `actionsSlot` on each row. */
   actionsColumnLabel?: string;
   /** Controls aligned to the right of the list title. */
   headerAside?: ReactNode;
@@ -91,9 +99,11 @@ type BookingsRowsTableProps = {
   colA: string;
   colB: string;
   colC: string;
+  colD: string;
   colCount: number;
   actionsColumnLabel?: string;
   tableEmptyMessage: string;
+  totalCount?: number;
 };
 
 function bookingRowHighlightClass(highlight: boolean | undefined): string {
@@ -108,43 +118,71 @@ function bookingDesktopHighlightClass(highlight: boolean | undefined): string {
     "[&>td]:border-transparent",
     "[&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg",
     `[&>td:first-child]:bg-[linear-gradient(90deg,transparent_0.5rem,${tint}_0.5rem)]`,
-    `[&>td:nth-child(2)]:bg-[${tint}] [&>td:nth-child(3)]:bg-[${tint}]`,
+    `[&>td:not(:first-child):not(:last-child)]:bg-[${tint}]`,
     `[&>td:last-child]:bg-[linear-gradient(270deg,transparent_0.5rem,${tint}_0.5rem)]`,
     `dark:[&>td:first-child]:bg-[linear-gradient(90deg,transparent_0.5rem,${tintDark}_0.5rem)]`,
-    `dark:[&>td:nth-child(2)]:bg-[${tintDark}] dark:[&>td:nth-child(3)]:bg-[${tintDark}]`,
+    `dark:[&>td:not(:first-child):not(:last-child)]:bg-[${tintDark}]`,
     `dark:[&>td:last-child]:bg-[linear-gradient(270deg,transparent_0.5rem,${tintDark}_0.5rem)]`,
   ].join(" ");
+}
+
+function BookingDirectionMark({
+  direction,
+}: {
+  direction: "incoming" | "outgoing";
+}) {
+  const incoming = direction === "incoming";
+  return (
+    <span
+      title={incoming ? "Incoming" : "Outgoing"}
+      aria-label={incoming ? "Incoming" : "Outgoing"}
+      className={classNames(
+        "shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+        incoming
+          ? "border-sky-500/40 text-sky-700 dark:text-sky-300"
+          : "border-violet-400/50 text-violet-700 dark:text-violet-300",
+      )}
+    >
+      {incoming ? "In" : "Out"}
+    </span>
+  );
 }
 
 function BookingRowMeta({
   title,
   subtitle,
   avatarUrl,
+  direction,
 }: {
   title: string;
   subtitle?: ReactNode;
   avatarUrl?: string | null;
+  direction?: "incoming" | "outgoing";
 }) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const showImage = Boolean(avatarUrl) && failedUrl !== avatarUrl;
+
   return (
     <div className="flex min-w-0 items-center gap-2.5">
-      {avatarUrl ? (
+      {showImage ? (
         <Image
-          src={avatarUrl}
+          src={avatarUrl!}
           alt=""
           width={36}
           height={36}
           sizes="36px"
           className="size-9 shrink-0 rounded-full object-cover ring-1 ring-border dark:ring-white/10"
+          onError={() => setFailedUrl(avatarUrl ?? null)}
         />
       ) : (
         <span
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#F4F4F5] text-[10px] font-semibold uppercase text-text-tertiary dark:bg-white/8"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#F3F4F6] text-text-tertiary ring-1 ring-black/5 dark:bg-white/10 dark:text-white/70 dark:ring-white/10"
           aria-hidden
         >
-          {title.slice(0, 1)}
+          <UserRound className="size-4" />
         </span>
       )}
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         {title ? (
           <p className="truncate text-sm font-medium text-text-primary">
             {title}
@@ -154,6 +192,9 @@ function BookingRowMeta({
           <p className="truncate text-xs text-text-tertiary">{subtitle}</p>
         ) : null}
       </div>
+      {direction ? (
+        <BookingDirectionMark direction={direction} />
+      ) : null}
     </div>
   );
 }
@@ -187,14 +228,17 @@ function BookingsRowsTable({
   colA,
   colB,
   colC,
+  colD,
   colCount,
   actionsColumnLabel,
   tableEmptyMessage,
+  totalCount,
   fill = false,
 }: BookingsRowsTableProps & { fill?: boolean }) {
   const [page, setPage] = useQueryParamNumber("page", 1, { omitWhen: 1 });
   const [pageSize, setPageSize] = usePageSize();
-  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const totalItems = totalCount ?? rows.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(Math.max(1, page), totalPages);
 
   useEffect(() => {
@@ -202,14 +246,15 @@ function BookingsRowsTable({
   }, [page, totalPages, setPage]);
 
   const paginatedRows = useMemo(() => {
+    if (totalCount !== undefined) return rows;
     if (rows.length <= pageSize) {
       return rows;
     }
     const start = (safePage - 1) * pageSize;
     return rows.slice(start, start + pageSize);
-  }, [rows, safePage, pageSize]);
+  }, [rows, safePage, pageSize, totalCount]);
 
-  const hasRows = rows.length > 0;
+  const hasRows = totalItems > 0;
 
   return (
     <div className={classNames("flex flex-col", fill && "min-h-0 flex-1")}>
@@ -232,14 +277,24 @@ function BookingsRowsTable({
                 className={`rounded-xl border border-[#F3F4F6] bg-white p-3 dark:border-white/10 dark:bg-[#1a1a22] ${bookingRowHighlightClass(row.highlight)}`}
               >
                 <div className="flex flex-col gap-2.5">
-                  <p className="text-[11px] font-medium text-text-tertiary">
+                  <p className="text-[11px] font-medium text-text-secondary">
+                    <span className="uppercase tracking-wide text-text-tertiary">
+                      Date
+                    </span>{" "}
                     {row.dateCol}
                   </p>
                   <BookingRowMeta
                     title={row.title}
                     subtitle={row.subtitle}
                     avatarUrl={row.avatarUrl}
+                    direction={row.direction}
                   />
+                  <p className="text-[11px] font-medium text-text-secondary">
+                    <span className="uppercase tracking-wide text-text-tertiary">
+                      When
+                    </span>{" "}
+                    {row.whenCol}
+                  </p>
                   <div className="flex flex-nowrap items-center justify-between gap-2">
                     <BookingRowStatus
                       pillLabel={row.pillLabel}
@@ -284,6 +339,12 @@ function BookingsRowsTable({
                 >
                   {colC}
                 </th>
+                <th
+                  scope="col"
+                  className="w-[1%] whitespace-nowrap pb-2 pr-3 text-[11px] font-medium uppercase tracking-wide text-text-tertiary"
+                >
+                  {colD}
+                </th>
                 {actionsColumnLabel ? (
                   <th
                     scope="col"
@@ -319,7 +380,11 @@ function BookingsRowsTable({
                         title={row.title}
                         subtitle={row.subtitle}
                         avatarUrl={row.avatarUrl}
+                        direction={row.direction}
                       />
+                    </td>
+                    <td className="whitespace-nowrap border-t border-[#F3F4F6] py-3 pr-3 align-middle text-xs text-text-secondary dark:border-white/10">
+                      {row.whenCol}
                     </td>
                     <td className="whitespace-nowrap border-t border-[#F3F4F6] py-3 pr-3 align-middle dark:border-white/10">
                       <BookingRowStatus
@@ -398,15 +463,16 @@ function BookingsTabBody({
   mainListTitle,
   columnLabels,
   rows,
+  totalCount,
   tableEmptyMessage = "Nothing here yet.",
   emptyDescription,
   fill = false,
   actionsColumnLabel,
   headerAside,
 }: BookingsTabBodyProps) {
-  const [colA, colB, colC] = columnLabels;
-  const colCount = actionsColumnLabel ? 4 : 3;
-  const mainListCount = rows.length;
+  const [colA, colB, colC, colD] = columnLabels;
+  const colCount = actionsColumnLabel ? 5 : 4;
+  const mainListCount = totalCount ?? rows.length;
 
   const rowIdsKey = useMemo(() => rows.map((r) => r.id).join("|"), [rows]);
 
@@ -474,9 +540,11 @@ function BookingsTabBody({
             colA={colA}
             colB={colB}
             colC={colC}
+            colD={colD}
             colCount={colCount}
             actionsColumnLabel={actionsColumnLabel}
             tableEmptyMessage={tableEmptyMessage}
+            totalCount={totalCount}
             fill={fill}
           />
         )}
@@ -521,6 +589,7 @@ function BookingsMobileRowSkeleton() {
           <BookingsSk className="h-3 w-1/2 max-w-36" />
         </div>
       </div>
+      <BookingsSk className="mt-2.5 h-3 w-28" />
       <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
         <BookingsSk className="h-6 w-20 rounded-full" />
         <div className="flex gap-1">
@@ -534,7 +603,7 @@ function BookingsMobileRowSkeleton() {
 
 function BookingsDesktopRowSkeleton() {
   return (
-    <div className="grid grid-cols-[minmax(5rem,auto)_1fr_minmax(5rem,auto)_minmax(5.5rem,auto)] items-center gap-3 border-t border-[#F3F4F6] py-3 dark:border-white/10">
+    <div className="grid grid-cols-[minmax(5rem,auto)_1fr_minmax(5rem,auto)_minmax(5rem,auto)_minmax(5.5rem,auto)] items-center gap-3 border-t border-[#F3F4F6] py-3 dark:border-white/10">
       <BookingsSk className="h-3.5 w-20" />
       <div className="flex min-w-0 items-center gap-2.5">
         <BookingsSk className="size-9 shrink-0 rounded-full" />
@@ -543,6 +612,7 @@ function BookingsDesktopRowSkeleton() {
           <BookingsSk className="h-3 w-28 max-w-full" />
         </div>
       </div>
+      <BookingsSk className="h-3.5 w-20" />
       <BookingsSk className="h-6 w-20 rounded-full" />
       <div className="flex justify-end gap-1">
         <BookingsSk className="size-9 rounded-md" />
@@ -586,11 +656,11 @@ export function BookingsShellSkeleton({
           </div>
 
           <div className="hidden min-w-0 md:block">
-            <div className="grid grid-cols-[minmax(5rem,auto)_1fr_minmax(5rem,auto)_minmax(5.5rem,auto)] gap-3 pb-2">
-              <BookingsSk className="h-3 w-12" />
+            <div className="grid grid-cols-[minmax(5rem,auto)_1fr_minmax(5rem,auto)_minmax(5rem,auto)_minmax(5.5rem,auto)] gap-3 pb-2">
+              <BookingsSk className="h-3 w-10" />
               <BookingsSk className="h-3 w-16" />
+              <BookingsSk className="h-3 w-10" />
               <BookingsSk className="h-3 w-12" />
-              <BookingsSk className="ms-auto h-3 w-14" />
             </div>
             <BookingsDesktopRowSkeleton />
             <BookingsDesktopRowSkeleton />

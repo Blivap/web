@@ -8,13 +8,14 @@ export type BookingStatus =
   | "completed"
   | "no_show";
 
-/** Optional filters for GET /bookings/sent and GET /bookings/received. */
+/** Optional filters for GET /bookings. */
 export type BookingListQuery = {
   page?: number;
   limit?: number;
-  status?: BookingStatus;
-  scheduledFrom?: string;
-  scheduledTo?: string;
+  /** Bookings screen filter: incoming, outgoing, pending, confirmed, and so on. */
+  filter?: string;
+  /** Calendar day `YYYY-MM-DD`. */
+  date?: string;
 };
 
 export type BookingsListMeta = {
@@ -29,6 +30,10 @@ export type Booking = {
   requesterId: string;
   hospitalId: string;
   scheduledAt: string;
+  /** When the booking record was created. */
+  createdAt?: string | null;
+  /** Set by GET /bookings when the row is incoming or outgoing. */
+  direction?: "incoming" | "outgoing" | null;
   slotEndAt?: string | null;
   status: BookingStatus;
   meetingCode?: string | null;

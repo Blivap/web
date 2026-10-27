@@ -353,6 +353,62 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
     if (!me.publicId && meId) me = { ...me, publicId: meId };
   }
 
+  if (!peer.profileImage || !me.profileImage) {
+    const imageFrom = (raw: unknown): string | null => {
+      if (!raw || typeof raw !== "object") return null;
+      const record = raw as Record<string, unknown>;
+      return pickString(
+        record.profileImage ??
+          record.profile_image ??
+          record.profileImageUrl ??
+          record.profile_image_url ??
+          record.avatarUrl ??
+          record.avatar,
+      );
+    };
+    const bookingRecord =
+      bookingRaw && typeof bookingRaw === "object"
+        ? (bookingRaw as Record<string, unknown>)
+        : null;
+    const donorImage =
+      imageFrom(r.donorUserId ?? r.donor_user_id) ??
+      (bookingRecord
+        ? pickString(
+            bookingRecord.donorProfileImage ??
+              bookingRecord.donor_profile_image,
+          ) ?? imageFrom(bookingRecord.donorUserId ?? bookingRecord.donor_user_id)
+        : null) ??
+      pickString(r.donorProfileImage ?? r.donor_profile_image);
+    const requesterImage =
+      imageFrom(r.requesterUserId ?? r.requesterId ?? r.requester_id) ??
+      (bookingRecord
+        ? pickString(
+            bookingRecord.requesterProfileImage ??
+              bookingRecord.requester_profile_image,
+          ) ??
+          imageFrom(
+            bookingRecord.requesterId ?? bookingRecord.requester_id,
+          )
+        : null) ??
+      pickString(r.requesterProfileImage ?? r.requester_profile_image);
+    const peerImage =
+      meRole === "donor"
+        ? requesterImage
+        : meRole === "requester"
+          ? donorImage
+          : null;
+    const meImage =
+      meRole === "donor"
+        ? donorImage
+        : meRole === "requester"
+          ? requesterImage
+          : null;
+    if (!peer.profileImage && peerImage) {
+      peer = { ...peer, profileImage: peerImage };
+    }
+    if (!me.profileImage && meImage) me = { ...me, profileImage: meImage };
+  }
+
   if (me.meetupVerified === undefined || peer.meetupVerified === undefined) {
     if (meRole === "requester") {
       me = {

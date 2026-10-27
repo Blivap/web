@@ -1,4 +1,4 @@
-import type { Booking, BookingStatus } from "@/types/bookings";
+import type { Booking, BookingListQuery } from "@/types/bookings";
 
 export const BOOKING_LIST_FILTERS = [
   "all",
@@ -26,16 +26,6 @@ export const BOOKING_LIST_FILTER_LABELS: Record<BookingListFilter, string> = {
   declined: "Declined",
   expired: "Expired",
   no_show: "No-show",
-};
-
-const STATUS_FILTERS: Partial<Record<BookingListFilter, BookingStatus>> = {
-  pending: "pending",
-  confirmed: "accepted",
-  cancelled: "cancelled",
-  completed: "completed",
-  declined: "rejected",
-  expired: "expired",
-  no_show: "no_show",
 };
 
 export function isBookingListFilter(value: string): value is BookingListFilter {
@@ -71,25 +61,104 @@ export function bookingListEmptyCopy(filter: BookingListFilter): {
   }
 }
 
-/** True when `scheduledAt` falls on `date` (`YYYY-MM-DD`, local calendar day). */
-export function bookingMatchesDate(booking: Booking, date: string): boolean {
-  const wanted = date.trim();
-  if (!wanted) return true;
-  const scheduled = new Date(booking.scheduledAt);
-  if (Number.isNaN(scheduled.getTime())) return false;
-  const month = String(scheduled.getMonth() + 1).padStart(2, "0");
-  const day = String(scheduled.getDate()).padStart(2, "0");
-  return `${scheduled.getFullYear()}-${month}-${day}` === wanted;
+/** Query fields for GET /bookings: `filter` and `date` (`YYYY-MM-DD`). */
+export function bookingListApiQuery(
+  filter: BookingListFilter,
+  date: string,
+): Pick<BookingListQuery, "filter" | "date"> {
+  const day = /^\d{4}-\d{2}-\d{2}$/.test(date.trim()) ? date.trim() : "";
+  return {
+    ...(filter !== "all" ? { filter } : {}),
+    ...(day ? { date: day } : {}),
+  };
 }
 
-export function bookingMatchesListFilter(
-  booking: Booking,
-  direction: "incoming" | "outgoing",
-  filter: BookingListFilter,
+export function isActiveBookingListQuery(
+  query?: Pick<BookingListQuery, "filter" | "date">,
 ): boolean {
-  if (filter === "incoming") return direction === "incoming";
-  if (filter === "outgoing") return direction === "outgoing";
-  const status = STATUS_FILTERS[filter];
-  if (status) return booking.status === status;
-  return true;
+  return Boolean(
+    (query?.filter && query.filter !== "all") || query?.date,
+  );
+}
+
+export type BookingsListSourceOptions = {
+  /** Sent on GET /bookings as `filter` and `date`. */
+  query?: Pick<BookingListQuery, "filter" | "date">;
+  /** When false, the hook does not request the list. */
+  enabled?: boolean;
+  /** Rows to render instead of the stored list. */
+  bookings?: Booking[];
+  /** Apply a successful mutation to the visible rows. */
+  onBookingPatched?: (id: string, patch: Partial<Booking>) => void;
+};
+
+const LIST_FILTER_STATUS: Partial<
+  Record<BookingListFilter, Booking["status"]>
+> = {
+  pending: "pending",
+  confirmed: "accepted",
+  cancelled: "cancelled",
+  completed: "completed",
+  declined: "rejected",
+  expired: "expired",
+  no_show: "no_show",
+};
+
+function scheduledCalendarDay(iso: string | undefined): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+/** Whether a patched row still belongs on the current bookings query. */
+export function bookingStillMatchesListQuery(
+  booking: Booking,
+  filter: BookingListFilter,
+  date: string,
+  userId: string | undefined,
+): boolean {
+  if (date) {
+    const day = scheduledCalendarDay(booking.scheduledAt);
+    if (day && day !== date) return false;
+  }
+  if (filter === "all") return true;
+  if (filter === "incoming" || filter === "outgoing") {
+    return bookingDirectionForViewer(booking, userId, filter) === filter;
+  }
+  const status = LIST_FILTER_STATUS[filter];
+  return status ? booking.status === status : true;
+}
+
+/** `silent` keeps the current screen up. `replace` drops rows the server filter excluded. */
+export function bookingListLoadArg(
+  query: BookingsListSourceOptions["query"],
+  alreadyLoaded: boolean,
+): {
+  silent?: boolean;
+  replace?: boolean;
+  query?: BookingsListSourceOptions["query"];
+} {
+  const active = isActiveBookingListQuery(query);
+  if (alreadyLoaded) {
+    return { silent: true, replace: active, query };
+  }
+  return { replace: active, query };
+}
+
+export function bookingDirectionForViewer(
+  booking: Booking,
+  userId: string | undefined,
+  filter: BookingListFilter,
+): "incoming" | "outgoing" {
+  if (booking.direction === "incoming" || booking.direction === "outgoing") {
+    return booking.direction;
+  }
+  if (filter === "incoming") return "incoming";
+  if (filter === "outgoing") return "outgoing";
+  if (userId && booking.requesterId === userId) return "outgoing";
+  if (userId && booking.donorUserId === userId) return "incoming";
+  return "outgoing";
 }
