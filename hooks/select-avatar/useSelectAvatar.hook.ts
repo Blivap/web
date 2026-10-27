@@ -8,19 +8,46 @@ import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setUser } from "@/store/slices/authSlice";
 import {
-  setAvatars,
+  emptyAvatarListMeta,
+  setAvatarPage,
   setIsLoading,
   setSelectedAvatar,
   toggleSelectedAvatar,
 } from "@/store/slices/selectAvatarSlice";
 import { normalizeUser } from "@/lib/utils";
-import { IUser } from "@/types";
+import { AvatarListMeta, IUser } from "@/types";
 import { getPostAuthRedirect } from "@/lib/navigation/authRedirect";
 import {
   classifyAnalyticsError,
   trackFailure,
   trackSuccess,
 } from "@/lib/analytics/ga";
+
+function readAvatarListMeta(body: unknown): AvatarListMeta {
+  if (!body || typeof body !== "object") return emptyAvatarListMeta;
+  const raw = (body as { meta?: unknown }).meta;
+  if (!raw || typeof raw !== "object") return emptyAvatarListMeta;
+  const meta = raw as Record<string, unknown>;
+  const total = Math.max(0, Math.round(Number(meta.total) || 0));
+  const totalPages = Math.max(1, Math.round(Number(meta.totalPages) || 1));
+  const page = Math.min(
+    totalPages,
+    Math.max(1, Math.round(Number(meta.page) || 1)),
+  );
+  return {
+    page,
+    total,
+    totalPages,
+    hasNextPage:
+      typeof meta.hasNextPage === "boolean"
+        ? meta.hasNextPage
+        : page < totalPages,
+    hasPreviousPage:
+      typeof meta.hasPreviousPage === "boolean"
+        ? meta.hasPreviousPage
+        : page > 1,
+  };
+}
 
 function mergeUserWithAvatar(
   currentUser: IUser | null,
@@ -41,7 +68,7 @@ export function useSelectAvatar() {
   const searchParams = useSearchParams();
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
-  const { avatars, isLoading, selectedAvatar } = useAppSelector(
+  const { avatars, meta, isLoading, selectedAvatar } = useAppSelector(
     (state) => state.selectAvatar,
   );
   const user = useAppSelector((state) => state.auth.user);
@@ -51,30 +78,46 @@ export function useSelectAvatar() {
   showSnackbarRef.current = showSnackbar;
 
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
-  const getAvatars = useCallback(async () => {
-    try {
-      dispatch(setIsLoading(true));
-      const { data, status } = await $api.avatar.getAvatars();
-      if (status >= 200 && status < 300 && data) {
-        const list = Array.isArray(data.data) ? data.data : [];
-        dispatch(setAvatars(list));
-      } else {
-        /* Treat non-OK as finished load so consumers don’t retry forever while avatars stays null. */
-        dispatch(setAvatars([]));
-      }
-    } catch (err: unknown) {
-      const message =
-        err instanceof AxiosError
-          ? ((err.response?.data as { message?: string })?.message ??
-            err.message)
-          : "Unable to load avatars.";
-      showSnackbarRef.current(message, "error");
-      /* Network/offline: stop infinite refetch — `null` meant “never fetched” and effects kept calling again. */
-      dispatch(setAvatars([]));
-    } finally {
-      dispatch(setIsLoading(false));
-    }
+  const requestId = useRef(0);
+  const avatarsRef = useRef(avatars);
+  avatarsRef.current = avatars;
+
+  const markLoadFinished = useCallback(() => {
+    /* `null` means “never fetched” and the open effects would retry forever. */
+    if (avatarsRef.current !== null) return;
+    dispatch(setAvatarPage({ avatars: [], meta: emptyAvatarListMeta }));
   }, [dispatch]);
+
+  const getAvatars = useCallback(
+    async (page = 1) => {
+      const id = ++requestId.current;
+      try {
+        dispatch(setIsLoading(true));
+        const { data, status } = await $api.avatar.getAvatars(page);
+        if (id !== requestId.current) return;
+        if (status >= 200 && status < 300 && data) {
+          const list = Array.isArray(data.data) ? data.data : [];
+          dispatch(
+            setAvatarPage({ avatars: list, meta: readAvatarListMeta(data) }),
+          );
+        } else {
+          markLoadFinished();
+        }
+      } catch (err: unknown) {
+        if (id !== requestId.current) return;
+        const message =
+          err instanceof AxiosError
+            ? ((err.response?.data as { message?: string })?.message ??
+              err.message)
+            : "Unable to load avatars.";
+        showSnackbarRef.current(message, "error");
+        markLoadFinished();
+      } finally {
+        if (id === requestId.current) dispatch(setIsLoading(false));
+      }
+    },
+    [dispatch, markLoadFinished],
+  );
 
   const handleSelectAvatar = (avatarUrl: string) => {
     dispatch(toggleSelectedAvatar(avatarUrl));
@@ -146,6 +189,7 @@ export function useSelectAvatar() {
 
   return {
     avatars,
+    avatarMeta: meta,
     selectedAvatar,
     handleSelectAvatar,
     handleContinue,

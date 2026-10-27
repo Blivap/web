@@ -1,8 +1,17 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { IAvatar } from "@/types";
+import { AvatarListMeta, IAvatar } from "@/types";
+
+export const emptyAvatarListMeta: AvatarListMeta = {
+  page: 1,
+  total: 0,
+  totalPages: 1,
+  hasNextPage: false,
+  hasPreviousPage: false,
+};
 
 interface SelectAvatarState {
   avatars: IAvatar[] | null;
+  meta: AvatarListMeta;
   isLoading: boolean;
   selectedAvatar: string | null;
   isModalOpen: boolean;
@@ -10,6 +19,7 @@ interface SelectAvatarState {
 
 const initialState: SelectAvatarState = {
   avatars: null,
+  meta: emptyAvatarListMeta,
   isLoading: false,
   selectedAvatar: null,
   isModalOpen: false,
@@ -19,8 +29,12 @@ const selectAvatarSlice = createSlice({
   name: "selectAvatar",
   initialState,
   reducers: {
-    setAvatars: (state, action: PayloadAction<IAvatar[] | null>) => {
-      state.avatars = action.payload;
+    setAvatarPage: (
+      state,
+      action: PayloadAction<{ avatars: IAvatar[]; meta: AvatarListMeta }>,
+    ) => {
+      state.avatars = action.payload.avatars;
+      state.meta = action.payload.meta;
     },
     setIsLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
@@ -42,7 +56,7 @@ const selectAvatarSlice = createSlice({
 });
 
 export const {
-  setAvatars,
+  setAvatarPage,
   setIsLoading,
   toggleSelectedAvatar,
   setSelectedAvatar,

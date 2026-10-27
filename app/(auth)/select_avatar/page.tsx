@@ -1,14 +1,14 @@
 "use client";
 
-import classNames from "classnames";
-import Image from "next/image";
 import { Button } from "../../../components/button/button.component";
+import { AvatarPicker } from "@/components/select-avatar/avatar-picker.component";
 import { useSelectAvatar } from "@/hooks/select-avatar/useSelectAvatar.hook";
 import { useEffect } from "react";
 
 export default function SelectAvatarPage() {
   const {
     avatars,
+    avatarMeta,
     selectedAvatar,
     handleSelectAvatar,
     handleContinue,
@@ -28,38 +28,20 @@ export default function SelectAvatarPage() {
           Select Avatar
         </p>
         <div className="flex flex-col gap-13.5">
-          <div className="grid grid-cols-4 grid-rows-3 gap-4 rounded-3xl border border-black/5 bg-[#00000026] px-5 py-10 dark:border-white/10 dark:bg-white/6 md:px-18.75 md:py-24.5">
-            {isLoading || !avatars
-              ? [...Array(12)].map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="flex size-15 shrink-0 items-center justify-center rounded-full border border-[#FFFFFF00] bg-[#B190B6] animate-pulse dark:bg-[#4B5563]"
-                  />
-                ))
-              : avatars?.map((avatar) => (
-                  <button
-                    key={avatar.id}
-                    type="button"
-                    className={classNames(
-                      "relative size-15 shrink-0 overflow-hidden rounded-full border border-transparent bg-[#B190B6] transition-all duration-150 hover:border-3 hover:border-primary dark:bg-[#374151]",
-                      {
-                        "border-3 border-primary":
-                          selectedAvatar === avatar.url,
-                      },
-                    )}
-                    onClick={() => handleSelectAvatar(avatar.url)}
-                  >
-                    <Image
-                      src={avatar.url}
-                      alt="Avatar option"
-                      fill
-                      sizes="60px"
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </button>
-                ))}
-          </div>
+          <AvatarPicker
+            avatars={avatars}
+            isLoading={isLoading}
+            selectedUrl={selectedAvatar}
+            onSelect={handleSelectAvatar}
+            page={avatarMeta.page}
+            totalPages={avatarMeta.totalPages}
+            hasNextPage={avatarMeta.hasNextPage}
+            hasPreviousPage={avatarMeta.hasPreviousPage}
+            onPageChange={(nextPage) => void getAvatars(nextPage)}
+            tileClassName="size-15 shrink-0 rounded-full border border-transparent bg-[#B190B6] dark:bg-[#374151]"
+            skeletonClassName="animate-pulse dark:bg-[#4B5563]"
+            frameClassName="rounded-3xl border border-black/5 bg-[#00000026] px-8 py-10 dark:border-white/10 dark:bg-white/6 md:px-18.75 md:py-24.5"
+          />
           <Button
             disabled={!selectedAvatar || isConfirming}
             loading={isConfirming}
