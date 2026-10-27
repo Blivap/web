@@ -111,9 +111,9 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
             />
           </div>
         </div>
-        <p className="mt-auto mb-4 flex min-w-0 max-w-full items-end overflow-hidden font-helvetica text-5xl font-semibold tracking-tight text-primary">
-          <BlivapLogo fill="#960018" className="size-18 -ml-2" />
-          <span className="-mt-1 -ml-2">livap</span>
+        <p className="mt-auto mb-4 flex min-w-0 max-w-full items-start  font-helvetica text-5xl font-semibold tracking-tight text-primary">
+          <BlivapLogo fill="#960018" className="size-18" />
+          <span className="-ml-4.5">livap</span>
         </p>
       </div>
       {/* Topbar */}
@@ -140,7 +140,7 @@ export const Layout = (props: PropsWithChildren<unknown>) => {
       </div>
       {/* Main content area. The bordered frame stays fixed; only the inner pane scrolls. */}
       <div className="relative h-full min-h-0 min-w-0 flex-1 overflow-hidden md:ml-63">
-        <div className="absolute inset-x-0 bottom-0 top-[calc(var(--spacing)*18.5)] flex min-h-0 flex-col overflow-hidden bg-white transition-colors duration-200 md:top-[calc(var(--spacing)*18.5+var(--spacing)*2)] md:right-2 md:bottom-2 md:left-4 md:rounded md:border md:border-[#DADADA] dark:bg-[#14141a] md:dark:border-white/10">
+        <div className="absolute inset-x-0 bottom-0 top-18.5 flex min-h-0 flex-col overflow-hidden bg-white transition-colors duration-200 md:top-[calc(var(--spacing)*18.5+var(--spacing)*2)] md:right-2 md:bottom-2 md:left-4 md:rounded md:border md:border-[#DADADA] dark:bg-[#14141a] md:dark:border-white/10">
           <div className="custom-scrollbar flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain p-4 xl:px-7">
             {!user?.nationalIdentificationNumberVerified && (
               <div className="mb-10 flex gap-4 border-l-4 border-[#960018] bg-[#FFE2E2] p-4 dark:bg-red-950/35 dark:border-primary">

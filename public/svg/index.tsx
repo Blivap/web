@@ -118,29 +118,26 @@ export const BlivapLogo = ({
     <span
       ref={containerRef}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center overflow-visible",
+        "relative inline-flex shrink-0 items-center justify-center overflow-visible w-0 h-0 ",
         className,
       )}
-      style={
-        width !== undefined || height !== undefined
-          ? {
-              width: width ?? height,
-              height: height ?? width,
-            }
-          : undefined
-      }
+      style={{
+        width: width ?? height,
+        height: height ?? width,
+      }}
     >
       <svg
         ref={svgRef}
         viewBox="0 0 53 113"
         xmlns="http://www.w3.org/2000/svg"
-        className="h-full max-h-full w-auto"
+        className="h-full  w-auto max-w-none shrink-0 overflow-visible"
         preserveAspectRatio="xMidYMid meet"
         aria-hidden
       >
         <defs>
           <filter
             id={filterId}
+            filterUnits="userSpaceOnUse"
             x="-50%"
             y="-40%"
             width="200%"
