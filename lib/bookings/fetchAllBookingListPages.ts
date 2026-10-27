@@ -13,18 +13,19 @@ export type FetchAllBookingsResult =
   | { ok: false; error: string };
 
 /**
- * Loads all pages from GET /bookings/sent or GET /bookings/received until
- * `meta.total` is satisfied or a short page / empty page ends the chain.
+ * Loads every page from GET /bookings until `meta.total` is satisfied
+ * or a short page ends the chain.
  */
 export async function fetchAllBookingListPages(
   fetchPage: (params: BookingListQuery) => Promise<IResponse<unknown>>,
+  filters?: Omit<BookingListQuery, "page" | "limit">,
 ): Promise<FetchAllBookingsResult> {
   const merged: Booking[] = [];
   let page = 1;
   let lastMeta: BookingsListMeta | undefined;
 
   for (;;) {
-    const res = await fetchPage({ page, limit: PAGE_LIMIT });
+    const res = await fetchPage({ ...filters, page, limit: PAGE_LIMIT });
     if (res.status < 200 || res.status >= 300 || res.data === undefined) {
       return { ok: false, error: "Could not load bookings." };
     }

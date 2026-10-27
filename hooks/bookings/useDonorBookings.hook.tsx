@@ -1,25 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useStore } from "react-redux";
 import { $api } from "@/app/api";
 import { useSnackbar } from "@/components/feedback/snackbar/snackbar.context";
 import type { BookingsShellTabItem } from "@/app/(users)/bookings/components/bookings-shell.view";
 import { useSetQueryParams } from "@/hooks/navigation/useQueryParamState.hook";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import type { RootState, AppDispatch } from "@/store/store";
+import type { RootState } from "@/store/store";
 import {
   loadReceivedBookings,
   patchBookingInLists,
 } from "@/store/slices/bookingsSlice";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import { parseBookingMutationResponse } from "@/lib/bookings/parseBookingMutationResponse";
+import type { Booking } from "@/types/bookings";
 import {
   buildDonorBookingsTabPanels,
   DONOR_TAB_ORDER,
   type DonorPanelKey,
 } from "@/lib/bookings/donorBookingsTabPanels";
+import {
+  bookingListLoadArg,
+  type BookingsListSourceOptions,
+} from "@/lib/bookings/bookingListFilters";
 import { useBookingDeepLinkHighlight } from "./useBookingDeepLinkHighlight.hook";
 import {
   classifyAnalyticsError,
@@ -33,23 +38,21 @@ export {
   donorTabForBooking,
 } from "@/lib/bookings/donorBookingsTabPanels";
 
-const BOOKINGS_POLL_MS = 20_000;
-
-function scheduleBookingsResync(dispatch: AppDispatch) {
-  window.setTimeout(() => {
-    void dispatch(loadReceivedBookings({ silent: true }));
-  }, 800);
-}
-
-export function useDonorBookings() {
+export function useDonorBookings(options?: BookingsListSourceOptions) {
+  const enabled = options?.enabled !== false;
+  const query = options?.query;
+  const queryKey = JSON.stringify(query ?? {});
+  const queryRef = useRef(query);
+  queryRef.current = query;
+  const onBookingPatchedRef = useRef(options?.onBookingPatched);
+  onBookingPatchedRef.current = options?.onBookingPatched;
   const { showSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
   const store = useStore<RootState>();
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const user = useAppSelector((s) => s.auth.user);
-  const bookings = useAppSelector((s) => s.bookings.received.items);
+  const storedBookings = useAppSelector((s) => s.bookings.received.items);
+  const bookings = options?.bookings ?? storedBookings;
   const loadState = useAppSelector((s) => s.bookings.received.status);
   const loadError = useAppSelector((s) => s.bookings.received.error);
 
@@ -70,38 +73,33 @@ export function useDonorBookings() {
     [setParams],
   );
 
-  useEffect(() => {
-    if (!user?.id) return;
-    const timer = window.setInterval(() => {
-      void dispatch(loadReceivedBookings({ silent: true }));
-    }, BOOKINGS_POLL_MS);
-    return () => window.clearInterval(timer);
-  }, [dispatch, user?.id]);
-
   const [mutatingId, setMutatingId] = useState<string | null>(null);
 
+  const publishBookingPatch = useCallback((id: string, patch: Partial<Booking>) => {
+    onBookingPatchedRef.current?.(id, patch);
+  }, []);
+
   const loadData = useCallback(() => {
-    if (!user?.id) return Promise.resolve();
-    return dispatch(loadReceivedBookings()).unwrap();
-  }, [dispatch, user?.id]);
+    if (!user?.id || !enabled) return Promise.resolve();
+    return dispatch(
+      loadReceivedBookings(
+        bookingListLoadArg(
+          queryRef.current,
+          store.getState().bookings.received.status === "ok",
+        ),
+      ),
+    ).unwrap();
+  }, [dispatch, enabled, store, user?.id]);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || !enabled) return;
     const status = store.getState().bookings.received.status;
     void dispatch(
-      loadReceivedBookings(status === "ok" ? { silent: true } : undefined),
+      loadReceivedBookings(
+        bookingListLoadArg(queryRef.current, status === "ok"),
+      ),
     );
-  }, [dispatch, user?.id, store]);
-
-  useEffect(() => {
-    const onVis = () => {
-      if (document.visibilityState === "visible" && user?.id) {
-        void dispatch(loadReceivedBookings({ silent: true }));
-      }
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
-  }, [dispatch, user?.id]);
+  }, [dispatch, enabled, queryKey, store, user?.id]);
 
   const rowIdsFingerprint = useMemo(
     () => bookings.map((b) => b.id).join(","),
@@ -131,17 +129,16 @@ export function useDonorBookings() {
           return;
         }
         trackSuccess("booking_accepted");
-        const serverPatch = parseBookingMutationResponse(data);
-        if (serverPatch) {
-          dispatch(patchBookingInLists({ id, ...serverPatch }));
-        }
+        const patch: Partial<Booking> = {
+          status: "accepted",
+          respondedAt: new Date().toISOString(),
+          ...parseBookingMutationResponse(data),
+        };
+        dispatch(patchBookingInLists({ id, ...patch }));
+        publishBookingPatch(id, patch);
         showSnackbar(
           "You accepted this booking. You can share the meeting code when you meet.",
         );
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("tab", "confirmed");
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-        scheduleBookingsResync(dispatch);
       } catch (e) {
         trackFailure("booking_accepted", classifyAnalyticsError(e));
         dispatch(patchBookingInLists({ id, status: prev }));
@@ -155,7 +152,7 @@ export function useDonorBookings() {
         setMutatingId(null);
       }
     },
-    [dispatch, pathname, router, searchParams, showSnackbar, store],
+    [dispatch, publishBookingPatch, showSnackbar, store],
   );
 
   const declineBooking = useCallback(
@@ -180,15 +177,14 @@ export function useDonorBookings() {
           return;
         }
         trackSuccess("booking_declined");
-        const serverPatch = parseBookingMutationResponse(data);
-        if (serverPatch) {
-          dispatch(patchBookingInLists({ id, ...serverPatch }));
-        }
+        const patch: Partial<Booking> = {
+          status: "rejected",
+          respondedAt: new Date().toISOString(),
+          ...parseBookingMutationResponse(data),
+        };
+        dispatch(patchBookingInLists({ id, ...patch }));
+        publishBookingPatch(id, patch);
         showSnackbar("Booking declined.", "success");
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("tab", "past");
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-        scheduleBookingsResync(dispatch);
       } catch (e) {
         trackFailure("booking_declined", classifyAnalyticsError(e));
         dispatch(patchBookingInLists({ id, status: prev }));
@@ -202,7 +198,7 @@ export function useDonorBookings() {
         setMutatingId(null);
       }
     },
-    [dispatch, pathname, router, searchParams, showSnackbar, store],
+    [dispatch, publishBookingPatch, showSnackbar, store],
   );
 
   const submitReport = useCallback(
@@ -210,6 +206,7 @@ export function useDonorBookings() {
       if (!reportBookingId) return;
       const id = reportBookingId;
       const row =
+        bookings.find((b) => b.id === id) ??
         store.getState().bookings.received.items.find((b) => b.id === id) ??
         store.getState().bookings.sent.items.find((b) => b.id === id);
       const prevCount = row?.reportsCount ?? 0;
@@ -217,11 +214,12 @@ export function useDonorBookings() {
       if (status < 200 || status >= 300) {
         throw new Error("Could not send the report.");
       }
-      dispatch(patchBookingInLists({ id, reportsCount: prevCount + 1 }));
+      const patch = { reportsCount: prevCount + 1 };
+      dispatch(patchBookingInLists({ id, ...patch }));
+      publishBookingPatch(id, patch);
       showSnackbar("Thanks — your report was submitted.");
-      scheduleBookingsResync(dispatch);
     },
-    [dispatch, reportBookingId, showSnackbar, store],
+    [bookings, dispatch, publishBookingPatch, reportBookingId, showSnackbar, store],
   );
 
   const tabPanels = useMemo(
