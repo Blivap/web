@@ -65,6 +65,14 @@ export type IAvatar = {
   publicId: string;
   url: string;
 };
+/** GET /avatar is fixed at 12 items per page. There is no limit parameter. */
+export type AvatarListMeta = {
+  page: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+};
 export type IAuthResponse = {
   accessToken?: string;
   access_token?: string;
