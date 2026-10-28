@@ -103,6 +103,8 @@ export function BookingsListView() {
   const [loadState, setLoadState] = useState<"loading" | "ok" | "error">(
     "loading",
   );
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const hasLoadedRef = useRef(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -115,7 +117,7 @@ export function BookingsListView() {
       if (cancelled) return;
       setLoadState("loading");
       setLoadError(null);
-      if (queryChanged) {
+      if (queryChanged && !hasLoadedRef.current) {
         setPageBookings([]);
         setTotalCount(undefined);
       }
@@ -131,18 +133,24 @@ export function BookingsListView() {
           setLoadError("Could not load bookings.");
           setPageBookings([]);
           setTotalCount(undefined);
+          hasLoadedRef.current = true;
+          setHasLoaded(true);
           return;
         }
         const parsed = parseBookingsPaginatedResponse(response.data);
         setPageBookings(parsed.bookings);
         setTotalCount(parsed.meta?.total);
         setLoadState("ok");
+        hasLoadedRef.current = true;
+        setHasLoaded(true);
       } catch {
         if (cancelled) return;
         setLoadState("error");
         setLoadError("Could not load bookings.");
         setPageBookings([]);
         setTotalCount(undefined);
+        hasLoadedRef.current = true;
+        setHasLoaded(true);
       }
     })();
     return () => {
@@ -260,7 +268,7 @@ export function BookingsListView() {
     );
   }
 
-  if (loadState === "loading" && pageBookings.length === 0) {
+  if (!hasLoaded && loadState === "loading" && pageBookings.length === 0) {
     return <BookingsShellSkeleton tabLabels={["Bookings"]} />;
   }
 
@@ -338,7 +346,8 @@ export function BookingsListView() {
                 <button
                   type="button"
                   aria-label="Clear date filter"
-                  className="absolute top-1/2 right-2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
+                  className="absolute top-1/2 right-2 z-10 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
+                  onMouseDown={(event) => event.preventDefault()}
                   onClick={() => selectDate("")}
                 >
                   <X className="size-3.5" aria-hidden />
