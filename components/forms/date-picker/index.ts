@@ -1,1 +1,5 @@
-export { DatePicker, type DatePickerProps } from "./date-picker.component";
+export {
+  DatePicker,
+  formatLocalDateInput,
+  type DatePickerProps,
+} from "./date-picker.component";

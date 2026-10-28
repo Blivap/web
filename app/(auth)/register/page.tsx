@@ -1,7 +1,10 @@
 "use client";
 import { Button } from "@/components/button/button.component";
 import { Checkbox } from "@/components/forms/checkbox";
-import { DatePicker } from "@/components/forms/date-picker";
+import {
+  DatePicker,
+  formatLocalDateInput,
+} from "@/components/forms/date-picker";
 import { Input } from "@/components/forms/inputs/input.component";
 import { PhoneInput } from "@/components/forms/phone-input";
 import { AuthLayout } from "@/layout/auth.layout.component";
@@ -170,7 +173,7 @@ export default function SignUpPage() {
                             label="Date Of Birth"
                             name="dateOfBirth"
                             placeholder="DD-MM-YYYY"
-                            max={new Date().toISOString().slice(0, 10)}
+                            max={formatLocalDateInput()}
                           />
                         </div>
                         <div className="min-w-0">
