@@ -76,6 +76,11 @@ function toYmd(d: Date): string {
   return format(d, "yyyy-MM-dd");
 }
 
+/** Calendar day in the user's timezone, as `YYYY-MM-DD`. */
+export function formatLocalDateInput(date = new Date()): string {
+  return toYmd(startOfDay(date));
+}
+
 function createChangeEvent(
   name: string,
   value: string,
@@ -193,14 +198,15 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
       const base = selected ?? new Date();
       return { year: base.getFullYear(), month: base.getMonth() };
     });
+    const suppressTriggerToggleRef = useRef(false);
 
-    /* Sync calendar month to selection when opening or when value changes while open. */
-    useEffect(() => {
-      if (!open) return;
+    const openCalendar = () => {
       const base = selected ?? new Date();
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- align cursor with `selected` when popover opens or value changes
       setCursor(clampCursor(base.getFullYear(), base.getMonth()));
-    }, [open, selected, clampCursor]);
+      setMonthMenuOpen(false);
+      setYearMenuOpen(false);
+      setOpen(true);
+    };
 
     const calendarDays = useMemo(() => {
       const { year, month } = cursor;
@@ -278,9 +284,15 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
     }, [open, monthMenuOpen, yearMenuOpen, closePopover]);
 
     const commitValue = (ymd: string) => {
+      // The click that follows this press can land on the field after the
+      // calendar closes. Ignore that one click, then accept the next.
+      suppressTriggerToggleRef.current = true;
+      window.setTimeout(() => {
+        suppressTriggerToggleRef.current = false;
+      }, 0);
       onChange?.(createChangeEvent(name, ymd));
       closePopover();
-      requestAnimationFrame(() => onBlur?.(createBlurEvent(name)));
+      onBlur?.(createBlurEvent(name));
     };
 
     const goMonth = (delta: number) => {
@@ -366,7 +378,15 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                 inputClassName,
                 className,
               )}
-              onClick={() => !disabled && setOpen((o) => !o)}
+              onClick={() => {
+                if (disabled) return;
+                if (suppressTriggerToggleRef.current) return;
+                if (open) {
+                  closePopover();
+                  return;
+                }
+                openCalendar();
+              }}
               onBlur={(e) => {
                 if (!containerRef.current?.contains(e.relatedTarget as Node)) {
                   onBlur?.(createBlurEvent(name));
@@ -394,6 +414,10 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
               role="dialog"
               aria-modal="true"
               aria-label="Choose date"
+              onMouseDown={(event) => {
+                // Keep the field focused so choosing a day is not cancelled by blur.
+                event.preventDefault();
+              }}
               className="absolute left-0 top-full z-101 mt-1 w-58 rounded-md border border-[#66666659] bg-white p-2 shadow-[0_6px_16px_rgba(15,23,42,0.1)] dark:border-white/12 dark:bg-[#111827] dark:shadow-[0_16px_40px_rgba(0,0,0,0.45)]"
             >
               <div className="mb-1.5 flex items-center gap-0.5">
@@ -591,7 +615,11 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
                         "EEEE d MMMM yyyy",
                       )}
                       aria-pressed={Boolean(isSelected)}
-                      onClick={() => !dimmed && commitValue(ymd)}
+                      onMouseDown={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (!dimmed) commitValue(ymd);
+                      }}
                       className={classNames(
                         "flex h-7 w-7 items-center justify-center rounded text-[11px] font-medium transition-colors",
                         dimmed &&

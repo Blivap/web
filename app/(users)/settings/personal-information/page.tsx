@@ -1,6 +1,9 @@
 "use client";
 
-import { DatePicker } from "@/components/forms/date-picker";
+import {
+  DatePicker,
+  formatLocalDateInput,
+} from "@/components/forms/date-picker";
 import { Input } from "@/components/forms/inputs/input.component";
 import { PhoneInput } from "@/components/forms/phone-input";
 import { useSettings } from "@/hooks/settings/useSettings.hook";
@@ -197,7 +200,7 @@ export default function PersonalInformationPage() {
                       inputClassName="py-1.5"
                       containerClassName="gap-1"
                       placeholder="DD-MM-YYYY"
-                      max={new Date().toISOString().slice(0, 10)}
+                      max={formatLocalDateInput()}
                     />
                   </div>
 
