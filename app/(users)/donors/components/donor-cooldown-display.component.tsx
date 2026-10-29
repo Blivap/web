@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Clock, HeartPulse, Sparkles } from "lucide-react";
 import {
   Popover,
@@ -10,14 +10,20 @@ import {
 import { cn } from "@/lib/utils";
 import {
   COOLDOWN_TONE_STYLES,
+  cooldownRingRatiosForCooldown,
   formatOwnerCountdown,
   resolveDonorCooldown,
   type CooldownParts,
   type CooldownTone,
 } from "@/lib/donors/donorCooldown";
 
+/** Live tick while resting so rings crawl forward bit by bit. */
+const LIVE_TICK_MS = 250;
+
 type DonorCooldownDisplayProps = {
   cooldownEndsAt?: string | null;
+  /** Donation that started this rest period — drives distinct ring progress. */
+  lastDonationAt?: string | null;
   /** Rest period with no end timestamp, including a one-time donation block. */
   unavailable?: boolean;
   /** Full live timer for the donor viewing their own profile/card */
@@ -27,6 +33,7 @@ type DonorCooldownDisplayProps = {
 
 export function DonorCooldownDisplay({
   cooldownEndsAt,
+  lastDonationAt,
   unavailable = false,
   variant,
   className,
@@ -34,9 +41,10 @@ export function DonorCooldownDisplay({
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    const intervalMs = cooldownEndsAt || lastDonationAt ? LIVE_TICK_MS : 1000;
+    const id = window.setInterval(() => setNow(Date.now()), intervalMs);
     return () => window.clearInterval(id);
-  }, []);
+  }, [cooldownEndsAt, lastDonationAt]);
 
   const state = resolveDonorCooldown(cooldownEndsAt, now);
   const blockedWithoutDate = unavailable && !state.isActive;
@@ -49,6 +57,10 @@ export function DonorCooldownDisplay({
       <CooldownClock
         className={className}
         parts={state.parts}
+        lastDonationAt={lastDonationAt}
+        cooldownEndsAt={state.endsAt}
+        remainingMs={state.remainingMs}
+        nowMs={now}
         tone={tone}
         label={`Cooling down, ${formatOwnerCountdown(state.parts)}`}
       />
@@ -96,6 +108,21 @@ export function DonorCooldownDisplay({
   );
 }
 
+/** Ease while a ring is being gained; snap when the unit rolls over to empty. */
+function useRisingAnimate(ratio: number): boolean {
+  const prevRef = useRef(ratio);
+  const [animate, setAnimate] = useState(true);
+
+  useEffect(() => {
+    const prev = prevRef.current;
+    // Drop of >2% means the unit wrapped — jump back to empty without easing.
+    setAnimate(ratio + 0.02 >= prev);
+    prevRef.current = ratio;
+  }, [ratio]);
+
+  return animate;
+}
+
 function CooldownRing({
   radius,
   ratio,
@@ -109,6 +136,8 @@ function CooldownRing({
 }) {
   const circumference = 2 * Math.PI * radius;
   const clamped = Math.min(1, Math.max(0, ratio));
+  // Round caps draw a visible sliver at ratio 0 — skip the progress stroke.
+  const showProgress = clamped > 0.002;
   return (
     <>
       <circle
@@ -119,20 +148,22 @@ function CooldownRing({
         strokeWidth={strokeWidth}
         className="stroke-current opacity-20"
       />
-      <circle
-        cx="50"
-        cy="50"
-        r={radius}
-        fill="none"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeDasharray={`${clamped * circumference} ${circumference}`}
-        className={cn(
-          "stroke-current",
-          animate &&
-            "transition-[stroke-dasharray] duration-1000 ease-linear motion-reduce:transition-none",
-        )}
-      />
+      {showProgress ? (
+        <circle
+          cx="50"
+          cy="50"
+          r={radius}
+          fill="none"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={`${clamped * circumference} ${circumference}`}
+          className={cn(
+            "stroke-current",
+            animate &&
+              "transition-[stroke-dasharray] duration-250 ease-linear motion-reduce:transition-none",
+          )}
+        />
+      ) : null}
     </>
   );
 }
@@ -192,6 +223,7 @@ function CooldownKey({ label, ratio }: { label: string; ratio: number }) {
   const radius = 9;
   const circumference = 2 * Math.PI * radius;
   const clamped = Math.min(1, Math.max(0, ratio));
+  const showProgress = clamped > 0.002;
   return (
     <div className="flex flex-col items-center gap-0.5 rounded-xl border border-[#e7b4ba] bg-white py-1 dark:border-[#c45b68]/50 dark:bg-[#3a1c22]">
       <svg viewBox="0 0 24 24" className="size-5 -rotate-90" aria-hidden>
@@ -203,16 +235,18 @@ function CooldownKey({ label, ratio }: { label: string; ratio: number }) {
           stroke="#f3c9cf"
           strokeWidth="1.25"
         />
-        <circle
-          cx="12"
-          cy="12"
-          r={radius}
-          fill="none"
-          stroke="#960018"
-          strokeWidth="1.25"
-          strokeLinecap="round"
-          strokeDasharray={`${clamped * circumference} ${circumference}`}
-        />
+        {showProgress ? (
+          <circle
+            cx="12"
+            cy="12"
+            r={radius}
+            fill="none"
+            stroke="#960018"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeDasharray={`${clamped * circumference} ${circumference}`}
+          />
+        ) : null}
       </svg>
       <span className="text-[9px] font-medium uppercase tracking-wide text-[#960018] dark:text-[#ffb4be]">
         {label}
@@ -221,23 +255,63 @@ function CooldownKey({ label, ratio }: { label: string; ratio: number }) {
   );
 }
 
+function CooldownSecondsDot({
+  ratio,
+  animate,
+}: {
+  ratio: number;
+  animate: boolean;
+}) {
+  const clamped = Math.min(1, Math.max(0, ratio));
+  // Grows as seconds of rest elapse; tiny core when the minute just started.
+  const scale = 0.28 + clamped * 0.72;
+  return (
+    <circle
+      cx="50"
+      cy="50"
+      r={5.5}
+      className={cn(
+        "fill-current motion-reduce:transition-none",
+        animate && "transition-transform duration-250 ease-linear",
+      )}
+      style={{
+        transform: `scale(${scale})`,
+        transformOrigin: "50px 50px",
+      }}
+    />
+  );
+}
+
 function CooldownClock({
   parts,
+  lastDonationAt,
+  cooldownEndsAt,
+  remainingMs,
+  nowMs,
   tone,
   label,
   className,
 }: {
   parts: CooldownParts;
+  lastDonationAt?: string | null;
+  cooldownEndsAt: string | null;
+  remainingMs: number;
+  nowMs: number;
   tone: CooldownTone;
   label: string;
   className?: string;
 }) {
-  const [trackedSeconds, setTrackedSeconds] = useState(parts.seconds);
-  // Jump the seconds ring when the minute rolls over; ease it on the way down.
-  const animateSeconds = parts.seconds <= trackedSeconds;
-  if (parts.seconds !== trackedSeconds) {
-    setTrackedSeconds(parts.seconds);
-  }
+  const ratios = cooldownRingRatiosForCooldown({
+    lastDonationAt,
+    cooldownEndsAt,
+    remainingMs,
+    nowMs,
+  });
+  const animateMonths = useRisingAnimate(ratios.months);
+  const animateWeeks = useRisingAnimate(ratios.weeks);
+  const animateHours = useRisingAnimate(ratios.hours);
+  const animateMinutes = useRisingAnimate(ratios.minutes);
+  const animateSeconds = useRisingAnimate(ratios.seconds);
 
   return (
     <Popover>
@@ -250,7 +324,7 @@ function CooldownClock({
             "relative shrink-0 cursor-pointer rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
             COOLDOWN_TONE_STYLES[tone].label,
             className,
-            "size-8",
+            "size-9",
           )}
         >
           <svg
@@ -259,29 +333,39 @@ function CooldownClock({
             aria-hidden
           >
             <CooldownRing
-              radius={44}
-              ratio={parts.seconds / 60}
-              strokeWidth={6}
+              radius={46}
+              ratio={ratios.months}
+              strokeWidth={5}
+              animate={animateMonths}
+            />
+            <CooldownRing
+              radius={36}
+              ratio={ratios.weeks}
+              strokeWidth={5}
+              animate={animateWeeks}
+            />
+            <CooldownRing
+              radius={26}
+              ratio={ratios.hours}
+              strokeWidth={5}
+              animate={animateHours}
+            />
+            <CooldownRing
+              radius={16}
+              ratio={ratios.minutes}
+              strokeWidth={5}
+              animate={animateMinutes}
+            />
+            <CooldownSecondsDot
+              ratio={ratios.seconds}
               animate={animateSeconds}
-            />
-            <CooldownRing
-              radius={32}
-              ratio={parts.minutes / 60}
-              strokeWidth={6}
-              animate={false}
-            />
-            <CooldownRing
-              radius={20}
-              ratio={parts.hours / 24}
-              strokeWidth={6}
-              animate={false}
             />
           </svg>
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[216px] overflow-hidden rounded-2xl border border-[#e7b4ba] bg-[#fff4f1] p-3 shadow-[0_2px_8px_rgba(150,0,24,0.08)] dark:border-[#c45b68]/40 dark:bg-[#2a1418] dark:shadow-none"
+        className="w-[240px] overflow-hidden rounded-2xl border border-[#e7b4ba] bg-[#fff4f1] p-3 shadow-[0_2px_8px_rgba(150,0,24,0.08)] dark:border-[#c45b68]/40 dark:bg-[#2a1418] dark:shadow-none"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center gap-2">
@@ -293,10 +377,12 @@ function CooldownClock({
         <p className="mt-1 font-mono text-[11px] font-medium tabular-nums text-[#960018] dark:text-[#ffb4be]">
           {formatOwnerCountdown(parts)}
         </p>
-        <div className="mt-2.5 grid grid-cols-3 gap-1.5">
-          <CooldownKey label="sec" ratio={parts.seconds / 60} />
-          <CooldownKey label="min" ratio={parts.minutes / 60} />
-          <CooldownKey label="hr" ratio={parts.hours / 24} />
+        <div className="mt-2.5 grid grid-cols-5 gap-1">
+          <CooldownKey label="min" ratio={ratios.minutes} />
+          <CooldownKey label="hr" ratio={ratios.hours} />
+          <CooldownKey label="wk" ratio={ratios.weeks} />
+          <CooldownKey label="mo" ratio={ratios.months} />
+          <CooldownKey label="sec" ratio={ratios.seconds} />
         </div>
       </PopoverContent>
     </Popover>

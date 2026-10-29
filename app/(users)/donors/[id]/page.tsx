@@ -193,6 +193,7 @@ export default function DonorDetailsPage() {
                       ) : null}
                       <DonorCooldownDisplay
                         cooldownEndsAt={donor.cooldownEndsAt}
+                        lastDonationAt={donor.lastDonationAt}
                         unavailable={
                           donor.isInDonationCooldown ||
                           donor.isPermanentDonationBlock

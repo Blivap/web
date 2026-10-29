@@ -48,6 +48,23 @@ function pickCooldownEndsAtFromRecord(
   );
 }
 
+function pickLastDonationAtFromRecord(
+  record: Record<string, unknown>,
+): string | null {
+  return (
+    parseCooldownEndIso(record.lastDonationAt ?? record.last_donation_at) ??
+    parseCooldownEndIso(record.lastDonatedAt ?? record.last_donated_at) ??
+    parseCooldownEndIso(record.donatedAt ?? record.donated_at) ??
+    parseCooldownEndIso(record.lastDonationDate ?? record.last_donation_date) ??
+    parseCooldownEndIso(
+      record.mostRecentDonationAt ?? record.most_recent_donation_at,
+    ) ??
+    parseCooldownEndIso(record.cooldownStartedAt ?? record.cooldown_started_at) ??
+    parseCooldownEndIso(record.restStartedAt ?? record.rest_started_at) ??
+    null
+  );
+}
+
 function pickFromDonationCooldownList(
   record: Record<string, unknown>,
 ): string | null {
@@ -69,6 +86,27 @@ function pickFromDonationCooldownList(
   return parseCooldownEndIso(match.cooldownEndsAt ?? match.cooldown_ends_at);
 }
 
+function pickLastDonationAtFromCooldownList(
+  record: Record<string, unknown>,
+): string | null {
+  const list = record.donationCooldowns ?? record.donation_cooldowns;
+  if (!Array.isArray(list)) return null;
+  const primary =
+    record.primaryDonationType ??
+    record.donationType ??
+    record.primary_donation_type;
+  const rows = list.filter(
+    (item): item is Record<string, unknown> =>
+      !!item && typeof item === "object",
+  );
+  const match =
+    rows.find(
+      (item) => item.donationType === primary || item.donation_type === primary,
+    ) ?? rows.find((item) => item.available === false);
+  if (!match) return null;
+  return pickLastDonationAtFromRecord(match);
+}
+
 export function pickCooldownEndsAt(
   record: Record<string, unknown>,
 ): string | null {
@@ -86,6 +124,23 @@ export function pickCooldownEndsAt(
     if (found) return found;
   }
   return pickFromDonationCooldownList(record);
+}
+
+/** ISO timestamp of the donation that started the current rest period. */
+export function pickLastDonationAt(
+  record: Record<string, unknown>,
+): string | null {
+  const direct = pickLastDonationAtFromRecord(record);
+  if (direct) return direct;
+  for (const key of ["cooldown", "availability", "donationAvailability"]) {
+    const nested = record[key];
+    if (!nested || typeof nested !== "object") continue;
+    const found = pickLastDonationAtFromRecord(
+      nested as Record<string, unknown>,
+    );
+    if (found) return found;
+  }
+  return pickLastDonationAtFromCooldownList(record);
 }
 
 export function donorIsCoolingDown(donor: {
@@ -116,6 +171,94 @@ export function cooldownPartsFromMs(remainingMs: number): CooldownParts {
     minutes: d.minutes ?? 0,
     seconds: d.seconds ?? 0,
   };
+}
+
+/** Full weeks remaining after months (from leftover days). */
+export function cooldownWeeksFromParts(parts: CooldownParts): number {
+  return Math.floor(Math.max(0, parts.days) / 7);
+}
+
+const MS_MINUTE = 60 * 1000;
+const MS_HOUR = 60 * MS_MINUTE;
+const MS_DAY = 24 * MS_HOUR;
+
+export type CooldownRingRatios = {
+  months: number;
+  weeks: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+/** Typical whole-blood rest window — used so mid-cooldown donors aren't stuck at 0%. */
+const DEFAULT_REST_MS = 56 * MS_DAY;
+
+/**
+ * Overall progress fills the 4 rings in order (min → hr → wk → mo).
+ * Center seconds tick within each remaining minute so the dot still moves live.
+ */
+function ratiosFromProgress(
+  progress: number,
+  remainingMs: number,
+): CooldownRingRatios {
+  const stage = Math.min(1, Math.max(0, progress)) * 4;
+  const fill = (index: number) => Math.min(1, Math.max(0, stage - index));
+
+  const remInMinute = remainingMs % MS_MINUTE;
+  const seconds =
+    remainingMs <= 0 ? 1 : remInMinute === 0 ? 0 : 1 - remInMinute / MS_MINUTE;
+
+  return {
+    seconds,
+    minutes: fill(0),
+    hours: fill(1),
+    weeks: fill(2),
+    months: fill(3),
+  };
+}
+
+/**
+ * Ring fill = how close the donor is to finishing cooldown.
+ * Prefer lastDonationAt → cooldownEndsAt (exact rest window from API).
+ * Example: B74 donated Oct 22 (further along) fills more than M2A donated Oct 24.
+ * Rings fill in order (min → hr → wk → mo); next starts only after the previous
+ * completes. All rings complete as remaining hits zero.
+ */
+export function cooldownRingRatiosForCooldown(opts: {
+  lastDonationAt?: string | null;
+  cooldownEndsAt?: string | null;
+  remainingMs: number;
+  nowMs?: number;
+}): CooldownRingRatios {
+  const remainingMs = Math.max(0, opts.remainingMs);
+  if (remainingMs <= 0) {
+    return ratiosFromProgress(1, 0);
+  }
+
+  const nowMs = opts.nowMs ?? Date.now();
+  const startMs = opts.lastDonationAt
+    ? Date.parse(opts.lastDonationAt)
+    : Number.NaN;
+  const endMs = opts.cooldownEndsAt
+    ? Date.parse(opts.cooldownEndsAt)
+    : Number.NaN;
+
+  let progress: number;
+
+  if (Number.isFinite(startMs) && Number.isFinite(endMs) && endMs > startMs) {
+    const totalMs = endMs - startMs;
+    const elapsedMs = Math.min(totalMs, Math.max(0, nowMs - startMs));
+    progress = elapsedMs / totalMs;
+  } else {
+    // Fallback when donation date is missing: remaining vs typical 56-day window.
+    const totalMs = Math.max(DEFAULT_REST_MS, remainingMs);
+    progress = 1 - remainingMs / totalMs;
+  }
+
+  return ratiosFromProgress(
+    Math.min(1, Math.max(0, progress)),
+    remainingMs,
+  );
 }
 
 export function cooldownToneFrom(
@@ -191,9 +334,14 @@ function pad2(n: number): string {
 /** Owner-facing live countdown segments. */
 export function formatOwnerCountdown(parts: CooldownParts): string {
   const segments: string[] = [];
-  if (parts.years > 0) segments.push(`${parts.years}y`);
-  if (parts.months > 0) segments.push(`${parts.months}mo`);
-  if (parts.days > 0) segments.push(`${parts.days}d`);
+  const totalMonths = parts.years * 12 + parts.months;
+  const weeks = cooldownWeeksFromParts(parts);
+  if (totalMonths > 0) segments.push(`${totalMonths}mo`);
+  if (weeks > 0) segments.push(`${weeks}w`);
+  const leftoverDays = parts.days % 7;
+  if (leftoverDays > 0 && totalMonths === 0 && weeks === 0) {
+    segments.push(`${leftoverDays}d`);
+  }
   segments.push(`${parts.hours}h`);
   segments.push(`${pad2(parts.minutes)}m`);
   segments.push(`${pad2(parts.seconds)}s`);

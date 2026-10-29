@@ -23,15 +23,18 @@ import {
   parseDonorsListResponse,
 } from "@/lib/donors/parseDonorsListResponse";
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
-import { DonorCooldownDisplay } from "../donors/components/donor-cooldown-display.component";
 import { applyOwnerCooldown } from "@/lib/donors/donorCooldown";
+import { isExistingRegisteredDonor } from "@/lib/donors/donorProfileGuards";
 import type { Donor } from "../donors/donors.data";
 import { OverviewActiveDonorCard } from "./components/overview-active-donor-card.component";
+import {
+  OverviewHeaderDonorStatus,
+  type OverviewDonorProfileState,
+} from "./components/overview-header-donor-status.component";
 import { SCREENING_DONATION_TYPE_OPTIONS } from "@/lib/donors/screeningDonationTypes";
 import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component";
 import { Button } from "@/components/button/button.component";
 import { OverviewNotificationsTab } from "./components/overview-notifications-tab.component";
-import { Skeleton } from "@/components/ui/skeleton.component";
 
 const OVERVIEW_DONORS_LIMIT = 8;
 
@@ -49,9 +52,9 @@ function donationTypeLabel(type: string): string {
 
 export default function OverviewPage() {
   const { user } = useDashboard();
-  const [myCooldownEndsAt, setMyCooldownEndsAt] = useState<
-    string | null | undefined
-  >(undefined);
+  const [donorProfile, setDonorProfile] = useState<OverviewDonorProfileState>({
+    status: "loading",
+  });
   const [activeDonors, setActiveDonors] = useState<Donor[]>([]);
   const [activeDonorsLoadState, setActiveDonorsLoadState] = useState<
     "idle" | "loading" | "ok" | "error"
@@ -62,13 +65,28 @@ export default function OverviewPage() {
     void (async () => {
       try {
         const { data, status } = await $api.donors.me();
-        if (cancelled || status < 200 || status >= 300 || !data) return;
+        if (cancelled) return;
+        if (status === 404 || status < 200 || status >= 300 || !data) {
+          setDonorProfile({ status: "not_donor" });
+          return;
+        }
         const raw =
           unwrapApiRecord(data) ?? (typeof data === "object" ? data : null);
+        if (!raw || !isExistingRegisteredDonor(raw)) {
+          setDonorProfile({ status: "not_donor" });
+          return;
+        }
         const row = parseDonorRecord(raw);
-        if (!cancelled) setMyCooldownEndsAt(row?.cooldownEndsAt ?? null);
+        setDonorProfile({
+          status: "donor",
+          cooldownEndsAt: row?.cooldownEndsAt ?? null,
+          lastDonationAt: row?.lastDonationAt ?? null,
+          unavailable:
+            row?.isInDonationCooldown === true ||
+            row?.isPermanentDonationBlock === true,
+        });
       } catch {
-        if (!cancelled) setMyCooldownEndsAt(null);
+        if (!cancelled) setDonorProfile({ status: "not_donor" });
       }
     })();
     return () => {
@@ -102,6 +120,9 @@ export default function OverviewPage() {
     };
   }, []);
 
+  const myCooldownEndsAt =
+    donorProfile.status === "donor" ? donorProfile.cooldownEndsAt : null;
+
   const visibleActiveDonors = useMemo(
     () => applyOwnerCooldown(activeDonors, user?.id, myCooldownEndsAt),
     [activeDonors, myCooldownEndsAt, user?.id],
@@ -131,23 +152,12 @@ export default function OverviewPage() {
                   <Pencil className="size-4" aria-hidden />
                 </Button>
               </div>
-              <div className="flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2 lg:flex-nowrap">
+              <div className="flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-6 sm:gap-y-2 lg:flex-nowrap">
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <span className="text-text-secondary">Email</span>
                   <CopyableTextLabel value={user?.email ?? ""} />
                 </div>
-                <div className="flex min-w-0 flex-col gap-0.5 sm:border-l sm:border-border sm:pl-6 dark:border-white/10">
-                  <span className="text-text-secondary">Cooldown</span>
-                  {myCooldownEndsAt === undefined ? (
-                    <Skeleton className="size-8 rounded-full" />
-                  ) : (
-                    <DonorCooldownDisplay
-                      cooldownEndsAt={myCooldownEndsAt}
-                      variant="owner"
-                      className="w-fit max-w-full"
-                    />
-                  )}
-                </div>
+                <OverviewHeaderDonorStatus profile={donorProfile} />
               </div>
             </div>
           </div>

@@ -26,12 +26,27 @@ const COVERAGE_OPTIONS: {
   { value: "requester", title: "Ask the requester" },
 ];
 
+function sameMeetupCare(
+  current: DonorWelfarePreferences,
+  saved: DonorWelfarePreferences,
+) {
+  if (current.coverage !== saved.coverage) return false;
+  const left = [...current.items].sort();
+  const right = [...saved.items].sort();
+  return (
+    left.length === right.length &&
+    left.every((code, index) => code === right[index])
+  );
+}
+
 export function DonorWelfareSettings() {
   const { showSnackbar } = useSnackbar();
   const [packages, setPackages] = useState<DonorWelfarePackage[]>([]);
   const [preferences, setPreferences] = useState<DonorWelfarePreferences>(
     DEFAULT_DONOR_WELFARE_PREFERENCES,
   );
+  const [savedPreferences, setSavedPreferences] =
+    useState<DonorWelfarePreferences>(DEFAULT_DONOR_WELFARE_PREFERENCES);
   const [ready, setReady] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -68,10 +83,12 @@ export function DonorWelfareSettings() {
       }
       const saved = parseMeetupCarePreferences(profileRes.data ?? profileRes);
       const known = new Set(offered.map((item) => item.code));
-      setPreferences({
+      const loaded = {
         coverage: saved.coverage,
         items: saved.items.filter((code) => known.has(code)),
-      });
+      };
+      setPreferences(loaded);
+      setSavedPreferences(loaded);
       setReady(true);
     } catch (err) {
       setLoadError(getAxiosErrorMessage(err, "Could not load meetup care"));
@@ -83,6 +100,7 @@ export function DonorWelfareSettings() {
   }, [load]);
 
   const askRequester = preferences.coverage === "requester";
+  const meetupCareChanged = !sameMeetupCare(preferences, savedPreferences);
 
   const setCoverage = (coverage: DonorWelfareCoverage) => {
     setPreferences((current) => ({
@@ -127,6 +145,7 @@ export function DonorWelfareSettings() {
       }
       const saved = parseMeetupCarePreferences(res.data ?? res);
       setPreferences(saved);
+      setSavedPreferences(saved);
       showSnackbar("Meetup care preferences saved.", "success");
     } catch (err) {
       showSnackbar(
@@ -258,7 +277,7 @@ export function DonorWelfareSettings() {
               <Button
                 type="button"
                 className="w-full rounded-lg px-5 py-2.5 text-sm font-semibold @min-[24rem]:w-fit"
-                disabled={!ready || saving}
+                disabled={!ready || saving || !meetupCareChanged}
                 loading={saving}
                 onClick={() => void save()}
               >

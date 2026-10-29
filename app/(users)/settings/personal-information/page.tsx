@@ -94,6 +94,7 @@ export default function PersonalInformationPage() {
             handleChange,
             handleBlur,
             setFieldValue,
+            dirty,
           }) => {
             setProfileImageRef.current = setFieldValue;
 
@@ -107,6 +108,7 @@ export default function PersonalInformationPage() {
                   <div className="relative">
                     <Avatar
                       src={values.profileImage || user?.profileImage}
+                      sizes="(min-width: 640px) 136px, 80px"
                       className="size-20 sm:size-34 border-[3px] border-primary"
                     />
                     <Button
@@ -230,7 +232,7 @@ export default function PersonalInformationPage() {
                     type="submit"
                     size="sm"
                     className="rounded-md px-5 text-xs font-semibold"
-                    disabled={isProfileLoading}
+                    disabled={isProfileLoading || !dirty}
                     loading={isProfileLoading}
                   >
                     {isProfileLoading ? "Updating..." : "Save Changes"}

@@ -18,9 +18,10 @@ import {
   sanitizeReturnPath,
   withDn,
 } from "@/lib/navigation/authRedirect";
+import type { IUser } from "@/types";
 import { AuthLoader } from "./auth-loader.component";
 
-const VERIFY_EMAIL_PATH = routes.verifyEmail;
+const LOGIN_REDIRECT_GUARD_KEY = "blivap:auth:redirecting-login";
 
 function normalizePath(pathname: string): string {
   return pathname.length > 1 && pathname.endsWith("/")
@@ -29,8 +30,23 @@ function normalizePath(pathname: string): string {
 }
 
 function isPublicAppPath(pathname: string): boolean {
-  const path = normalizePath(pathname);
-  return publicRoutes.includes(path);
+  return publicRoutes.includes(normalizePath(pathname));
+}
+
+/** Marketing, legal, and 404 — reachable regardless of verification state. */
+function isOpenPath(pathname: string): boolean {
+  return isPublicAppPath(pathname) || isNotFoundPath(pathname);
+}
+
+function isOverviewPath(pathname: string): boolean {
+  return (
+    pathname === routes.overview || pathname.startsWith(`${routes.overview}/`)
+  );
+}
+
+/** Protected app shell (not verify-email / email-link landing). */
+function isAppShellPath(pathname: string): boolean {
+  return requiresAuth(pathname) && pathname !== routes.verifyEmail;
 }
 
 function currentSearch(): string {
@@ -48,12 +64,54 @@ function useHasMounted(): boolean {
 }
 
 /**
+ * Single source of truth for client-side auth navigation.
+ *
+ * Rules:
+ * - Guests cannot open the app shell → `/login` (with return `dn`).
+ * - Verified users leave `/verify-email` → post-auth destination.
+ * - Unverified without avatar → `/verify-email` only (plus open paths).
+ * - Unverified with avatar → `/overview` only (plus open paths).
+ *   Always `/overview` here — never honor `dn` (would fight the overview-only gate).
+ */
+function resolveAuthRedirect(args: {
+  pathname: string | null;
+  user: IUser | null;
+  token: string | null;
+  ready: boolean;
+}): string | null {
+  const { pathname, user, token, ready } = args;
+  if (!ready || !pathname) return null;
+
+  if (!user) {
+    // Token present → `/me` still resolving; do not bounce yet.
+    if (token) return null;
+    if (!isAppShellPath(pathname)) return null;
+    return loginWithReturn(pathname, currentSearch());
+  }
+
+  if (user.emailVerified) {
+    if (pathname !== routes.verifyEmail) return null;
+    return getPostAuthRedirect(new URLSearchParams(currentSearch()));
+  }
+
+  // Unverified: open paths stay reachable.
+  if (isOpenPath(pathname)) return null;
+
+  if (user.profileImage) {
+    return isOverviewPath(pathname) ? null : routes.overview;
+  }
+
+  if (pathname === routes.verifyEmail) return null;
+  const returnPath = sanitizeReturnPath(
+    pathFromParts(pathname, currentSearch()),
+  );
+  return withDn(routes.verifyEmail, returnPath);
+}
+
+/**
  * Token is restored from the cookie in `StoreProvider`; session user is loaded via `useCheckUser` (GET /me).
  * User is only considered authenticated after we have a valid user from the API.
  * If the token is expired or invalid (401/403), logs out and redirects to /login.
- * Unverified users (emailVerified === false) are only allowed on /verify-email.
- * Verified users are redirected away from /verify-email and never see that page’s UI.
- * Shows a custom loader while auth status is being checked (token present, /me in flight).
  */
 export function AuthChecker({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -62,116 +120,41 @@ export function AuthChecker({ children }: { children: React.ReactNode }) {
   const token = useAppSelector((state) => state.auth.token);
   const { isChecking } = useCheckUser();
   useSessionExpiryWatcher();
-  /** Avoid auth-gated UI until after hydrate (cookie/token only exist on the client). */
   const hasMounted = useHasMounted();
+
+  const ready = hasMounted && !isChecking;
+  const redirectTo = resolveAuthRedirect({
+    pathname,
+    user,
+    token,
+    ready,
+  });
 
   // Clear one-shot redirect guard once we're on login
   useEffect(() => {
-    if (pathname === routes.login) {
-      try {
-        sessionStorage.removeItem("blivap:auth:redirecting-login");
-      } catch {
-        /* ignore */
-      }
+    if (pathname !== routes.login) return;
+    try {
+      sessionStorage.removeItem(LOGIN_REDIRECT_GUARD_KEY);
+    } catch {
+      /* ignore */
     }
   }, [pathname]);
 
-  // Protected route with no session after check finished → login (preserve return via dn)
   useEffect(() => {
-    if (!hasMounted || isChecking) return;
-    if (!pathname || !requiresAuth(pathname)) return;
-    if (pathname === VERIFY_EMAIL_PATH) return;
-    if (user) return;
-    if (token) return; // /me still resolving or about to retry
-    router.replace(loginWithReturn(pathname, currentSearch()));
-  }, [hasMounted, isChecking, pathname, user, token, router]);
+    if (redirectTo) router.replace(redirectTo);
+  }, [redirectTo, router]);
 
-  // Unverified users may only access the verify-email page — redirect and block content.
-  // Allow public marketing + not-found so 404 / legal pages still work.
-  // If user has profileImage they've completed select_avatar, so send to dashboard not verify-email.
-  useEffect(() => {
-    if (
-      user &&
-      !user.emailVerified &&
-      !user.profileImage &&
-      pathname !== VERIFY_EMAIL_PATH &&
-      pathname &&
-      !isPublicAppPath(pathname) &&
-      !isNotFoundPath(pathname)
-    ) {
-      const returnPath = sanitizeReturnPath(
-        pathFromParts(pathname, currentSearch()),
-      );
-      router.replace(withDn(VERIFY_EMAIL_PATH, returnPath));
-    }
-    if (
-      user &&
-      !user.emailVerified &&
-      user.profileImage &&
-      pathname !== "/overview" &&
-      !pathname.startsWith("/overview/") &&
-      pathname &&
-      !isPublicAppPath(pathname) &&
-      !isNotFoundPath(pathname)
-    ) {
-      const params = new URLSearchParams(currentSearch());
-      router.replace(getPostAuthRedirect(params));
-    }
-  }, [user, pathname, router]);
+  const awaitingSession =
+    Boolean(pathname) && isAppShellPath(pathname) && (!hasMounted || !user);
 
-  useEffect(() => {
-    if (user?.emailVerified === true && pathname === VERIFY_EMAIL_PATH) {
-      const params = new URLSearchParams(currentSearch());
-      router.replace(getPostAuthRedirect(params));
-    }
-  }, [user, pathname, router]);
-
-  /* `emailVerified === true`: never mount verify-email content (before global auth loading branch). */
-  if (user?.emailVerified === true && pathname === VERIFY_EMAIL_PATH) {
-    return <AuthLoader />;
-  }
-
-  if (isChecking) {
-    return <AuthLoader />;
-  }
-
-  // Do not render dashboard or other pages for unverified users without profileImage; show loader until redirect
-  if (
-    user &&
-    !user.emailVerified &&
-    !user.profileImage &&
-    pathname !== VERIFY_EMAIL_PATH &&
-    pathname &&
-    !isPublicAppPath(pathname) &&
-    !isNotFoundPath(pathname)
-  ) {
-    return <AuthLoader />;
-  }
-  // Unverified but has profileImage (completed select_avatar): allow dashboard, block others until redirect
-  if (
-    user &&
-    !user.emailVerified &&
-    user.profileImage &&
-    pathname !== "/overview" &&
-    !pathname.startsWith("/overview/") &&
-    pathname &&
-    !isPublicAppPath(pathname) &&
-    !isNotFoundPath(pathname)
-  ) {
-    return <AuthLoader />;
-  }
-
-  const isProtectedPath =
-    Boolean(pathname) &&
-    requiresAuth(pathname) &&
-    pathname !== VERIFY_EMAIL_PATH;
-
-  /*
-   * Protected routes: same AuthLoader on server + first client paint (hasMounted=false),
-   * then keep showing it until session is resolved. Avoids hydration mismatch from cookies.
-   */
-  if (isProtectedPath && (!hasMounted || (!user && !token))) {
-    return <AuthLoader />;
+  // AuthLoader is fixed inset-0 — keep the page under it so the check feels like an overlay.
+  if (redirectTo || awaitingSession || isChecking) {
+    return (
+      <>
+        {children}
+        <AuthLoader />
+      </>
+    );
   }
 
   return <>{children}</>;
