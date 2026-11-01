@@ -142,10 +142,7 @@ export function parseBookingRecord(raw: unknown): Booking | null {
     unwrapped.scheduledAt ?? r.scheduledAt ?? unwrapped.scheduled_at,
   );
   const createdAt = pickString(
-    unwrapped.createdAt ??
-      r.createdAt ??
-      unwrapped.created_at ??
-      r.created_at,
+    unwrapped.createdAt ?? r.createdAt ?? unwrapped.created_at ?? r.created_at,
   );
   const direction = parseBookingDirection(
     unwrapped.direction ??

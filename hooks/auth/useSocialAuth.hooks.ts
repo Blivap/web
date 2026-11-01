@@ -85,7 +85,7 @@ export function useSocialAuth(options?: { enabled?: boolean }) {
   }, [configured]);
 
   const signIn = async (provider: SocialProvider) => {
-    if (provider === "apple" || provider === "facebook") {
+    if (provider === "facebook") {
       showSnackbar("Still under construction", "info");
       return;
     }

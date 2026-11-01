@@ -7,12 +7,14 @@ interface AvatarProps {
   src?: string | null;
   /** Empty when the photo sits next to a name. Set when the image is the only label. */
   alt?: string;
+  /** Layout width for the image optimizer. Match the rendered circle; default is `size-11` (44px). */
+  sizes?: string;
 }
 export const Avatar = (
   props: AvatarProps &
     DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>,
 ) => {
-  const { className: style, src, alt = "", ...rest } = props;
+  const { className: style, src, alt = "", sizes = "44px", ...rest } = props;
   return (
     <div
       {...rest}
@@ -22,7 +24,7 @@ export const Avatar = (
       )}
     >
       {src ? (
-        <Image src={src} alt={alt} fill sizes="44px" className="object-cover" />
+        <Image src={src} alt={alt} fill sizes={sizes} className="object-fit" />
       ) : (
         <User aria-hidden />
       )}

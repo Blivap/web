@@ -11,7 +11,8 @@ type AvatarListBody = {
 export default function avatarRepository() {
   return {
     getAvatars(page = 1): Promise<IResponse<AvatarListBody>> {
-      const nextPage = Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1;
+      const nextPage =
+        Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1;
       return fetcher<AvatarListBody>(endpoints.avatar, {
         method: "GET",
         params: { page: nextPage },
