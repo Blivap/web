@@ -98,10 +98,10 @@ export function AvatarPicker({
                   >
                     <Image
                       src={avatar.url}
-                      alt=""
+                      alt="Profile avatar"
                       fill
                       sizes="60px"
-                      className="object-contain object-center bg-no-repeat"
+                      className="object-center bg-no-repeat"
                       unoptimized
                     />
                   </button>
