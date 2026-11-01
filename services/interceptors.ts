@@ -5,6 +5,7 @@ import { endpoints } from "@/services/endpoints";
 /** Auth endpoints where 401 means bad credentials, not an expired session. */
 const AUTH_CREDENTIAL_PATHS = [
   endpoints.auth.login,
+  endpoints.auth.social,
   endpoints.auth.register,
   endpoints.auth.signup,
   endpoints.auth.forgotPassword,
