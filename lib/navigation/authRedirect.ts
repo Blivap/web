@@ -31,6 +31,7 @@ function isAllowedDnPath(path: string): boolean {
   // Auth hops themselves are not valid return destinations
   if (
     normalized === routes.verifyEmail ||
+    normalized === routes.completeProfile ||
     normalized === routes.login ||
     normalized === routes.register ||
     normalized === routes.forgotPassword ||

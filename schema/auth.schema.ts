@@ -66,6 +66,22 @@ export const changePasswordSchema = yup.object({
     .required("Confirm your new password"),
 });
 
+/** Required after Google/Apple sign-in (phone + DOB are not on the provider). */
+export const completeProfileSchema = yup.object({
+  phoneCountryCode: yup
+    .string()
+    .required("Country code is required")
+    .matches(/^\+\d{1,6}$/, "Invalid country code"),
+  phoneNational: yup
+    .string()
+    .required("Phone number is required")
+    .test("phone-national", "Enter 6–15 digits", (v) => {
+      const d = (v ?? "").replace(/\D/g, "");
+      return d.length >= 6 && d.length <= 15;
+    }),
+  dateOfBirth: yup.string().required("Date of Birth is required"),
+});
+
 export const editProfileSchema = yup.object({
   firstname: yup.string().trim().optional().nullable(),
   lastname: yup.string().trim().optional().nullable(),

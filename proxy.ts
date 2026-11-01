@@ -22,6 +22,7 @@ const AUTH_ENTRY_PATHS = new Set<string>([
   routes.login,
   routes.register,
   routes.verifyEmail,
+  routes.completeProfile,
   routes.forgotPassword,
   routes.resetPassword,
   routes.selectAvatar,

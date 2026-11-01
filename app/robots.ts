@@ -21,6 +21,7 @@ const DISALLOWED_PREFIXES = [
   "/forgot-password/",
   "/reset-password/",
   "/verify-email/",
+  "/complete-profile/",
   "/waitlist/",
 ] as const;
 
