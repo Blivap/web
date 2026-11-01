@@ -101,7 +101,7 @@ export function AvatarPicker({
                       alt=""
                       fill
                       sizes="60px"
-                      className="object-cover"
+                      className="object-fit bg-center bg-no-repeat"
                       unoptimized
                     />
                   </button>

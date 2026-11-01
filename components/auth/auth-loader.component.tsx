@@ -5,7 +5,7 @@ import { BlivapLogo } from "@/public/svg";
 export function AuthLoader() {
   return (
     <div
-      className="fixed inset-0 z-100 flex min-h-screen flex-col items-center justify-center gap-6 bg-white dark:bg-[#0B0D12]"
+      className="fixed inset-0 z-100 flex min-h-screen flex-col items-center justify-center gap-6 bg-white/70 backdrop-blur-[2px] dark:bg-[#0B0D12]/70"
       aria-live="polite"
       aria-busy="true"
       role="status"

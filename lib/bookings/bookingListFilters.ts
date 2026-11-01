@@ -76,9 +76,7 @@ export function bookingListApiQuery(
 export function isActiveBookingListQuery(
   query?: Pick<BookingListQuery, "filter" | "date">,
 ): boolean {
-  return Boolean(
-    (query?.filter && query.filter !== "all") || query?.date,
-  );
+  return Boolean((query?.filter && query.filter !== "all") || query?.date);
 }
 
 export type BookingsListSourceOptions = {

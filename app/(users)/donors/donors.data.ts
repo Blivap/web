@@ -25,6 +25,8 @@ export interface Donor {
   activeDonationTypes: string[];
   /** ISO timestamp when donation cooldown ends; null/omitted if eligible now. */
   cooldownEndsAt?: string | null;
+  /** ISO timestamp of the donation that started the current rest period. */
+  lastDonationAt?: string | null;
   /** Primary donation type cannot be booked yet, including a block with no end date. */
   isInDonationCooldown?: boolean;
   isPermanentDonationBlock?: boolean;

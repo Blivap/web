@@ -192,9 +192,7 @@ function BookingRowMeta({
           <p className="truncate text-xs text-text-tertiary">{subtitle}</p>
         ) : null}
       </div>
-      {direction ? (
-        <BookingDirectionMark direction={direction} />
-      ) : null}
+      {direction ? <BookingDirectionMark direction={direction} /> : null}
     </div>
   );
 }

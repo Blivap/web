@@ -88,6 +88,7 @@ function DonorCard({
             <div className="mb-3">
               <DonorCooldownDisplay
                 cooldownEndsAt={donor.cooldownEndsAt}
+                lastDonationAt={donor.lastDonationAt}
                 unavailable={
                   donor.isInDonationCooldown || donor.isPermanentDonationBlock
                 }

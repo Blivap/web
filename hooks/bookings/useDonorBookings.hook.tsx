@@ -75,9 +75,12 @@ export function useDonorBookings(options?: BookingsListSourceOptions) {
 
   const [mutatingId, setMutatingId] = useState<string | null>(null);
 
-  const publishBookingPatch = useCallback((id: string, patch: Partial<Booking>) => {
-    onBookingPatchedRef.current?.(id, patch);
-  }, []);
+  const publishBookingPatch = useCallback(
+    (id: string, patch: Partial<Booking>) => {
+      onBookingPatchedRef.current?.(id, patch);
+    },
+    [],
+  );
 
   const loadData = useCallback(() => {
     if (!user?.id || !enabled) return Promise.resolve();
@@ -219,7 +222,14 @@ export function useDonorBookings(options?: BookingsListSourceOptions) {
       publishBookingPatch(id, patch);
       showSnackbar("Thanks — your report was submitted.");
     },
-    [bookings, dispatch, publishBookingPatch, reportBookingId, showSnackbar, store],
+    [
+      bookings,
+      dispatch,
+      publishBookingPatch,
+      reportBookingId,
+      showSnackbar,
+      store,
+    ],
   );
 
   const tabPanels = useMemo(

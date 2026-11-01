@@ -6,7 +6,10 @@ import {
 import { unwrapApiRecord } from "@/lib/donors/unwrapApiData";
 import type { DonorPublicScreening } from "@/types/donors";
 import { parseDonorPublicScreening } from "@/lib/donors/parseDonorPublicScreening";
-import { pickCooldownEndsAt } from "@/lib/donors/donorCooldown";
+import {
+  pickCooldownEndsAt,
+  pickLastDonationAt,
+} from "@/lib/donors/donorCooldown";
 import { normalizeDonationTypesList } from "@/lib/donors/screeningDonationTypes";
 import { parseDonorProfileRatings } from "@/lib/ratings/parseDonorRatingsResponse";
 import type { DonorRatingsSummary } from "@/types/ratings";
@@ -223,6 +226,7 @@ export function parseDonorRecord(raw: unknown): Donor | null {
   const publicIdRaw = pickString(merged.publicId ?? merged.public_id);
   const publicId = publicIdRaw ? publicIdRaw.toUpperCase() : null;
   const cooldownEndsAt = pickCooldownEndsAt(merged);
+  const lastDonationAt = pickLastDonationAt(merged);
   const isPermanentDonationBlock = merged.isPermanentDonationBlock === true;
   const isInDonationCooldown =
     merged.isInDonationCooldown === true || isPermanentDonationBlock;
@@ -246,6 +250,7 @@ export function parseDonorRecord(raw: unknown): Donor | null {
     ...(userId ? { userId } : {}),
     ...(publicId ? { publicId } : {}),
     ...(cooldownEndsAt ? { cooldownEndsAt } : {}),
+    ...(lastDonationAt ? { lastDonationAt } : {}),
     ...(isInDonationCooldown ? { isInDonationCooldown: true } : {}),
     ...(isPermanentDonationBlock ? { isPermanentDonationBlock: true } : {}),
     ...(profileImage ? { profileImage } : {}),

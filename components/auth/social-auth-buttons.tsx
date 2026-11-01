@@ -21,7 +21,7 @@ const PROVIDERS: {
     provider: "apple",
     src: "/icons/Apple.svg",
     label: "Apple",
-    available: false,
+    available: true,
   },
   {
     provider: "facebook",
