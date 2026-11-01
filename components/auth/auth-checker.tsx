@@ -11,6 +11,7 @@ import {
   requiresAuth,
   routes,
 } from "@/config/routes";
+import { needsRequiredProfileDetails } from "@/lib/auth/profileCompleteness";
 import {
   getPostAuthRedirect,
   loginWithReturn,
@@ -44,9 +45,13 @@ function isOverviewPath(pathname: string): boolean {
   );
 }
 
-/** Protected app shell (not verify-email / email-link landing). */
+/** Protected app shell (not verify-email / complete-profile landing). */
 function isAppShellPath(pathname: string): boolean {
-  return requiresAuth(pathname) && pathname !== routes.verifyEmail;
+  return (
+    requiresAuth(pathname) &&
+    pathname !== routes.verifyEmail &&
+    pathname !== routes.completeProfile
+  );
 }
 
 function currentSearch(): string {
@@ -69,6 +74,8 @@ function useHasMounted(): boolean {
  * Rules:
  * - Guests cannot open the app shell → `/login` (with return `dn`).
  * - Verified users leave `/verify-email` → post-auth destination.
+ * - Verified users missing phone or date of birth → `/complete-profile` only
+ *   (plus open paths). Social sign-in never collects those fields.
  * - Unverified without avatar → `/verify-email` only (plus open paths).
  * - Unverified with avatar → `/overview` only (plus open paths).
  *   Always `/overview` here — never honor `dn` (would fight the overview-only gate).
@@ -90,6 +97,18 @@ function resolveAuthRedirect(args: {
   }
 
   if (user.emailVerified) {
+    if (needsRequiredProfileDetails(user)) {
+      if (pathname === routes.completeProfile || isOpenPath(pathname)) {
+        return null;
+      }
+      const returnPath = sanitizeReturnPath(
+        pathFromParts(pathname, currentSearch()),
+      );
+      return withDn(routes.completeProfile, returnPath);
+    }
+    if (pathname === routes.completeProfile) {
+      return getPostAuthRedirect(new URLSearchParams(currentSearch()));
+    }
     if (pathname !== routes.verifyEmail) return null;
     return getPostAuthRedirect(new URLSearchParams(currentSearch()));
   }
