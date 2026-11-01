@@ -58,14 +58,15 @@ export function normalizeUser(input: unknown): IUser | null {
   const firstname = asString(obj.firstname, obj.firstName, obj.first_name);
   const lastname = asString(obj.lastname, obj.lastName, obj.last_name);
 
+  const emailVerifiedRaw =
+    obj.emailVerified ?? obj.email_verified ?? obj.isEmailVerified;
   const emailVerified =
-    typeof obj.emailVerified === "boolean"
-      ? obj.emailVerified
-      : typeof obj.email_verified === "boolean"
-        ? obj.email_verified
-        : typeof obj.isEmailVerified === "boolean"
-          ? obj.isEmailVerified
-          : false;
+    typeof emailVerifiedRaw === "boolean"
+      ? emailVerifiedRaw
+      : emailVerifiedRaw === 1 ||
+        emailVerifiedRaw === "1" ||
+        emailVerifiedRaw === "true" ||
+        emailVerifiedRaw === "TRUE";
 
   const phonenumber =
     typeof obj.phonenumber === "string"
@@ -146,15 +147,20 @@ export function normalizeUser(input: unknown): IUser | null {
   };
 }
 
+function readEmailVerifiedFlag(user: LooseRecord): boolean | null {
+  const raw = user.emailVerified ?? user.email_verified ?? user.isEmailVerified;
+  if (typeof raw === "boolean") return raw;
+  if (raw === 1 || raw === "1" || raw === "true" || raw === "TRUE") return true;
+  if (raw === 0 || raw === "0" || raw === "false" || raw === "FALSE")
+    return false;
+  return null;
+}
+
 /** True when the account should be treated as not yet email-verified. */
 export function isEmailUnverified(user: unknown): boolean {
   if (user == null || typeof user !== "object") return true;
 
-  const u = user as LooseRecord;
-
-  if (typeof u.emailVerified === "boolean") return !u.emailVerified;
-  if (typeof u.email_verified === "boolean") return !u.email_verified;
-  if (typeof u.isEmailVerified === "boolean") return !u.isEmailVerified;
-
-  return true;
+  const verified = readEmailVerifiedFlag(user as LooseRecord);
+  if (verified == null) return true;
+  return !verified;
 }
