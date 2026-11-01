@@ -24,6 +24,47 @@ import {
 } from "@/lib/firebase/auth";
 import { useAppDispatch } from "@/store/hooks";
 
+function messageFromBody(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const body = data as { message?: unknown; error?: unknown };
+  if (typeof body.message === "string" && body.message.trim()) {
+    return body.message.trim();
+  }
+  if (typeof body.error === "string" && body.error.trim()) {
+    return body.error.trim();
+  }
+  return null;
+}
+
+/** Maps POST /authentication/social failures to a user-facing message. */
+function socialApiErrorMessage(
+  status: number | undefined,
+  data: unknown,
+  fallback?: string | null,
+): string {
+  const fromBody = messageFromBody(data);
+  // Old backend path — account is now created on first social sign-in.
+  if (
+    fromBody &&
+    /registration\s*required|sign\s*up\s*required|complete\s*registration/i.test(
+      fromBody,
+    )
+  ) {
+    return "Could not finish signing in. Please try again.";
+  }
+  if (fromBody) return fromBody;
+  if (status === 400) {
+    return "This account could not be signed in. Check that the provider shared an email address.";
+  }
+  if (status === 409) {
+    return "This email is already linked to a different sign-in method.";
+  }
+  if (status === 503) {
+    return "Social sign-in is temporarily unavailable. Please try again shortly.";
+  }
+  return fallback?.trim() || "Could not sign in with that account";
+}
+
 export function useSocialAuth(options?: { enabled?: boolean }) {
   const enabled = options?.enabled !== false;
   const configured = isFirebaseAuthConfigured();
@@ -38,26 +79,44 @@ export function useSocialAuth(options?: { enabled?: boolean }) {
     idToken: string,
     method: SocialProvider | "redirect",
   ) => {
-    const { data, status, message, error } = await $api.auth.social({
-      idToken,
-    });
-    if (status >= 200 && status < 300) {
-      trackSuccess("login", { method });
-      showSnackbar("Signed in", "success");
-      await applyAuthSession({
-        authData: readAuthEnvelope(data),
-        dispatch,
-        router,
-        searchParams,
+    try {
+      const { data, status, message, error } = await $api.auth.social({
+        idToken,
       });
-      return true;
+      if (status >= 200 && status < 300) {
+        trackSuccess("login", { method });
+        showSnackbar("Login successful!", "success");
+        await applyAuthSession({
+          authData: readAuthEnvelope(data),
+          dispatch,
+          router,
+          searchParams,
+          // Backend creates social users as verified — never send OTP.
+          skipEmailVerification: true,
+        });
+        return true;
+      }
+      trackFailure("login", "api", { method });
+      showSnackbar(
+        socialApiErrorMessage(status, data, error || message),
+        "error",
+      );
+      return false;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        trackFailure("login", classifyAnalyticsError(error), { method });
+        showSnackbar(
+          socialApiErrorMessage(
+            error.response?.status,
+            error.response?.data,
+            error.message,
+          ),
+          "error",
+        );
+        return false;
+      }
+      throw error;
     }
-    trackFailure("login", "api", { method });
-    showSnackbar(
-      error || message || "Could not sign in with that account",
-      "error",
-    );
-    return false;
   };
 
   useEffect(() => {
@@ -105,19 +164,6 @@ export function useSocialAuth(options?: { enabled?: boolean }) {
     } catch (error) {
       const firebaseMessage = socialAuthErrorMessage(error);
       if (!firebaseMessage) return;
-      if (error instanceof AxiosError) {
-        trackFailure("login", classifyAnalyticsError(error), {
-          method: provider,
-        });
-        const responseData = error.response?.data as
-          | { message?: string; error?: string }
-          | undefined;
-        showSnackbar(
-          responseData?.message || responseData?.error || firebaseMessage,
-          "error",
-        );
-        return;
-      }
       trackFailure("login", classifyAnalyticsError(error), {
         method: provider,
       });

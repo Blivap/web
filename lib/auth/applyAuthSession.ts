@@ -34,6 +34,11 @@ export async function applyAuthSession(args: {
   dispatch: AppDispatch;
   router: ReplaceRouter;
   searchParams: { get: (name: string) => string | null };
+  /**
+   * Social sign-in creates/returns verified users with no OTP.
+   * Never route those sessions to `/verify-email`.
+   */
+  skipEmailVerification?: boolean;
 }): Promise<boolean> {
   const token = accessTokenFrom(args.authData);
   if (!token) return false;
@@ -60,13 +65,19 @@ export async function applyAuthSession(args: {
       /* session token may lag; routing still uses the login envelope */
     }
   }
+  if (args.skipEmailVerification && userPayload && !userPayload.emailVerified) {
+    userPayload = { ...userPayload, emailVerified: true };
+  }
   if (userPayload) {
     args.dispatch(setUser(userPayload));
   }
   // Prefer live URL / storage in case another effect already mutated the route.
   const returnTo =
     resolveDnRedirect(args.searchParams) ?? dnRedirect ?? consumeStoredDn();
-  if (isEmailUnverified(userPayload ?? args.authData?.user)) {
+  const needsVerifyEmail =
+    !args.skipEmailVerification &&
+    isEmailUnverified(userPayload ?? args.authData?.user);
+  if (needsVerifyEmail) {
     args.router.replace(withDn(routes.verifyEmail, returnTo));
   } else {
     if (returnTo) consumeStoredDn();
