@@ -202,8 +202,7 @@ const bookingsSlice = createSlice({
         if (state.received.requestId !== action.meta.requestId) return;
         state.received.status = "ok";
         state.received.error = null;
-        const replace =
-          !action.meta.arg?.silent || action.meta.arg?.replace;
+        const replace = !action.meta.arg?.silent || action.meta.arg?.replace;
         state.received.items = replace
           ? action.payload.bookings
           : mergeBookingsList(state.received.items, action.payload.bookings);

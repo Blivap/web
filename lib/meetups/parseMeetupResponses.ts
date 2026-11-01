@@ -373,22 +373,21 @@ export function parseMeetupSessionBody(body: unknown): MeetupSession | null {
     const donorImage =
       imageFrom(r.donorUserId ?? r.donor_user_id) ??
       (bookingRecord
-        ? pickString(
+        ? (pickString(
             bookingRecord.donorProfileImage ??
               bookingRecord.donor_profile_image,
-          ) ?? imageFrom(bookingRecord.donorUserId ?? bookingRecord.donor_user_id)
+          ) ??
+          imageFrom(bookingRecord.donorUserId ?? bookingRecord.donor_user_id))
         : null) ??
       pickString(r.donorProfileImage ?? r.donor_profile_image);
     const requesterImage =
       imageFrom(r.requesterUserId ?? r.requesterId ?? r.requester_id) ??
       (bookingRecord
-        ? pickString(
+        ? (pickString(
             bookingRecord.requesterProfileImage ??
               bookingRecord.requester_profile_image,
           ) ??
-          imageFrom(
-            bookingRecord.requesterId ?? bookingRecord.requester_id,
-          )
+          imageFrom(bookingRecord.requesterId ?? bookingRecord.requester_id))
         : null) ??
       pickString(r.requesterProfileImage ?? r.requester_profile_image);
     const peerImage =

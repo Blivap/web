@@ -754,13 +754,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     setTerminateReason("");
     showSnackbar("Meetup terminated.", "success");
     router.push(routes.bookings);
-  }, [
-    readOnly,
-    terminateReason,
-    terminateMeet,
-    showSnackbar,
-    router,
-  ]);
+  }, [readOnly, terminateReason, terminateMeet, showSnackbar, router]);
 
   const myDonationDone = useMemo(() => {
     if (!session || !user?.id) return false;

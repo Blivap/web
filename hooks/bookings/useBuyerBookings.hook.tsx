@@ -66,9 +66,12 @@ export function useBuyerBookings(options?: BookingsListSourceOptions) {
 
   const [mutatingId, setMutatingId] = useState<string | null>(null);
 
-  const publishBookingPatch = useCallback((id: string, patch: Partial<Booking>) => {
-    onBookingPatchedRef.current?.(id, patch);
-  }, []);
+  const publishBookingPatch = useCallback(
+    (id: string, patch: Partial<Booking>) => {
+      onBookingPatchedRef.current?.(id, patch);
+    },
+    [],
+  );
 
   const openRatingForBooking = useCallback(
     (id: string) => {
@@ -117,7 +120,13 @@ export function useBuyerBookings(options?: BookingsListSourceOptions) {
         status: "completed",
       });
     }
-  }, [ratingBookingId, dispatch, closeRating, publishBookingPatch, showSnackbar]);
+  }, [
+    ratingBookingId,
+    dispatch,
+    closeRating,
+    publishBookingPatch,
+    showSnackbar,
+  ]);
 
   const loadData = useCallback(() => {
     if (!user?.id || !enabled) return Promise.resolve();

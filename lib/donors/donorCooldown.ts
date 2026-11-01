@@ -59,7 +59,9 @@ function pickLastDonationAtFromRecord(
     parseCooldownEndIso(
       record.mostRecentDonationAt ?? record.most_recent_donation_at,
     ) ??
-    parseCooldownEndIso(record.cooldownStartedAt ?? record.cooldown_started_at) ??
+    parseCooldownEndIso(
+      record.cooldownStartedAt ?? record.cooldown_started_at,
+    ) ??
     parseCooldownEndIso(record.restStartedAt ?? record.rest_started_at) ??
     null
   );
@@ -255,10 +257,7 @@ export function cooldownRingRatiosForCooldown(opts: {
     progress = 1 - remainingMs / totalMs;
   }
 
-  return ratiosFromProgress(
-    Math.min(1, Math.max(0, progress)),
-    remainingMs,
-  );
+  return ratiosFromProgress(Math.min(1, Math.max(0, progress)), remainingMs);
 }
 
 export function cooldownToneFrom(

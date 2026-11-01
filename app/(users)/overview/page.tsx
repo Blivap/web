@@ -71,7 +71,10 @@ export default function OverviewPage() {
           return;
         }
         const raw =
-          unwrapApiRecord(data) ?? (typeof data === "object" ? data : null);
+          unwrapApiRecord(data) ??
+          (data && typeof data === "object"
+            ? (data as Record<string, unknown>)
+            : null);
         if (!raw || !isExistingRegisteredDonor(raw)) {
           setDonorProfile({ status: "not_donor" });
           return;

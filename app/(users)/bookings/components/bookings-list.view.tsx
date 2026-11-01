@@ -14,7 +14,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { $api } from "@/app/api";
-import { useSetQueryParams, useQueryParamNumber } from "@/hooks/navigation/useQueryParamState.hook";
+import {
+  useSetQueryParams,
+  useQueryParamNumber,
+} from "@/hooks/navigation/useQueryParamState.hook";
 import { usePageSize } from "@/hooks/navigation/usePageSize.hook";
 import { useAppSelector } from "@/store/hooks";
 import { useBuyerBookings } from "@/hooks/bookings/useBuyerBookings.hook";
@@ -148,7 +151,16 @@ export function BookingsListView() {
     return () => {
       cancelled = true;
     };
-  }, [dateFilter, filter, listQuery, page, pageSize, requestKey, retryKey, user?.id]);
+  }, [
+    dateFilter,
+    filter,
+    listQuery,
+    page,
+    pageSize,
+    requestKey,
+    retryKey,
+    user?.id,
+  ]);
 
   const onBookingPatched = useCallback(
     (id: string, patch: Partial<Booking>) => {
