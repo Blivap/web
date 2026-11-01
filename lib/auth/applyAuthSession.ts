@@ -7,6 +7,7 @@ import {
   resolveDnRedirect,
   withDn,
 } from "@/lib/navigation/authRedirect";
+import { needsRequiredProfileDetails } from "@/lib/auth/profileCompleteness";
 import { isEmailUnverified, normalizeUser } from "@/lib/utils";
 import { setCredentials, setUser } from "@/store/slices/authSlice";
 import type { AppDispatch } from "@/store/store";
@@ -79,6 +80,8 @@ export async function applyAuthSession(args: {
     isEmailUnverified(userPayload ?? args.authData?.user);
   if (needsVerifyEmail) {
     args.router.replace(withDn(routes.verifyEmail, returnTo));
+  } else if (needsRequiredProfileDetails(userPayload)) {
+    args.router.replace(withDn(routes.completeProfile, returnTo));
   } else {
     if (returnTo) consumeStoredDn();
     args.router.replace(returnTo ?? routes.overview);

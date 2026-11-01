@@ -51,6 +51,10 @@ export const routeRoleRules: readonly {
     prefix: routes.verifyEmail,
     roles: [Role.DONOR, Role.HOSPITAL, Role.ADMIN],
   },
+  {
+    prefix: routes.completeProfile,
+    roles: [Role.DONOR, Role.HOSPITAL, Role.ADMIN],
+  },
   { prefix: routes.overview, roles: [Role.DONOR, Role.HOSPITAL, Role.ADMIN] },
   { prefix: routes.dashboard, roles: [Role.DONOR, Role.HOSPITAL, Role.ADMIN] },
   { prefix: routes.wallet, roles: [Role.DONOR, Role.ADMIN] },

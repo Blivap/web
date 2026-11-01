@@ -12,6 +12,8 @@ export const routes = {
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
   verifyEmail: "/verify-email",
+  /** Social accounts must add phone + date of birth before using the app. */
+  completeProfile: "/complete-profile",
 
   // Marketing / content (many are “public” in middleware — see `publicRoutes`)
   bookDemo: "/book-demo",
@@ -137,6 +139,7 @@ export const protectedRoutePrefixes: readonly string[] = [
   "/verify-id",
   "/schedule-appointment",
   routes.verifyEmail,
+  routes.completeProfile,
   routes.selectAvatar,
 ];
 
