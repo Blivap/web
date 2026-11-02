@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 /**
- * Handles `postMessage` from `public/push-sw.js` when a push notification is clicked
- * and an app tab is focused (SPA navigation without opening a new window).
+ * Handles `postMessage` from `public/firebase-messaging-sw.js` when a push
+ * notification is clicked and an app tab is focused (SPA navigation).
  */
 export function useNotificationNavigationListener() {
   const router = useRouter();
