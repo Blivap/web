@@ -1,44 +1,48 @@
 /**
- * Minimal Web Push handler. Payload shape should mirror in-app rows (title, body, data).
- * `data` values are strings (per backend); we pass through for notificationclick routing.
+ * Firebase Cloud Messaging service worker (web).
+ * Compat scripts must stay aligned with the `firebase` package major/minor.
  */
+/* eslint-disable no-undef */
+importScripts(
+  "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js",
+);
+importScripts(
+  "https://www.gstatic.com/firebasejs/12.19.0/firebase-messaging-compat.js",
+);
 
-self.addEventListener("push", function (event) {
-  let title = "Blivap";
-  let body = "";
-  let icon = "/icon1.png";
-  /** @type {Record<string, string>} */
-  let data = {};
+firebase.initializeApp({
+  apiKey: "AIzaSyAkMPJRD4zBM5oDNtiOZT1IMP-diE2iRwY",
+  authDomain: "blivap.firebaseapp.com",
+  projectId: "blivap",
+  messagingSenderId: "935287391630",
+  appId: "1:935287391630:web:b08cc67c0abbf2090e90df",
+});
 
-  if (event.data) {
-    try {
-      const json = event.data.json();
-      title = json.title || title;
-      body = json.body || "";
-      if (typeof json.icon === "string" && json.icon) icon = json.icon;
-      if (json.data && typeof json.data === "object") {
-        data = /** @type {Record<string, string>} */ (json.data);
-      }
-    } catch {
-      body = event.data.text();
-    }
-  }
+const messaging = firebase.messaging();
 
-  event.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      data,
-      icon,
-      badge: "/icon1.png",
-    }),
-  );
+messaging.onBackgroundMessage(function (payload) {
+  const data = payload.data || {};
+  const title =
+    (payload.notification && payload.notification.title) ||
+    data.title ||
+    "Blivap";
+  const body =
+    (payload.notification && payload.notification.body) || data.body || "";
+  const icon =
+    (payload.notification && payload.notification.icon) || "/icon1.png";
+
+  return self.registration.showNotification(title, {
+    body: body,
+    data: data,
+    icon: icon,
+    badge: "/icon1.png",
+  });
 });
 
 self.addEventListener("notificationclick", function (event) {
   event.notification.close();
   const d = event.notification.data || {};
 
-  /** @type {string} */
   let path = "/overview";
   if (typeof d.url === "string" && d.url.startsWith("/")) {
     path = d.url;
@@ -50,12 +54,10 @@ self.addEventListener("notificationclick", function (event) {
       type === "booking_rejected"
     ) {
       path = d.bookingId
-        ? `/bookings?bookingId=${encodeURIComponent(d.bookingId)}`
+        ? "/bookings?bookingId=" + encodeURIComponent(d.bookingId)
         : "/bookings";
     } else if (type === "donor_matched") {
-      path = d.donorId
-        ? `/donors/${encodeURIComponent(d.donorId)}`
-        : "/bookings";
+      path = d.donorId ? "/donors/" + encodeURIComponent(d.donorId) : "/bookings";
     } else if (
       type === "verification_approved" ||
       type === "verification_rejected"

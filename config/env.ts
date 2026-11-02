@@ -7,8 +7,8 @@ type Env = {
   appName: string;
   enableNotifications: boolean;
   /**
-   * VAPID public key (same as backend Web Push) for PushManager.subscribe.
-   * Optional; web push registration is skipped when unset.
+   * Firebase Web Push certificate key (Console → Cloud Messaging → Web Push certificates).
+   * Used by Firebase Messaging `getToken` for web FCM. Optional; skipped when unset.
    */
   webPushVapidPublicKey: string | undefined;
   /**
