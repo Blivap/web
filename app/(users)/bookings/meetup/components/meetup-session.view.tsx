@@ -553,10 +553,16 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
         return;
       }
       const res = await verifyCode(digits);
-      if (!res.ok) return;
+      if (!res.ok) {
+        // Keep the scanner available so they can try the peer's QR again.
+        setPeerScannerOpen(true);
+        return;
+      }
       showSnackbar("Verified — thank you.", "success");
       setCodeInput("");
+      // Show your QR so the peer can scan you; Scan QR stays available.
       setPeerScannerOpen(false);
+      setQrPanelOpen(true);
     },
     [swapCodes, verifyCode, showSnackbar],
   );
@@ -766,12 +772,23 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
   }, [session, user?.id, isRequester]);
 
   const iVerifiedMeetup = session?.me.meetupVerified === true;
-  const showCodePath =
-    session &&
-    session.codeVerificationEnabled !== false &&
+  /** Still need to enter/scan the peer's code. */
+  const showVerifyEntry =
+    Boolean(session) &&
+    session?.codeVerificationEnabled !== false &&
     !readOnly &&
     !gateSatisfied &&
     !iVerifiedMeetup;
+  /**
+   * Keep Show QR / Scan QR until both sides verify — after you scan, the peer
+   * still needs your code, and you may need to scan again.
+   */
+  const showQrTools =
+    Boolean(ninOk) &&
+    Boolean(session) &&
+    session?.codeVerificationEnabled !== false &&
+    !readOnly &&
+    !gateSatisfied;
   const waitingOnPeerVerify =
     Boolean(ninOk) &&
     Boolean(session) &&
@@ -782,10 +799,10 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
     Boolean(ninOk) && gateSatisfied && !readOnly && !myDonationDone;
 
   useEffect(() => {
-    if (ninOk && showCodePath) return;
+    if (showQrTools) return;
     setQrPanelOpen(false);
     setPeerScannerOpen(false);
-  }, [ninOk, showCodePath]);
+  }, [showQrTools]);
 
   useEffect(() => {
     if (sessionLoad !== "ok" || !session) return;
@@ -1252,7 +1269,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
             )}
           </div>
 
-          {ninOk && showCodePath && qrPanelOpen && swapCodeQrUrl ? (
+          {showQrTools && qrPanelOpen && swapCodeQrUrl ? (
             <div className="flex flex-col items-center gap-2 border-t border-border bg-[#FAFAFB] px-4 py-3 dark:border-white/10 dark:bg-black/25">
               <Button
                 type="button"
@@ -1262,7 +1279,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                 onClick={() => setPeerScannerOpen((open) => !open)}
               >
                 <Camera className="size-3.5" aria-hidden />
-                {peerScannerOpen ? "Close camera" : "Open camera"}
+                {peerScannerOpen ? "Close scanner" : "Scan QR"}
               </Button>
               <div className="relative size-44 overflow-hidden rounded-lg bg-white">
                 {peerScannerOpen ? (
@@ -1302,12 +1319,7 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                   </span>
                 ) : null}
               </div>
-              {waitingOnPeerVerify ? (
-                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-200">
-                  <span className="size-1.5 animate-pulse rounded-full bg-amber-300" />
-                  Pending
-                </span>
-              ) : showConfirmDonation ? (
+              {showConfirmDonation ? (
                 <Button
                   type="button"
                   size="xs"
@@ -1318,33 +1330,42 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                 >
                   Confirm donation
                 </Button>
-              ) : ninOk && showCodePath ? (
+              ) : showQrTools ? (
                 <div className="flex shrink-0 items-center gap-2">
-                  <input
-                    name="meetupCode"
-                    aria-label="Other person's code"
-                    value={codeInput}
-                    onChange={(event) =>
-                      setCodeInput(
-                        event.target.value.replace(/\D/g, "").slice(0, 6),
-                      )
-                    }
-                    placeholder="000000"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    maxLength={6}
-                    disabled={verifyBusy}
-                    className="h-8 w-28 rounded-md border border-border bg-white px-2 text-center font-mono text-sm tracking-widest text-text-primary outline-none placeholder:tracking-widest placeholder:text-text-tertiary focus:border-primary/45 disabled:opacity-50 dark:border-white/15 dark:bg-[#111118]"
-                  />
-                  <Button
-                    type="button"
-                    size="xs"
-                    disabled={verifyBusy || codeInput.length !== 6}
-                    loading={verifyBusy}
-                    onClick={() => void onVerifyCode()}
-                  >
-                    Verify
-                  </Button>
+                  {waitingOnPeerVerify ? (
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-200">
+                      <span className="size-1.5 animate-pulse rounded-full bg-amber-300" />
+                      Pending
+                    </span>
+                  ) : showVerifyEntry ? (
+                    <>
+                      <input
+                        name="meetupCode"
+                        aria-label="Other person's code"
+                        value={codeInput}
+                        onChange={(event) =>
+                          setCodeInput(
+                            event.target.value.replace(/\D/g, "").slice(0, 6),
+                          )
+                        }
+                        placeholder="000000"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        disabled={verifyBusy}
+                        className="h-8 w-28 rounded-md border border-border bg-white px-2 text-center font-mono text-sm tracking-widest text-text-primary outline-none placeholder:tracking-widest placeholder:text-text-tertiary focus:border-primary/45 disabled:opacity-50 dark:border-white/15 dark:bg-[#111118]"
+                      />
+                      <Button
+                        type="button"
+                        size="xs"
+                        disabled={verifyBusy || codeInput.length !== 6}
+                        loading={verifyBusy}
+                        onClick={() => void onVerifyCode()}
+                      >
+                        Verify
+                      </Button>
+                    </>
+                  ) : null}
                   <Button
                     type="button"
                     variant="outline"
@@ -1366,8 +1387,9 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                   >
                     <p>
                       Enter the other person&apos;s six-digit code, or show your
-                      QR so they can scan it. Open the camera to scan theirs in
-                      the same square.
+                      QR so they can scan it. Open the scanner to scan theirs in
+                      the same square. After you verify, keep this open so they
+                      can scan you.
                     </p>
                   </InfoHint>
                 </div>
