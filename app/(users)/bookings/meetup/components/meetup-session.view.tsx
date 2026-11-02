@@ -14,6 +14,8 @@ import {
 import {
   BadgeCheck,
   Camera,
+  Check,
+  CheckCheck,
   ChevronRight,
   Loader2,
   MoreVertical,
@@ -1202,6 +1204,24 @@ export function MeetupSessionView({ sessionId }: MeetupSessionViewProps) {
                           >
                             <MessageBody text={message.text} mine={mine} />
                           </div>
+                          {mine ? (
+                            <p
+                              className="mt-0.5 flex items-center gap-0.5 text-[10px] text-text-tertiary"
+                              aria-label={
+                                message.seen ? "Seen" : "Delivered"
+                              }
+                            >
+                              {message.seen ? (
+                                <CheckCheck
+                                  className="size-3 text-primary"
+                                  aria-hidden
+                                />
+                              ) : (
+                                <Check className="size-3" aria-hidden />
+                              )}
+                              <span>{message.seen ? "Seen" : "Sent"}</span>
+                            </p>
+                          ) : null}
                         </div>
                       </div>
                     </div>

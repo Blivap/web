@@ -9,4 +9,10 @@ export type DonationChatMessage = {
   senderUserId?: string;
   /** Anonymous handle when the sender object includes one. */
   senderPublicId?: string;
+  /** Peer has opened/read this message (receipts). */
+  seen?: boolean;
+  /** Current user has opened/read this message. */
+  seenByMe?: boolean;
+  /** User ids who have seen it. */
+  readBy?: string[];
 };
