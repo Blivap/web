@@ -20,6 +20,7 @@ import {
   absorbSocketDonationChatPayload,
   appendDonationChatOptimistic,
   clearDonationChatMessages,
+  markDonationChatMessagesSeen,
   mergeDonationChatHistory,
   resetDonationChatRoom,
   stripDonationChatOptimistic,
@@ -282,13 +283,26 @@ export function useDonationChat({
       }
     };
 
+    const emitMessageSeen = (messageId: string) => {
+      const roomId = donationIdRef.current;
+      const s = socketRef.current;
+      if (!roomId || !s?.connected) return;
+      if (!messageId || messageId.startsWith("opt-")) return;
+      const t = accessTokenRef.current;
+      s.emit("chat:read", {
+        donationId: roomId,
+        messageId,
+        ...(t ? { token: t, accessToken: t } : {}),
+      });
+    };
+
     const acceptIncomingMessage = (payload: unknown) => {
       const roomId = donationIdRef.current;
       if (!roomId || isLiveTypingPayload(payload)) return;
-      const hasMessage = extractSocketChatPayloads(payload).some(
-        (piece) => parseDonationChatMessageRecord(piece) != null,
-      );
-      if (!hasMessage) return;
+      const pieces = extractSocketChatPayloads(payload)
+        .map((piece) => parseDonationChatMessageRecord(piece))
+        .filter((m): m is NonNullable<typeof m> => m != null);
+      if (pieces.length === 0) return;
       dispatch(
         absorbSocketDonationChatPayload({
           donationId: roomId,
@@ -296,6 +310,54 @@ export function useDonationChat({
         }),
       );
       clearTypingLabel();
+      const viewer = viewerUserIdRef.current?.trim();
+      for (const msg of pieces) {
+        if (!viewer || !msg.senderUserId || msg.senderUserId === viewer) {
+          continue;
+        }
+        if (msg.seenByMe) continue;
+        emitMessageSeen(msg.id);
+      }
+    };
+
+    const applySeenEvent = (payload: unknown) => {
+      const roomId = donationIdRef.current;
+      const viewer = viewerUserIdRef.current?.trim();
+      if (!roomId || !viewer || !payload || typeof payload !== "object") return;
+      const o = payload as Record<string, unknown>;
+      const envId = envelopeDonationId(payload);
+      if (envId && envId !== roomId) return;
+
+      const seenByUserId = (() => {
+        const direct =
+          typeof o.seenByUserId === "string"
+            ? o.seenByUserId
+            : typeof o.readByUserId === "string"
+              ? o.readByUserId
+              : null;
+        return direct?.trim() || null;
+      })();
+      if (!seenByUserId) return;
+
+      const messageIds: string[] = [];
+      if (Array.isArray(o.messageIds)) {
+        for (const id of o.messageIds) {
+          if (typeof id === "string" && id.trim()) messageIds.push(id.trim());
+        }
+      }
+      if (typeof o.messageId === "string" && o.messageId.trim()) {
+        messageIds.push(o.messageId.trim());
+      }
+      if (messageIds.length === 0) return;
+
+      dispatch(
+        markDonationChatMessagesSeen({
+          donationId: roomId,
+          messageIds,
+          seenByUserId,
+          viewerUserId: viewer,
+        }),
+      );
     };
 
     const handleIncomingMessage = (...args: unknown[]) => {
@@ -451,6 +513,8 @@ export function useDonationChat({
     socket.on("chat:room_opened", onRoomOpened);
     socket.on("chat:error", onChatError);
     socket.on("chat:typing", onTyping);
+    socket.on("chat:seen", applySeenEvent);
+    socket.on("chat:read", applySeenEvent);
 
     socket.on("connect", () => {
       setSocketConnected(true);
@@ -481,6 +545,8 @@ export function useDonationChat({
       socket.off("chat:room_opened", onRoomOpened);
       socket.off("chat:error", onChatError);
       socket.off("chat:typing", onTyping);
+      socket.off("chat:seen", applySeenEvent);
+      socket.off("chat:read", applySeenEvent);
       const id = donationIdRef.current;
       if (id && socket.connected) {
         const t = accessTokenRef.current;
@@ -537,6 +603,9 @@ export function useDonationChat({
               text: trimmed,
               createdAt: new Date().toISOString(),
               senderUserId: viewer,
+              seen: false,
+              seenByMe: false,
+              readBy: [],
             },
           }),
         );
