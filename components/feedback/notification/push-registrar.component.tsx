@@ -3,10 +3,13 @@
 import { useEffect } from "react";
 import { useAppSelector } from "@/store/hooks";
 import { config } from "@/config/env";
-import { registerWebPushSubscription } from "@/lib/notifications/webPush";
+import {
+  attachForegroundPushHandler,
+  registerWebPushSubscription,
+} from "@/lib/notifications/webPush";
 
 /**
- * After login, registers Web Push (VAPID) when enabled in env and key is set.
+ * After login, registers Firebase web FCM when notifications + VAPID key are set.
  */
 export function PushNotificationRegistrar() {
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
@@ -16,6 +19,10 @@ export function PushNotificationRegistrar() {
     if (!config.enableNotifications || !config.webPushVapidPublicKey) return;
 
     void registerWebPushSubscription();
+    const stop = attachForegroundPushHandler();
+    return () => {
+      stop?.();
+    };
   }, [isAuthenticated]);
 
   return null;

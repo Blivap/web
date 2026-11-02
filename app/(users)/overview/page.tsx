@@ -36,7 +36,7 @@ import { CopyableTextLabel } from "@/components/ui/copyable-text-label.component
 import { Button } from "@/components/button/button.component";
 import { OverviewNotificationsTab } from "./components/overview-notifications-tab.component";
 
-const OVERVIEW_DONORS_LIMIT = 8;
+const OVERVIEW_DONORS_LIMIT = 9;
 
 const DONATION_TYPE_LABELS = new Map(
   SCREENING_DONATION_TYPE_OPTIONS.map((o) => [o.value, o.label]),
@@ -272,7 +272,7 @@ export default function OverviewPage() {
                     <div className="p-4 sm:p-5">
                       {activeDonorsLoadState === "loading" ? (
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                          {Array.from({ length: 4 }).map((_, i) => (
+                          {Array.from({ length: 9 }).map((_, i) => (
                             <div
                               key={`donor-sk-${i}`}
                               className="h-40 animate-pulse rounded-xl bg-[#F4F4F5] dark:bg-white/8"
