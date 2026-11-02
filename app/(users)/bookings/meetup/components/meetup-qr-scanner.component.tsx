@@ -24,6 +24,44 @@ type MeetupQrScannerProps = {
   className?: string;
 };
 
+function ScannerViewfinder() {
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 z-10"
+      aria-hidden
+    >
+      <div className="absolute inset-0 bg-black/35" />
+      <div className="absolute inset-[14%] overflow-hidden rounded-md shadow-[0_0_0_999px_rgba(0,0,0,0.35)]">
+        <div className="absolute inset-x-[12%] top-[18%] h-px animate-pulse bg-primary/90 motion-reduce:animate-none" />
+        <span className="absolute top-0 left-0 size-5 border-t-2 border-l-2 border-white" />
+        <span className="absolute top-0 right-0 size-5 border-t-2 border-r-2 border-white" />
+        <span className="absolute bottom-0 left-0 size-5 border-b-2 border-l-2 border-white" />
+        <span className="absolute right-0 bottom-0 size-5 border-r-2 border-b-2 border-white" />
+      </div>
+      <p className="absolute inset-x-2 bottom-2 rounded-md bg-black/70 px-2 py-1 text-center text-[10px] font-medium text-white/90">
+        Align the QR inside the frame
+      </p>
+    </div>
+  );
+}
+
+async function preferContinuousFocus(
+  instance: import("html5-qrcode").Html5Qrcode,
+) {
+  const attempts: MediaTrackConstraints[] = [
+    { advanced: [{ focusMode: "continuous" } as MediaTrackConstraintSet] },
+    { focusMode: "continuous" } as MediaTrackConstraints,
+  ];
+  for (const constraints of attempts) {
+    try {
+      await instance.applyVideoConstraints(constraints);
+      return;
+    } catch {
+      /* device may not support continuous focus */
+    }
+  }
+}
+
 export function MeetupQrScanner({
   disabled,
   busy,
@@ -131,7 +169,9 @@ export function MeetupQrScanner({
     handledRef.current = false;
 
     try {
-      const { Html5Qrcode } = await import("html5-qrcode");
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import(
+        "html5-qrcode"
+      );
       if (scannerRef.current) {
         await stopScannerRef.current({ notifyParent: false });
       }
@@ -141,24 +181,34 @@ export function MeetupQrScanner({
         throw new Error("Scanner region is not mounted yet.");
       }
 
-      const instance = new Html5Qrcode(regionId);
+      const instance = new Html5Qrcode(regionId, {
+        verbose: false,
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+        useBarCodeDetectorIfSupported: true,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true,
+        },
+      });
       scannerRef.current = instance;
 
       const regionWidth = regionEl.clientWidth || 176;
       const scanSide = Math.max(
-        96,
-        Math.min(240, Math.floor(regionWidth * 0.72)),
+        120,
+        Math.min(280, Math.floor(regionWidth * 0.78)),
       );
       const scanConfig = {
-        fps: 10,
+        fps: 20,
         qrbox: { width: scanSide, height: scanSide },
         aspectRatio: 1,
+        disableFlip: false,
+        videoConstraints: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 1280 },
+        } satisfies MediaTrackConstraints,
       };
 
-      const cameraCandidates: Array<
-        | string
-        | { facingMode: "environment" | "user" | { ideal: "environment" } }
-      > = [];
+      const cameraCandidates: Array<string | MediaTrackConstraints> = [];
       try {
         const cameras = await Html5Qrcode.getCameras();
         if (Array.isArray(cameras) && cameras.length > 0) {
@@ -177,8 +227,8 @@ export function MeetupQrScanner({
         /* camera listing can fail before permission */
       }
       cameraCandidates.push(
-        { facingMode: "environment" },
         { facingMode: { ideal: "environment" } },
+        { facingMode: "environment" },
         { facingMode: "user" },
       );
 
@@ -213,6 +263,7 @@ export function MeetupQrScanner({
       if (!started) {
         throw startError ?? new Error("Could not open scanner camera.");
       }
+      void preferContinuousFocus(instance);
       setActive(true);
     } catch (e) {
       await stopScannerRef.current({ notifyParent: false });
@@ -235,11 +286,17 @@ export function MeetupQrScanner({
         <div
           ref={regionRef}
           id={regionId}
-          className="absolute inset-0 overflow-hidden bg-black [&_video]:h-full! [&_video]:w-full! [&_video]:object-cover!"
+          className="absolute inset-0 overflow-hidden bg-black [&_img]:hidden! [&_video]:h-full! [&_video]:w-full! [&_video]:object-cover!"
         />
+        {(active || starting) && !error ? <ScannerViewfinder /> : null}
+        {starting && !active ? (
+          <p className="absolute inset-x-2 top-2 z-20 rounded-md bg-black/70 px-2 py-1 text-center text-[10px] text-white/90">
+            Starting scanner…
+          </p>
+        ) : null}
         {error ? (
           <p
-            className="absolute inset-x-2 bottom-2 rounded-md bg-black/80 px-2 py-1 text-center text-[11px] text-red-200"
+            className="absolute inset-x-2 bottom-2 z-20 rounded-md bg-black/80 px-2 py-1 text-center text-[11px] text-red-200"
             role="alert"
           >
             {error}
@@ -274,24 +331,29 @@ export function MeetupQrScanner({
             className="gap-2"
           >
             <Camera className="size-4" aria-hidden />
-            {starting ? "Starting camera…" : "Open scanner"}
+            {starting ? "Starting scanner…" : "Open scanner"}
           </Button>
         )}
       </div>
 
       <div
-        ref={regionRef}
-        id={regionId}
         className={cn(
-          "w-full overflow-hidden rounded-lg border border-border bg-black/90 dark:border-white/10",
+          "relative w-full overflow-hidden rounded-lg border border-border bg-black/90 dark:border-white/10",
           showRegion ? "min-h-50 min-w-37.5" : "hidden",
         )}
-        aria-hidden={!showRegion}
-      />
+      >
+        <div
+          ref={regionRef}
+          id={regionId}
+          className="min-h-50 w-full overflow-hidden [&_img]:hidden! [&_video]:h-full! [&_video]:w-full! [&_video]:object-cover!"
+          aria-hidden={!showRegion}
+        />
+        {(active || starting) && !error ? <ScannerViewfinder /> : null}
+      </div>
 
       {!active && !error ? (
         <p className="text-xs text-text-secondary">
-          Point your camera at the other person&apos;s meetup QR.
+          Hold steady and align the meetup QR inside the frame.
         </p>
       ) : null}
 

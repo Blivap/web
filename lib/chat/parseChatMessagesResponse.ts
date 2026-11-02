@@ -112,6 +112,26 @@ export function parseDonationChatMessageRecord(
     pickString(r.createdAt ?? r.created_at ?? r.timestamp ?? r.sentAt) ??
     undefined;
 
+  const readByRaw = r.readBy ?? r.read_by;
+  const readBy = Array.isArray(readByRaw)
+    ? readByRaw
+        .map((entry) => pickString(entry))
+        .filter((entry): entry is string => Boolean(entry))
+    : undefined;
+
+  const seen =
+    typeof r.seen === "boolean"
+      ? r.seen
+      : typeof r.isSeen === "boolean"
+        ? r.isSeen
+        : undefined;
+  const seenByMe =
+    typeof r.seenByMe === "boolean"
+      ? r.seenByMe
+      : typeof r.seen_by_me === "boolean"
+        ? r.seen_by_me
+        : undefined;
+
   const resolvedId =
     id ??
     simpleStableId([createdAt ?? "", senderUserId ?? "", text.slice(0, 200)]);
@@ -124,6 +144,9 @@ export function parseDonationChatMessageRecord(
     ...(kind ? { kind } : {}),
     ...(senderUserId ? { senderUserId } : {}),
     ...(senderPublicId ? { senderPublicId } : {}),
+    ...(seen !== undefined ? { seen } : {}),
+    ...(seenByMe !== undefined ? { seenByMe } : {}),
+    ...(readBy && readBy.length > 0 ? { readBy } : {}),
   };
 }
 
