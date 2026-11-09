@@ -16,17 +16,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
-import {
-  SUPPORT_EMAIL,
-  SUPPORT_UNDER_CONSTRUCTION_MESSAGE,
-} from "@/lib/support/supportChat";
+import { useBliivaChat } from "@/hooks/support/useBliivaChat.hook";
+import { SUPPORT_MESSAGE_MAX } from "@/lib/support/supportChat";
 import { cn } from "@/lib/utils";
-
-type ChatLine = {
-  id: string;
-  from: "support" | "user";
-  text: string;
-};
 
 type Side = "left" | "right";
 
@@ -39,12 +31,6 @@ type Place = {
 const BUTTON = 64;
 const DRAG_SLOP = 8;
 const ROD = 32;
-
-const openingMessage: ChatLine = {
-  id: "support-opening",
-  from: "support",
-  text: SUPPORT_UNDER_CONSTRUCTION_MESSAGE,
-};
 
 let remembered: Place | null = null;
 
@@ -330,8 +316,10 @@ export function SupportChatButton() {
   const [placed, setPlaced] = useState(false);
   const [side, setSide] = useState<Side>("right");
   const [open, setOpen] = useState(false);
-  const [lines, setLines] = useState<ChatLine[]>([openingMessage]);
-  const [draft, setDraft] = useState("");
+  const chat = useBliivaChat(user?.id, open);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const preserveScrollRef = useRef<number | null>(null);
+  const lastLineId = chat.lines[chat.lines.length - 1]?.id;
 
   useLayoutEffect(() => {
     const el = nodeRef.current;
@@ -540,20 +528,30 @@ export function SupportChatButton() {
     startRollRef.current();
   }, [open]);
 
+  useLayoutEffect(() => {
+    const el = scrollerRef.current;
+    const before = preserveScrollRef.current;
+    if (!el || before == null) return;
+    preserveScrollRef.current = null;
+    el.scrollTop += el.scrollHeight - before;
+  }, [chat.lines]);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || preserveScrollRef.current != null) return;
+    el.scrollTop = el.scrollHeight;
+  }, [lastLineId, chat.sending, open]);
+
   const send = (event: FormEvent) => {
     event.preventDefault();
-    const text = draft.trim();
-    if (!text) return;
-    setLines((current) => [
-      ...current,
-      { id: `user-${current.length}`, from: "user", text },
-      {
-        id: `support-${current.length}`,
-        from: "support",
-        text: SUPPORT_UNDER_CONSTRUCTION_MESSAGE,
-      },
-    ]);
-    setDraft("");
+    void chat.send(chat.draft);
+  };
+
+  const showEarlier = async () => {
+    const el = scrollerRef.current;
+    preserveScrollRef.current = el ? el.scrollHeight : null;
+    const loaded = await chat.loadEarlier();
+    if (!loaded) preserveScrollRef.current = null;
   };
 
   return (
@@ -680,22 +678,60 @@ export function SupportChatButton() {
                 <span className="inline-flex size-8 shrink-0" aria-hidden>
                   <SupportHead live={false} />
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-[#3C2A1A]">Bliiva</p>
-                  <p className="text-xs text-[#7A6248]">
-                    We reply by email for now
-                  </p>
+                  <p className="text-xs text-[#7A6248]">{chat.statusLabel}</p>
                 </div>
+                {chat.hasThread ? (
+                  <button
+                    type="button"
+                    onClick={chat.startNew}
+                    disabled={chat.sending}
+                    className="shrink-0 text-[11px] font-semibold text-primary underline disabled:opacity-60"
+                  >
+                    New chat
+                  </button>
+                ) : null}
               </div>
-              <div className="custom-scrollbar relative flex max-h-72 flex-col gap-3 overflow-y-auto px-4 py-3">
-                {lines.map((line) => {
+              <div
+                ref={scrollerRef}
+                className="custom-scrollbar relative flex max-h-72 flex-col gap-3 overflow-y-auto px-4 py-3"
+                aria-live="polite"
+              >
+                {chat.hasEarlier ? (
+                  <button
+                    type="button"
+                    onClick={() => void showEarlier()}
+                    disabled={chat.loadingEarlier}
+                    className="self-center text-[11px] font-semibold text-primary underline disabled:opacity-60"
+                  >
+                    {chat.loadingEarlier ? "Loading…" : "Earlier messages"}
+                  </button>
+                ) : null}
+                {chat.loading && chat.lines.length === 0 ? (
+                  <p className="text-xs text-[#7A6248]">
+                    Opening your conversation…
+                  </p>
+                ) : null}
+                {!chat.loading && chat.lines.length === 0 ? (
+                  <p className="text-xs leading-relaxed text-[#7A6248]">
+                    Ask about your account, a donation, a blood request, or your
+                    wallet.
+                  </p>
+                ) : null}
+                {chat.lines.map((line) => {
                   const mine = line.from === "user";
+                  const system = line.from === "system";
                   return (
                     <div
                       key={line.id}
                       className={cn(
                         "flex",
-                        mine ? "justify-end" : "justify-start",
+                        system
+                          ? "justify-center"
+                          : mine
+                            ? "justify-end"
+                            : "justify-start",
                       )}
                     >
                       <div
@@ -706,7 +742,7 @@ export function SupportChatButton() {
                       >
                         {mine ? (
                           <UserChatAvatar src={user?.profileImage} />
-                        ) : (
+                        ) : system ? null : (
                           <span
                             className="mt-0.5 inline-flex size-8 shrink-0"
                             aria-hidden
@@ -714,44 +750,86 @@ export function SupportChatButton() {
                             <SupportHead live={false} />
                           </span>
                         )}
-                        <p
-                          className={cn(
-                            "min-w-0 rounded-xl px-3 py-2 text-xs leading-relaxed wrap-break-word",
-                            mine
-                              ? "bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.45)]"
-                              : "bg-transparent px-0 text-[#3C2A1A]",
-                          )}
-                        >
-                          {line.text}{" "}
-                          {line.from === "support" ? (
-                            <a
-                              href={`mailto:${SUPPORT_EMAIL}`}
-                              className="font-semibold text-primary underline"
-                            >
-                              {SUPPORT_EMAIL}
-                            </a>
+                        <div className="min-w-0">
+                          <p
+                            className={cn(
+                              "min-w-0 rounded-xl px-3 py-2 text-xs leading-relaxed wrap-break-word whitespace-pre-wrap",
+                              mine
+                                ? "bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.45)]"
+                                : system
+                                  ? "px-0 text-center text-[#7A6248]"
+                                  : "bg-transparent px-0 text-[#3C2A1A]",
+                            )}
+                          >
+                            {line.text}
+                          </p>
+                          {line.id === chat.branchMessageId &&
+                          chat.reference ? (
+                            <p className="mt-1 text-[11px] text-[#7A6248]">
+                              Reference {chat.reference}
+                            </p>
                           ) : null}
-                        </p>
+                          {line.id === chat.branchMessageId &&
+                          chat.responseType === "TEMPORARY_ERROR" ? (
+                            <button
+                              type="button"
+                              onClick={() => void chat.retry()}
+                              disabled={chat.sending}
+                              className="mt-1 text-[11px] font-semibold text-primary underline disabled:opacity-60"
+                            >
+                              Try again
+                            </button>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                   );
                 })}
+                {chat.sending ? (
+                  <p className="text-xs text-[#7A6248]">Bliiva is replying…</p>
+                ) : null}
               </div>
+              {chat.choices.length > 0 ? (
+                <div className="relative flex flex-wrap gap-1.5 px-4 pb-1">
+                  {chat.choices.map((choice) => (
+                    <button
+                      key={choice}
+                      type="button"
+                      disabled={chat.sending}
+                      onClick={() => void chat.send(choice)}
+                      className="rounded-full border border-[#8C6A45]/50 px-2.5 py-1 text-[11px] text-[#3C2A1A] disabled:opacity-60"
+                    >
+                      {choice}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {chat.error ? (
+                <p
+                  className="relative px-4 text-[11px] text-[#960018]"
+                  role="alert"
+                >
+                  {chat.error}
+                </p>
+              ) : null}
               <form
                 onSubmit={send}
                 className="relative flex items-center gap-2 px-3 pt-1 pb-8"
               >
                 <input
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
+                  value={chat.draft}
+                  onChange={(event) => chat.setDraft(event.target.value)}
                   placeholder="Write a message"
                   aria-label="Message Bliiva"
-                  className="h-9 min-w-0 flex-1 border-0 border-b border-[#8C6A45]/50 bg-transparent px-1 text-xs text-[#3C2A1A] outline-none placeholder:text-[#8A7355] focus:border-[#960018]"
+                  maxLength={SUPPORT_MESSAGE_MAX}
+                  disabled={chat.sending}
+                  className="h-9 min-w-0 flex-1 border-0 border-b border-[#8C6A45]/50 bg-transparent px-1 text-xs text-[#3C2A1A] outline-none placeholder:text-[#8A7355] focus:border-[#960018] disabled:opacity-60"
                 />
                 <button
                   type="submit"
                   aria-label="Send message"
-                  className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.65)]"
+                  disabled={chat.sending || !chat.draft.trim()}
+                  className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.65)] disabled:opacity-60"
                 >
                   <Send className="size-3.5" aria-hidden />
                 </button>
