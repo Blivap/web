@@ -261,6 +261,29 @@ function ScrollRod() {
   );
 }
 
+function BliivaTyping() {
+  return (
+    <div
+      className="flex items-center gap-2.5"
+      role="status"
+      aria-label="Bliiva is replying"
+    >
+      <span className="inline-flex size-8 shrink-0" aria-hidden>
+        <SupportHead live />
+      </span>
+      <span className="flex items-center gap-2" aria-hidden>
+        {[0, 160, 320].map((delay) => (
+          <span
+            key={delay}
+            className="bliiva-dot size-3.5 rounded-full bg-[#3C2A1A]"
+            style={{ animationDelay: `${delay}ms` }}
+          />
+        ))}
+      </span>
+    </div>
+  );
+}
+
 function UserChatAvatar({ src }: { src?: string | null }) {
   const [failed, setFailed] = useState(false);
   const showImage = Boolean(src) && !failed;
@@ -785,9 +808,7 @@ export function SupportChatButton() {
                     </div>
                   );
                 })}
-                {chat.sending ? (
-                  <p className="text-xs text-[#7A6248]">Bliiva is replying…</p>
-                ) : null}
+                {chat.sending ? <BliivaTyping /> : null}
               </div>
               {chat.choices.length > 0 ? (
                 <div className="relative flex flex-wrap gap-1.5 px-4 pb-1">
