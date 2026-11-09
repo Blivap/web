@@ -204,6 +204,22 @@ html.dark *::-webkit-scrollbar-corner {
   }
 }
 
+@keyframes bliivaDotHover {
+  0%,
+  100% {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 rgba(62, 42, 28, 0.18);
+  }
+  50% {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 8px rgba(62, 42, 28, 0.14);
+  }
+}
+
+.bliiva-dot {
+  animation: bliivaDotHover 1.15s ease-in-out infinite;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -398,7 +414,8 @@ html.dark .custom-scrollbar::-webkit-scrollbar-track {
   .home-map-dot,
   .home-coverage-pulse,
   .home-coverage-link-flow,
-  .home-coverage-meter {
+  .home-coverage-meter,
+  .bliiva-dot {
     animation: none !important;
   }
 }
