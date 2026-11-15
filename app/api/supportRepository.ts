@@ -5,6 +5,7 @@ import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import {
   chronologicalMessages,
   parseSupportConversation,
+  parseSupportConversations,
   parseSupportMessages,
   parseSupportTurn,
   readBliivaData,
@@ -70,6 +71,34 @@ export default function SupportRepository() {
         parseSupportConversation,
         "Bliiva could not start a conversation.",
       ).then((result) => result.data);
+    },
+
+    /**
+     * GET /support/conversations → Bliiva envelope.
+     * `data` is the conversation array. `meta` is present on this list.
+     */
+    async conversations(params?: { page?: number; limit?: number }): Promise<{
+      conversations: SupportConversation[];
+      meta: BliivaPageMeta | null;
+    }> {
+      const page = params?.page ?? 1;
+      const limit = params?.limit ?? MESSAGE_PAGE_LIMIT;
+      const query = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+      });
+      const result = await readEnvelope(
+        () =>
+          fetcher(`${endpoints.support.conversations}?${query.toString()}`, {
+            method: "GET",
+          }),
+        parseSupportConversations,
+        "Bliiva could not load your chats.",
+      );
+      return {
+        conversations: result.data,
+        meta: result.meta,
+      };
     },
 
     /** GET /support/conversations/:id → Bliiva envelope, 200. */
