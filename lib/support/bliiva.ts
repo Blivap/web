@@ -48,6 +48,8 @@ export type SupportConversation = {
   lastMessageAt: string | null;
   state: string;
   pendingClarification: SupportPendingClarification | null;
+  /** Last message snippet when returned from the conversations list. */
+  preview?: string | null;
 };
 
 export type SupportTurn = {
@@ -148,7 +150,42 @@ export function parseSupportConversation(
       typeof value.lastMessageAt === "string" ? value.lastMessageAt : null,
     state: text(value.state) ?? "idle",
     pendingClarification: parsePendingClarification(value.pendingClarification),
+    preview: nullableText(value.preview),
   };
+}
+
+export function parseSupportConversations(
+  value: unknown,
+): SupportConversation[] | null {
+  if (!Array.isArray(value)) return null;
+  const conversations: SupportConversation[] = [];
+  for (const item of value) {
+    const conversation = parseSupportConversation(item);
+    if (conversation) conversations.push(conversation);
+  }
+  return conversations;
+}
+
+export function supportCategoryLabel(category: string): string {
+  return category
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+export function supportConversationStatusLabel(status: string): string {
+  switch (status) {
+    case "human":
+    case "waiting":
+      return "With a specialist";
+    case "resolved":
+      return "Resolved";
+    case "closed":
+      return "Closed";
+    default:
+      return "Open";
+  }
 }
 
 export function parseSupportTurn(value: unknown): SupportTurn | null {
@@ -259,24 +296,13 @@ export function supportStatusLabel(
   responseType: SupportResponseType | null,
   conversationStatus: string | null,
 ): string {
-  if (conversationStatus === "closed" || conversationStatus === "resolved") {
-    return "Your next message starts a new conversation";
+  if (
+    conversationStatus === "human" ||
+    conversationStatus === "waiting" ||
+    responseType === "ESCALATED" ||
+    responseType === "HUMAN_HANDLING"
+  ) {
+    return "Human support";
   }
-  switch (responseType) {
-    case "CLARIFICATION_REQUIRED":
-      return "Choose one, or say it another way";
-    case "ACTION_CONFIRMATION_REQUIRED":
-      return "Confirm to continue";
-    case "ACTION_COMPLETED":
-      return "Done";
-    case "ESCALATED":
-    case "HUMAN_HANDLING":
-      return "A specialist has this conversation";
-    case "UNSUPPORTED":
-      return "No matching answer";
-    case "TEMPORARY_ERROR":
-      return "That didn't go through";
-    default:
-      return "Accounts, donations, and your wallet";
-  }
+  return "AI support";
 }

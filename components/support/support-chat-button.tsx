@@ -8,8 +8,9 @@ import {
   useRef,
   useState,
 } from "react";
+import { formatDistanceToNow } from "date-fns";
 import { gsap } from "gsap";
-import { Send, UserRound } from "lucide-react";
+import { History, Send, UserRound } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -17,6 +18,11 @@ import {
 } from "@/components/ui/popover";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
 import { useBliivaChat } from "@/hooks/support/useBliivaChat.hook";
+import {
+  supportCategoryLabel,
+  supportConversationStatusLabel,
+  type SupportConversation,
+} from "@/lib/support/bliiva";
 import { SUPPORT_MESSAGE_MAX } from "@/lib/support/supportChat";
 import { cn } from "@/lib/utils";
 
@@ -280,6 +286,193 @@ function BliivaTyping() {
           />
         ))}
       </span>
+    </div>
+  );
+}
+
+function BliivaChatSkeleton() {
+  const rows = [
+    { mine: false, widths: ["w-40", "w-28"] },
+    { mine: true, widths: ["w-32"] },
+    { mine: false, widths: ["w-48", "w-36", "w-20"] },
+  ] as const;
+
+  return (
+    <div
+      className="flex flex-col gap-3"
+      role="status"
+      aria-label="Loading conversation"
+    >
+      {rows.map((row, index) => (
+        <div
+          key={index}
+          className={cn("flex", row.mine ? "justify-end" : "justify-start")}
+        >
+          <div
+            className={cn(
+              "flex max-w-[min(100%,26rem)] items-start gap-2",
+              row.mine && "flex-row-reverse",
+            )}
+          >
+            <span
+              className="mt-0.5 size-8 shrink-0 animate-pulse rounded-full bg-[#D8C39A] motion-reduce:animate-none"
+              aria-hidden
+            />
+            <div
+              className={cn(
+                "flex min-w-0 flex-col gap-1.5",
+                row.mine ? "items-end" : "items-start",
+              )}
+            >
+              {row.widths.map((width) => (
+                <span
+                  key={width}
+                  className={cn(
+                    "h-3 animate-pulse rounded-full bg-[#D8C39A] motion-reduce:animate-none",
+                    width,
+                  )}
+                  aria-hidden
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BliivaHistorySkeleton() {
+  return (
+    <div
+      className="flex flex-col gap-2"
+      role="status"
+      aria-label="Loading chats"
+    >
+      {[0, 1, 2].map((index) => (
+        <div
+          key={index}
+          className="rounded-xl border border-[#8C6A45]/25 bg-[#F6EBD4]/55 px-3 py-2.5"
+        >
+          <span
+            className="mb-2 block h-3 w-28 animate-pulse rounded-full bg-[#D8C39A] motion-reduce:animate-none"
+            aria-hidden
+          />
+          <span
+            className="block h-2.5 w-full animate-pulse rounded-full bg-[#D8C39A] motion-reduce:animate-none"
+            aria-hidden
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function conversationWhen(value: string | null) {
+  if (!value) return "Just now";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Just now";
+  return formatDistanceToNow(date, { addSuffix: true });
+}
+
+function conversationTitle(item: SupportConversation) {
+  const preview = item.preview?.trim();
+  if (preview) {
+    return preview.length > 72 ? `${preview.slice(0, 72).trimEnd()}…` : preview;
+  }
+  return supportCategoryLabel(item.category);
+}
+
+function isClosedConversation(status: string) {
+  return status === "closed" || status === "resolved";
+}
+
+function BliivaHistoryList({
+  items,
+  activeId,
+  loading,
+  hasMore,
+  onOpen,
+  onLoadMore,
+}: {
+  items: SupportConversation[];
+  activeId: string | null;
+  loading: boolean;
+  hasMore: boolean;
+  onOpen: (id: string, status: string) => void;
+  onLoadMore: () => void;
+}) {
+  if (loading && items.length === 0) return <BliivaHistorySkeleton />;
+
+  if (!loading && items.length === 0) {
+    return (
+      <p className="text-xs leading-relaxed text-[#7A6248]">
+        No earlier chats yet. Send a message to start one.
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {items.map((item) => {
+        const active = item.id === activeId;
+        const closed = isClosedConversation(item.status);
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => {
+              if (closed || loading) return;
+              onOpen(item.id, item.status);
+            }}
+            disabled={closed || loading}
+            aria-disabled={closed || loading}
+            title={closed ? "This chat is closed" : undefined}
+            className={cn(
+              "rounded-xl border px-3 py-2.5 text-left transition-colors",
+              closed
+                ? "cursor-not-allowed border-[#8C6A45]/15 bg-[#E8D9B4]/45 opacity-55 grayscale"
+                : active
+                  ? "border-primary/50 bg-[#F6EBD4]"
+                  : "border-[#8C6A45]/25 bg-[#F6EBD4]/55 hover:border-[#8C6A45]/45",
+              loading && !closed && "opacity-60",
+            )}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <p
+                className={cn(
+                  "min-w-0 text-xs font-semibold",
+                  closed ? "text-[#8A7355]" : "text-[#3C2A1A]",
+                )}
+              >
+                {conversationTitle(item)}
+              </p>
+              <span className="shrink-0 text-[10px] text-[#7A6248]">
+                {conversationWhen(item.lastMessageAt)}
+              </span>
+            </div>
+            <p className="mt-1 text-[11px] leading-relaxed text-[#7A6248]">
+              {closed ? "Closed" : supportConversationStatusLabel(item.status)}
+              {closed ? null : (
+                <span className="text-[#8A7355]">
+                  {" · "}
+                  {supportCategoryLabel(item.category)}
+                </span>
+              )}
+            </p>
+          </button>
+        );
+      })}
+      {hasMore ? (
+        <button
+          type="button"
+          onClick={onLoadMore}
+          disabled={loading}
+          className="self-center text-[11px] font-semibold text-primary underline disabled:opacity-60"
+        >
+          {loading ? "Loading…" : "More chats"}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -703,25 +896,59 @@ export function SupportChatButton() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-[#3C2A1A]">Bliiva</p>
-                  <p className="text-xs text-[#7A6248]">{chat.statusLabel}</p>
+                  <p className="text-xs text-[#7A6248]">
+                    {chat.historyOpen ? "Your chats" : chat.statusLabel}
+                  </p>
                 </div>
-                {chat.hasThread ? (
-                  <button
-                    type="button"
-                    onClick={chat.startNew}
-                    disabled={chat.sending}
-                    className="shrink-0 text-[11px] font-semibold text-primary underline disabled:opacity-60"
-                  >
-                    New chat
-                  </button>
-                ) : null}
+                <div className="flex shrink-0 items-center gap-2">
+                  {user?.id ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        chat.historyOpen
+                          ? chat.closeHistory()
+                          : void chat.openHistory()
+                      }
+                      disabled={chat.sending || chat.loading}
+                      aria-label={
+                        chat.historyOpen ? "Back to chat" : "Previous chats"
+                      }
+                      aria-pressed={chat.historyOpen}
+                      className="grid size-7 place-items-center rounded-full text-[#3C2A1A] disabled:opacity-60"
+                    >
+                      <History className="size-3.5" aria-hidden />
+                    </button>
+                  ) : null}
+                  {chat.hasThread || chat.historyOpen ? (
+                    <button
+                      type="button"
+                      onClick={chat.startNew}
+                      disabled={chat.sending}
+                      className="text-[11px] font-semibold text-primary underline disabled:opacity-60"
+                    >
+                      New chat
+                    </button>
+                  ) : null}
+                </div>
               </div>
               <div
                 ref={scrollerRef}
                 className="custom-scrollbar relative flex max-h-72 flex-col gap-3 overflow-y-auto px-4 py-3"
                 aria-live="polite"
               >
-                {chat.hasEarlier ? (
+                {chat.historyOpen ? (
+                  <BliivaHistoryList
+                    items={chat.history}
+                    activeId={chat.conversationId}
+                    loading={chat.historyLoading || chat.loading}
+                    hasMore={chat.historyHasMore}
+                    onOpen={(id, status) =>
+                      void chat.openConversation(id, status)
+                    }
+                    onLoadMore={() => void chat.loadMoreHistory()}
+                  />
+                ) : null}
+                {!chat.historyOpen && chat.hasEarlier ? (
                   <button
                     type="button"
                     onClick={() => void showEarlier()}
@@ -731,86 +958,90 @@ export function SupportChatButton() {
                     {chat.loadingEarlier ? "Loading…" : "Earlier messages"}
                   </button>
                 ) : null}
-                {chat.loading && chat.lines.length === 0 ? (
-                  <p className="text-xs text-[#7A6248]">
-                    Opening your conversation…
-                  </p>
+                {!chat.historyOpen &&
+                chat.loading &&
+                chat.lines.length === 0 ? (
+                  <BliivaChatSkeleton />
                 ) : null}
-                {!chat.loading && chat.lines.length === 0 ? (
+                {!chat.historyOpen &&
+                !chat.loading &&
+                chat.lines.length === 0 ? (
                   <p className="text-xs leading-relaxed text-[#7A6248]">
                     Ask about your account, a donation, a blood request, or your
                     wallet.
                   </p>
                 ) : null}
-                {chat.lines.map((line) => {
-                  const mine = line.from === "user";
-                  const system = line.from === "system";
-                  return (
-                    <div
-                      key={line.id}
-                      className={cn(
-                        "flex",
-                        system
-                          ? "justify-center"
-                          : mine
-                            ? "justify-end"
-                            : "justify-start",
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "flex max-w-[min(100%,26rem)] items-start gap-2",
-                          mine && "flex-row-reverse",
-                        )}
-                      >
-                        {mine ? (
-                          <UserChatAvatar src={user?.profileImage} />
-                        ) : system ? null : (
-                          <span
-                            className="mt-0.5 inline-flex size-8 shrink-0"
-                            aria-hidden
-                          >
-                            <SupportHead live={false} />
-                          </span>
-                        )}
-                        <div className="min-w-0">
-                          <p
+                {!chat.historyOpen
+                  ? chat.lines.map((line) => {
+                      const mine = line.from === "user";
+                      const system = line.from === "system";
+                      return (
+                        <div
+                          key={line.id}
+                          className={cn(
+                            "flex",
+                            system
+                              ? "justify-center"
+                              : mine
+                                ? "justify-end"
+                                : "justify-start",
+                          )}
+                        >
+                          <div
                             className={cn(
-                              "min-w-0 rounded-xl px-3 py-2 text-xs leading-relaxed wrap-break-word whitespace-pre-wrap",
-                              mine
-                                ? "bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.45)]"
-                                : system
-                                  ? "px-0 text-center text-[#7A6248]"
-                                  : "bg-transparent px-0 text-[#3C2A1A]",
+                              "flex max-w-[min(100%,26rem)] items-start gap-2",
+                              mine && "flex-row-reverse",
                             )}
                           >
-                            {line.text}
-                          </p>
-                          {line.id === chat.branchMessageId &&
-                          chat.reference ? (
-                            <p className="mt-1 text-[11px] text-[#7A6248]">
-                              Reference {chat.reference}
-                            </p>
-                          ) : null}
-                          {line.id === chat.branchMessageId &&
-                          chat.responseType === "TEMPORARY_ERROR" ? (
-                            <button
-                              type="button"
-                              onClick={() => void chat.retry()}
-                              disabled={chat.sending}
-                              className="mt-1 text-[11px] font-semibold text-primary underline disabled:opacity-60"
-                            >
-                              Try again
-                            </button>
-                          ) : null}
+                            {mine ? (
+                              <UserChatAvatar src={user?.profileImage} />
+                            ) : system ? null : (
+                              <span
+                                className="mt-0.5 inline-flex size-8 shrink-0"
+                                aria-hidden
+                              >
+                                <SupportHead live={false} />
+                              </span>
+                            )}
+                            <div className="min-w-0">
+                              <p
+                                className={cn(
+                                  "min-w-0 rounded-xl px-3 py-2 text-xs leading-relaxed wrap-break-word whitespace-pre-wrap",
+                                  mine
+                                    ? "bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.45)]"
+                                    : system
+                                      ? "px-0 text-center text-[#7A6248]"
+                                      : "bg-transparent px-0 text-[#3C2A1A]",
+                                )}
+                              >
+                                {line.text}
+                              </p>
+                              {line.id === chat.branchMessageId &&
+                              chat.reference ? (
+                                <p className="mt-1 text-[11px] text-[#7A6248]">
+                                  Reference {chat.reference}
+                                </p>
+                              ) : null}
+                              {line.id === chat.branchMessageId &&
+                              chat.responseType === "TEMPORARY_ERROR" ? (
+                                <button
+                                  type="button"
+                                  onClick={() => void chat.retry()}
+                                  disabled={chat.sending}
+                                  className="mt-1 text-[11px] font-semibold text-primary underline disabled:opacity-60"
+                                >
+                                  Try again
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                {chat.sending ? <BliivaTyping /> : null}
+                      );
+                    })
+                  : null}
+                {!chat.historyOpen && chat.sending ? <BliivaTyping /> : null}
               </div>
-              {chat.choices.length > 0 ? (
+              {!chat.historyOpen && chat.choices.length > 0 ? (
                 <div className="relative flex flex-wrap gap-1.5 px-4 pb-1">
                   {chat.choices.map((choice) => (
                     <button
