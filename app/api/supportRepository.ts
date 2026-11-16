@@ -3,6 +3,11 @@ import { fetcher } from "@/services/http";
 import { endpoints } from "@/services/endpoints";
 import { getAxiosErrorMessage } from "@/lib/bookings/axiosErrorMessage";
 import {
+  extractHtmlErrorBody,
+  friendlyHttpErrorMessage,
+  looksLikeHtmlDocument,
+} from "@/lib/api/htmlErrorBody";
+import {
   chronologicalMessages,
   parseSupportConversation,
   parseSupportConversations,
@@ -17,11 +22,27 @@ import {
 
 export class SupportChatError extends Error {
   status: number;
+  /** Raw HTML gateway page when the API returned one instead of JSON. */
+  htmlBody: string | null;
 
-  constructor(message: string, status: number) {
-    super(message);
+  constructor(
+    message: string,
+    status: number,
+    htmlBody: string | null = null,
+  ) {
+    const html =
+      htmlBody ?? (looksLikeHtmlDocument(message) ? message : null);
+    super(
+      html
+        ? friendlyHttpErrorMessage(
+            status,
+            "Support chat is temporarily unavailable.",
+          )
+        : message,
+    );
     this.name = "SupportChatError";
     this.status = status;
+    this.htmlBody = html;
   }
 }
 
@@ -49,9 +70,11 @@ async function readEnvelope<T>(
       throw error;
     }
     if (axios.isAxiosError(error)) {
+      const status = error.response?.status ?? 0;
       throw new SupportChatError(
         getAxiosErrorMessage(error, fallback),
-        error.response?.status ?? 0,
+        status,
+        extractHtmlErrorBody(error.response?.data),
       );
     }
     throw new SupportChatError(fallback, 0);
