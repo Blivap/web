@@ -869,7 +869,7 @@ export function SupportChatButton() {
           >
             <div
               ref={setSheetNode}
-              className="relative z-[1] mx-8 overflow-hidden bg-[linear-gradient(180deg,#F4E4C4_0%,#E4C98A_18%,#F6EBD4_42%,#E7D3A1_100%)] pt-7 shadow-[inset_8px_0_10px_rgba(62,42,28,0.08),inset_-8px_0_10px_rgba(62,42,28,0.08)]"
+              className="relative z-[1] mx-8 flex max-h-[min(32rem,calc(100dvh-7rem))] flex-col overflow-hidden bg-[linear-gradient(180deg,#F4E4C4_0%,#E4C98A_18%,#F6EBD4_42%,#E7D3A1_100%)] pt-7 shadow-[inset_8px_0_10px_rgba(62,42,28,0.08),inset_-8px_0_10px_rgba(62,42,28,0.08)]"
               style={{
                 transform: "translateY(var(--roll, calc(100% - 32px)))",
               }}
@@ -890,7 +890,7 @@ export function SupportChatButton() {
                 aria-hidden
                 className="pointer-events-none absolute inset-y-0 left-4 w-px bg-gradient-to-b from-transparent via-[#24AFB5]/70 to-transparent"
               />
-              <div className="relative flex items-center gap-2 px-4 pt-5 pb-2">
+              <div className="relative flex shrink-0 items-center gap-2 px-4 pt-5 pb-2">
                 <span className="inline-flex size-8 shrink-0" aria-hidden>
                   <SupportHead live={false} />
                 </span>
@@ -933,7 +933,7 @@ export function SupportChatButton() {
               </div>
               <div
                 ref={scrollerRef}
-                className="custom-scrollbar relative flex max-h-72 flex-col gap-3 overflow-y-auto px-4 py-3"
+                className="custom-scrollbar relative flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-y-contain px-4 py-3"
                 aria-live="polite"
               >
                 {chat.historyOpen ? (
@@ -1042,7 +1042,7 @@ export function SupportChatButton() {
                 {!chat.historyOpen && chat.sending ? <BliivaTyping /> : null}
               </div>
               {!chat.historyOpen && chat.choices.length > 0 ? (
-                <div className="relative flex flex-wrap gap-1.5 px-4 pb-1">
+                <div className="relative flex shrink-0 flex-wrap gap-1.5 px-4 pb-1">
                   {chat.choices.map((choice) => (
                     <button
                       key={choice}
@@ -1058,7 +1058,7 @@ export function SupportChatButton() {
               ) : null}
               {chat.error ? (
                 <p
-                  className="relative px-4 text-[11px] text-[#960018]"
+                  className="relative shrink-0 px-4 text-[11px] text-[#960018]"
                   role="alert"
                 >
                   {chat.error}
@@ -1066,7 +1066,7 @@ export function SupportChatButton() {
               ) : null}
               <form
                 onSubmit={send}
-                className="relative flex items-center gap-2 px-3 pt-1 pb-8"
+                className="relative flex shrink-0 items-center gap-2 px-3 pt-1 pb-8"
               >
                 <input
                   value={chat.draft}
