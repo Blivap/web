@@ -69,6 +69,10 @@ function errorText(error: unknown, fallback: string) {
   return fallback;
 }
 
+function errorHtmlBody(error: unknown): string | null {
+  return error instanceof SupportChatError ? error.htmlBody : null;
+}
+
 function isMissingConversation(error: unknown) {
   return error instanceof SupportChatError && error.status === 404;
 }
@@ -80,6 +84,7 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
   const [loading, setLoading] = useState(false);
   const [loadingEarlier, setLoadingEarlier] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorHtml, setErrorHtml] = useState<string | null>(null);
   const [responseType, setResponseType] = useState<SupportResponseType | null>(
     null,
   );
@@ -96,6 +101,29 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
   const [history, setHistory] = useState<SupportConversation[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyHasMore, setHistoryHasMore] = useState(false);
+
+  const clearError = useCallback(() => {
+    setError(null);
+    setErrorHtml(null);
+  }, []);
+
+  const showError = useCallback((message: string, html: string | null = null) => {
+    setError(message);
+    setErrorHtml(html);
+  }, []);
+
+  const applyError = useCallback(
+    (error: unknown, fallback: string) => {
+      const message = errorText(error, fallback);
+      showError(
+        /cannot get \/api\/v1\/support\/conversations/i.test(message)
+          ? "Previous chats are unavailable until support is restarted."
+          : message,
+        errorHtmlBody(error),
+      );
+    },
+    [showError],
+  );
 
   const conversationIdRef = useRef<string | null>(null);
   const previousUserRef = useRef<string | undefined>(undefined);
@@ -174,7 +202,7 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
     historyPageRef.current = 1;
     setLines([]);
     setDraft("");
-    setError(null);
+    clearError();
     setResponseType(null);
     setChoices([]);
     setReference(null);
@@ -186,7 +214,7 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
     setHistoryOpen(false);
     setHistory([]);
     setHistoryHasMore(false);
-  }, [userId]);
+  }, [clearError, userId]);
 
   useEffect(() => {
     if (!open) {
@@ -203,7 +231,7 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
 
     let cancelled = false;
     setLoading(true);
-    setError(null);
+    clearError();
 
     void (async () => {
       try {
@@ -218,7 +246,7 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
           setHasThread(false);
           return;
         }
-        setError(errorText(error, "Bliiva could not open this conversation."));
+        applyError(error, "Bliiva could not open this conversation.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -227,25 +255,25 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
     return () => {
       cancelled = true;
     };
-  }, [hydrateThread, open, rememberConversation, userId]);
+  }, [applyError, clearError, hydrateThread, open, rememberConversation, userId]);
 
   const send = useCallback(
     async (raw: string) => {
       const text = raw.trim();
       if (!text || sendingRef.current) return;
       if (!userId) {
-        setError("Sign in to message Bliiva.");
+        showError("Sign in to message Bliiva.");
         return;
       }
       if (text.length > SUPPORT_MESSAGE_MAX) {
-        setError("Keep the message under 2,000 characters.");
+        showError("Keep the message under 2,000 characters.");
         return;
       }
 
       sendingRef.current = true;
       setSending(true);
       setHistoryOpen(false);
-      setError(null);
+      clearError();
       setDraft("");
       setChoices([]);
       const optimisticId = localId();
@@ -296,14 +324,14 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
             current.filter((line) => line.id !== optimisticId),
           );
           setDraft(text);
-          setError(errorText(error, "Bliiva could not send that message."));
+          applyError(error, "Bliiva could not send that message.");
         }
       } finally {
         sendingRef.current = false;
         setSending(false);
       }
     },
-    [rememberConversation, userId],
+    [applyError, clearError, rememberConversation, showError, userId],
   );
 
   const startNew = useCallback(() => {
@@ -314,7 +342,7 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
     lastSentRef.current = "";
     hydratedFor.current = userId;
     setLines([]);
-    setError(null);
+    clearError();
     setResponseType(null);
     setChoices([]);
     setReference(null);
@@ -323,13 +351,13 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
     setHasEarlier(false);
     setHasThread(false);
     setHistoryOpen(false);
-  }, [rememberConversation, userId]);
+  }, [clearError, rememberConversation, userId]);
 
   const openHistory = useCallback(async () => {
     if (!userId || historyLoading) return;
     setHistoryOpen(true);
     setHistoryLoading(true);
-    setError(null);
+    clearError();
     try {
       const page = await $api.support.conversations({
         page: 1,
@@ -340,23 +368,18 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
       setHistoryHasMore((page.meta?.page ?? 1) < (page.meta?.totalPages ?? 1));
     } catch (error) {
       if (!isUnauthorized(error)) {
-        const message = errorText(error, "Bliiva could not load your chats.");
-        setError(
-          /cannot get \/api\/v1\/support\/conversations/i.test(message)
-            ? "Previous chats are unavailable until support is restarted."
-            : message,
-        );
+        applyError(error, "Bliiva could not load your chats.");
       }
     } finally {
       setHistoryLoading(false);
     }
-  }, [historyLoading, userId]);
+  }, [applyError, clearError, historyLoading, userId]);
 
   const loadMoreHistory = useCallback(async () => {
     if (!userId || !historyHasMore || historyLoading) return;
     const nextPage = historyPageRef.current + 1;
     setHistoryLoading(true);
-    setError(null);
+    clearError();
     try {
       const page = await $api.support.conversations({
         page: nextPage,
@@ -375,18 +398,18 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
       );
     } catch (error) {
       if (!isUnauthorized(error)) {
-        setError(errorText(error, "Bliiva could not load more chats."));
+        applyError(error, "Bliiva could not load more chats.");
       }
     } finally {
       setHistoryLoading(false);
     }
-  }, [historyHasMore, historyLoading, userId]);
+  }, [applyError, clearError, historyHasMore, historyLoading, userId]);
 
   const openConversation = useCallback(
     async (id: string, status?: string) => {
       if (!userId || sendingRef.current || loading) return;
       if (status === "closed" || status === "resolved") {
-        setError("That chat is closed. Start a new chat instead.");
+        showError("That chat is closed. Start a new chat instead.");
         return;
       }
       if (id === conversationIdRef.current && hasThread) {
@@ -395,28 +418,20 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
       }
       setHistoryOpen(false);
       setLoading(true);
-      setError(null);
+      clearError();
       try {
         await hydrateThread(id);
         hydratedFor.current = userId;
       } catch (error) {
         if (!isUnauthorized(error)) {
-          const message = errorText(
-            error,
-            "Bliiva could not open that conversation.",
-          );
-          setError(
-            /cannot get \/api\/v1\/support\/conversations/i.test(message)
-              ? "Previous chats are unavailable until support is restarted."
-              : message,
-          );
+          applyError(error, "Bliiva could not open that conversation.");
           setHistoryOpen(true);
         }
       } finally {
         setLoading(false);
       }
     },
-    [hasThread, hydrateThread, loading, userId],
+    [applyError, clearError, hasThread, hydrateThread, loading, showError, userId],
   );
 
   const retry = useCallback(() => {
@@ -430,7 +445,7 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
     if (!id || !hasEarlier || loadingEarlier) return false;
     const nextPage = pageRef.current + 1;
     setLoadingEarlier(true);
-    setError(null);
+    clearError();
     try {
       const page = await $api.support.messages(id, {
         page: nextPage,
@@ -454,13 +469,13 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
       return true;
     } catch (error) {
       if (!isUnauthorized(error)) {
-        setError(errorText(error, "Bliiva could not load earlier messages."));
+        applyError(error, "Bliiva could not load earlier messages.");
       }
       return false;
     } finally {
       setLoadingEarlier(false);
     }
-  }, [hasEarlier, loadingEarlier]);
+  }, [applyError, clearError, hasEarlier, loadingEarlier]);
 
   return {
     lines,
@@ -470,6 +485,7 @@ export function useBliivaChat(userId: string | undefined, open: boolean) {
     loading,
     loadingEarlier,
     error,
+    errorHtml,
     responseType,
     choices,
     reference,

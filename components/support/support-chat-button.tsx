@@ -387,11 +387,50 @@ function isClosedConversation(status: string) {
   return status === "closed" || status === "resolved";
 }
 
+function BliivaErrorBanner({
+  message,
+  html,
+}: {
+  message: string;
+  html: string | null;
+}) {
+  const [showPage, setShowPage] = useState(false);
+
+  return (
+    <div
+      className="relative mx-3 mb-1 shrink-0 overflow-hidden rounded-xl border border-[#960018]/25 bg-[#FFF6F4] px-3 py-2"
+      role="alert"
+    >
+      <p className="text-[11px] leading-relaxed text-[#960018]">{message}</p>
+      {html ? (
+        <div className="mt-1.5">
+          <button
+            type="button"
+            onClick={() => setShowPage((open) => !open)}
+            className="text-[11px] font-semibold text-[#960018] underline"
+          >
+            {showPage ? "Hide server page" : "View server page"}
+          </button>
+          {showPage ? (
+            <iframe
+              title="Server error page"
+              sandbox=""
+              srcDoc={html}
+              className="mt-2 h-44 w-full rounded-lg border border-[#960018]/20 bg-white"
+            />
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function BliivaHistoryList({
   items,
   activeId,
   loading,
   hasMore,
+  loadFailed,
   onOpen,
   onLoadMore,
 }: {
@@ -399,12 +438,14 @@ function BliivaHistoryList({
   activeId: string | null;
   loading: boolean;
   hasMore: boolean;
+  loadFailed?: boolean;
   onOpen: (id: string, status: string) => void;
   onLoadMore: () => void;
 }) {
   if (loading && items.length === 0) return <BliivaHistorySkeleton />;
 
   if (!loading && items.length === 0) {
+    if (loadFailed) return null;
     return (
       <p className="text-xs leading-relaxed text-[#7A6248]">
         No earlier chats yet. Send a message to start one.
@@ -942,6 +983,7 @@ export function SupportChatButton() {
                     activeId={chat.conversationId}
                     loading={chat.historyLoading || chat.loading}
                     hasMore={chat.historyHasMore}
+                    loadFailed={Boolean(chat.error)}
                     onOpen={(id, status) =>
                       void chat.openConversation(id, status)
                     }
@@ -1057,12 +1099,10 @@ export function SupportChatButton() {
                 </div>
               ) : null}
               {chat.error ? (
-                <p
-                  className="relative shrink-0 px-4 text-[11px] text-[#960018]"
-                  role="alert"
-                >
-                  {chat.error}
-                </p>
+                <BliivaErrorBanner
+                  message={chat.error}
+                  html={chat.errorHtml}
+                />
               ) : null}
               <form
                 onSubmit={send}
