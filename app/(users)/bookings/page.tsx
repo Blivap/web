@@ -8,9 +8,9 @@ import { useAppSelector } from "@/store/hooks";
 
 function BookingsContent() {
   const user = useAppSelector((s) => s.auth.user);
-  const token = useAppSelector((s) => s.auth.token);
 
-  if (token && !user) {
+  // Auth user is client-only (/me). Same skeleton on SSR + first paint avoids hydration mismatch.
+  if (!user) {
     return <BookingsShellSkeleton />;
   }
 
