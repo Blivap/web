@@ -54,6 +54,19 @@ function setScrollOpacity(sheet: HTMLElement | null, opacity: string) {
   if (root) root.style.opacity = opacity;
 }
 
+function formatChatText(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return (
+        <strong key={index} className="font-bold">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
 function resting(side: Side, y: number): Place {
   const box = viewport();
   return {
@@ -1056,7 +1069,7 @@ export function SupportChatButton() {
                                       : "bg-transparent px-0 text-[#3C2A1A]",
                                 )}
                               >
-                                {line.text}
+                                {formatChatText(line.text)}
                               </p>
                               {line.id === chat.branchMessageId &&
                               chat.reference ? (
