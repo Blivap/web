@@ -10,6 +10,7 @@ import NewsRepository from "./newsRepository";
 import PublicRepository from "./publicRepository";
 import NinRepository from "./ninRepository";
 import NotificationRepository from "./notificationRepository";
+import SupportRepository from "./supportRepository";
 import WalletRepository from "./walletRepository";
 import WelfareRepository from "./welfareRepository";
 export const $api = {
@@ -25,6 +26,7 @@ export const $api = {
   public: PublicRepository(),
   nin: NinRepository(),
   notifications: NotificationRepository(),
+  support: SupportRepository(),
   wallet: WalletRepository(),
   welfare: WelfareRepository(),
 };

@@ -83,6 +83,18 @@ export const endpoints = {
       `/meetups/${encodeURIComponent(sessionId)}/terminate`,
   },
 
+  /**
+   * Bliiva support. Responses are Bliiva's envelope (`success`, `message`, `data`, optional `meta`).
+   * They are not wrapped again in Blivap's `{ message, data }`.
+   */
+  support: {
+    conversations: "/support/conversations",
+    conversation: (id: string) =>
+      `/support/conversations/${encodeURIComponent(id)}`,
+    messages: (id: string) =>
+      `/support/conversations/${encodeURIComponent(id)}/messages`,
+  },
+
   /** Donation coordination chat (`donationId` = booking id). Live traffic uses Socket.IO `/chat`. */
   chat: {
     messages: (donationId: string) =>

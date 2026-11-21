@@ -1,4 +1,5 @@
 import axios from "axios";
+import { looksLikeHtmlDocument } from "@/lib/api/htmlErrorBody";
 import {
   API_UNREACHABLE_MESSAGE,
   isNetworkFailure,
@@ -8,7 +9,12 @@ import {
 export function getApiMessageFromData(data: unknown): string | null {
   if (!data || typeof data !== "object") return null;
   const msg = (data as { message?: unknown }).message;
-  if (typeof msg === "string" && msg.trim()) return msg.trim();
+  if (typeof msg === "string" && msg.trim()) {
+    const trimmed = msg.trim();
+    // Gateway HTML pages are not useful as toast/inline copy.
+    if (looksLikeHtmlDocument(trimmed)) return null;
+    return trimmed;
+  }
   if (Array.isArray(msg) && msg.length && typeof msg[0] === "string") {
     return msg[0].trim();
   }
@@ -19,5 +25,7 @@ export function getApiMessageFromData(data: unknown): string | null {
 export function getAxiosErrorMessage(e: unknown, fallback: string): string {
   if (isNetworkFailure(e)) return API_UNREACHABLE_MESSAGE;
   if (!axios.isAxiosError(e)) return fallback;
-  return getApiMessageFromData(e.response?.data) ?? fallback;
+  const data = e.response?.data;
+  if (typeof data === "string" && looksLikeHtmlDocument(data)) return fallback;
+  return getApiMessageFromData(data) ?? fallback;
 }

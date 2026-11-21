@@ -8,25 +8,23 @@ import {
   useRef,
   useState,
 } from "react";
+import { formatDistanceToNow } from "date-fns";
 import { gsap } from "gsap";
-import { Send, UserRound } from "lucide-react";
+import { History, Send, UserRound } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useDashboard } from "@/hooks/dashboard/useDashboard.hook";
+import { useBliivaChat } from "@/hooks/support/useBliivaChat.hook";
 import {
-  SUPPORT_EMAIL,
-  SUPPORT_UNDER_CONSTRUCTION_MESSAGE,
-} from "@/lib/support/supportChat";
+  supportCategoryLabel,
+  supportConversationStatusLabel,
+  type SupportConversation,
+} from "@/lib/support/bliiva";
+import { SUPPORT_MESSAGE_MAX } from "@/lib/support/supportChat";
 import { cn } from "@/lib/utils";
-
-type ChatLine = {
-  id: string;
-  from: "support" | "user";
-  text: string;
-};
 
 type Side = "left" | "right";
 
@@ -39,12 +37,6 @@ type Place = {
 const BUTTON = 64;
 const DRAG_SLOP = 8;
 const ROD = 32;
-
-const openingMessage: ChatLine = {
-  id: "support-opening",
-  from: "support",
-  text: SUPPORT_UNDER_CONSTRUCTION_MESSAGE,
-};
 
 let remembered: Place | null = null;
 
@@ -60,6 +52,19 @@ function viewport() {
 function setScrollOpacity(sheet: HTMLElement | null, opacity: string) {
   const root = sheet?.parentElement?.parentElement;
   if (root) root.style.opacity = opacity;
+}
+
+function formatChatText(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return (
+        <strong key={index} className="font-bold">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
 }
 
 function resting(side: Side, y: number): Place {
@@ -275,6 +280,257 @@ function ScrollRod() {
   );
 }
 
+function BliivaTyping() {
+  return (
+    <div
+      className="flex items-center gap-2.5"
+      role="status"
+      aria-label="Bliiva is replying"
+    >
+      <span className="inline-flex size-8 shrink-0" aria-hidden>
+        <SupportHead live />
+      </span>
+      <span className="flex items-center gap-2" aria-hidden>
+        {[0, 160, 320].map((delay) => (
+          <span
+            key={delay}
+            className="bliiva-dot size-3.5 rounded-full bg-[#3C2A1A]"
+            style={{ animationDelay: `${delay}ms` }}
+          />
+        ))}
+      </span>
+    </div>
+  );
+}
+
+function BliivaChatSkeleton() {
+  const rows = [
+    { mine: false, widths: ["w-40", "w-28"] },
+    { mine: true, widths: ["w-32"] },
+    { mine: false, widths: ["w-48", "w-36", "w-20"] },
+  ] as const;
+
+  return (
+    <div
+      className="flex flex-col gap-3"
+      role="status"
+      aria-label="Loading conversation"
+    >
+      {rows.map((row, index) => (
+        <div
+          key={index}
+          className={cn("flex", row.mine ? "justify-end" : "justify-start")}
+        >
+          <div
+            className={cn(
+              "flex max-w-[min(100%,26rem)] items-start gap-2",
+              row.mine && "flex-row-reverse",
+            )}
+          >
+            <span
+              className="mt-0.5 size-8 shrink-0 animate-pulse rounded-full bg-[#D8C39A] motion-reduce:animate-none"
+              aria-hidden
+            />
+            <div
+              className={cn(
+                "flex min-w-0 flex-col gap-1.5",
+                row.mine ? "items-end" : "items-start",
+              )}
+            >
+              {row.widths.map((width) => (
+                <span
+                  key={width}
+                  className={cn(
+                    "h-3 animate-pulse rounded-full bg-[#D8C39A] motion-reduce:animate-none",
+                    width,
+                  )}
+                  aria-hidden
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BliivaHistorySkeleton() {
+  return (
+    <div
+      className="flex flex-col gap-2"
+      role="status"
+      aria-label="Loading chats"
+    >
+      {[0, 1, 2].map((index) => (
+        <div
+          key={index}
+          className="rounded-xl border border-[#8C6A45]/25 bg-[#F6EBD4]/55 px-3 py-2.5"
+        >
+          <span
+            className="mb-2 block h-3 w-28 animate-pulse rounded-full bg-[#D8C39A] motion-reduce:animate-none"
+            aria-hidden
+          />
+          <span
+            className="block h-2.5 w-full animate-pulse rounded-full bg-[#D8C39A] motion-reduce:animate-none"
+            aria-hidden
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function conversationWhen(value: string | null) {
+  if (!value) return "Just now";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Just now";
+  return formatDistanceToNow(date, { addSuffix: true });
+}
+
+function conversationTitle(item: SupportConversation) {
+  const preview = item.preview?.trim();
+  if (preview) {
+    return preview.length > 72 ? `${preview.slice(0, 72).trimEnd()}…` : preview;
+  }
+  return supportCategoryLabel(item.category);
+}
+
+function isClosedConversation(status: string) {
+  return status === "closed" || status === "resolved";
+}
+
+function BliivaErrorBanner({
+  message,
+  html,
+}: {
+  message: string;
+  html: string | null;
+}) {
+  const [showPage, setShowPage] = useState(false);
+
+  return (
+    <div
+      className="relative mx-3 mb-1 shrink-0 overflow-hidden rounded-xl border border-[#960018]/25 bg-[#FFF6F4] px-3 py-2"
+      role="alert"
+    >
+      <p className="text-[11px] leading-relaxed text-[#960018]">{message}</p>
+      {html ? (
+        <div className="mt-1.5">
+          <button
+            type="button"
+            onClick={() => setShowPage((open) => !open)}
+            className="text-[11px] font-semibold text-[#960018] underline"
+          >
+            {showPage ? "Hide server page" : "View server page"}
+          </button>
+          {showPage ? (
+            <iframe
+              title="Server error page"
+              sandbox=""
+              srcDoc={html}
+              className="mt-2 h-44 w-full rounded-lg border border-[#960018]/20 bg-white"
+            />
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function BliivaHistoryList({
+  items,
+  activeId,
+  loading,
+  hasMore,
+  loadFailed,
+  onOpen,
+  onLoadMore,
+}: {
+  items: SupportConversation[];
+  activeId: string | null;
+  loading: boolean;
+  hasMore: boolean;
+  loadFailed?: boolean;
+  onOpen: (id: string, status: string) => void;
+  onLoadMore: () => void;
+}) {
+  if (loading && items.length === 0) return <BliivaHistorySkeleton />;
+
+  if (!loading && items.length === 0) {
+    if (loadFailed) return null;
+    return (
+      <p className="text-xs leading-relaxed text-[#7A6248]">
+        No earlier chats yet. Send a message to start one.
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {items.map((item) => {
+        const active = item.id === activeId;
+        const closed = isClosedConversation(item.status);
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => {
+              if (closed || loading) return;
+              onOpen(item.id, item.status);
+            }}
+            disabled={closed || loading}
+            aria-disabled={closed || loading}
+            title={closed ? "This chat is closed" : undefined}
+            className={cn(
+              "rounded-xl border px-3 py-2.5 text-left transition-colors",
+              closed
+                ? "cursor-not-allowed border-[#8C6A45]/15 bg-[#E8D9B4]/45 opacity-55 grayscale"
+                : active
+                  ? "border-primary/50 bg-[#F6EBD4]"
+                  : "border-[#8C6A45]/25 bg-[#F6EBD4]/55 hover:border-[#8C6A45]/45",
+              loading && !closed && "opacity-60",
+            )}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <p
+                className={cn(
+                  "min-w-0 text-xs font-semibold",
+                  closed ? "text-[#8A7355]" : "text-[#3C2A1A]",
+                )}
+              >
+                {conversationTitle(item)}
+              </p>
+              <span className="shrink-0 text-[10px] text-[#7A6248]">
+                {conversationWhen(item.lastMessageAt)}
+              </span>
+            </div>
+            <p className="mt-1 text-[11px] leading-relaxed text-[#7A6248]">
+              {closed ? "Closed" : supportConversationStatusLabel(item.status)}
+              {closed ? null : (
+                <span className="text-[#8A7355]">
+                  {" · "}
+                  {supportCategoryLabel(item.category)}
+                </span>
+              )}
+            </p>
+          </button>
+        );
+      })}
+      {hasMore ? (
+        <button
+          type="button"
+          onClick={onLoadMore}
+          disabled={loading}
+          className="self-center text-[11px] font-semibold text-primary underline disabled:opacity-60"
+        >
+          {loading ? "Loading…" : "More chats"}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 function UserChatAvatar({ src }: { src?: string | null }) {
   const [failed, setFailed] = useState(false);
   const showImage = Boolean(src) && !failed;
@@ -330,8 +586,10 @@ export function SupportChatButton() {
   const [placed, setPlaced] = useState(false);
   const [side, setSide] = useState<Side>("right");
   const [open, setOpen] = useState(false);
-  const [lines, setLines] = useState<ChatLine[]>([openingMessage]);
-  const [draft, setDraft] = useState("");
+  const chat = useBliivaChat(user?.id, open);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const preserveScrollRef = useRef<number | null>(null);
+  const lastLineId = chat.lines[chat.lines.length - 1]?.id;
 
   useLayoutEffect(() => {
     const el = nodeRef.current;
@@ -540,20 +798,30 @@ export function SupportChatButton() {
     startRollRef.current();
   }, [open]);
 
+  useLayoutEffect(() => {
+    const el = scrollerRef.current;
+    const before = preserveScrollRef.current;
+    if (!el || before == null) return;
+    preserveScrollRef.current = null;
+    el.scrollTop += el.scrollHeight - before;
+  }, [chat.lines]);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || preserveScrollRef.current != null) return;
+    el.scrollTop = el.scrollHeight;
+  }, [lastLineId, chat.sending, open]);
+
   const send = (event: FormEvent) => {
     event.preventDefault();
-    const text = draft.trim();
-    if (!text) return;
-    setLines((current) => [
-      ...current,
-      { id: `user-${current.length}`, from: "user", text },
-      {
-        id: `support-${current.length}`,
-        from: "support",
-        text: SUPPORT_UNDER_CONSTRUCTION_MESSAGE,
-      },
-    ]);
-    setDraft("");
+    void chat.send(chat.draft);
+  };
+
+  const showEarlier = async () => {
+    const el = scrollerRef.current;
+    preserveScrollRef.current = el ? el.scrollHeight : null;
+    const loaded = await chat.loadEarlier();
+    if (!loaded) preserveScrollRef.current = null;
   };
 
   return (
@@ -655,7 +923,7 @@ export function SupportChatButton() {
           >
             <div
               ref={setSheetNode}
-              className="relative z-[1] mx-8 overflow-hidden bg-[linear-gradient(180deg,#F4E4C4_0%,#E4C98A_18%,#F6EBD4_42%,#E7D3A1_100%)] pt-7 shadow-[inset_8px_0_10px_rgba(62,42,28,0.08),inset_-8px_0_10px_rgba(62,42,28,0.08)]"
+              className="relative z-[1] mx-8 flex max-h-[min(32rem,calc(100dvh-7rem))] flex-col overflow-hidden bg-[linear-gradient(180deg,#F4E4C4_0%,#E4C98A_18%,#F6EBD4_42%,#E7D3A1_100%)] pt-7 shadow-[inset_8px_0_10px_rgba(62,42,28,0.08),inset_-8px_0_10px_rgba(62,42,28,0.08)]"
               style={{
                 transform: "translateY(var(--roll, calc(100% - 32px)))",
               }}
@@ -676,82 +944,197 @@ export function SupportChatButton() {
                 aria-hidden
                 className="pointer-events-none absolute inset-y-0 left-4 w-px bg-gradient-to-b from-transparent via-[#24AFB5]/70 to-transparent"
               />
-              <div className="relative flex items-center gap-2 px-4 pt-5 pb-2">
+              <div className="relative flex shrink-0 items-center gap-2 px-4 pt-5 pb-2">
                 <span className="inline-flex size-8 shrink-0" aria-hidden>
                   <SupportHead live={false} />
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-[#3C2A1A]">Bliiva</p>
                   <p className="text-xs text-[#7A6248]">
-                    We reply by email for now
+                    {chat.historyOpen ? "Your chats" : chat.statusLabel}
                   </p>
                 </div>
-              </div>
-              <div className="custom-scrollbar relative flex max-h-72 flex-col gap-3 overflow-y-auto px-4 py-3">
-                {lines.map((line) => {
-                  const mine = line.from === "user";
-                  return (
-                    <div
-                      key={line.id}
-                      className={cn(
-                        "flex",
-                        mine ? "justify-end" : "justify-start",
-                      )}
+                <div className="flex shrink-0 items-center gap-2">
+                  {user?.id ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        chat.historyOpen
+                          ? chat.closeHistory()
+                          : void chat.openHistory()
+                      }
+                      disabled={chat.sending || chat.loading}
+                      aria-label={
+                        chat.historyOpen ? "Back to chat" : "Previous chats"
+                      }
+                      aria-pressed={chat.historyOpen}
+                      className="grid size-7 place-items-center rounded-full text-[#3C2A1A] disabled:opacity-60"
                     >
-                      <div
-                        className={cn(
-                          "flex max-w-[min(100%,26rem)] items-start gap-2",
-                          mine && "flex-row-reverse",
-                        )}
-                      >
-                        {mine ? (
-                          <UserChatAvatar src={user?.profileImage} />
-                        ) : (
-                          <span
-                            className="mt-0.5 inline-flex size-8 shrink-0"
-                            aria-hidden
-                          >
-                            <SupportHead live={false} />
-                          </span>
-                        )}
-                        <p
+                      <History className="size-3.5" aria-hidden />
+                    </button>
+                  ) : null}
+                  {chat.hasThread || chat.historyOpen ? (
+                    <button
+                      type="button"
+                      onClick={chat.startNew}
+                      disabled={chat.sending}
+                      className="text-[11px] font-semibold text-primary underline disabled:opacity-60"
+                    >
+                      New chat
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+              <div
+                ref={scrollerRef}
+                className="custom-scrollbar relative flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-y-contain px-4 py-3"
+                aria-live="polite"
+              >
+                {chat.historyOpen ? (
+                  <BliivaHistoryList
+                    items={chat.history}
+                    activeId={chat.conversationId}
+                    loading={chat.historyLoading || chat.loading}
+                    hasMore={chat.historyHasMore}
+                    loadFailed={Boolean(chat.error)}
+                    onOpen={(id, status) =>
+                      void chat.openConversation(id, status)
+                    }
+                    onLoadMore={() => void chat.loadMoreHistory()}
+                  />
+                ) : null}
+                {!chat.historyOpen && chat.hasEarlier ? (
+                  <button
+                    type="button"
+                    onClick={() => void showEarlier()}
+                    disabled={chat.loadingEarlier}
+                    className="self-center text-[11px] font-semibold text-primary underline disabled:opacity-60"
+                  >
+                    {chat.loadingEarlier ? "Loading…" : "Earlier messages"}
+                  </button>
+                ) : null}
+                {!chat.historyOpen &&
+                chat.loading &&
+                chat.lines.length === 0 ? (
+                  <BliivaChatSkeleton />
+                ) : null}
+                {!chat.historyOpen &&
+                !chat.loading &&
+                chat.lines.length === 0 ? (
+                  <p className="text-xs leading-relaxed text-[#7A6248]">
+                    Ask about your account, a donation, a blood request, or your
+                    wallet.
+                  </p>
+                ) : null}
+                {!chat.historyOpen
+                  ? chat.lines.map((line) => {
+                      const mine = line.from === "user";
+                      const system = line.from === "system";
+                      return (
+                        <div
+                          key={line.id}
                           className={cn(
-                            "min-w-0 rounded-xl px-3 py-2 text-xs leading-relaxed wrap-break-word",
-                            mine
-                              ? "bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.45)]"
-                              : "bg-transparent px-0 text-[#3C2A1A]",
+                            "flex",
+                            system
+                              ? "justify-center"
+                              : mine
+                                ? "justify-end"
+                                : "justify-start",
                           )}
                         >
-                          {line.text}{" "}
-                          {line.from === "support" ? (
-                            <a
-                              href={`mailto:${SUPPORT_EMAIL}`}
-                              className="font-semibold text-primary underline"
-                            >
-                              {SUPPORT_EMAIL}
-                            </a>
-                          ) : null}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+                          <div
+                            className={cn(
+                              "flex max-w-[min(100%,26rem)] items-start gap-2",
+                              mine && "flex-row-reverse",
+                            )}
+                          >
+                            {mine ? (
+                              <UserChatAvatar src={user?.profileImage} />
+                            ) : system ? null : (
+                              <span
+                                className="mt-0.5 inline-flex size-8 shrink-0"
+                                aria-hidden
+                              >
+                                <SupportHead live={false} />
+                              </span>
+                            )}
+                            <div className="min-w-0">
+                              <p
+                                className={cn(
+                                  "min-w-0 rounded-xl px-3 py-2 text-xs leading-relaxed wrap-break-word whitespace-pre-wrap",
+                                  mine
+                                    ? "bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.45)]"
+                                    : system
+                                      ? "px-0 text-center text-[#7A6248]"
+                                      : "bg-transparent px-0 text-[#3C2A1A]",
+                                )}
+                              >
+                                {formatChatText(line.text)}
+                              </p>
+                              {line.id === chat.branchMessageId &&
+                              chat.reference ? (
+                                <p className="mt-1 text-[11px] text-[#7A6248]">
+                                  Reference {chat.reference}
+                                </p>
+                              ) : null}
+                              {line.id === chat.branchMessageId &&
+                              chat.responseType === "TEMPORARY_ERROR" ? (
+                                <button
+                                  type="button"
+                                  onClick={() => void chat.retry()}
+                                  disabled={chat.sending}
+                                  className="mt-1 text-[11px] font-semibold text-primary underline disabled:opacity-60"
+                                >
+                                  Try again
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  : null}
+                {!chat.historyOpen && chat.sending ? <BliivaTyping /> : null}
               </div>
+              {!chat.historyOpen && chat.choices.length > 0 ? (
+                <div className="relative flex shrink-0 flex-wrap gap-1.5 px-4 pb-1">
+                  {chat.choices.map((choice) => (
+                    <button
+                      key={choice}
+                      type="button"
+                      disabled={chat.sending}
+                      onClick={() => void chat.send(choice)}
+                      className="rounded-full border border-[#8C6A45]/50 px-2.5 py-1 text-[11px] text-[#3C2A1A] disabled:opacity-60"
+                    >
+                      {choice}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {chat.error ? (
+                <BliivaErrorBanner
+                  message={chat.error}
+                  html={chat.errorHtml}
+                />
+              ) : null}
               <form
                 onSubmit={send}
-                className="relative flex items-center gap-2 px-3 pt-1 pb-8"
+                className="relative flex shrink-0 items-center gap-2 px-3 pt-1 pb-8"
               >
                 <input
-                  value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
+                  value={chat.draft}
+                  onChange={(event) => chat.setDraft(event.target.value)}
                   placeholder="Write a message"
                   aria-label="Message Bliiva"
-                  className="h-9 min-w-0 flex-1 border-0 border-b border-[#8C6A45]/50 bg-transparent px-1 text-xs text-[#3C2A1A] outline-none placeholder:text-[#8A7355] focus:border-[#960018]"
+                  maxLength={SUPPORT_MESSAGE_MAX}
+                  disabled={chat.sending}
+                  className="h-9 min-w-0 flex-1 border-0 border-b border-[#8C6A45]/50 bg-transparent px-1 text-xs text-[#3C2A1A] outline-none placeholder:text-[#8A7355] focus:border-[#960018] disabled:opacity-60"
                 />
                 <button
                   type="submit"
                   aria-label="Send message"
-                  className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.65)]"
+                  disabled={chat.sending || !chat.draft.trim()}
+                  className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-white shadow-[0_0_0_1px_rgba(36,175,181,0.65)] disabled:opacity-60"
                 >
                   <Send className="size-3.5" aria-hidden />
                 </button>
